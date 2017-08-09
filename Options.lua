@@ -246,6 +246,12 @@ function BattleGroundEnemies:SetupOptions()
 								enemyButton:SetHeight(value)
 								enemyButton.Trinket:SetWidth(value)
 								enemyButton.Racial:SetWidth(value)
+								for spellID, debuffFrame in pairs(enemyButton.MyDebuffs) do
+									debuffFrame:SetWidth(value)
+								end
+								for drCategorie, drFrame in pairs(enemyButton.DR) do
+									drFrame:SetWidth(value)
+								end
 								self:CropImage(enemyButton.Spec.Icon, value, self.db.profile.Spec_Width)
 								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, value, self.db.profile.ObjectiveAndRespawn_Width)
 							end
@@ -253,6 +259,12 @@ function BattleGroundEnemies:SetupOptions()
 								enemyButton:SetHeight(value)
 								enemyButton.Trinket:SetWidth(value)
 								enemyButton.Racial:SetWidth(value)
+								for spellID, debuffFrame in pairs(enemyButton.MyDebuffs) do
+									debuffFrame:SetWidth(value)
+								end
+								for drCategorie, drFrame in pairs(enemyButton.DR) do
+									drFrame:SetWidth(value)
+								end
 								self:CropImage(enemyButton.Spec.Icon, value, self.db.profile.Spec_Width)
 								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, value, self.db.profile.ObjectiveAndRespawn_Width)
 							end
@@ -774,6 +786,9 @@ function BattleGroundEnemies:SetupOptions()
 									end
 									setOption(option, value)
 								end,
+								min = 0,
+								max = 10,
+								step = 1,
 								order = 3
 							}
 						}
@@ -876,6 +891,9 @@ function BattleGroundEnemies:SetupOptions()
 									end
 									setOption(option, value)
 								end,
+								min = 0,
+								max = 10,
+								step = 1,
 								order = 6
 							}
 						}

@@ -820,7 +820,7 @@ do
 				local anchor = self.DrContainerStartAnchor
 				for categorie, drFrame in pairs(self.DR) do
 					if drFrame:IsShown() then
-						local spacing = BattleGroundEnemies.db.profile.MyDebuffs_Spacing
+						local spacing = BattleGroundEnemies.db.profile.DrTracking_Spacing
 						drFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
 						drFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
 						anchor = drFrame
@@ -837,7 +837,7 @@ do
 				local anchor = self.DebuffContainerStartAnchor
 				for spellID, debuffFrame in pairs(self.MyDebuffs) do
 	
-					local spacing = BattleGroundEnemies.db.profile.DrTracking_Spacing
+					local spacing = BattleGroundEnemies.db.profile.MyDebuffs_Spacing
 					debuffFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
 					debuffFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
 					anchor = debuffFrame
