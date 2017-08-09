@@ -1,4 +1,7 @@
 local addonName, Data = ...
+
+local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
+
 Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/Romanization_of_Russian
 	["а"] = "a",
 	["Б"] = "b",
@@ -65,6 +68,12 @@ Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/R
 	["ю"] = "iu",
 	["Я"] = "ia",
 	["я"] = "ia"   
+}
+
+Data.FontOutlines = {
+    [""] = L["None"],
+    ["OUTLINE"] = L["Normal"],
+    ["THICKOUTLINE"] = L["Thick"],
 }
 
 

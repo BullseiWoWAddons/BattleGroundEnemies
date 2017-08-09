@@ -209,7 +209,50 @@ function BattleGroundEnemies:SetupOptions()
 								end,
 								width = "half",
 								order = 4
-							}
+							},
+							EnemyCount_Outline = {
+								type = "select",
+								name = L.Font_Outline,
+								desc = L.Font_Outline_Desc,
+								set = function(option, value)
+									self.EnemyCount:SetFont(LSM:Fetch("font", self.db.profile.Font), self.db.profile.EnemyCount_Fontsize, value)
+									setOption(option, value)
+								end,
+								values = Data.FontOutlines,
+								order = 5
+							},
+							Fake1 = {
+								type = "description",
+								name = " ",
+								width = "half",
+								order = 6
+							},
+							EnemyCount_EnableTextshadow = {
+								type = "toggle",
+								name = L.FontShadow_Enabled,
+								desc = L.FontShadow_Enabled_Desc,
+								set = function(option, value)
+									if value then
+										self.EnemyCount:SetShadowOffset(1, -1)
+									else
+										self.EnemyCount:SetShadowOffset(0, 0)
+									end
+									setOption(option, value)
+								end,
+								order = 7
+							},
+							EnemyCount_TextShadowcolor = {
+								type = "color",
+								name = L.FontShadowColor,
+								desc = L.FontShadowColor_Desc,
+								disabled = function() return not self.db.profile.EnemyCount_EnableTextshadow end,
+								set = function(option, ...)
+									local color = {...}
+									self.EnemyCount:SetShadowColor(...)
+									setOption(option, color)
+								end,
+								order = 8
+							},
 						}
 					}
 				}
@@ -355,7 +398,7 @@ function BattleGroundEnemies:SetupOptions()
 						args = {
 							General = {
 								type = "group",
-								name = "General",
+								name = L.General,
 								desc = "",
 								--inline = true,
 								order = 1,
@@ -440,6 +483,54 @@ function BattleGroundEnemies:SetupOptions()
 										width = "full",
 										order = 4
 									},
+									Name_Outline = {
+										type = "select",
+										name = L.Font_Outline,
+										desc = L.Font_Outline_Desc,
+										set = function(option, value)
+											UpdateButtons(option, value, "Name", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.Name_Fontsize, value)
+										end,
+										values = Data.FontOutlines,
+										order = 5
+									},
+									Fake3 = {
+										type = "description",
+										name = " ",
+										fontSize = "large",
+										width = "full",
+										order = 6
+									},
+									EnemyCount_EnableTextshadow = {
+										type = "toggle",
+										name = L.FontShadow_Enabled,
+										desc = L.FontShadow_Enabled_Desc,
+										set = function(option, value)
+											if value then
+												UpdateButtons(option, value, "Name", nil, "SetShadowOffset", 1, -1)
+											else
+												UpdateButtons(option, value, "Name", nil, "SetShadowOffset", 0, 0)
+											end
+										end,
+										order = 7
+									},
+									EnemyCount_TextShadowcolor = {
+										type = "color",
+										name = L.FontShadowColor,
+										desc = L.FontShadowColor_Desc,
+										disabled = function() return not self.db.profile.EnemyCount_EnableTextshadow end,
+										set = function(option, ...)
+											local color = {...}
+											UpdateButtons(option, color, "Name", nil, "SetShadowColor", ...)
+										end,
+										order = 8
+									},
+									Fake4 = {
+										type = "description",
+										name = " ",
+										fontSize = "large",
+										width = "full",
+										order = 9
+									},
 									ConvertCyrillic = {
 										type = "toggle",
 										name = L.ConvertCyrillic,
@@ -474,7 +565,7 @@ function BattleGroundEnemies:SetupOptions()
 											setOption(option, value)
 										end,
 										width = "normal",
-										order = 5
+										order = 10
 									},
 									ShowRealmnames = {
 										type = "toggle",
@@ -493,7 +584,7 @@ function BattleGroundEnemies:SetupOptions()
 											setOption(option, value)
 										end,
 										width = "normal",
-										order = 6
+										order = 11
 									}
 								}
 							},
@@ -553,12 +644,46 @@ function BattleGroundEnemies:SetupOptions()
 										width = "half",
 										order = 4
 									},
+									NumericTargetindicator_Outline = {
+										type = "select",
+										name = L.Font_Outline,
+										desc = L.Font_Outline_Desc,
+										set = function(option, value)
+											UpdateButtons(option, value, "TargetCounter", "Text", "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.NumericTargetindicator_Fontsize, value)
+										end,
+										values = Data.FontOutlines,
+										order = 5
+									},
+									NumericTargetindicator_EnableTextshadow = {
+										type = "toggle",
+										name = L.FontShadow_Enabled,
+										desc = L.FontShadow_Enabled_Desc,
+										set = function(option, value)
+											if value then
+												UpdateButtons(option, value, "TargetCounter", "Text", "SetShadowOffset", 1, -1)
+											else
+												UpdateButtons(option, value, "TargetCounter", "Text", "SetShadowOffset", 0, 0)
+											end
+										end,
+										order = 6
+									},
+									NumericTargetindicator_TextShadowcolor = {
+										type = "color",
+										name = L.FontShadowColor,
+										desc = L.FontShadowColor_Desc,
+										disabled = function() return not self.db.profile.NumericTargetindicator_EnableTextshadow end,
+										set = function(option, ...)
+											local color = {...}
+											UpdateButtons(option, color, "TargetCounter", "Text", "SetShadowColor", ...)
+										end,
+										order = 7
+									},
 									Fake2 = {
 										type = "description",
 										name = " ",
 										fontSize = "large",
 										width = "full",
-										order = 5
+										order = 6
 									},
 									SymbolicTargetindicator_Enabled = {
 										type = "toggle",
@@ -580,7 +705,7 @@ function BattleGroundEnemies:SetupOptions()
 											setOption(option, value)
 										end,
 										width = "full",
-										order = 6
+										order = 7
 									}
 								}
 							}
@@ -712,7 +837,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.ObjectiveAndRespawn_Fontsize_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, value)
-									UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetFont", LSM:Fetch("font", self.db.profile.Font), value)
+									UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.ObjectiveAndRespawn_Outline)
 								end,
 								min = 10,
 								max = 20,
@@ -737,7 +862,48 @@ function BattleGroundEnemies:SetupOptions()
 								end,
 								width = "half",
 								order = 5
-							}
+							}, 
+							ObjectiveAndRespawn_Outline = {
+								type = "select",
+								name = L.Font_Outline,
+								desc = L.Font_Outline_Desc,
+								set = function(option, value)
+									UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.ObjectiveAndRespawn_Fontsize, value)
+								end,
+								values = Data.FontOutlines,
+								order = 6
+							},
+							Fake3 = {
+								type = "description",
+								name = " ",
+								fontSize = "large",
+								width = "full",
+								order = 7
+							},
+							ObjectiveAndRespawn_EnableTextshadow = {
+								type = "toggle",
+								name = L.FontShadow_Enabled,
+								desc = L.FontShadow_Enabled_Desc,
+								set = function(option, value)
+									if value then
+										UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetShadowOffset", 1, -1)
+									else
+										UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetShadowOffset", 0, 0)
+									end
+								end,
+								order = 8
+							},
+							NumericTargetindicator_TextShadowcolor = {
+								type = "color",
+								name = L.FontShadowColor,
+								desc = L.FontShadowColor_Desc,
+								disabled = function() return not self.db.profile.ObjectiveAndRespawn_EnableTextshadow end,
+								set = function(option, ...)
+									local color = {...}
+									UpdateButtons(option, color, "ObjectiveAndRespawn", "AuraText", "SetShadowColor", ...)
+								end,
+								order = 9
+							},
 						}
 					},
 					DrTrackingSettings = {
@@ -825,6 +991,32 @@ function BattleGroundEnemies:SetupOptions()
 								end,
 								order = 2
 							},
+							MyDebuffs_Spacing = {
+								type = "range",
+								name = L.MyDebuffs_Spacing,
+								desc = L.MyDebuffs_Spacing_Desc,
+								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
+								set = function(option, value)
+									for name, enemyButton in pairs(self.Enemys) do
+										enemyButton:DebuffPositioning()
+									end
+									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
+										enemyButton:DebuffPositioning()
+									end
+									setOption(option, value)
+								end,
+								min = 0,
+								max = 10,
+								step = 1,
+								order = 3
+							},
+							Fake = {
+								type = "description",
+								name = " ",
+								fontSize = "large",
+								width = "full",
+								order = 4
+							},
 							MyDebuffs_Fontsize = {
 								type = "range",
 								name = L.MyDebuffs_Fontsize,
@@ -846,14 +1038,14 @@ function BattleGroundEnemies:SetupOptions()
 								min = 10,
 								max = 20,
 								step = 1,
-								order = 3
+								width = "normal",
+								order = 5
 							},
-							Fake = {
+							Fake1 = {
 								type = "description",
 								name = " ",
 								width = "half",
-								order = 4
-								
+								order = 6
 							},
 							MyDebuffs_Textcolor = {
 								type = "color",
@@ -875,26 +1067,89 @@ function BattleGroundEnemies:SetupOptions()
 									setOption(option, color)
 								end,
 								width = "half",
-								order = 5
+								order = 7
 							},
-							MyDebuffs_Spacing = {
-								type = "range",
-								name = L.MyDebuffs_Spacing,
-								desc = L.MyDebuffs_Spacing_Desc,
-								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
+							Fake2 = {
+								type = "description",
+								name = " ",
+								fontSize = "large",
+								width = "full",
+								order = 8
+							},
+							MyDebuffs_Outline = {
+								type = "select",
+								name = L.Font_Outline,
+								desc = L.Font_Outline_Desc,
 								set = function(option, value)
 									for name, enemyButton in pairs(self.Enemys) do
-										enemyButton:DebuffPositioning()
+										for spellID, frame in pairs(enemyButton.MyDebuffs) do
+											frame.Stacks:SetFont(LSM:Fetch("font", self.db.profile.Font), self.db.profile.MyDebuffs_Fontsize, value)
+										end
 									end
 									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										enemyButton:DebuffPositioning()
+										for spellID, frame in pairs(enemyButton.MyDebuffs) do
+											frame.Stacks:SetFont(LSM:Fetch("font", self.db.profile.Font), self.db.profile.MyDebuffs_Fontsize, value)
+										end
 									end
 									setOption(option, value)
 								end,
-								min = 0,
-								max = 10,
-								step = 1,
-								order = 6
+								values = Data.FontOutlines,
+								order = 9
+							},
+							Fake3 = {
+								type = "description",
+								name = " ",
+								fontSize = "large",
+								width = "full",
+								order = 10
+							},
+							MyDebuffs_EnableTextshadow = {
+								type = "toggle",
+								name = L.FontShadow_Enabled,
+								desc = L.FontShadow_Enabled_Desc,
+								set = function(option, value)
+									for name, enemyButton in pairs(self.Enemys) do
+										for spellID, frame in pairs(enemyButton.MyDebuffs) do
+											if value then
+												frame.Stacks:SetShadowOffset(1, -1)
+											else
+												frame.Stacks:SetShadowOffset(0, 0)
+											end
+										end
+									end
+									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
+										for spellID, frame in pairs(enemyButton.MyDebuffs) do
+											if value then
+												frame.Stacks:SetShadowOffset(1, -1)
+											else
+												frame.Stacks:SetShadowOffset(0, 0)
+											end
+										end
+									end
+									setOption(option, value)
+								end,
+								order = 11
+							},
+							MyDebuffs_TextShadowcolor = {
+								type = "color",
+								name = L.FontShadowColor,
+								desc = L.FontShadowColor_Desc,
+								disabled = function() return not self.db.profile.MyDebuffs_EnableTextshadow end,
+								set = function(option, ...)
+									local color = {...}
+									for name, enemyButton in pairs(self.Enemys) do
+										for spellID, frame in pairs(enemyButton.MyDebuffs) do
+											frame.Stacks:SetShadowColor(...)
+										end
+									end
+									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
+										for spellID, frame in pairs(enemyButton.MyDebuffs) do
+											frame.Stacks:SetShadowColor(...)
+										end
+									end
+									setOption(option, color)
+								end,
+								order = 12
 							}
 						}
 					},
