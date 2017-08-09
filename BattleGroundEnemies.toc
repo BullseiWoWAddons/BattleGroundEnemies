@@ -1,6 +1,6 @@
 ## Interface: 70200
 ## Title: BattleGroundEnemies
-## Version: V1.4
+## Version: @project-version@
 ## Author: Bullsei
 ## SavedVariables: BattleGroundEnemiesDB
 ## OptionalDeps: Ace3, LibStub, LibRaces-1.0, UTF8, DRData-1.0, LibSharedMedia-3.0
