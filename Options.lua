@@ -150,7 +150,7 @@ function BattleGroundEnemies:SetupOptions()
 							end
 							setOption(option, value)
 						end,
-						values = {upwards = "upwards", downwards = "downwards"},
+						values = {upwards = L.Upwards, downwards = L.Downwards},
 						order = 9
 					},
 					Fake = {
