@@ -13,6 +13,7 @@ embeds.xml
 
 Locales\enUS.lua
 Locales\deDE.lua
+Locales\koKR.lua
 
 Data.lua
 Main.lua
