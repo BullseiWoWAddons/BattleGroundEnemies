@@ -27,19 +27,38 @@ local function setOption(option, value)
 	-- print(unpack(value))
 	BattleGroundEnemies.db.profile[key] = value
 end
-		
-local function UpdateButtons(option, value, subtablename, subsubtablename, func, farg1, farg2, farg3, farg4)
+
+
+local function UpdateButtons(option, value, subtablename, subsubtablename, looptable, func, farg1, farg2, farg3, farg4)
 	for name, enemyButton in pairs(BattleGroundEnemies.Enemys) do
-		local buttonobject = enemyButton
-		if subtablename then buttonobject = buttonobject[subtablename] end
-		if subsubtablename then buttonobject = buttonobject[subsubtablename] end
-		buttonobject[func](buttonobject, farg1, farg2, farg3, farg4)
+		if looptable then
+			for k, frame in pairs(enemyButton[looptable]) do
+				if subtablename then frame = frame[subtablename] end
+				if subsubtablename then frame = frame[subsubtablename] end
+				frame[func](frame, farg1, farg2, farg3, farg4)
+			end
+		else
+			local buttonobject = enemyButton
+			if subtablename then buttonobject = buttonobject[subtablename] end
+			if subsubtablename then buttonobject = buttonobject[subsubtablename] end
+			
+			buttonobject[func](buttonobject, farg1, farg2, farg3, farg4)
+		end
 	end
 	for number, enemyButton in ipairs(BattleGroundEnemies.InactiveEnemyButtons) do
-		local buttonobject = enemyButton
-		if subtablename then buttonobject = buttonobject[subtablename] end
-		if subsubtablename then buttonobject = buttonobject[subsubtablename] end
-		buttonobject[func](buttonobject, farg1, farg2, farg3, farg4)
+		if looptable then
+			for k, frame in pairs(enemyButton[looptable]) do
+				if subtablename then frame = frame[subtablename] end
+				if subsubtablename then frame = frame[subsubtablename] end
+				frame[func](frame, farg1, farg2, farg3, farg4)
+			end
+		else
+			local buttonobject = enemyButton
+			if subtablename then buttonobject = buttonobject[subtablename] end
+			if subsubtablename then buttonobject = buttonobject[subsubtablename] end
+			
+			buttonobject[func](buttonobject, farg1, farg2, farg3, farg4)
+		end
 	end
 	setOption(option, value)
 end
@@ -350,7 +369,7 @@ function BattleGroundEnemies:SetupOptions()
 						name = L.RangeIndicator_Enabled,
 						desc = L.RangeIndicator_Enabled_Desc,
 						set = function(option, value) 
-							UpdateButtons(option, value, nil, nil, "SetAlpha", value and 0.55 or 1)
+							UpdateButtons(option, value, nil, nil, nil, "SetAlpha", value and 0.55 or 1)
 						end,
 						order = 4
 					},
@@ -383,7 +402,7 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.MyTarget_Color_Desc,
 						set = function(option, ...)
 							local color = {...} 
-							UpdateButtons(option, color, "MyTarget", nil, "SetBackdropBorderColor", ...)
+							UpdateButtons(option, color, "MyTarget", nil, nil ,"SetBackdropBorderColor", ...)
 						end,
 						order = 7
 					},
@@ -393,7 +412,7 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.MyFocus_Color_Desc,
 						set = function(option, ...)
 							local color = {...} 
-							UpdateButtons(option, color, "MyFocus", nil, "SetBackdropBorderColor", ...)
+							UpdateButtons(option, color, "MyFocus", nil, nil, "SetBackdropBorderColor", ...)
 						end,
 						order = 8
 					},
@@ -415,7 +434,7 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.BarTexture,
 										desc = L.BarTexture_Desc,
 										set = function(option, value)
-											UpdateButtons(option, value, "Health", nil, "SetStatusBarTexture", LSM:Fetch("statusbar", value))
+											UpdateButtons(option, value, "Health", nil, nil, "SetStatusBarTexture", LSM:Fetch("statusbar", value))
 										end,
 										dialogControl = 'LSM30_Statusbar',
 										values = AceGUIWidgetLSMlists.statusbar,
@@ -434,7 +453,7 @@ function BattleGroundEnemies:SetupOptions()
 										desc = L.BarBackground_Desc,
 										set = function(option, ...)
 											local color = {...} 
-											UpdateButtons(option, color, "Health", "Background", "SetVertexColor", ...)
+											UpdateButtons(option, color, "Health", "Background", nil, "SetVertexColor", ...)
 										end,
 										width = "normal",
 										order = 3
@@ -458,7 +477,7 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.Name_Fontsize,
 										desc = L.Name_Fontsize_Desc,
 										set = function(option, value)
-											UpdateButtons(option, value, "Name", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.Name_Outline)
+											UpdateButtons(option, value, "Name", nil, nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.Name_Outline)
 										end,
 										min = 6,
 										max = 20,
@@ -478,7 +497,7 @@ function BattleGroundEnemies:SetupOptions()
 										desc = L.Name_Textcolor_Desc,
 										set = function(option, ...)
 											local color = {...} 
-											UpdateButtons(option, color, "Name", nil, "SetTextColor", ...)
+											UpdateButtons(option, color, "Name", nil, nil, "SetTextColor", ...)
 										end,
 										width = "half",
 										order = 3
@@ -495,7 +514,7 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.Font_Outline,
 										desc = L.Font_Outline_Desc,
 										set = function(option, value)
-											UpdateButtons(option, value, "Name", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.Name_Fontsize, value)
+											UpdateButtons(option, value, "Name", nil, nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.Name_Fontsize, value)
 										end,
 										values = Data.FontOutlines,
 										order = 5
@@ -513,9 +532,9 @@ function BattleGroundEnemies:SetupOptions()
 										desc = L.FontShadow_Enabled_Desc,
 										set = function(option, value)
 											if value then
-												UpdateButtons(option, value, "Name", nil, "SetShadowOffset", 1, -1)
+												UpdateButtons(option, value, "Name", nil, nil, "SetShadowOffset", 1, -1)
 											else
-												UpdateButtons(option, value, "Name", nil, "SetShadowOffset", 0, 0)
+												UpdateButtons(option, value, "Name", nil, nil, "SetShadowOffset", 0, 0)
 											end
 										end,
 										order = 7
@@ -527,7 +546,7 @@ function BattleGroundEnemies:SetupOptions()
 										disabled = function() return not self.db.profile.EnemyCount_EnableTextshadow end,
 										set = function(option, ...)
 											local color = {...}
-											UpdateButtons(option, color, "Name", nil, "SetShadowColor", ...)
+											UpdateButtons(option, color, "Name", nil, nil, "SetShadowColor", ...)
 										end,
 										order = 8
 									},
@@ -614,7 +633,7 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.NumericTargetindicator_Enabled,
 										desc = L.NumericTargetindicator_Enabled_Desc,
 										set = function(option, value)
-											UpdateButtons(option, value, "TargetCounter", nil, "SetShown", value)
+											UpdateButtons(option, value, "TargetCounter", nil, nil, "SetShown", value)
 										end,
 										width = "full",
 										order = 1
@@ -625,7 +644,7 @@ function BattleGroundEnemies:SetupOptions()
 										desc = L.NumericTargetindicator_Fontsize_Desc,
 										disabled = function() return not self.db.profile.NumericTargetindicator_Enabled end,
 										set = function(option, value)
-											UpdateButtons(option, value, "TargetCounter", "Text", "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.NumericTargetindicator_Outline)
+											UpdateButtons(option, value, "TargetCounter", "Text", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.NumericTargetindicator_Outline)
 										end,
 										min = 6,
 										max = 20,
@@ -646,7 +665,7 @@ function BattleGroundEnemies:SetupOptions()
 										disabled = function() return not self.db.profile.NumericTargetindicator_Enabled end,
 										set = function(option, ...)
 											local color = {...} 
-											UpdateButtons(option, color, "TargetCounter", "Text", "SetTextColor", ...)
+											UpdateButtons(option, color, "TargetCounter", "Text", nil, "SetTextColor", ...)
 										end,
 										width = "half",
 										order = 4
@@ -656,7 +675,7 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.Font_Outline,
 										desc = L.Font_Outline_Desc,
 										set = function(option, value)
-											UpdateButtons(option, value, "TargetCounter", "Text", "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.NumericTargetindicator_Fontsize, value)
+											UpdateButtons(option, value, "TargetCounter", "Text", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.NumericTargetindicator_Fontsize, value)
 										end,
 										values = Data.FontOutlines,
 										order = 5
@@ -667,9 +686,9 @@ function BattleGroundEnemies:SetupOptions()
 										desc = L.FontShadow_Enabled_Desc,
 										set = function(option, value)
 											if value then
-												UpdateButtons(option, value, "TargetCounter", "Text", "SetShadowOffset", 1, -1)
+												UpdateButtons(option, value, "TargetCounter", "Text", nil, "SetShadowOffset", 1, -1)
 											else
-												UpdateButtons(option, value, "TargetCounter", "Text", "SetShadowOffset", 0, 0)
+												UpdateButtons(option, value, "TargetCounter", "Text", nil, "SetShadowOffset", 0, 0)
 											end
 										end,
 										order = 6
@@ -681,7 +700,7 @@ function BattleGroundEnemies:SetupOptions()
 										disabled = function() return not self.db.profile.NumericTargetindicator_EnableTextshadow end,
 										set = function(option, ...)
 											local color = {...}
-											UpdateButtons(option, color, "TargetCounter", "Text", "SetShadowColor", ...)
+											UpdateButtons(option, color, "TargetCounter", "Text", nil, "SetShadowColor", ...)
 										end,
 										order = 7
 									},
@@ -697,19 +716,7 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.SymbolicTargetindicator_Enabled,
 										desc = L.SymbolicTargetindicator_Enabled_Desc,
 										set = function(option, value)
-											for name, enemyButton in pairs(self.Enemys) do
-												local targetIndicator = enemyButton.TargetIndicators
-												for i = 1, #enemyButton.TargetIndicators do
-													enemyButton.TargetIndicators[i]:SetShown(value)
-												end
-											end
-											for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-												local targetIndicator = enemyButton.TargetIndicators
-												for i = 1, #enemyButton.TargetIndicators do
-													enemyButton.TargetIndicators[i]:SetShown(value)
-												end
-											end
-											setOption(option, value)
+											UpdateButtons(option, value, nil, nil, "TargetIndicators", "SetShown", value)
 										end,
 										width = "full",
 										order = 7
@@ -729,7 +736,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Trinket_Enabled,
 								desc = L.Trinket_Enabled_Desc,
 								set = function(option, value)
-									UpdateButtons(option, value, "Trinket", nil, "SetShown", value)
+									UpdateButtons(option, value, "Trinket", nil, nil, "SetShown", value)
 								end,
 								order = 1
 							},
@@ -739,7 +746,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.Trinket_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.Trinket_Enabled end,
 								set = function(option, value)
-									UpdateButtons(option, value, "Trinket", "Cooldown", "SetHideCountdownNumbers", not value)
+									UpdateButtons(option, value, "Trinket", "Cooldown", nil, "SetHideCountdownNumbers", not value)
 								end,
 								order = 2
 							}
@@ -756,7 +763,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Racial_Enabled,
 								desc = L.Racial_Enabled_Desc,
 								set = function(option, value)
-									UpdateButtons(option, value, "Racial", nil, "SetShown", value)
+									UpdateButtons(option, value, "Racial", nil, nil, "SetShown", value)
 								end,
 								order = 1
 							},
@@ -766,7 +773,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.Racial_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.Racial_Enabled end,
 								set = function(option, value)
-									UpdateButtons(option, value, "Racial", "Cooldown", "SetHideCountdownNumbers", not value)
+									UpdateButtons(option, value, "Racial", "Cooldown", nil, "SetHideCountdownNumbers", not value)
 								end,
 								order = 3
 							}
@@ -783,7 +790,11 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Spec_Width,
 								desc = L.Spec_Width_Desc,
 								set = function(option, value)
-									for name, enemyButton in pairs(BattleGroundEnemies.Enemys) do
+									for name, enemyButton in pairs(self.Enemys) do
+										self:CropImage(enemyButton.Spec.Icon, self.db.profile.BarHeight, value)
+										enemyButton.Spec:SetWidth(value)
+									end
+									for name, enemyButton in pairs(self.InactiveEnemyButtons) do
 										self:CropImage(enemyButton.Spec.Icon, self.db.profile.BarHeight, value)
 										enemyButton.Spec:SetWidth(value)
 									end
@@ -807,7 +818,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.ObjectiveAndRespawn_ObjectiveEnabled,
 								desc = L.ObjectiveAndRespawn_ObjectiveEnabled_Desc,
 								set = function(option, value)
-									for name, enemyButton in pairs(BattleGroundEnemies.Enemys) do
+									for name, enemyButton in pairs(self.Enemys) do
 										if value then
 											if enemyButton.ObjectiveAndRespawn.Icon:GetTexture() then
 												enemyButton.ObjectiveAndRespawn:Show()
@@ -826,8 +837,11 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.ObjectiveAndRespawn_Width_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, value)
-									UpdateButtons(option, value, "ObjectiveAndRespawn", nil, "SetWidth", value)
-									for name, enemyButton in pairs(BattleGroundEnemies.Enemys) do
+									for name, enemyButton in pairs(self.Enemys) do
+										self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, self.db.profile.BarHeight, value)
+										enemyButton.ObjectiveAndRespawn:SetWidth(value)
+									end
+									for name, enemyButton in pairs(self.InactiveEnemyButtons) do
 										self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, self.db.profile.BarHeight, value)
 										enemyButton.ObjectiveAndRespawn:SetWidth(value)
 									end
@@ -844,7 +858,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.ObjectiveAndRespawn_Fontsize_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, value)
-									UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.ObjectiveAndRespawn_Outline)
+									UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.ObjectiveAndRespawn_Outline)
 								end,
 								min = 10,
 								max = 20,
@@ -865,7 +879,7 @@ function BattleGroundEnemies:SetupOptions()
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, ...)
 									local color = {...} 
-									UpdateButtons(option, color, "ObjectiveAndRespawn", "AuraText", "SetTextColor", ...)
+									UpdateButtons(option, color, "ObjectiveAndRespawn", "AuraText", nil, "SetTextColor", ...)
 								end,
 								width = "half",
 								order = 5
@@ -875,7 +889,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Font_Outline,
 								desc = L.Font_Outline_Desc,
 								set = function(option, value)
-									UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.ObjectiveAndRespawn_Fontsize, value)
+									UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.ObjectiveAndRespawn_Fontsize, value)
 								end,
 								values = Data.FontOutlines,
 								order = 6
@@ -893,9 +907,9 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.FontShadow_Enabled_Desc,
 								set = function(option, value)
 									if value then
-										UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetShadowOffset", 1, -1)
+										UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", nil, "SetShadowOffset", 1, -1)
 									else
-										UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", "SetShadowOffset", 0, 0)
+										UpdateButtons(option, value, "ObjectiveAndRespawn", "AuraText", nil, "SetShadowOffset", 0, 0)
 									end
 								end,
 								order = 8
@@ -907,7 +921,7 @@ function BattleGroundEnemies:SetupOptions()
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_EnableTextshadow end,
 								set = function(option, ...)
 									local color = {...}
-									UpdateButtons(option, color, "ObjectiveAndRespawn", "AuraText", "SetShadowColor", ...)
+									UpdateButtons(option, color, "ObjectiveAndRespawn", "AuraText", nil, "SetShadowColor", ...)
 								end,
 								order = 9
 							},
@@ -931,17 +945,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.DrTracking_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.DrTracking_Enabled end,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
-										for categorie, v in pairs(DRData:GetCategories()) do
-											enemyButton.DR[categorie].Cooldown:SetHideCountdownNumbers(not value)
-										end
-									end
-									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										for categorie, v in pairs(DRData:GetCategories()) do
-											enemyButton.DR[categorie].Cooldown:SetHideCountdownNumbers(not value)
-										end
-									end
-									setOption(option, value)
+									UpdateButtons(option, value, "Cooldown", nil, "DR", "SetHideCountdownNumbers", not value)
 								end,
 								order = 2
 							},
@@ -951,13 +955,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.DrTracking_Spacing_Desc,
 								disabled = function() return not self.db.profile.DrTracking_Enabled end,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
-										enemyButton:DrPositioning()
-									end
-									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										enemyButton:DrPositioning()
-									end
-									setOption(option, value)
+									UpdateButtons(option, value, nil, nil, nil, "DrPositioning")
 								end,
 								min = 0,
 								max = 10,
@@ -984,17 +982,8 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.MyDebuffs_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											myDebuffFrame.Cooldown:SetHideCountdownNumbers(not value)
-										end
-									end
-									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											myDebuffFrame.Cooldown:SetHideCountdownNumbers(not value)
-										end
-									end
-									setOption(option, value)
+									UpdateButtons(option, value, "Cooldown", nil, "MyDebuffs", "SetHideCountdownNumbers", not value)
+									UpdateButtons(option, value, "Cooldown", nil, "InactiveDebuffs", "SetHideCountdownNumbers", not value)
 								end,
 								order = 2
 							},
@@ -1004,13 +993,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.MyDebuffs_Spacing_Desc,
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
-										enemyButton:DebuffPositioning()
-									end
-									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										enemyButton:DebuffPositioning()
-									end
-									setOption(option, value)
+									UpdateButtons(option, value, nil, nil, nil, "DebuffPositioning")
 								end,
 								min = 0,
 								max = 10,
@@ -1030,17 +1013,8 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.MyDebuffs_Fontsize_Desc,
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, self.db.profile.MyDebuffs_Outline)
-										end
-									end
-									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, self.db.profile.MyDebuffs_Outline)
-										end
-									end
-									setOption(option, value)
+									UpdateButtons(option, value, "Stacks", nil, "MyDebuffs", "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, self.db.profile.MyDebuffs_Outline)
+									UpdateButtons(option, value, "Stacks", nil, "InactiveDebuffs", "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, self.db.profile.MyDebuffs_Outline)
 								end,
 								min = 10,
 								max = 20,
@@ -1060,18 +1034,9 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.MyDebuffs_Textcolor_Desc,
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, ...)
-									local color = {...} 
-									for name, enemyButton in pairs(self.Enemys) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetTextColor(...)
-										end
-									end
-									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetTextColor(...)
-										end
-									end
-									setOption(option, color)
+									local color = {...}
+									UpdateButtons(option, color, "Stacks", nil, "MyDebuffs", "SetTextColor", ...)
+									UpdateButtons(option, color, "Stacks", nil, "InactiveDebuffs", "SetTextColor", ...)
 								end,
 								width = "half",
 								order = 7
@@ -1088,17 +1053,8 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Font_Outline,
 								desc = L.Font_Outline_Desc,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetFont(LSM:Fetch("font", self.db.profile.Font), self.db.profile.MyDebuffs_Fontsize, value)
-										end
-									end
-									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetFont(LSM:Fetch("font", self.db.profile.Font), self.db.profile.MyDebuffs_Fontsize, value)
-										end
-									end
-									setOption(option, value)
+									UpdateButtons(option, value, "Stacks", nil, "MyDebuffs", "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.MyDebuffs_Fontsize, value)
+									UpdateButtons(option, value, "Stacks", nil, "InactiveDebuffs", "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.MyDebuffs_Fontsize, value)
 								end,
 								values = Data.FontOutlines,
 								order = 9
@@ -1144,17 +1100,8 @@ function BattleGroundEnemies:SetupOptions()
 								disabled = function() return not self.db.profile.MyDebuffs_EnableTextshadow end,
 								set = function(option, ...)
 									local color = {...}
-									for name, enemyButton in pairs(self.Enemys) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetShadowColor(...)
-										end
-									end
-									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetShadowColor(...)
-										end
-									end
-									setOption(option, color)
+									UpdateButtons(option, color, "Stacks", nil, "MyDebuffs", "SetShadowColor", ...)
+									UpdateButtons(option, color, "Stacks", nil, "InactiveDebuffs", "SetShadowColor", ...)
 								end,
 								order = 12
 							}
@@ -1204,7 +1151,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.ObjectiveAndRespawn_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_RespawnEnabled end,
 								set = function(option, value)
-									UpdateButtons(option, value, "ObjectiveAndRespawn", "Cooldown", "SetHideCountdownNumbers", not value)
+									UpdateButtons(option, value, "ObjectiveAndRespawn", "Cooldown", nil, "SetHideCountdownNumbers", not value)
 								end,
 								order = 5
 							}
@@ -1225,7 +1172,7 @@ SlashCmdList["BattleGroundEnemies"] = function(msg)
 	local AceDialog = LibStub("AceConfigDialog-3.0")
 	if not BattleGroundEnemies.options then
 		BattleGroundEnemies:SetupOptions()
-		AceDialog:SetDefaultSize("BattleGroundEnemies", 830, 530)
+		AceDialog:SetDefaultSize("BattleGroundEnemies", 830, 800)
 	end
 	AceDialog:Open("BattleGroundEnemies")
 end

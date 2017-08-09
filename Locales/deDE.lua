@@ -134,4 +134,3 @@ L["Trinket_ShowNumbers_Desc"] = "Falls diese Option aktiviert ist werden Abkling
 L["TrinketSettings"] = "Anti-CC-Talent"
 L["TrinketSettings_Desc"] = "Einstellungen bezüglich des PvP-Talents in der ersten Reihe"
 L["Upwards"] = "Nach oben"
-
