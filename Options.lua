@@ -103,15 +103,22 @@ function BattleGroundEnemies:SetupOptions()
 						name = L.Font,
 						desc = L.Font_Desc,
 						set = function(option, value)
+							local conf = self.db.profile
 							for name, enemyButton in pairs(self.Enemys) do
-								enemyButton.Name:SetFont(LSM:Fetch("font", value), self.db.profile.Name_Fontsize)
-								enemyButton.TargetCounter.Text:SetFont(LSM:Fetch("font", value), self.db.profile.NumericTargetindicator_Fontsize)
-								enemyButton.ObjectiveAndRespawn.AuraText:SetFont(LSM:Fetch("font", value), self.db.profile.ObjectiveAndRespawn_Fontsize)
+								enemyButton.Name:SetFont(LSM:Fetch("font", value), conf.Name_Fontsize, conf.Name_Outline)
+								enemyButton.TargetCounter.Text:SetFont(LSM:Fetch("font", value), conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline)
+								enemyButton.ObjectiveAndRespawn.AuraText:SetFont(LSM:Fetch("font", value), conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline)
+								for spellID, frame in pairs(enemyButton.MyDebuffs) do
+									frame.Stacks:SetFont(LSM:Fetch("font", value), conf.MyDebuffs_Fontsize, conf.MyDebuffs_Outline)
+								end
 							end
 							for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-								enemyButton.Name:SetFont(LSM:Fetch("font", value), self.db.profile.Name_Fontsize)
-								enemyButton.TargetCounter.Text:SetFont(LSM:Fetch("font", value), self.db.profile.NumericTargetindicator_Fontsize)
-								enemyButton.ObjectiveAndRespawn.AuraText:SetFont(LSM:Fetch("font", value), self.db.profile.ObjectiveAndRespawn_Fontsize)
+								enemyButton.Name:SetFont(LSM:Fetch("font", value), conf.Name_Fontsize, conf.Name_Outline)
+								enemyButton.TargetCounter.Text:SetFont(LSM:Fetch("font", value), conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline)
+								enemyButton.ObjectiveAndRespawn.AuraText:SetFont(LSM:Fetch("font", value), conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline)
+								for spellID, frame in pairs(enemyButton.MyDebuffs) do
+									frame.Stacks:SetFont(LSM:Fetch("font", value), conf.MyDebuffs_Fontsize, conf.MyDebuffs_Outline)
+								end
 							end
 							setOption(option, value)
 						end,
@@ -182,7 +189,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.EnemyCount_Fontsize_Desc,
 								disabled = function() return not self.db.profile.EnemyCount_Enabled end,
 								set = function(option, value) 
-									self.EnemyCount:SetFont(LSM:Fetch("font", self.db.profile.Font), value)
+									self.EnemyCount:SetFont(LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.EnemyCount_Outline)
 									setOption(option, value)
 								end,
 								min = 1,
@@ -451,7 +458,7 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.Name_Fontsize,
 										desc = L.Name_Fontsize_Desc,
 										set = function(option, value)
-											UpdateButtons(option, value, "Name", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), value)
+											UpdateButtons(option, value, "Name", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.Name_Outline)
 										end,
 										min = 6,
 										max = 20,
@@ -618,7 +625,7 @@ function BattleGroundEnemies:SetupOptions()
 										desc = L.NumericTargetindicator_Fontsize_Desc,
 										disabled = function() return not self.db.profile.NumericTargetindicator_Enabled end,
 										set = function(option, value)
-											UpdateButtons(option, value, "TargetCounter", "Text", "SetFont", LSM:Fetch("font", self.db.profile.Font), value)
+											UpdateButtons(option, value, "TargetCounter", "Text", "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.NumericTargetindicator_Outline)
 										end,
 										min = 6,
 										max = 20,
@@ -1025,12 +1032,12 @@ function BattleGroundEnemies:SetupOptions()
 								set = function(option, value)
 									for name, enemyButton in pairs(self.Enemys) do
 										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value)
+											frame.Stacks:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, self.db.profile.MyDebuffs_Outline)
 										end
 									end
 									for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
 										for spellID, frame in pairs(enemyButton.MyDebuffs) do
-											frame.Stacks:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value)
+											frame.Stacks:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, self.db.profile.MyDebuffs_Outline)
 										end
 									end
 									setOption(option, value)
