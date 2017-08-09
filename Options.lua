@@ -221,7 +221,6 @@ function BattleGroundEnemies:SetupOptions()
 				--childGroups = "tab",
 				order = 2,
 				args = {
-					
 					BarWidth = {
 						type = "range",
 						name = L.BarWidth,
@@ -245,13 +244,13 @@ function BattleGroundEnemies:SetupOptions()
 							local previousButton
 							for name, enemyButton in pairs(self.Enemys) do
 								enemyButton:SetHeight(value)
-								self:CropImage(enemyButton.Spec.Icon, self.db.profile.BarHeight, value)
-								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, self.db.profile.BarHeight, value)
+								self:CropImage(enemyButton.Spec.Icon, value, self.db.profile.BarWidth)
+								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, value, self.db.profile.BarWidth)
 							end
 							for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
 								enemyButton:SetHeight(value)
-								self:CropImage(enemyButton.Spec.Icon, self.db.profile.BarHeight, value)
-								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, self.db.profile.BarHeight, value)
+								self:CropImage(enemyButton.Spec.Icon, value, self.db.profile.BarWidth)
+								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, value, self.db.profile.BarWidth)
 							end
 							setOption(option, value)
 						end,
