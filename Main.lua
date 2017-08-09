@@ -1195,6 +1195,7 @@ do
 		end
 		do
 			local usersParent = {}
+			local usersPetParent = {}
 			local fakeParent
 			local fakeFrame = CreateFrame("frame")
 		
@@ -1210,6 +1211,9 @@ do
 									local arenaFrame = _G["ArenaEnemyFrame"..i]
 									usersParent[i] = arenaFrame:GetParent() 
 									arenaFrame:SetParent(fakeFrame)
+									local arenaPetFrame = _G["ArenaEnemyFrame"..i.."PetFrame"]
+									usersPetParent[i] = arenaPetFrame:GetParent() 
+									arenaPetFrame:SetParent(fakeFrame)
 								end
 								fakeParent = true
 								fakeFrame:Hide()
@@ -1218,6 +1222,8 @@ do
 							for i = 1, 4 do
 								local arenaFrame = _G["ArenaEnemyFrame"..i]
 								arenaFrame:SetParent(usersParent[i])
+								local arenaPetFrame = _G["ArenaEnemyFrame"..i.."PetFrame"]
+								arenaPetFrame:SetParent(usersPetParent[i])
 							end
 							fakeParent = false
 						end
@@ -1225,6 +1231,8 @@ do
 						for i = 1, 4 do
 							local arenaFrame = _G["ArenaEnemyFrame"..i]
 							arenaFrame:SetParent(usersParent[i])
+							local arenaPetFrame = _G["ArenaEnemyFrame"..i.."PetFrame"]
+							arenaPetFrame:SetParent(usersPetParent[i])
 						end
 						fakeParent = false
 					end
