@@ -244,11 +244,15 @@ function BattleGroundEnemies:SetupOptions()
 							local previousButton
 							for name, enemyButton in pairs(self.Enemys) do
 								enemyButton:SetHeight(value)
+								enemyButton.Trinket:SetWidth(value)
+								enemyButton.Racial:SetWidth(value)
 								self:CropImage(enemyButton.Spec.Icon, value, self.db.profile.Spec_Width)
 								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, value, self.db.profile.ObjectiveAndRespawn_Width)
 							end
 							for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
 								enemyButton:SetHeight(value)
+								enemyButton.Trinket:SetWidth(value)
+								enemyButton.Racial:SetWidth(value)
 								self:CropImage(enemyButton.Spec.Icon, value, self.db.profile.Spec_Width)
 								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, value, self.db.profile.ObjectiveAndRespawn_Width)
 							end
