@@ -103,7 +103,6 @@ function BattleGroundEnemies:SetupOptions()
 						name = L.Font,
 						desc = L.Font_Desc,
 						set = function(option, value)
-							print(value)
 							for name, enemyButton in pairs(self.Enemys) do
 								enemyButton.Name:SetFont(LSM:Fetch("font", value), self.db.profile.Name_Fontsize)
 								enemyButton.TargetCounter.Text:SetFont(LSM:Fetch("font", value), self.db.profile.NumericTargetindicator_Fontsize)
@@ -205,7 +204,6 @@ function BattleGroundEnemies:SetupOptions()
 								disabled = function() return not self.db.profile.EnemyCount_Enabled end,
 								set = function(option, ...)
 									local color = {...} 
-									print(color[1], color[2], color[3])
 									self.EnemyCount:SetTextColor(...)
 									setOption(option, color)
 								end,
@@ -434,7 +432,6 @@ function BattleGroundEnemies:SetupOptions()
 										set = function(option, value)
 											for name, enemyButton in pairs(self.Enemys) do
 												local displayedName = name
-												print("value", value)
 												if value then
 													displayedName = ""
 													for i = 1, name:utf8len() do
@@ -847,7 +844,6 @@ function BattleGroundEnemies:SetupOptions()
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, ...)
 									local color = {...} 
-									print(color[1], color[2], color[3])
 									for name, enemyButton in pairs(self.Enemys) do
 										for spellID, frame in pairs(enemyButton.MyDebuffs) do
 											frame.Stacks:SetTextColor(...)
