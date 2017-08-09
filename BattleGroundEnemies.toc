@@ -1,0 +1,19 @@
+## Interface: 70200
+## Title: BattleGroundEnemies
+## Version: V1.4
+## Author: Bullsei
+## SavedVariables: BattleGroundEnemiesDB
+## OptionalDeps: Ace3, LibStub, LibRaces-1.0, UTF8, DRData-1.0, LibSharedMedia-3.0
+
+## X-Curse-Project-ID: 274066
+
+#@no-lib-strip@
+embeds.xml
+#@end-no-lib-strip@
+
+Locales\enUS.lua
+Locales\deDE.lua
+
+Data.lua
+Main.lua
+Options.lua
