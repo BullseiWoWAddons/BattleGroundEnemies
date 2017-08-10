@@ -204,7 +204,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							EnemyCount_Fontsize = {
 								type = "range",
-								name = L.EnemyCount_Fontsize,
+								name = L.Fontsize,
 								desc = L.EnemyCount_Fontsize_Desc,
 								disabled = function() return not self.db.profile.EnemyCount_Enabled end,
 								set = function(option, value) 
@@ -225,7 +225,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							EnemyCount_Textcolor = {
 								type = "color",
-								name = L.EnemyCount_Textcolor,
+								name = L.Fontcolor,
 								desc = L.EnemyCount_Textcolor_Desc,
 								disabled = function() return not self.db.profile.EnemyCount_Enabled end,
 								set = function(option, ...)
@@ -292,7 +292,7 @@ function BattleGroundEnemies:SetupOptions()
 				args = {
 					BarWidth = {
 						type = "range",
-						name = L.BarWidth,
+						name = L.Width,
 						desc = L.BarWidth_Desc,
 						disabled = InCombatLockdown,
 						set = function(option, value)
@@ -474,7 +474,7 @@ function BattleGroundEnemies:SetupOptions()
 								args = {
 									Name_Fontsize = {
 										type = "range",
-										name = L.Name_Fontsize,
+										name = L.Fontsize,
 										desc = L.Name_Fontsize_Desc,
 										set = function(option, value)
 											UpdateButtons(option, value, "Name", nil, nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.Name_Outline)
@@ -493,7 +493,7 @@ function BattleGroundEnemies:SetupOptions()
 									},
 									Name_Textcolor = {
 										type = "color",
-										name = L.Name_Textcolor,
+										name = L.Fontcolor,
 										desc = L.Name_Textcolor_Desc,
 										set = function(option, ...)
 											local color = {...} 
@@ -570,17 +570,15 @@ function BattleGroundEnemies:SetupOptions()
 														local c = name:utf8sub(i,i)
 										
 														if Data.CyrillicToRomanian[c] then
-															if i == 1 then
-																displayedName = displayedName..Data.CyrillicToRomanian[c]:upper()
-															else
-																displayedName = displayedName..Data.CyrillicToRomanian[c]
-															end
+															displayedName = displayedName..Data.CyrillicToRomanian[c]
 														else
 															displayedName = displayedName..c
 														end
 													end
+													displayedName = displayedName:gsub("^.",string.upper):gsub("-.",string.upper) --uppercase the first character and the one after the -
+													enemyButton.PlayerDetails.DisplayedName = displayedName
 												end
-												enemyButton.PlayerDetails.DisplayedName = displayedName
+												
 												
 												if self.db.profile.ShowRealmnames then
 													enemyButton.Name:SetText(displayedName)
@@ -599,12 +597,10 @@ function BattleGroundEnemies:SetupOptions()
 										desc = L.ShowRealmnames_Desc,
 										set = function(option, value)
 											for name, enemyButton in pairs(self.Enemys) do
-												local displayedName = enemyButton.PlayerDetails.DisplayedName
-												
 												if value then
-													enemyButton.Name:SetText(displayedName)
+													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName)
 												else
-													enemyButton.Name:SetText(displayedName:match("[^%-]*"))
+													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName:match("[^%-]*"))
 												end
 											end
 											setOption(option, value)
@@ -640,7 +636,7 @@ function BattleGroundEnemies:SetupOptions()
 									},
 									NumericTargetindicator_Fontsize = {
 										type = "range",
-										name = L.NumericTargetindicator_Fontsize,
+										name = L.Fontsize,
 										desc = L.NumericTargetindicator_Fontsize_Desc,
 										disabled = function() return not self.db.profile.NumericTargetindicator_Enabled end,
 										set = function(option, value)
@@ -660,7 +656,7 @@ function BattleGroundEnemies:SetupOptions()
 									},
 									NumericTargetindicator_Textcolor = {
 										type = "color",
-										name = L.NumericTargetindicator_Textcolor,
+										name = L.Fontcolor,
 										desc = L.NumericTargetindicator_Textcolor_Desc,
 										disabled = function() return not self.db.profile.NumericTargetindicator_Enabled end,
 										set = function(option, ...)
@@ -742,7 +738,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							Trinket_ShowNumbers = {
 								type = "toggle",
-								name = L.Trinket_ShowNumbers,
+								name = L.ShowNumbers,
 								desc = L.Trinket_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.Trinket_Enabled end,
 								set = function(option, value)
@@ -769,7 +765,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							Racial_ShowNumbers = {
 								type = "toggle",
-								name = L.Racial_ShowNumbers,
+								name = L.ShowNumbers,
 								desc = L.Racial_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.Racial_Enabled end,
 								set = function(option, value)
@@ -787,7 +783,7 @@ function BattleGroundEnemies:SetupOptions()
 						args = {
 							Spec_Width = {
 								type = "range",
-								name = L.Spec_Width,
+								name = L.Width,
 								desc = L.Spec_Width_Desc,
 								set = function(option, value)
 									for name, enemyButton in pairs(self.Enemys) do
@@ -833,7 +829,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							ObjectiveAndRespawn_Width = {
 								type = "range",
-								name = L.ObjectiveAndRespawn_Width,
+								name = L.Width,
 								desc = L.ObjectiveAndRespawn_Width_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, value)
@@ -854,7 +850,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							ObjectiveAndRespawn_Fontsize = {
 								type = "range",
-								name = L.ObjectiveAndRespawn_Fontsize,
+								name = L.Fontsize,
 								desc = L.ObjectiveAndRespawn_Fontsize_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, value)
@@ -874,7 +870,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							ObjectiveAndRespawn_Textcolor = {
 								type = "color",
-								name = L.ObjectiveAndRespawn_Textcolor,
+								name = L.Fontcolor,
 								desc = L.ObjectiveAndRespawn_Textcolor_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, ...)
@@ -941,7 +937,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							DrTracking_ShowNumbers = {
 								type = "toggle",
-								name = L.DrTracking_ShowNumbers,
+								name = L.ShowNumbers,
 								desc = L.DrTracking_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.DrTracking_Enabled end,
 								set = function(option, value)
@@ -978,7 +974,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							MyDebuffs_ShowNumbers = {
 								type = "toggle",
-								name = L.MyDebuffs_ShowNumbers,
+								name = L.ShowNumbers,
 								desc = L.MyDebuffs_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, value)
@@ -1009,7 +1005,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							MyDebuffs_Fontsize = {
 								type = "range",
-								name = L.MyDebuffs_Fontsize,
+								name = L.Fontsize,
 								desc = L.MyDebuffs_Fontsize_Desc,
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, value)
@@ -1030,7 +1026,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							MyDebuffs_Textcolor = {
 								type = "color",
-								name = L.MyDebuffs_Textcolor,
+								name = L.Fontcolor,
 								desc = L.MyDebuffs_Textcolor_Desc,
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, ...)
@@ -1147,7 +1143,7 @@ function BattleGroundEnemies:SetupOptions()
 							},
 							ObjectiveAndRespawn_ShowNumbers = {
 								type = "toggle",
-								name = L.ObjectiveAndRespawn_ShowNumbers,
+								name = L.ShowNumbers,
 								desc = L.ObjectiveAndRespawn_ShowNumbers_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_RespawnEnabled end,
 								set = function(option, value)
@@ -1172,7 +1168,7 @@ SlashCmdList["BattleGroundEnemies"] = function(msg)
 	local AceDialog = LibStub("AceConfigDialog-3.0")
 	if not BattleGroundEnemies.options then
 		BattleGroundEnemies:SetupOptions()
-		AceDialog:SetDefaultSize("BattleGroundEnemies", 830, 800)
+		AceDialog:SetDefaultSize("BattleGroundEnemies", 830, 600)
 	end
 	AceDialog:Open("BattleGroundEnemies")
 end

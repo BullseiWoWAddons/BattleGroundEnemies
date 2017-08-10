@@ -1044,7 +1044,7 @@ do
 		
 		function BattleGroundEnemies:CropImage(texture, height, width)
 			local ratio = height / width
-			local left, right, top, bottom = unpack({5, 59, 5, 59 })
+			local left, right, top, bottom = 5, 59, 5, 59
 			if ratio > 1 then --crop the sides
 				ratio = 1/ratio 
 				texture:SetTexCoord( (left/64) + ((1- ratio) / 2), (right/64) - ((1- ratio) / 2), top/64, bottom/64) 
@@ -1265,7 +1265,7 @@ do
 		
 		local numArenaOpponents, EnemyFaction
 		
-		local function AreneEnemysAtBeginn()
+		local function ArenaEnemysAtBeginn()
 			if #BattleGroundEnemies.EnemySortingTable > 1 then --this ensures that we checked for enmys and the flag carrier will be shown (if its an enemy)
 				for i = 1,  numArenaOpponents do
 					local unitID = "arena"..i
@@ -1277,7 +1277,7 @@ do
 					end
 				end
 			else
-				C_Timer.After(2, AreneEnemysAtBeginn)
+				C_Timer.After(2, ArenaEnemysAtBeginn)
 			end
 		end
 						
@@ -1353,7 +1353,7 @@ do
 				numArenaOpponents = GetNumArenaOpponents()-- returns valid data on PLAYER_ENTERING_WORLD
 				--print(numArenaOpponents)
 				if numArenaOpponents > 0 then 
-					C_Timer.After(2, AreneEnemysAtBeginn)
+					C_Timer.After(2, ArenaEnemysAtBeginn)
 				end
 				
 				self:ToggleArenaFrames()
@@ -1519,16 +1519,14 @@ do
 					enemyDetails.DisplayedName = ""
 					for i = 1, name:utf8len() do
 						local c = name:utf8sub(i,i)
+
 						if Data.CyrillicToRomanian[c] then
-							if i == 1 then
-								enemyDetails.DisplayedName = enemyDetails.DisplayedName..Data.CyrillicToRomanian[c]:upper()
-							else
-								enemyDetails.DisplayedName = enemyDetails.DisplayedName..Data.CyrillicToRomanian[c]
-							end
+							enemyDetails.DisplayedName = enemyDetails.DisplayedName..Data.CyrillicToRomanian[c]
 						else
 							enemyDetails.DisplayedName = enemyDetails.DisplayedName..c
 						end
 					end
+					enemyDetails.DisplayedName = enemyDetails.DisplayedName:gsub("^.",string.upper):gsub("-.",string.upper) --uppercase the first character and the one after the -
 				end
 				
 				if self.db.profile.ShowRealmnames then
