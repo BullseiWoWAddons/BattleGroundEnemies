@@ -11,4 +11,5 @@
 	<Include file="Libs\AceLocale-3.0\AceLocale-3.0.xml"/>
 	<Include file="Libs\DRData-1.0\DRData-1.0.xml"/>
 	<Include file="Libs\LibSharedMedia-3.0\lib.xml"/>
+	<Include file="Libs\LibPlayerSpells-1.0\lib.xml"/>
 </Ui>

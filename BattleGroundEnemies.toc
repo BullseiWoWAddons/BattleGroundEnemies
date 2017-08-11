@@ -3,7 +3,7 @@
 ## Version: @project-version@
 ## Author: Bullsei
 ## SavedVariables: BattleGroundEnemiesDB
-## OptionalDeps: Ace3, LibStub, LibRaces-1.0, UTF8, DRData-1.0, LibSharedMedia-3.0
+## OptionalDeps: Ace3, LibStub, LibRaces-1.0, UTF8, DRData-1.0, LibSharedMedia-3.0, LibPlayerSpells-1.0
 
 ## X-Curse-Project-ID: 274066
 
@@ -11,10 +11,19 @@
 embeds.xml
 #@end-no-lib-strip@
 
-Locales\enUS.lua
 Locales\deDE.lua
+Locales\enUS.lua
+Locales\esES.lua
+Locales\esMX.lua
+Locales\frFR.lua
+Locales\itIT.lua
 Locales\koKR.lua
+Locales\ptBR.lua
+Locales\ruRU.lua
+Locales\zhCN.lua
+Locales\zhTW.lua
 
 Data.lua
 Main.lua
+Testmode.lua
 Options.lua

@@ -30,7 +30,7 @@ end
 
 
 local function UpdateButtons(option, value, subtablename, subsubtablename, looptable, func, farg1, farg2, farg3, farg4)
-	for name, enemyButton in pairs(BattleGroundEnemies.Enemys) do
+	for name, enemyButton in pairs(BattleGroundEnemies.Enemies) do
 		if looptable then
 			for k, frame in pairs(enemyButton[looptable]) do
 				if subtablename then frame = frame[subtablename] end
@@ -63,6 +63,37 @@ local function UpdateButtons(option, value, subtablename, subsubtablename, loopt
 	setOption(option, value)
 end
 
+local function addVerticalSpacing(order)
+	local verticalSpacing = {
+		type = "description",
+		name = " ",
+		fontSize = "large",
+		width = "full",
+		order = order
+	}
+	return verticalSpacing
+end
+
+local function addHorizontalSpacing(order)
+	local horizontalSpacing = {
+		type = "description",
+		name = " ",
+		width = "half",	
+		order = order,
+	}
+	return horizontalSpacing
+end
+
+local function addHorizontalSpacingFull(order)
+	local horizontalSpacing = {
+		type = "description",
+		name = " ",
+		width = "double",	
+		order = order,
+	}
+	return horizontalSpacing
+end
+
 
 function BattleGroundEnemies:SetupOptions()
 	self.options = {
@@ -72,11 +103,19 @@ function BattleGroundEnemies:SetupOptions()
 		get = getOption,
 		set = setOption,
 		args = {
+			Testmode = {
+				type = "execute",
+				name = L.Testmode_Toggle,
+				desc = L.Testmode_Toggle_Desc,
+				disabled = function() return self:IsShown() and not self.TestmodeActive end,
+				func  = self.ToggleTestmode,
+				order = 1	
+			},
 			GeneralSettings = {
 				type = "group",
 				name = L.GeneralSettings,
 				desc = L.GeneralSettings_Desc,
-				order = 1,
+				order = 2,
 				args = {
 					Locked = {
 						type = "toggle",
@@ -123,7 +162,7 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.Font_Desc,
 						set = function(option, value)
 							local conf = self.db.profile
-							for name, enemyButton in pairs(self.Enemys) do
+							for name, enemyButton in pairs(self.Enemies) do
 								enemyButton.Name:SetFont(LSM:Fetch("font", value), conf.Name_Fontsize, conf.Name_Outline)
 								enemyButton.TargetCounter.Text:SetFont(LSM:Fetch("font", value), conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline)
 								enemyButton.ObjectiveAndRespawn.AuraText:SetFont(LSM:Fetch("font", value), conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline)
@@ -165,7 +204,7 @@ function BattleGroundEnemies:SetupOptions()
 							local previousButton = self
 							for number, name in ipairs(self.EnemySortingTable) do
 					
-								local enemyButton = self.Enemys[name]
+								local enemyButton = self.Enemies[name]
 								enemyButton:SetPosition(value, previousButton, self.db.profile.SpaceBetweenRows)
 								previousButton = enemyButton
 							end
@@ -179,13 +218,7 @@ function BattleGroundEnemies:SetupOptions()
 						values = {upwards = L.Upwards, downwards = L.Downwards},
 						order = 9
 					},
-					Fake = {
-						type = "description",
-						name = " ",
-						fontSize = "large",
-						width = "full",
-						order = 10
-					},
+					Fake = addVerticalSpacing(10),
 					EnemyCount = {
 						type = "group",
 						name = L.EnemyCount_Enabled,
@@ -217,12 +250,7 @@ function BattleGroundEnemies:SetupOptions()
 								width = "normal",
 								order = 2
 							},
-							Fake = {
-								type = "description",
-								name = " ",
-								width = "half",
-								order = 3
-							},
+							Fake = addHorizontalSpacing(3),
 							EnemyCount_Textcolor = {
 								type = "color",
 								name = L.Fontcolor,
@@ -247,12 +275,7 @@ function BattleGroundEnemies:SetupOptions()
 								values = Data.FontOutlines,
 								order = 5
 							},
-							Fake1 = {
-								type = "description",
-								name = " ",
-								width = "half",
-								order = 6
-							},
+							Fake1 = addHorizontalSpacing(6),
 							EnemyCount_EnableTextshadow = {
 								type = "toggle",
 								name = L.FontShadow_Enabled,
@@ -288,7 +311,7 @@ function BattleGroundEnemies:SetupOptions()
 				name = L.BarSettings,
 				desc = L.BarSettings_Desc,
 				--childGroups = "tab",
-				order = 2,
+				order = 3,
 				args = {
 					BarWidth = {
 						type = "range",
@@ -311,7 +334,7 @@ function BattleGroundEnemies:SetupOptions()
 						disabled = InCombatLockdown,
 						set = function(option, value) 
 							local previousButton
-							for name, enemyButton in pairs(self.Enemys) do
+							for name, enemyButton in pairs(self.Enemies) do
 								enemyButton:SetHeight(value)
 								enemyButton.Trinket:SetWidth(value)
 								enemyButton.Racial:SetWidth(value)
@@ -353,7 +376,7 @@ function BattleGroundEnemies:SetupOptions()
 							for number, name in ipairs(self.EnemySortingTable) do
 								if number == 1 then previousButton = self end
 					
-								local enemyButton = self.Enemys[name]
+								local enemyButton = self.Enemies[name]
 								enemyButton:SetPosition(self.db.profile.Growdirection, previousButton, value)
 								previousButton = enemyButton
 							end
@@ -441,12 +464,7 @@ function BattleGroundEnemies:SetupOptions()
 										width = "normal",
 										order = 1
 									},
-									Fake = {
-										type = "description",
-										name = " ",
-										width = "half",
-										order = 2
-									},
+									Fake = addHorizontalSpacing(2),
 									BarBackground = {
 										type = "color",
 										name = L.BarBackground,
@@ -485,12 +503,7 @@ function BattleGroundEnemies:SetupOptions()
 										width = "normal",
 										order = 1
 									},
-									Fake = {
-										type = "description",
-										name = " ",
-										width = "half",
-										order = 2
-									},
+									Fake = addHorizontalSpacing(2),
 									Name_Textcolor = {
 										type = "color",
 										name = L.Fontcolor,
@@ -502,13 +515,7 @@ function BattleGroundEnemies:SetupOptions()
 										width = "half",
 										order = 3
 									},
-									Fake2 = {
-										type = "description",
-										name = " ",
-										fontSize = "large",
-										width = "full",
-										order = 4
-									},
+									Fake2 = addVerticalSpacing(4),
 									Name_Outline = {
 										type = "select",
 										name = L.Font_Outline,
@@ -519,13 +526,7 @@ function BattleGroundEnemies:SetupOptions()
 										values = Data.FontOutlines,
 										order = 5
 									},
-									Fake3 = {
-										type = "description",
-										name = " ",
-										fontSize = "large",
-										width = "full",
-										order = 6
-									},
+									Fake3 = addVerticalSpacing(6),
 									EnemyCount_EnableTextshadow = {
 										type = "toggle",
 										name = L.FontShadow_Enabled,
@@ -550,41 +551,23 @@ function BattleGroundEnemies:SetupOptions()
 										end,
 										order = 8
 									},
-									Fake4 = {
-										type = "description",
-										name = " ",
-										fontSize = "large",
-										width = "full",
-										order = 9
-									},
+									Fake4 = addVerticalSpacing(9),
 									ConvertCyrillic = {
 										type = "toggle",
 										name = L.ConvertCyrillic,
 										desc = L.ConvertCyrillic_Desc,
 										set = function(option, value)
-											for name, enemyButton in pairs(self.Enemys) do
-												local displayedName = name
+											for name, enemyButton in pairs(self.Enemies) do
 												if value then
-													displayedName = ""
-													for i = 1, name:utf8len() do
-														local c = name:utf8sub(i,i)
-										
-														if Data.CyrillicToRomanian[c] then
-															displayedName = displayedName..Data.CyrillicToRomanian[c]
-														else
-															displayedName = displayedName..c
-														end
-													end
-													displayedName = displayedName:gsub("^.",string.upper):gsub("-.",string.upper) --uppercase the first character and the one after the -
-													enemyButton.PlayerDetails.DisplayedName = displayedName
+													self:ConvertCyrillic(name, enemyButton.PlayerDetails)
 												end
-												
-												
+											
 												if self.db.profile.ShowRealmnames then
-													enemyButton.Name:SetText(displayedName)
+													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName)
 												else
-													enemyButton.Name:SetText(displayedName:match("[^%-]*"))
+													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName:match("[^%-]*"))
 												end
+												
 											end
 											setOption(option, value)
 										end,
@@ -596,7 +579,7 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.ShowRealmnames,
 										desc = L.ShowRealmnames_Desc,
 										set = function(option, value)
-											for name, enemyButton in pairs(self.Enemys) do
+											for name, enemyButton in pairs(self.Enemies) do
 												if value then
 													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName)
 												else
@@ -643,17 +626,12 @@ function BattleGroundEnemies:SetupOptions()
 											UpdateButtons(option, value, "TargetCounter", "Text", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), value, self.db.profile.NumericTargetindicator_Outline)
 										end,
 										min = 6,
-										max = 20,
+										max = 30,
 										step = 1,
 										width = "normal",
 										order = 2
 									},
-									Fake = {
-										type = "description",
-										name = " ",
-										width = "half",
-										order = 3
-									},
+									Fake = addHorizontalSpacing(3),
 									NumericTargetindicator_Textcolor = {
 										type = "color",
 										name = L.Fontcolor,
@@ -700,13 +678,7 @@ function BattleGroundEnemies:SetupOptions()
 										end,
 										order = 7
 									},
-									Fake2 = {
-										type = "description",
-										name = " ",
-										fontSize = "large",
-										width = "full",
-										order = 6
-									},
+									Fake2 = addVerticalSpacing(6),
 									SymbolicTargetindicator_Enabled = {
 										type = "toggle",
 										name = L.SymbolicTargetindicator_Enabled,
@@ -786,7 +758,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Width,
 								desc = L.Spec_Width_Desc,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
+									for name, enemyButton in pairs(self.Enemies) do
 										self:CropImage(enemyButton.Spec.Icon, self.db.profile.BarHeight, value)
 										enemyButton.Spec:SetWidth(value)
 									end
@@ -814,7 +786,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.ObjectiveAndRespawn_ObjectiveEnabled,
 								desc = L.ObjectiveAndRespawn_ObjectiveEnabled_Desc,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
+									for name, enemyButton in pairs(self.Enemies) do
 										if value then
 											if enemyButton.ObjectiveAndRespawn.Icon:GetTexture() then
 												enemyButton.ObjectiveAndRespawn:Show()
@@ -833,7 +805,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.ObjectiveAndRespawn_Width_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
+									for name, enemyButton in pairs(self.Enemies) do
 										self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, self.db.profile.BarHeight, value)
 										enemyButton.ObjectiveAndRespawn:SetWidth(value)
 									end
@@ -862,12 +834,7 @@ function BattleGroundEnemies:SetupOptions()
 								width = "normal",
 								order = 3
 							},
-							Fake = {
-								type = "description",
-								name = " ",
-								width = "half",
-								order = 4
-							},
+							Fake = addHorizontalSpacing(4),
 							ObjectiveAndRespawn_Textcolor = {
 								type = "color",
 								name = L.Fontcolor,
@@ -890,13 +857,7 @@ function BattleGroundEnemies:SetupOptions()
 								values = Data.FontOutlines,
 								order = 6
 							},
-							Fake3 = {
-								type = "description",
-								name = " ",
-								fontSize = "large",
-								width = "full",
-								order = 7
-							},
+							Fake3 = addVerticalSpacing(7),
 							ObjectiveAndRespawn_EnableTextshadow = {
 								type = "toggle",
 								name = L.FontShadow_Enabled,
@@ -996,13 +957,7 @@ function BattleGroundEnemies:SetupOptions()
 								step = 1,
 								order = 3
 							},
-							Fake = {
-								type = "description",
-								name = " ",
-								fontSize = "large",
-								width = "full",
-								order = 4
-							},
+							Fake = addVerticalSpacing(4),
 							MyDebuffs_Fontsize = {
 								type = "range",
 								name = L.Fontsize,
@@ -1013,17 +968,12 @@ function BattleGroundEnemies:SetupOptions()
 									UpdateButtons(option, value, "Stacks", nil, "InactiveDebuffs", "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, self.db.profile.MyDebuffs_Outline)
 								end,
 								min = 10,
-								max = 20,
+								max = 30,
 								step = 1,
 								width = "normal",
 								order = 5
 							},
-							Fake1 = {
-								type = "description",
-								name = " ",
-								width = "half",
-								order = 6
-							},
+							Fake1 = addHorizontalSpacing(6),
 							MyDebuffs_Textcolor = {
 								type = "color",
 								name = L.Fontcolor,
@@ -1037,13 +987,7 @@ function BattleGroundEnemies:SetupOptions()
 								width = "half",
 								order = 7
 							},
-							Fake2 = {
-								type = "description",
-								name = " ",
-								fontSize = "large",
-								width = "full",
-								order = 8
-							},
+							Fake2 = addVerticalSpacing(8),
 							MyDebuffs_Outline = {
 								type = "select",
 								name = L.Font_Outline,
@@ -1055,19 +999,13 @@ function BattleGroundEnemies:SetupOptions()
 								values = Data.FontOutlines,
 								order = 9
 							},
-							Fake3 = {
-								type = "description",
-								name = " ",
-								fontSize = "large",
-								width = "full",
-								order = 10
-							},
+							Fake3 = addVerticalSpacing(10),
 							MyDebuffs_EnableTextshadow = {
 								type = "toggle",
 								name = L.FontShadow_Enabled,
 								desc = L.FontShadow_Enabled_Desc,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemys) do
+									for name, enemyButton in pairs(self.Enemies) do
 										for spellID, frame in pairs(enemyButton.MyDebuffs) do
 											if value then
 												frame.Stacks:SetShadowOffset(1, -1)

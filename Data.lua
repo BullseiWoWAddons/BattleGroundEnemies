@@ -424,3 +424,24 @@ for range, itemID in next, Data.RangeToItemID do
 	Data.ItemIDToRange[itemID] = range
 end 
 
+
+Data.Classes = {}
+Data.RolesToSpec = {HEALER = {}, TANK = {}, DAMAGER = {}} --for Testmode only
+
+do
+	local roleNameToRoleNumber = {
+		["DAMAGER"] = 3,
+		["HEALER"] = 1,
+		["TANK"] = 2
+	}
+	for classId = 1, MAX_CLASSES do --example classes[EnglishClass][SpecName].
+		local _, classTag = GetClassInfoByID(classId)
+		Data.Classes[classTag] = {}
+		for i = 1, GetNumSpecializationsForClassID(classId) do
+			local id,specName,_,icon,role = GetSpecializationInfoForClassID(classId, i)
+			Data.Classes[classTag][specName] = {roleNumber = roleNameToRoleNumber[role], roleID = role}
+			Data.Classes[classTag][specName].icon = icon
+			table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = specName})
+		end
+	end
+end
