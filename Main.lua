@@ -19,8 +19,8 @@ local print = print
 local type = type
 local unpack = unpack
 local floor = math.floor
-local table.insert = table.insert
-local table.remove = table.remove
+local tinsert = table.insert
+local tremove = table.remove
 
 local C_PvP = C_PvP
 local GetArenaCrowdControlInfo = C_PvP.GetArenaCrowdControlInfo
@@ -252,7 +252,7 @@ function BattleGroundEnemies:GetEnemyButtonForNewPlayer()
 	
 	local enemyButton = self.InactiveEnemyButtons[#self.InactiveEnemyButtons] 
 	if enemyButton then --recycle a previous used button
-		table.remove(self.InactiveEnemyButtons, #self.InactiveEnemyButtons)
+		tremove(self.InactiveEnemyButtons, #self.InactiveEnemyButtons)
 		--Cleanup previous shown stuff of another player
 		enemyButton.Trinket.HasTrinket = nil
 		enemyButton.Trinket.Icon:SetTexture(nil)
@@ -277,10 +277,10 @@ end
 
 
 function BattleGroundEnemies:RemoveEnemy(enemyButton, name)	
-	table.remove(self.EnemySortingTable, enemyButton.Position)
+	tremove(self.EnemySortingTable, enemyButton.Position)
 	enemyButton:Hide()
 
-	table.insert(self.InactiveEnemyButtons, enemyButton)
+	tinsert(self.InactiveEnemyButtons, enemyButton)
 	self.Enemies[name] = nil
 end
 
@@ -943,7 +943,7 @@ do
 					local enemyButton = debuffFrame:GetParent()
 					enemyButton.MyDebuffs[debuffFrame.SpellID] = nil
 					enemyButton:DebuffPositioning()
-					table.insert(enemyButton.InactiveDebuffs, debuffFrame)
+					tinsert(enemyButton.InactiveDebuffs, debuffFrame)
 				end
 				
 				
@@ -951,7 +951,7 @@ do
 
 					local debuffFrame = self.InactiveDebuffs[#self.InactiveDebuffs] 
 					if debuffFrame then --recycle a previous used Frame
-						table.remove(self.InactiveDebuffs, #self.InactiveDebuffs)
+						tremove(self.InactiveDebuffs, #self.InactiveDebuffs)
 						debuffFrame:Show()
 					else -- create a new Frame 
 					
@@ -1504,17 +1504,17 @@ do
 					-- print("Delitation")
 					-- print(name, enemyButton.Position, "gets removed")
 					-- print(self.EnemySortingTable[enemyButton.Position])
-					-- table.remove(self.EnemySortingTable, enemyButton.Position)
+					-- tremove(self.EnemySortingTable, enemyButton.Position)
 					-- enemyButton:Hide()
 					
-					-- table.insert(self.InactiveEnemyButtons, enemyButton)
+					-- tinsert(self.InactiveEnemyButtons, enemyButton)
 					-- self.Enemies[name] = nil
 					
 					-- resort = true
 				-- end 
 			-- end
 			
-			--Rückwärts um keine Probleme mit table.remove zu bekommen, wenn man mehr als einen Spieler in einem Schleifendurchlauf entfernt,
+			--Rückwärts um keine Probleme mit tremove zu bekommen, wenn man mehr als einen Spieler in einem Schleifendurchlauf entfernt,
 			-- da ansonsten die enemyButton.Position nicht mehr passen (sie sind zu hoch)
 			for i = #self.EnemySortingTable, 1, -1 do
 				local name = self.EnemySortingTable[i]
@@ -1578,7 +1578,7 @@ do
 				enemyButton:Show()
 				enemyButton.PlayerDetails = enemyDetails
 				
-				table.insert(self.EnemySortingTable, name)				
+				tinsert(self.EnemySortingTable, name)				
 				self.Enemies[name] = enemyButton
 			end
 

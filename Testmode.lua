@@ -6,9 +6,8 @@ local DRData = LibStub("DRData-1.0")
 local LibPlayerSpells = LibStub("LibPlayerSpells-1.0")
 
 
-local math.random = math.random
-local table.insert = table.insert
-local table.remove = table.remove
+local mathrandom = math.random
+local tinsert = table.insert
 
 
 local playerFaction = UnitFactionGroup("player")
@@ -34,7 +33,7 @@ local function SetupTestmode()
 
 
 	for spellID, categorieName in pairs(DRData.spells) do
-		table.insert(DrCategoryToSpell[categorieName], spellID)
+		tinsert(DrCategoryToSpell[categorieName], spellID)
 	end
 
 
@@ -91,7 +90,7 @@ end
 local counter
 function BattleGroundEnemies:FillEnemyData(amount, role)
 	for i = 1, amount do
-		local randomSpec = Data.RolesToSpec[role][math.random(1, #Data.RolesToSpec[role])]
+		local randomSpec = Data.RolesToSpec[role][mathrandom(1, #Data.RolesToSpec[role])]
 		local classTag = randomSpec.classTag
 		local specName = randomSpec.specName
 		fakeEnemies["enemy"..counter.."-realm"..counter] = {
@@ -124,7 +123,7 @@ function BattleGroundEnemies:CreateTestdata()
 			if IsHarmfulSpell(id, 'spell') then
 				local flags, providers, modifiedSpells = LibPlayerSpells:GetSpellInfo(spellID)
 				if flags and bit.band(flags, LibPlayerSpells.constants.AURA) ~= 0 then -- This spell is an aura, do something meaningful with it.
-					table.insert(harmfulPlayerSpells, spellID)
+					tinsert(harmfulPlayerSpells, spellID)
 				end
 			end
 		end
@@ -146,8 +145,8 @@ function BattleGroundEnemies:CreateTestdata()
 	end
 	
 	
-	local healerAmount = math.random(1, 3)
-	local tankAmount = math.random(1, 2)
+	local healerAmount = mathrandom(1, 3)
+	local tankAmount = mathrandom(1, 2)
 	local damagerAmount = 15 - healerAmount - tankAmount
 	
 	counter = 1
@@ -176,7 +175,7 @@ function BattleGroundEnemies:CreateTestdata()
 		enemyButton:Show()
 		enemyButton.PlayerDetails = enemyDetails
 		
-		table.insert(self.EnemySortingTable, name)
+		tinsert(self.EnemySortingTable, name)
 								
 		self.Enemies[name] = enemyButton
 	end
@@ -202,7 +201,7 @@ do
 			for name, enemyButton in pairs(BattleGroundEnemies.Enemies) do
 				
 				
-				local number = math.random(1,10)
+				local number = mathrandom(1,10)
 				--print("number", number)
 				
 				--print(enemyButton.ObjectiveAndRespawn.Cooldown:GetCooldownDuration())
@@ -210,7 +209,7 @@ do
 					--print("test")
 					
 					--health simulation
-					local health = math.random(0, 100)
+					local health = mathrandom(0, 100)
 					if health == 0 then --player died
 						--print("dead")
 						enemyButton.Health:SetValue(0)
@@ -237,7 +236,7 @@ do
 								--show new flag carrier
 								local enemyButtonObjective = enemyButton.ObjectiveAndRespawn
 								
-								enemyButtonObjective.AuraText:SetText(math.random(1,9))
+								enemyButtonObjective.AuraText:SetText(mathrandom(1,9))
 								enemyButtonObjective.Icon:SetTexture(GetSpellTexture(46392))
 								enemyButtonObjective:Show()
 								
@@ -249,7 +248,7 @@ do
 						
 						-- trinket simulation
 						if number == 2 and enemyButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
-							local spellID = randomTrinkets[math.random(1, #randomTrinkets)] 
+							local spellID = randomTrinkets[mathrandom(1, #randomTrinkets)] 
 							if spellID ~= 214027 then --adapted
 								if spellID == 196029 then--relentless
 									enemyButton.Trinket:TrinketCheck(spellID, false)
@@ -261,13 +260,13 @@ do
 						
 						--racial simulation
 						if number == 3 and enemyButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
-							enemyButton:RacialUsed(randomRacials[math.random(1, #randomRacials)])
+							enemyButton:RacialUsed(randomRacials[mathrandom(1, #randomRacials)])
 						end
 						
 						
 						-- targetcounter simulation
 						if targetCounts < 15 then
-							local targetCounter = math.random(0,3)
+							local targetCounter = mathrandom(0,3)
 							if targetCounts + targetCounter <= 15 then
 								enemyButton.TargetCounter.Text:SetText(targetCounter)
 							end
@@ -275,16 +274,16 @@ do
 						
 						if number == 4 then --player got an diminishing CC applied
 							--print("Nummber4")
-							local dRCategory = randomDrCategory[math.random(1, #randomDrCategory)]
-							local spellID = DrCategoryToSpell[dRCategory][math.random(1, #DrCategoryToSpell[dRCategory])]
+							local dRCategory = randomDrCategory[mathrandom(1, #randomDrCategory)]
+							local spellID = DrCategoryToSpell[dRCategory][mathrandom(1, #DrCategoryToSpell[dRCategory])]
 							enemyButton:UpdateDR(spellID, false, true)
 
 						end
 						
 						if number == 5 then --player got one of the players debuff's applied
 							--print("Nummber5")
-							local spellID = harmfulPlayerSpells[math.random(1, #harmfulPlayerSpells)]
-							enemyButton:DebuffChanged(true, nil, spellID, true, true, math.random(1, 9), math.random(10, 15))
+							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
+							enemyButton:DebuffChanged(true, nil, spellID, true, true, mathrandom(1, 9), mathrandom(10, 15))
 						end
 						
 						
