@@ -402,12 +402,21 @@ do
 		TimeSinceLastOnUpdate = TimeSinceLastOnUpdate + elapsed
 		if TimeSinceLastOnUpdate > UpdatePeroid then
 			for name, enemyButton in pairs(BattleGroundEnemies.Enemies) do
-				local unitID = enemyButton.PlayerDetails.UnitID
+				local enemyDetails = enemyButton.PlayerDetails
+				local unitID = enemyDetails.UnitID
 				if unitID then 
-					if UnitGUID(unitID) == enemyButton.PlayerDetails.GUID then
+					if UnitGUID(unitID) == enemyDetails.GUID then
 						enemyButton:UpdateHealthRangeAndRespawn(unitID)
-					else -- unitID doesn't fit to that player anymore
-						enemyButton.PlayerDetails.UnitID = nil
+					else -- unitID doesn't fit to that player anymore, maybe find another one
+						enemyDetails.UnitID = nil
+						for allyDetails in pairs(enemyDetails.TargetedByAlly) do
+							if UnitGUID(allyDetails.UnitID.."target") == enemyDetails.GUID then--another ally is still targeting this unit
+								enemyDetails.UnitID = allyDetails.UnitID.."target"
+								print("Treffer")
+								enemyButton:UpdateHealthRangeAndRespawn(enemyDetails.UnitID)
+								break
+							end
+						end
 					end
 				else
 					local settings = BattleGroundEnemies.db.profile
@@ -548,7 +557,7 @@ function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 				if allyName == PlayerName then
 					unitID = "player"
 				end
-				allyDetails.unitID = unitID --always update unitID
+				allyDetails.UnitID = unitID --always update unitID
 				self.AllyUnitIDToAllyDetails[unitID] = allyDetails
 			else
 				C_Timer.After(1, BattleGroundEnemies.GROUP_ROSTER_UPDATE) --recheck in 1 second
@@ -624,7 +633,7 @@ function BattleGroundEnemies:PlayerAlive()
 	self:RegisterEvent("UNIT_TARGET")
 	--recheck the targets of groupmembers
 	for allyName, allyDetails in pairs(self.Allys) do
-		self:UnitTargetCheck(allyDetails.unitID)
+		self:UnitTargetCheck(allyDetails.UnitID)
 	end	
 end
 

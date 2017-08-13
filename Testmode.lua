@@ -284,6 +284,7 @@ do
 							--print("Nummber5")
 							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
 							enemyButton:DebuffChanged(true, nil, spellID, true, true, mathrandom(1, 9), mathrandom(10, 15))
+							enemyButton:UpdateDR(spellID, true, true)
 						end
 						
 						
