@@ -412,7 +412,6 @@ do
 						for allyDetails in pairs(enemyDetails.TargetedByAlly) do
 							if UnitGUID(allyDetails.UnitID.."target") == enemyDetails.GUID then--another ally is still targeting this unit
 								enemyDetails.UnitID = allyDetails.UnitID.."target"
-								print("Treffer")
 								enemyButton:UpdateHealthRangeAndRespawn(enemyDetails.UnitID)
 								break
 							end
