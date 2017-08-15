@@ -75,6 +75,7 @@ RealEnemiesOnUpdateFrame:Hide()
 
 BattleGroundEnemies.InactiveEnemyButtons = {} --index = number, value = button(table)
 
+
 BattleGroundEnemies.ArenaEnemyIDToEnemyButtonObjective = {} --key = arenaID: arenaX, value = enemyButton of that unitID
 BattleGroundEnemies.Enemies = {} --index = name, value = button(table), contains enemyButtons
 BattleGroundEnemies.EnemySortingTable = {} --index = number, value = enemy name
@@ -276,7 +277,9 @@ end
 
 
 
-function BattleGroundEnemies:RemoveEnemy(enemyButton, name)	
+function BattleGroundEnemies:RemoveEnemy(name, enemyButton)	
+	if not enemyButton then enemyButton = self.Enemies[name] end
+	
 	tremove(self.EnemySortingTable, enemyButton.Position)
 	enemyButton:Hide()
 
@@ -292,13 +295,13 @@ do
 	end
 
 	local function PlayerSortingByRoleClassName(a, b)-- a and b are playernames
-		local detailsPlayerA = BattleGroundEnemies.Enemies[a].PlayerDetails
-		local detailsPlayerB = BattleGroundEnemies.Enemies[b].PlayerDetails
-		if detailsPlayerA.RoleNumber == detailsPlayerB.RoleNumber then
-			if BlizzardsSortOrder[ detailsPlayerA.Class ] == BlizzardsSortOrder[ detailsPlayerB.Class ] then
+		local playerA = BattleGroundEnemies.Enemies[a]
+		local playerB = BattleGroundEnemies.Enemies[b]
+		if playerA.RoleNumber == playerB.RoleNumber then
+			if BlizzardsSortOrder[ playerA.PlayerClass ] == BlizzardsSortOrder[ playerB.PlayerClass ] then
 				if a < b then return true end
-			elseif BlizzardsSortOrder[ detailsPlayerA.Class ] < BlizzardsSortOrder[ detailsPlayerB.Class ] then return true end
-		elseif detailsPlayerA.RoleNumber < detailsPlayerB.RoleNumber then return true end
+			elseif BlizzardsSortOrder[ playerA.PlayerClass ] < BlizzardsSortOrder[ playerB.PlayerClass ] then return true end
+		elseif playerA.RoleNumber < playerB.RoleNumber then return true end
 	end
 
 	function BattleGroundEnemies:SortEnemies()
@@ -314,44 +317,39 @@ do
 	end
 end
 
-function BattleGroundEnemies:ConvertCyrillic(nameToConvert, enemyDetails)
-
-	enemyDetails.DisplayedName = ""
-	for i = 1, nameToConvert:utf8len() do
-		local c = nameToConvert:utf8sub(i,i)
-
-		if Data.CyrillicToRomanian[c] then
-			enemyDetails.DisplayedName = enemyDetails.DisplayedName..Data.CyrillicToRomanian[c]
-		else
-			enemyDetails.DisplayedName = enemyDetails.DisplayedName..c
-		end
-	end
-	enemyDetails.DisplayedName = enemyDetails.DisplayedName:gsub("^.",string.upper):gsub("-.",string.upper) --uppercase the first character and the one after the -
-end
 
 
 -- Updates the TargetedByAlly tables.
-function BattleGroundEnemies:UnitTargetCheck(unitID, isPlayer)
+function BattleGroundEnemies:UpdateTargets(unitID, isPlayer)
 
 	local allyDetails = self.AllyUnitIDToAllyDetails[unitID]
-	local newTargetUnitID = unitID.."target"
+	local targetUnitID = unitID.."target"
 	
 	local oldTargetEnemyButton = allyDetails.target
 	if oldTargetEnemyButton then
 		if isPlayer then
 			oldTargetEnemyButton.MyTarget:Hide()
 		end
+		if oldTargetEnemyButton.UnitID == targetUnitID then --the currently active unitID is the no longer existing raid..i..target
+			oldTargetEnemyButton.UnitID = false
+			if oldTargetEnemyButton.NameplateUnitID then 
+				oldTargetEnemyButton.UnitID = oldTargetEnemyButton.NameplateUnitID
+				oldTargetEnemyButton:UpdateHealthRangeAndRespawn()
+			else
+				oldTargetEnemyButton:GrabAnotherAllyTargetUnitID()
+			end
+		end
 		oldTargetEnemyButton:UpdateTargetIndicators(allyDetails, nil)
 	end
 	
-	local newTargetEnemyButton = self:GetEnemybuttonByUnitID(newTargetUnitID)
+	local newTargetEnemyButton = self:GetEnemybuttonByUnitID(targetUnitID)
 	if newTargetEnemyButton then --ally targets an existing enemy
 		if isPlayer then
 			newTargetEnemyButton.MyTarget:Show()
 		end
-		allyDetails.target = newTargetEnemyButton
+		newTargetEnemyButton:AddUnitID(targetUnitID)
 		newTargetEnemyButton:UpdateTargetIndicators(allyDetails, true)
-		self:ScanUnit(newTargetUnitID, newTargetEnemyButton)
+		allyDetails.target = newTargetEnemyButton
 	else
 		allyDetails.target = false
 	end
@@ -366,32 +364,12 @@ function BattleGroundEnemies:SavePosition()
 	end
 end
 
-function BattleGroundEnemies:ScanUnit(unitID, enemyButton)
-	if not enemyButton then --do checks if valid target
-		if not UnitExists(unitID) then 
-			return
-		end
-		
-		enemyButton = self:GetEnemybuttonByUnitID(unitID)
-		if not enemyButton then --unit is not a shown enemy
-			return
-		end
-	end
+function BattleGroundEnemies:UnitIDChecks(unitID)
+	 --do checks if valid enemy
 	
-	enemyButton:UpdateHealthRangeAndRespawn(unitID)
-	
-	--unitID and GUID update
-	local enemyDetails = enemyButton.PlayerDetails
-	if enemyDetails.UnitID then -- if player has a unitID he always has already a guid assigned, not vice-versa
-		if enemyDetails.GUID ~= UnitGUID(enemyDetails.UnitID) then --the currently assigned unitID doesn't fit to this player anymore
-			--print("Hallo")
-			enemyDetails.UnitID = unitID --the current unitID isn't this player anymore, update it
-		end
-	else
-		if not enemyDetails.GUID then
-			enemyDetails.GUID = UnitGUID(unitID)
-		end
-		enemyDetails.UnitID = unitID
+	local enemyButton = self:GetEnemybuttonByUnitID(unitID)
+	if enemyButton then --unit is not a shown enemy
+		enemyButton:AddUnitID(unitID)
 	end
 end
 
@@ -402,21 +380,8 @@ do
 		TimeSinceLastOnUpdate = TimeSinceLastOnUpdate + elapsed
 		if TimeSinceLastOnUpdate > UpdatePeroid then
 			for name, enemyButton in pairs(BattleGroundEnemies.Enemies) do
-				local enemyDetails = enemyButton.PlayerDetails
-				local unitID = enemyDetails.UnitID
-				if unitID then 
-					if UnitGUID(unitID) == enemyDetails.GUID then
-						enemyButton:UpdateHealthRangeAndRespawn(unitID)
-					else -- unitID doesn't fit to that player anymore, maybe find another one
-						enemyDetails.UnitID = nil
-						for allyDetails in pairs(enemyDetails.TargetedByAlly) do
-							if UnitGUID(allyDetails.UnitID.."target") == enemyDetails.GUID then--another ally is still targeting this unit
-								enemyDetails.UnitID = allyDetails.UnitID.."target"
-								enemyButton:UpdateHealthRangeAndRespawn(enemyDetails.UnitID)
-								break
-							end
-						end
-					end
+				if enemyButton.UnitID then 
+					enemyButton:UpdateHealthRangeAndRespawn()							
 				else
 					local settings = BattleGroundEnemies.db.profile
 					if settings.RangeIndicator_Enabled then
@@ -424,6 +389,7 @@ do
 					end
 				end
 			end
+			RequestBattlefieldScoreData()
 			TimeSinceLastOnUpdate = 0
 		end
 	end
@@ -490,7 +456,8 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED(timestamp,subevent,hide
 			end
 		end
 	elseif subevent == "UNIT_DIED" then
-		local enemyButton = self.Enemies[srcName]
+		print("subevent", destName, "died")
+		local enemyButton = self.Enemies[destName]
 		if enemyButton then
 			enemyButton.ObjectiveAndRespawn:ShowRespawnTimer(27)
 		end
@@ -503,12 +470,12 @@ function BattleGroundEnemies:UNIT_TARGET(unitID)
 	
 	if self.AllyUnitIDToAllyDetails[unitID] and unitID ~= "player" then
 		--print("target changed")
-		self:UnitTargetCheck(unitID)
+		self:UpdateTargets(unitID)
 	end
 end
 
 function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
-	self:UnitTargetCheck("player", true)
+	self:UpdateTargets("player", true)
 end
 
 do
@@ -521,17 +488,38 @@ do
 		if enemyButton then
 			enemyButton.MyFocus:Show()
 			oldFocus = enemyButton
-			self:ScanUnit("focus", enemyButton)
+			enemyButton:AddUnitID("focus")
 		end
 	end
 end
 
 function BattleGroundEnemies:UPDATE_MOUSEOVER_UNIT()
-	self:ScanUnit("mouseover")
+	self:UnitIDChecks("mouseover")
 end
 
-BattleGroundEnemies.UNIT_HEALTH_FREQUENT = BattleGroundEnemies.ScanUnit --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-BattleGroundEnemies.NAME_PLATE_UNIT_ADDED = BattleGroundEnemies.ScanUnit
+BattleGroundEnemies.UNIT_HEALTH_FREQUENT = BattleGroundEnemies.UnitIDChecks --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
+
+
+
+function BattleGroundEnemies:NAME_PLATE_UNIT_ADDED(unitID)
+	local enemyButton = self:GetEnemybuttonByUnitID(unitID)
+	if enemyButton then
+		enemyButton.NameplateUnitID = unitID
+		enemyButton:AddUnitID(unitID)
+	end
+end
+
+function BattleGroundEnemies:NAME_PLATE_UNIT_REMOVED(unitID)
+	--print(unitID)
+	local enemyButton = self:GetEnemybuttonByUnitID(unitID)
+	if enemyButton then
+		if enemyButton.UnitID == unitID then
+			enemyButton.UnitID = false
+			enemyButton:GrabAnotherAllyTargetUnitID()
+		end
+		self.NameplateUnitID = false
+	end
+end	
 
 
 -- if lets say raid1 leaves all remaining players get shifted up, so raid2 is the new raid1, raid 3 gets raid2 etc.
@@ -632,7 +620,7 @@ function BattleGroundEnemies:PlayerAlive()
 	self:RegisterEvent("UNIT_TARGET")
 	--recheck the targets of groupmembers
 	for allyName, allyDetails in pairs(self.Allys) do
-		self:UnitTargetCheck(allyDetails.UnitID)
+		self:UpdateTargets(allyDetails.UnitID)
 	end	
 end
 
@@ -761,15 +749,15 @@ do
 						self.Icon:SetTexture(GetSpellTexture(8326))
 						self.AuraText:SetText("")
 						self.Cooldown:SetCooldown(GetTime(), duration)
-						if not self.hasHideScript then 
-							--print("script set")
-							self.Cooldown:SetScript("OnHide", function() --don't set the script on frame creation, otherwise it happens when doing a reload while a flag carrier is shown that this script gets called after the buff should got shown.
-								--print("ObjectiveAndRespawn.Cooldown hidden")
-								self.Icon:SetTexture()
-								self:Hide()
-							end)
-							self.hasHideScript = true
-						end
+						-- if not self.hasHideScript then 
+							-- --print("script set")
+							-- self.Cooldown:SetScript("OnHide", function() --don't set the script on frame creation, otherwise it happens when doing a reload while a flag carrier is shown that this script gets called after the buff should got shown.
+								-- --print("ObjectiveAndRespawn.Cooldown hidden")
+								-- self.Icon:SetTexture()
+								-- self:Hide()
+							-- end)
+							-- self.hasHideScript = true
+						-- end
 					end
 				end
 			end
@@ -788,9 +776,50 @@ do
 				end
 			end
 			
+			function enemyButtonFunctions:ConvertCyrillic(nameToConvert)
+				self.DisplayedName = ""
+				for i = 1, nameToConvert:utf8len() do
+					local c = nameToConvert:utf8sub(i,i)
+
+					if Data.CyrillicToRomanian[c] then
+						self.DisplayedName = self.DisplayedName..Data.CyrillicToRomanian[c]
+					else
+						self.DisplayedName = self.DisplayedName..c
+					end
+				end
+				self.DisplayedName = self.DisplayedName:gsub("^.",string.upper):gsub("-.",string.upper) --uppercase the first character and the one after the -
+			end
+			
+			function enemyButtonFunctions:AddUnitID(unitID)
+				if self.UnitID then -- if player has a unitID he always has already a guid assigned, not vice-versa
+					if self.GUID ~= UnitGUID(self.UnitID) then --the currently assigned unitID doesn't fit to this player anymore
+						--print("Hallo")
+						self.UnitID = unitID --the current unitID isn't this player anymore, update it
+					end
+				else
+					if not self.GUID then
+						self.GUID = UnitGUID(unitID)
+					end
+					self.UnitID = unitID
+				end
+				
+				self:UpdateHealthRangeAndRespawn()
+			end
+
+			
+			function enemyButtonFunctions:GrabAnotherAllyTargetUnitID()
+				for allyDetails in pairs(self.TargetedByAlly) do
+					if UnitGUID(allyDetails.UnitID.."target") == self.GUID then--another ally is still targeting this unit
+						self.UnitID = allyDetails.UnitID.."target"
+						self:UpdateHealthRangeAndRespawn()
+						break
+					end
+				end
+			end
+						
 			-- Shows/Hides targeting indicators for a button
 			function enemyButtonFunctions:UpdateTargetIndicators(allyDetails, status, wipes)
-				local targetedByAlly = self.PlayerDetails.TargetedByAlly
+				local targetedByAlly = self.TargetedByAlly
 				if wipes then
 					wipe(targetedByAlly)
 				else
@@ -824,10 +853,12 @@ do
 			end
 			
 			
-			function enemyButtonFunctions:UpdateHealthRangeAndRespawn(unitID)
+			function enemyButtonFunctions:UpdateHealthRangeAndRespawn()
+				local unitID = self.UnitID
 				local settings = BattleGroundEnemies.db.profile
 				-- RespawnTimer
 				if UnitIsDead(unitID) then
+					print("UpdateHealthRangeAndRespawn", UnitName(unitID), "died")
 					--print("isdead")
 					self.ObjectiveAndRespawn:ShowRespawnTimer(26)
 				end
@@ -849,14 +880,12 @@ do
 			--Relentless maybe
 			function enemyButtonFunctions:RelentlessCheck(spellID)
 				if not BattleGroundEnemies.db.profile.Trinket_Enabled then return end
-			
-				local enemyDetails = self.PlayerDetails
 				
 				if self.Trinket.HasTrinket then
 					return
 				end
 				
-				if not enemyDetails.UnitID then
+				if not self.UnitID then
 					return 
 				end
 				
@@ -871,13 +900,13 @@ do
 				end
 				
 				local spellName = GetSpellInfo(spellID)
-				local _, _, _, _, _, actualDuration = UnitDebuff(enemyDetails.UnitID, spellName)
+				local _, _, _, _, _, actualDuration = UnitDebuff(self.UnitID, spellName)
 
 				if not actualDuration then
 					return 
 				end
 				local Racefaktor = 1
-				if drCat == "stun" and enemyDetails.Race == "Orc" then
+				if drCat == "stun" and self.PlayerRace == "Orc" then
 					Racefaktor = 0.8	--Hardiness
 				end
 
@@ -1002,7 +1031,7 @@ do
 					if applied then
 						if not testmode then
 						
-							local enemyUnitID = self.PlayerDetails.UnitID
+							local enemyUnitID = self.UnitID
 							if not enemyUnitID or srcName ~= PlayerName then return end
 						
 							local spellID, _
@@ -1155,8 +1184,8 @@ do
 			-- events/scripts
 			button:RegisterForClicks('AnyUp')
 			button:RegisterForDrag('LeftButton')
-			button:SetAttribute('type1','macro')
-			button:SetAttribute('type2','macro')
+			button:SetAttribute('type1','macro')-- type1 = Left-Click
+			button:SetAttribute('type2','macro')-- type2 = Right-Click, type1 = Middle-Click
 
 			button:SetScript('OnDragStart', button_OnDragStart)
 			button:SetScript('OnDragStop', button_OnDragStop)
@@ -1240,6 +1269,8 @@ do
 			button.MyDebuffs = {}
 			button.InactiveDebuffs = {}
 			
+			button.TargetedByAlly = {}
+			
 		
 			
 			
@@ -1255,7 +1286,7 @@ do
 				button.DrContainerStartAnchor = button.ObjectiveAndRespawn
 				button:DrPositioning()
 			end)
-			button.ObjectiveAndRespawn:Hide()
+			--button.ObjectiveAndRespawn:Hide()
 			
 			button.ObjectiveAndRespawn.ArenaOpponentShown = objectiveFrameFunctions.ArenaOpponentShown
 			button.ObjectiveAndRespawn.ShowRespawnTimer =	objectiveFrameFunctions.ShowRespawnTimer
@@ -1269,8 +1300,14 @@ do
 			button.ObjectiveAndRespawn.AuraText = CreateFontString(button.ObjectiveAndRespawn, true, nil, nil, "CENTER", nil, conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline, conf.ObjectiveAndRespawn_Textcolor, conf.ObjectiveAndRespawn_EnableTextshadow, conf.ObjectiveAndRespawn_TextShadowcolor)
 			
 			button.ObjectiveAndRespawn.Cooldown = CreateCooldown(button.ObjectiveAndRespawn, conf.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})	
+			
 			---don't set the cooldown OnHide  script on frame creation, otherwise it happens when doing a reload while a flag carrier is shown that this script gets called after the buff should got shown.
-		
+			button.ObjectiveAndRespawn.Cooldown:SetScript("OnHide", function() --don't set the script on frame creation, otherwise it happens when doing a reload while a flag carrier is shown that this script gets called after the buff should got shown.
+				--print("ObjectiveAndRespawn.Cooldown hidden")
+				button.ObjectiveAndRespawn.Icon:SetTexture()
+				button.ObjectiveAndRespawn:Hide()
+			end)
+			--button.ObjectiveAndRespawn.Cooldown:Hide()
 			
 			return button
 		end
@@ -1392,6 +1429,7 @@ do
 					self:RegisterEvent("UNIT_TARGET")
 					self:RegisterEvent("UNIT_HEALTH_FREQUENT")
 					self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+					self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 					self:RegisterEvent("ARENA_OPPONENT_UPDATE")
 					self:RegisterEvent("ARENA_CROWD_CONTROL_SPELL_UPDATE")
 					self:RegisterEvent("ARENA_COOLDOWNS_UPDATE")
@@ -1438,12 +1476,12 @@ do
 			local _, _, _, _, numEnemies = GetBattlefieldTeamInfo(EnemyFaction)
 			
 			if numEnemies ~= oldNumEnemies then
-				if IsRatedBG then
+				if IsRatedBG and self.db.profile.Notificatoins_Enabled then
 					if numEnemies < oldNumEnemies then
-						RaidNotice_AddMessage(RaidWarningFrame, "An enemy left the battleground", ChatTypeInfo["RAID_WARNING"]) 
+						RaidNotice_AddMessage(RaidWarningFrame, L.EnemyLeft, ChatTypeInfo["RAID_WARNING"]) 
 						PlaySound("LEVELUPSOUND")
 					else -- numEnemies > oldNumEnemies
-						RaidNotice_AddMessage(RaidWarningFrame, "An enemy joined the battleground", ChatTypeInfo["RAID_WARNING"]) 
+						RaidNotice_AddMessage(RaidWarningFrame, L.EnemyJoined, ChatTypeInfo["RAID_WARNING"]) 
 						PlaySound("RaidWarning")
 					end
 				end
@@ -1481,57 +1519,35 @@ do
 				if faction == EnemyFaction and name and race and classTag and spec then
 					local enemyButton = self.Enemies[name]
 					if enemyButton then	--already existing
-						enemyButton.PlayerDetails.Status = 1 --1 means found, already existing
-						if enemyButton.PlayerDetails.Spec ~= spec then--its possible to change spec in battleground
-							enemyButton.PlayerDetails.Spec = spec
-							enemyButton.Spec.Icon:SetTexture(Data.Classes[classTag][spec].icon)
-							enemyButton.PlayerDetails.RoleNumber = Data.Classes[classTag][spec].roleNumber
-							enemyButton.PlayerDetails.RoleID = Data.Classes[classTag][spec].roleID
-							enemyButton.PlayerDetails.SpecIcon = Data.Classes[classTag][spec].icon
+						enemyButton.Status = 1 --1 means found, already existing
+						if enemyButton.PlayerSpec ~= spec then--its possible to change spec in battleground
+							enemyButton.PlayerSpec = spec
+							enemyButton.Spec.Icon:SetTexture(Data.Classes[classTag][spec].specIcon)
 							
 							resort = true
 						end
 					else
 						newPlayerDetails[name] = { -- details of this new player
-							Race = LibRaces:GetRaceToken(race), --delifers are local independent token for relentless check
-							Class = classTag,
-							Spec = spec,
-							TargetedByAlly = {},
-							RoleNumber = Data.Classes[classTag][spec].roleNumber,
-							RoleID = Data.Classes[classTag][spec].roleID,
-							SpecIcon = Data.Classes[classTag][spec].icon,
-							Status = 2
+							PlayerRace = LibRaces:GetRaceToken(race), --delifers are local independent token for relentless check
+							PlayerClass = classTag,
+							PlayerSpec = spec,
 						}
 						
 						resort = true
 					end
 				end
 			end
-			-- for name, enemyButton in pairs(self.Enemies) do
-				-- if enemyButton.PlayerDetails.Status == 2 then --no longer existing
-					-- print("Delitation")
-					-- print(name, enemyButton.Position, "gets removed")
-					-- print(self.EnemySortingTable[enemyButton.Position])
-					-- tremove(self.EnemySortingTable, enemyButton.Position)
-					-- enemyButton:Hide()
-					
-					-- tinsert(self.InactiveEnemyButtons, enemyButton)
-					-- self.Enemies[name] = nil
-					
-					-- resort = true
-				-- end 
-			-- end
 			
 			--Rückwärts um keine Probleme mit tremove zu bekommen, wenn man mehr als einen Spieler in einem Schleifendurchlauf entfernt,
 			-- da ansonsten die enemyButton.Position nicht mehr passen (sie sind zu hoch)
 			for i = #self.EnemySortingTable, 1, -1 do
 				local name = self.EnemySortingTable[i]
 				local enemyButton = self.Enemies[name]
-				if enemyButton.PlayerDetails.Status == 2 then --no longer existing
-					self:RemoveEnemy(enemyButton, name)
+				if enemyButton.Status == 2 then --no longer existing
+					self:RemoveEnemy(name, enemyButton)
 					resort = true
 				else -- == 1 -- set to 2 for the next comparison
-					enemyButton.PlayerDetails.Status = 2
+					enemyButton.Status = 2
 				end 
 			end
 			for name, enemyDetails in pairs(newPlayerDetails) do
@@ -1550,30 +1566,39 @@ do
 					'/targetlasttarget'
 				)
 				
-				enemyButton.Spec.Icon:SetTexture(enemyDetails.SpecIcon)		
+				enemyButton.PlayerRace = enemyDetails.PlayerRace
+				enemyButton.PlayerClass = enemyDetails.PlayerClass
+				enemyButton.PlayerSpec = enemyDetails.PlayerSpec
+				enemyButton.Status = 2
+				
+				
+				local specData = Data.Classes[enemyDetails.PlayerClass][enemyButton.PlayerSpec]
+				
 				--enemyButton.Role.Icon:SetTexCoord(GetTexCoordsForRole(enemyDetails.RoleID))		
 				-- enemyButton.Role.Icon:SetTexture(RoleIcons[enemyDetails.RoleID])	
 				-- enemyButton.Role:Show()
+				
+				enemyButton.RoleNumber = specData.roleNumber
+				enemyButton.Spec.Icon:SetTexture(specData.specIcon)		
+			
 
-				local c = RAID_CLASS_COLORS[enemyDetails.Class]
+				local c = RAID_CLASS_COLORS[enemyDetails.PlayerClass]
 				enemyButton.Health:SetStatusBarColor(c.r,c.g,c.b)
 				enemyButton.Health:SetValue(1)
 				
-				enemyDetails.DisplayedName = name
+				
+				enemyButton.DisplayedName = name
 				
 				if self.db.profile.ConvertCyrillic then
-					self:ConvertCyrillic(name, enemyDetails)
+					enemyButton:ConvertCyrillic(name)
 				end
 				
 				if self.db.profile.ShowRealmnames then
-					enemyButton.Name:SetText(enemyDetails.DisplayedName)
+					enemyButton.Name:SetText(enemyButton.DisplayedName)
 				else
-					enemyButton.Name:SetText(enemyDetails.DisplayedName:match("[^%-]*"))
+					enemyButton.Name:SetText(enemyButton.DisplayedName:match("[^%-]*"))
 				end
-				
-				
-				
-				
+
 				
 				if BattleGroundDebuffs then
 					if CurrentMapID == 856 then --8456 is kotmogu
@@ -1583,8 +1608,9 @@ do
 					end
 				end
 				
+				enemyButton.UnitID = false
+				enemyButton.GUID = false
 				enemyButton:Show()
-				enemyButton.PlayerDetails = enemyDetails
 				
 				tinsert(self.EnemySortingTable, name)				
 				self.Enemies[name] = enemyButton
@@ -1615,11 +1641,13 @@ do
 
 			
 			
-			-- wipe(self.EnemySortingTable)
-			for name, enemyButton in pairs(self.Enemies) do
-				enemyButton:Hide()
+			for i = #self.EnemySortingTable, 1, -1 do
+				local name = self.EnemySortingTable[i]
+				self:RemoveEnemy(name)
 			end
+
 			RealEnemiesOnUpdateFrame:Show()
+			
 			self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
 		else
 			self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -1630,6 +1658,7 @@ do
 			self:UnregisterEvent("UNIT_HEALTH_FREQUENT")
 			self:UnregisterEvent("UPDATE_BATTLEFIELD_SCORE")
 			self:UnregisterEvent("NAME_PLATE_UNIT_ADDED")
+			self:UnregisterEvent("NAME_PLATE_UNIT_REMOVED")
 			self:UnregisterEvent("ARENA_OPPONENT_UPDATE")--fires when a arena enemy appears and a frame is ready to be shown
 			self:UnregisterEvent("ARENA_CROWD_CONTROL_SPELL_UPDATE") --fires when data requested by C_PvP.RequestCrowdControlSpell(unitID) is available
 			self:UnregisterEvent("ARENA_COOLDOWNS_UPDATE") --fires when a arenaX enemy used a trinket or racial to break cc, C_PvP.GetArenaCrowdControlInfo(unitID) shoudl be called afterwards to get used CCs

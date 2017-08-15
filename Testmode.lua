@@ -71,12 +71,8 @@ function BattleGroundEnemies.ToggleTestmode()
 	if BattleGroundEnemies.TestmodeActive then --disable testmode
 		BattleGroundEnemies:DisableTestMode()
 	else --enable Testmode
-		BattleGroundEnemies:Show()
-		BattleGroundEnemies:CreateTestdata()
-		FakeEnemiesOnUpdateFrame:Show()
-		BattleGroundEnemies.TestmodeActive = true
+		BattleGroundEnemies:EnableTestMode()
 	end
-
 end
 
 function BattleGroundEnemies:DisableTestMode()
@@ -87,100 +83,114 @@ end
 
 
 
-local counter
-function BattleGroundEnemies:FillEnemyData(amount, role)
-	for i = 1, amount do
-		local randomSpec = Data.RolesToSpec[role][mathrandom(1, #Data.RolesToSpec[role])]
-		local classTag = randomSpec.classTag
-		local specName = randomSpec.specName
-		fakeEnemies["enemy"..counter.."-realm"..counter] = {
-			Class = randomSpec.classTag,
-			RoleNumber = Data.Classes[classTag][specName].roleNumber,
-			SpecIcon = Data.Classes[classTag][specName].icon,
-			TargetedByAlly = {},
-		}
-		counter = counter + 1
-	end
-end
 
-local TestmodeRanOnce = false
-function BattleGroundEnemies:CreateTestdata()
-	if not TestmodeRanOnce then
-		SetupTestmode()
-		TestmodeRanOnce = true
+
+
+do
+	local counter
+	
+	
+	function BattleGroundEnemies:FillFakeEnemyData(amount, role)
+		for i = 1, amount do
+			local randomSpec = Data.RolesToSpec[role][mathrandom(1, #Data.RolesToSpec[role])]
+			local classTag = randomSpec.classTag
+			local specName = randomSpec.specName
+			fakeEnemies["Enemy"..counter.."-Realm"..counter] = {
+				PlayerClass = classTag,
+				PlayerSpec = specName,
+			}
+			counter = counter + 1
+		end
 	end
-	
-	wipe(fakeEnemies)
-	
-	wipe(harmfulPlayerSpells)
-	local numTabs = GetNumSpellTabs()
-	for i = 1, numTabs do
-		local name, texture, offset, numSpells = GetSpellTabInfo(i)
-		for j = 1, numSpells do
-			local id = j + offset
-			local spellName = GetSpellBookItemName(id, 'spell')
-			local _, _, _, _, _, _, spellID = GetSpellInfo(spellName)
-			if IsHarmfulSpell(id, 'spell') then
-				local flags, providers, modifiedSpells = LibPlayerSpells:GetSpellInfo(spellID)
-				if flags and bit.band(flags, LibPlayerSpells.constants.AURA) ~= 0 then -- This spell is an aura, do something meaningful with it.
-					tinsert(harmfulPlayerSpells, spellID)
+
+	local TestmodeRanOnce = false
+	function BattleGroundEnemies:EnableTestMode()
+		self:Show()
+
+		if not TestmodeRanOnce then
+			SetupTestmode()
+			TestmodeRanOnce = true
+		end
+		
+		wipe(fakeEnemies)
+		
+		wipe(harmfulPlayerSpells)
+		local numTabs = GetNumSpellTabs()
+		for i = 1, numTabs do
+			local name, texture, offset, numSpells = GetSpellTabInfo(i)
+			for j = 1, numSpells do
+				local id = j + offset
+				local spellName = GetSpellBookItemName(id, 'spell')
+				local _, _, _, _, _, _, spellID = GetSpellInfo(spellName)
+				if IsHarmfulSpell(id, 'spell') then
+					local flags, providers, modifiedSpells = LibPlayerSpells:GetSpellInfo(spellID)
+					if flags and bit.band(flags, LibPlayerSpells.constants.AURA) ~= 0 then -- This spell is an aura, do something meaningful with it.
+						tinsert(harmfulPlayerSpells, spellID)
+					end
 				end
 			end
 		end
-	end
 
-	for i = #self.EnemySortingTable, 1, -1 do
-		local name = self.EnemySortingTable[i]
-		local enemyButton = self.Enemies[name]
-		self:RemoveEnemy(enemyButton, name)
-	end
-	
-	
-	if self.db.profile.EnemyCount_Enabled then
-		if playerFaction == "Alliance" then -- enemy is Horde
-			self.EnemyCount:SetText(format(PLAYER_COUNT_HORDE, 15))
-		else --enemy is Alliance
-			self.EnemyCount:SetText(format(PLAYER_COUNT_ALLIANCE, 15))
-		end
-	end
-	
-	
-	local healerAmount = mathrandom(1, 3)
-	local tankAmount = mathrandom(1, 2)
-	local damagerAmount = 15 - healerAmount - tankAmount
-	
-	counter = 1
-	self:FillEnemyData(healerAmount, "HEALER")
-	self:FillEnemyData(tankAmount, "TANK")
-	self:FillEnemyData(damagerAmount, "DAMAGER")
-	
-	for name, enemyDetails in pairs(fakeEnemies) do
-		local enemyButton = self:GetEnemyButtonForNewPlayer()
-
-		
-		enemyButton.Spec.Icon:SetTexture(enemyDetails.SpecIcon)		
-
-
-		local c = RAID_CLASS_COLORS[enemyDetails.Class]
-		enemyButton.Health:SetStatusBarColor(c.r,c.g,c.b)
-		enemyButton.Health:SetValue(1)	
-		
-		enemyDetails.DisplayedName = name
-		if self.db.profile.ShowRealmnames then
-			enemyButton.Name:SetText(enemyDetails.DisplayedName)
-		else
-			enemyButton.Name:SetText(enemyDetails.DisplayedName:match("[^%-]*"))
+		for i = #self.EnemySortingTable, 1, -1 do
+			local name = self.EnemySortingTable[i]
+			self:RemoveEnemy(name)
 		end
 		
-		enemyButton:Show()
-		enemyButton.PlayerDetails = enemyDetails
 		
-		tinsert(self.EnemySortingTable, name)
-								
-		self.Enemies[name] = enemyButton
+		if self.db.profile.EnemyCount_Enabled then
+			if playerFaction == "Alliance" then -- enemy is Horde
+				self.EnemyCount:SetText(format(PLAYER_COUNT_HORDE, 15))
+			else --enemy is Alliance
+				self.EnemyCount:SetText(format(PLAYER_COUNT_ALLIANCE, 15))
+			end
+		end
+		
+		
+		local healerAmount = mathrandom(1, 3)
+		local tankAmount = mathrandom(1, 2)
+		local damagerAmount = 15 - healerAmount - tankAmount
+		
+		counter = 1
+		self:FillFakeEnemyData(healerAmount, "HEALER")
+		self:FillFakeEnemyData(tankAmount, "TANK")
+		self:FillFakeEnemyData(damagerAmount, "DAMAGER")
+		
+		for name, enemyDetails in pairs(fakeEnemies) do
+			local enemyButton = self:GetEnemyButtonForNewPlayer()
+
+			
+			enemyButton.PlayerClass = enemyDetails.PlayerClass
+			enemyButton.PlayerSpec = enemyDetails.PlayerSpec
+			
+			local specData = Data.Classes[enemyDetails.PlayerClass][enemyButton.PlayerSpec]
+			
+			enemyButton.RoleNumber = specData.roleNumber
+			enemyButton.Spec.Icon:SetTexture(specData.specIcon)		
+
+			local c = RAID_CLASS_COLORS[enemyDetails.PlayerClass]
+			enemyButton.Health:SetStatusBarColor(c.r,c.g,c.b)
+			enemyButton.Health:SetValue(1)	
+			
+			enemyButton.DisplayedName = name
+			
+			if self.db.profile.ShowRealmnames then
+				enemyButton.Name:SetText(enemyButton.DisplayedName)
+			else
+				enemyButton.Name:SetText(enemyButton.DisplayedName:match("[^%-]*"))
+			end
+			
+			enemyButton:Show()
+			
+			tinsert(self.EnemySortingTable, name)
+									
+			self.Enemies[name] = enemyButton
+		end
+		
+		self:SortEnemies()
+		
+		FakeEnemiesOnUpdateFrame:Show()
+		self.TestmodeActive = true
 	end
-	
-	self:SortEnemies()
 end
 
 
@@ -217,37 +227,35 @@ do
 					else
 						enemyButton.Health:SetValue(health/100) --player still alive
 						
-						if settings.ObjectiveAndRespawn_ObjectiveEnabled then
-							if number == 1 and not hasFlag then --this guy has a objective now
+						if number == 1 and not hasFlag and settings.ObjectiveAndRespawn_ObjectiveEnabled then --this guy has a objective now
+						
+				
+							-- hide old flag carrier
+							local oldFlagholder = holdsflag
+							if oldFlagholder then
+								local enemyButtonObjective = oldFlagholder.ObjectiveAndRespawn
 								
-								-- hide old flag carrier
-								local oldFlagholder = holdsflag
-								if oldFlagholder then
-									local enemyButtonObjective = oldFlagholder.ObjectiveAndRespawn
-									
-									enemyButtonObjective.AuraText:SetText("")
-									enemyButtonObjective.Icon:SetTexture("")
-									enemyButtonObjective:Hide()
-								end
-								
-								
-								
-								
-								--show new flag carrier
-								local enemyButtonObjective = enemyButton.ObjectiveAndRespawn
-								
-								enemyButtonObjective.AuraText:SetText(mathrandom(1,9))
-								enemyButtonObjective.Icon:SetTexture(GetSpellTexture(46392))
-								enemyButtonObjective:Show()
-								
-								
-								holdsflag = enemyButton
-								hasFlag = true
+								enemyButtonObjective.AuraText:SetText("")
+								enemyButtonObjective.Icon:SetTexture("")
+								enemyButtonObjective:Hide()
 							end
-						end
+							
+							
+							
+							
+							--show new flag carrier
+							local enemyButtonObjective = enemyButton.ObjectiveAndRespawn
+							
+							enemyButtonObjective.AuraText:SetText(mathrandom(1,9))
+							enemyButtonObjective.Icon:SetTexture(GetSpellTexture(46392))
+							enemyButtonObjective:Show()
+							
+							
+							holdsflag = enemyButton
+							hasFlag = true
 						
 						-- trinket simulation
-						if number == 2 and enemyButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
+						elseif number == 2 and enemyButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
 							local spellID = randomTrinkets[mathrandom(1, #randomTrinkets)] 
 							if spellID ~= 214027 then --adapted
 								if spellID == 196029 then--relentless
@@ -256,13 +264,20 @@ do
 									enemyButton.Trinket:TrinketCheck(spellID, true)
 								end
 							end
-						end
-						
 						--racial simulation
-						if number == 3 and enemyButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
+						elseif number == 3 and enemyButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
 							enemyButton:RacialUsed(randomRacials[mathrandom(1, #randomRacials)])
+						elseif number == 4 then --player got an diminishing CC applied
+							--print("Nummber4")
+							local dRCategory = randomDrCategory[mathrandom(1, #randomDrCategory)]
+							local spellID = DrCategoryToSpell[dRCategory][mathrandom(1, #DrCategoryToSpell[dRCategory])]
+							enemyButton:UpdateDR(spellID, false, true)
+						elseif number == 5 then --player got one of the players debuff's applied
+							--print("Nummber5")
+							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
+							enemyButton:DebuffChanged(true, nil, spellID, true, true, mathrandom(1, 9), mathrandom(10, 15))
+							enemyButton:UpdateDR(spellID, true, true)
 						end
-						
 						
 						-- targetcounter simulation
 						if targetCounts < 15 then
@@ -271,23 +286,6 @@ do
 								enemyButton.TargetCounter.Text:SetText(targetCounter)
 							end
 						end
-						
-						if number == 4 then --player got an diminishing CC applied
-							--print("Nummber4")
-							local dRCategory = randomDrCategory[mathrandom(1, #randomDrCategory)]
-							local spellID = DrCategoryToSpell[dRCategory][mathrandom(1, #DrCategoryToSpell[dRCategory])]
-							enemyButton:UpdateDR(spellID, false, true)
-
-						end
-						
-						if number == 5 then --player got one of the players debuff's applied
-							--print("Nummber5")
-							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
-							enemyButton:DebuffChanged(true, nil, spellID, true, true, mathrandom(1, 9), mathrandom(10, 15))
-							enemyButton:UpdateDR(spellID, true, true)
-						end
-						
-						
 					end		
 				end
 				if number == 6 then --toggle range

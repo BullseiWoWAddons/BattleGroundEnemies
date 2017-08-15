@@ -558,14 +558,15 @@ function BattleGroundEnemies:SetupOptions()
 										desc = L.ConvertCyrillic_Desc,
 										set = function(option, value)
 											for name, enemyButton in pairs(self.Enemies) do
+												enemyButton.DisplayedName = name
 												if value then
-													self:ConvertCyrillic(name, enemyButton.PlayerDetails)
+													enemyButton:ConvertCyrillic(name)
 												end
-											
+												
 												if self.db.profile.ShowRealmnames then
-													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName)
+													enemyButton.Name:SetText(enemyButton.DisplayedName)
 												else
-													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName:match("[^%-]*"))
+													enemyButton.Name:SetText(enemyButton.DisplayedName:match("[^%-]*"))
 												end
 												
 											end
@@ -581,9 +582,9 @@ function BattleGroundEnemies:SetupOptions()
 										set = function(option, value)
 											for name, enemyButton in pairs(self.Enemies) do
 												if value then
-													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName)
+													enemyButton.Name:SetText(enemyButton.DisplayedName)
 												else
-													enemyButton.Name:SetText(enemyButton.PlayerDetails.DisplayedName:match("[^%-]*"))
+													enemyButton.Name:SetText(enemyButton.DisplayedName:match("[^%-]*"))
 												end
 											end
 											setOption(option, value)
@@ -1106,7 +1107,7 @@ SlashCmdList["BattleGroundEnemies"] = function(msg)
 	local AceDialog = LibStub("AceConfigDialog-3.0")
 	if not BattleGroundEnemies.options then
 		BattleGroundEnemies:SetupOptions()
-		AceDialog:SetDefaultSize("BattleGroundEnemies", 830, 600)
+		AceDialog:SetDefaultSize("BattleGroundEnemies", 830, 500)
 	end
 	AceDialog:Open("BattleGroundEnemies")
 end

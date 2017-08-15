@@ -81,15 +81,15 @@ elseif locale == "frFR" then
 	L["Taunts"] = "Provocations"
 
 elseif locale == "itIT" then
-	
+
 elseif locale == "koKR" then
-	
+
 elseif locale == "ptBR" then
-	
+
 elseif locale == "ruRU" then
-	
+
 elseif locale == "zhCN" then
-	
+
 elseif locale == "zhTW" then
 	L["Cyclone"] = "颶風術"
 	L["Disarms"] = "繳械"
@@ -333,6 +333,7 @@ local spellsAndProvidersByCategory = {
 		-- Warrior
 		[132168] = true, -- Shockwave
 		[132169] = true, -- Storm Bolt
+		[237744] = true, -- Warbringer
 		-- Tauren
 		[ 20549] = true, -- War Stomp
 	},
@@ -379,7 +380,7 @@ local spellsAndProvidersByCategory = {
 		[  6360] = true, -- Whiplash
 		[115770] = true, -- Fellash
 	},
-} 
+}
 
 -- Map deprecatedCategories to the new ones
 local deprecatedCategories = {
