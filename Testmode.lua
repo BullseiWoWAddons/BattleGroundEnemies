@@ -171,18 +171,12 @@ do
 			enemyButton.Health:SetStatusBarColor(c.r,c.g,c.b)
 			enemyButton.Health:SetValue(1)	
 			
-			enemyButton.DisplayedName = name
+			enemyButton:SetName(name)
 			
-			if self.db.profile.ShowRealmnames then
-				enemyButton.Name:SetText(enemyButton.DisplayedName)
-			else
-				enemyButton.Name:SetText(enemyButton.DisplayedName:match("[^%-]*"))
-			end
-			
+			enemyButton.UnitIDs = {TargetedByAlly = {}}
 			enemyButton:Show()
 			
-			tinsert(self.EnemySortingTable, name)
-									
+			tinsert(self.EnemySortingTable, name)					
 			self.Enemies[name] = enemyButton
 		end
 		
@@ -196,7 +190,6 @@ end
 
 do
 	local holdsflag
-	local targetCounts
 	local TimeSinceLastOnUpdate = 0
 	local UpdatePeroid = 1 --update every second
 	
@@ -206,22 +199,22 @@ do
 			local settings = BattleGroundEnemies.db.profile
 		
 
-			targetCounts = 0
+			local targetCounts = 0
 			local hasFlag = false
 			for name, enemyButton in pairs(BattleGroundEnemies.Enemies) do
 				
 				
 				local number = mathrandom(1,10)
-				--print("number", number)
+				--self:Debug("number", number)
 				
-				--print(enemyButton.ObjectiveAndRespawn.Cooldown:GetCooldownDuration())
-				if enemyButton.ObjectiveAndRespawn.Cooldown:GetCooldownDuration() == 0 then --player is alive
-					--print("test")
+				--self:Debug(enemyButton.ObjectiveAndRespawn.Cooldown:GetCooldownDuration())
+				if not enemyButton.ObjectiveAndRespawn.ActiveRespawnTimer then --player is alive
+					--self:Debug("test")
 					
 					--health simulation
 					local health = mathrandom(0, 100)
-					if health == 0 then --player died
-						--print("dead")
+					if health == 0 and holdsflag ~= enemyButton then --don't let players die that are holding a flag at the moment
+						BattleGroundEnemies:Debug("dead")
 						enemyButton.Health:SetValue(0)
 						enemyButton.ObjectiveAndRespawn:ShowRespawnTimer(27)
 					else
@@ -268,12 +261,12 @@ do
 						elseif number == 3 and enemyButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
 							enemyButton:RacialUsed(randomRacials[mathrandom(1, #randomRacials)])
 						elseif number == 4 then --player got an diminishing CC applied
-							--print("Nummber4")
+							--self:Debug("Nummber4")
 							local dRCategory = randomDrCategory[mathrandom(1, #randomDrCategory)]
 							local spellID = DrCategoryToSpell[dRCategory][mathrandom(1, #DrCategoryToSpell[dRCategory])]
 							enemyButton:UpdateDR(spellID, false, true)
 						elseif number == 5 then --player got one of the players debuff's applied
-							--print("Nummber5")
+							--self:Debug("Nummber5")
 							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
 							enemyButton:DebuffChanged(true, nil, spellID, true, true, mathrandom(1, 9), mathrandom(10, 15))
 							enemyButton:UpdateDR(spellID, true, true)

@@ -2,6 +2,12 @@ local addonName, Data = ...
 
 local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
 
+local GetClassInfoByID = GetClassInfoByID
+local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
+local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
+local GetSpellInfo = GetSpellInfo
+local GetSpellTexture = GetSpellTexture
+
 Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/Romanization_of_Russian
 	["А"] = "a",
 	["а"] = "a",

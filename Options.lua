@@ -21,10 +21,10 @@ local function setOption(option, value)
 		-- setting = setting[option[i]]
 	-- end
 	-- setting = value
-	-- print(option.arg, value, option[0], option[1], option[2], option[3], option[4])
+	-- BattleGroundEnemies:Debug(option.arg, value, option[0], option[1], option[2], option[3], option[4])
 	local key = option[#option]
-	-- print(key, value)
-	-- print(unpack(value))
+	-- BattleGroundEnemies:Debug(key, value)
+	-- BattleGroundEnemies:Debug(unpack(value))
 	BattleGroundEnemies.db.profile[key] = value
 end
 
@@ -333,34 +333,7 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.BarHeight_Desc,
 						disabled = InCombatLockdown,
 						set = function(option, value) 
-							local previousButton
-							for name, enemyButton in pairs(self.Enemies) do
-								enemyButton:SetHeight(value)
-								enemyButton.Trinket:SetWidth(value)
-								enemyButton.Racial:SetWidth(value)
-								for spellID, debuffFrame in pairs(enemyButton.MyDebuffs) do
-									debuffFrame:SetWidth(value)
-								end
-								for drCategorie, drFrame in pairs(enemyButton.DR) do
-									drFrame:SetWidth(value)
-								end
-								self:CropImage(enemyButton.Spec.Icon, value, self.db.profile.Spec_Width)
-								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, value, self.db.profile.ObjectiveAndRespawn_Width)
-							end
-							for number, enemyButton in ipairs(self.InactiveEnemyButtons) do
-								enemyButton:SetHeight(value)
-								enemyButton.Trinket:SetWidth(value)
-								enemyButton.Racial:SetWidth(value)
-								for spellID, debuffFrame in pairs(enemyButton.MyDebuffs) do
-									debuffFrame:SetWidth(value)
-								end
-								for drCategorie, drFrame in pairs(enemyButton.DR) do
-									drFrame:SetWidth(value)
-								end
-								self:CropImage(enemyButton.Spec.Icon, value, self.db.profile.Spec_Width)
-								self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, value, self.db.profile.ObjectiveAndRespawn_Width)
-							end
-							setOption(option, value)
+							UpdateButtons(option, value, nil, nil, nil, "SetHeight", value)
 						end,
 						min = 1,
 						max = 40,
@@ -372,9 +345,8 @@ function BattleGroundEnemies:SetupOptions()
 						name = L.SpaceBetweenRows,
 						desc = L.SpaceBetweenRows_Desc,
 						set = function(option, value) 
-							local previousButton
+							local previousButton = self
 							for number, name in ipairs(self.EnemySortingTable) do
-								if number == 1 then previousButton = self end
 					
 								local enemyButton = self.Enemies[name]
 								enemyButton:SetPosition(self.db.profile.Growdirection, previousButton, value)
@@ -557,20 +529,11 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.ConvertCyrillic,
 										desc = L.ConvertCyrillic_Desc,
 										set = function(option, value)
-											for name, enemyButton in pairs(self.Enemies) do
-												enemyButton.DisplayedName = name
-												if value then
-													enemyButton:ConvertCyrillic(name)
-												end
-												
-												if self.db.profile.ShowRealmnames then
-													enemyButton.Name:SetText(enemyButton.DisplayedName)
-												else
-													enemyButton.Name:SetText(enemyButton.DisplayedName:match("[^%-]*"))
-												end
-												
-											end
 											setOption(option, value)
+											for name, enemyButton in pairs(self.Enemies) do
+												enemyButton:SetName(name)
+											end
+											
 										end,
 										width = "normal",
 										order = 10
@@ -580,14 +543,10 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.ShowRealmnames,
 										desc = L.ShowRealmnames_Desc,
 										set = function(option, value)
-											for name, enemyButton in pairs(self.Enemies) do
-												if value then
-													enemyButton.Name:SetText(enemyButton.DisplayedName)
-												else
-													enemyButton.Name:SetText(enemyButton.DisplayedName:match("[^%-]*"))
-												end
-											end
 											setOption(option, value)
+											for name, enemyButton in pairs(self.Enemies) do
+												enemyButton:SetName(name)
+											end
 										end,
 										width = "normal",
 										order = 11
@@ -759,15 +718,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Width,
 								desc = L.Spec_Width_Desc,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemies) do
-										self:CropImage(enemyButton.Spec.Icon, self.db.profile.BarHeight, value)
-										enemyButton.Spec:SetWidth(value)
-									end
-									for name, enemyButton in pairs(self.InactiveEnemyButtons) do
-										self:CropImage(enemyButton.Spec.Icon, self.db.profile.BarHeight, value)
-										enemyButton.Spec:SetWidth(value)
-									end
-									setOption(option, value)
+									UpdateButtons(option, value, "Spec", nil, nil, "SetWidth", value)
 								end,
 								min = 1,
 								max = 50,
@@ -806,15 +757,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.ObjectiveAndRespawn_Width_Desc,
 								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
 								set = function(option, value)
-									for name, enemyButton in pairs(self.Enemies) do
-										self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, self.db.profile.BarHeight, value)
-										enemyButton.ObjectiveAndRespawn:SetWidth(value)
-									end
-									for name, enemyButton in pairs(self.InactiveEnemyButtons) do
-										self:CropImage(enemyButton.ObjectiveAndRespawn.Icon, self.db.profile.BarHeight, value)
-										enemyButton.ObjectiveAndRespawn:SetWidth(value)
-									end
-									setOption(option, value)
+									UpdateButtons(option, value, "ObjectiveAndRespawn", nil, nil, "SetWidth", value)
 								end,
 								min = 1,
 								max = 50,
