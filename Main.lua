@@ -340,7 +340,7 @@ do
 				for name, enemyButton in pairs(BattleGroundEnemies.Enemies) do
 					local activeUnitID = enemyButton.UnitIDs.Active
 					if activeUnitID then
-						enemyButton:UpdateHealthRangeAndRespawn(activeUnitID)	
+						enemyButton:UpdatesWithUnitID(activeUnitID)	
 					else
 						local settings = BattleGroundEnemies.db.profile
 						if settings.RangeIndicator_Enabled then
@@ -378,7 +378,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			local nameplateUnitID = unitIDs.NameplateUnitID
 			if nameplateUnitID then
 				unitIDs.Active = nameplateUnitID
-				enemyButton:UpdateHealthRangeAndRespawn(nameplateUnitID)
+				enemyButton:UpdatesWithUnitID(nameplateUnitID)
 			else
 				enemyButton:GrabAnotherAllyTargetUnitID(unitID)
 			end
@@ -520,7 +520,7 @@ function BattleGroundEnemies:UpdateAllyTargets(unitID)
 	end
 	
 	if newTargetEnemyButton then --ally targets an existing enemy
-		newTargetEnemyButton:UpdateHealthRangeAndRespawn(targetUnitID)
+		newTargetEnemyButton:UpdatesWithUnitID(targetUnitID)
 		newTargetEnemyButton:UpdateTargetIndicators(allyDetails, true)
 		allyDetails.Target = newTargetEnemyButton
 		self:Debug(newTargetEnemyButton.DisplayedName, "is now targeted by", unitID)
@@ -557,7 +557,7 @@ do
 		if enemyButton then
 			enemyButton.MyFocus:Show()
 			oldFocus = enemyButton
-			enemyButton:UpdateHealthRangeAndRespawn("focus")
+			enemyButton:UpdatesWithUnitID("focus")
 		end
 	end
 end
@@ -567,7 +567,7 @@ function BattleGroundEnemies:UpdateForEnemies(unitID)
 	
 	local enemyButton = self:GetEnemybuttonByUnitID(unitID)
 	if enemyButton then --unit is a shown enemy
-		enemyButton:UpdateHealthRangeAndRespawn(unitID)
+		enemyButton:UpdatesWithUnitID(unitID)
 	end
 end
 
@@ -586,7 +586,7 @@ function BattleGroundEnemies:NAME_PLATE_UNIT_ADDED(unitID)
 		local nameplateUnitID = UnitIDs.NameplateUnitID
 		if not UnitIDs.ArenaUnitID then
 			UnitIDs.Active = unitID
-			enemyButton:UpdateHealthRangeAndRespawn(unitID)
+			enemyButton:UpdatesWithUnitID(unitID)
 		end
 		nameplateUnitID = unitID
 	end
@@ -857,7 +857,7 @@ do
 		
 							unitIDs.Active = allyDetails.TargetUnitID
 							--BattleGroundEnemies:Debug("GrabAnotherAllyTargetUnitID", unitIDs.Active)
-							self:UpdateHealthRangeAndRespawn(unitIDs.Active)
+							self:UpdatesWithUnitID(unitIDs.Active)
 						else
 							return self:AllyLostThisTarget(allyDetails)
 						end
@@ -908,14 +908,14 @@ do
 			end
 			
 			
-			function enemyButtonFunctions:UpdateHealthRangeAndRespawn(unitID)
+			function enemyButtonFunctions:UpdatesWithUnitID(unitID)
 				local settings = BattleGroundEnemies.db.profile
 				-- RespawnTimer
 				-- if not UnitExists(unitID) then
-					-- BattleGroundEnemies:Debug("UpdateHealthRangeAndRespawn", unitID, self.DisplayedName, "doesn't exist")
+					-- BattleGroundEnemies:Debug("UpdatesWithUnitID", unitID, self.DisplayedName, "doesn't exist")
 				-- end
 				if UnitIsDead(unitID) then
-					--BattleGroundEnemies:Debug("UpdateHealthRangeAndRespawn", UnitName(unitID), "UnitIsDead")
+					--BattleGroundEnemies:Debug("UpdatesWithUnitID", UnitName(unitID), "UnitIsDead")
 					self.ObjectiveAndRespawn:ShowRespawnTimer(26)
 				elseif self.ObjectiveAndRespawn.ActiveRespawnTimer then --player is alive again
 					self.ObjectiveAndRespawn.Cooldown:Clear()
@@ -1240,8 +1240,8 @@ do
 			end
 			
 			button:SetScript("OnSizeChanged", function(self, width, height)
-				button.Trinket:SetWidth(height)
-				button.Racial:SetWidth(height)
+				self.Trinket:SetWidth(height)
+				self.Racial:SetWidth(height)
 				for drCategorie, drFrame in pairs(self.DR) do
 					drFrame:SetWidth(height)
 				end
@@ -1259,7 +1259,7 @@ do
 			button:RegisterForClicks('AnyUp')
 			button:RegisterForDrag('LeftButton')
 			button:SetAttribute('type1','macro')-- type1 = Left-Click
-			button:SetAttribute('type2','macro')-- type2 = Right-Click, type1 = Middle-Click
+			button:SetAttribute('type2','macro')-- type2 = Right-Click, type3 = Middle-Click
 
 			button:SetScript('OnDragStart', button_OnDragStart)
 			button:SetScript('OnDragStop', button_OnDragStop)
@@ -1358,7 +1358,7 @@ do
 				button:DrPositioning()
 			end)
 			
-			button.ObjectiveAndRespawn.ShowRespawnTimer =	objectiveFrameFunctions.ShowRespawnTimer
+			button.ObjectiveAndRespawn.ShowRespawnTimer = objectiveFrameFunctions.ShowRespawnTimer
 			
 			button.ObjectiveAndRespawn.Icon = button.ObjectiveAndRespawn:CreateTexture(nil, "BORDER")
 			button.ObjectiveAndRespawn.Icon:SetAllPoints()
@@ -1716,7 +1716,7 @@ do
 			self:UnregisterEvent("PLAYER_TARGET_CHANGED")
 			self:UnregisterEvent("PLAYER_FOCUS_CHANGED")
 			self:UnregisterEvent("UNIT_TARGET")
-			self:UnregisterEvent("UNIT_HEALTH_FREQUENT")
+			self:UnregisterEvent("UNIT_HEALTH_FREQUENT") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 			self:UnregisterEvent("UPDATE_BATTLEFIELD_SCORE")
 			self:UnregisterEvent("NAME_PLATE_UNIT_ADDED")
 			self:UnregisterEvent("NAME_PLATE_UNIT_REMOVED")
