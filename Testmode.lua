@@ -214,7 +214,7 @@ do
 					--health simulation
 					local health = mathrandom(0, 100)
 					if health == 0 and holdsflag ~= enemyButton then --don't let players die that are holding a flag at the moment
-						BattleGroundEnemies:Debug("dead")
+						--BattleGroundEnemies:Debug("dead")
 						enemyButton.Health:SetValue(0)
 						enemyButton.ObjectiveAndRespawn:ShowRespawnTimer(27)
 					else
@@ -264,12 +264,12 @@ do
 							--self:Debug("Nummber4")
 							local dRCategory = randomDrCategory[mathrandom(1, #randomDrCategory)]
 							local spellID = DrCategoryToSpell[dRCategory][mathrandom(1, #DrCategoryToSpell[dRCategory])]
-							enemyButton:UpdateDR(spellID, false, true)
+							enemyButton:UpdateDR(spellID, nil, false, true)
 						elseif number == 5 then --player got one of the players debuff's applied
 							--self:Debug("Nummber5")
 							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
-							enemyButton:DebuffChanged(true, nil, spellID, true, true, mathrandom(1, 9), mathrandom(10, 15))
-							enemyButton:UpdateDR(spellID, true, true)
+							enemyButton:DebuffChanged(true, nil, spellID, nil, true, true, mathrandom(1, 9), mathrandom(10, 15))
+							enemyButton:UpdateDR(spellID, nil, true, true)
 						end
 						
 						-- targetcounter simulation

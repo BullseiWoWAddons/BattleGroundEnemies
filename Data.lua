@@ -445,8 +445,7 @@ do
 		Data.Classes[classTag] = {}
 		for i = 1, GetNumSpecializationsForClassID(classId) do
 			local id,specName,_,icon,role = GetSpecializationInfoForClassID(classId, i)
-			Data.Classes[classTag][specName] = {roleNumber = roleNameToRoleNumber[role], roleID = role}
-			Data.Classes[classTag][specName].specIcon = icon
+			Data.Classes[classTag][specName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specIcon = icon}
 			table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = specName})
 		end
 	end
