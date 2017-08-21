@@ -915,22 +915,6 @@ do
 				end
 			end
 			
-			function enemyButtonFunctions:UnitIDUpdate()
-				local unitIDs = self.UnitIDs
-				unitIDs.Active = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
-				if unitIDs.Active then
-					self:RegisterForRangeUpdate()
-				else
-					if unitIDs.Ally then 
-						unitIDs.Active = unitIDs.Ally
-						unitIDs.UpdateHealth = true
-						self:RegisterForRangeUpdate()
-					else
-						self:DeleteActiveUnitID()
-					end 
-				end
-			end
-			
 			function enemyButtonFunctions:NowTargetedBy(allyGainedDetails)
 				local unitIDs = self.UnitIDs
 				unitIDs.TargetedByAlly[allyGainedDetails] = true
