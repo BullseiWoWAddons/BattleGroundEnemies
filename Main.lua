@@ -391,7 +391,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			objective:UnregisterAllEvents()
 			objective:Hide()
 
-			self.UnitIDs.Arena = false
+			enemyButton.UnitIDs.Arena = false
 			enemyButton:UnitIDUpdate()
 		end
 	else -- "unseen", "seen" or "destroyed"
@@ -985,7 +985,7 @@ do
 				--BattleGroundEnemies:Debug(unitID, self.DisplayedName)
 				if UnitIsDead(unitID) then
 					--BattleGroundEnemies:Debug("UpdateAll", UnitName(unitID), "UnitIsDead")
-					self.ObjectiveAndRespawn:ShowRespawnTimer(26)
+					self.ObjectiveAndRespawn:ShowRespawnTimer(27)
 				elseif self.ObjectiveAndRespawn.ActiveRespawnTimer then --player is alive again
 					self.ObjectiveAndRespawn.Cooldown:Clear()
 				end
