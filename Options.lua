@@ -186,15 +186,7 @@ function BattleGroundEnemies:SetupOptions()
 					},
 				
 
-					-- RoleIcon_Enabled = {
-						-- type = "toggle",
-						-- name = L.RoleIcon_Enabled,
-						-- desc = L.RoleIcon_Enabled_Desc,
-						-- set = function(option, ...)
-							-- UpdateButtons(option, value, "Role", "Icon", "SetShown", value)
-						-- end,
-						-- order = 6
-					-- },
+					
 		
 					Growdirection = {
 						type = "select",
@@ -216,14 +208,14 @@ function BattleGroundEnemies:SetupOptions()
 							setOption(option, value)
 						end,
 						values = {upwards = L.Upwards, downwards = L.Downwards},
-						order = 9
+						order = 6
 					},
-					Fake = addVerticalSpacing(10),
+					Fake = addVerticalSpacing(7),
 					EnemyCount = {
 						type = "group",
 						name = L.EnemyCount_Enabled,
 						inline = true,
-						order = 11,
+						order = 8,
 						args = {
 							EnemyCount_Enabled = {
 								type = "toggle",
@@ -257,10 +249,11 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.EnemyCount_Textcolor_Desc,
 								disabled = function() return not self.db.profile.EnemyCount_Enabled end,
 								set = function(option, ...)
-									local color = {...} 
+									local color = {...}
 									self.EnemyCount:SetTextColor(...)
 									setOption(option, color)
 								end,
+								hasAlpha = true,
 								width = "half",
 								order = 4
 							},
@@ -300,6 +293,7 @@ function BattleGroundEnemies:SetupOptions()
 									self.EnemyCount:SetShadowColor(...)
 									setOption(option, color)
 								end,
+								hasAlpha = true,
 								order = 8
 							},
 						}
@@ -329,7 +323,7 @@ function BattleGroundEnemies:SetupOptions()
 					},
 					BarHeight = {
 						type = "range",
-						name = L.BarHeight,
+						name = L.Height,
 						desc = L.BarHeight_Desc,
 						disabled = InCombatLockdown,
 						set = function(option, value) 
@@ -399,6 +393,7 @@ function BattleGroundEnemies:SetupOptions()
 							local color = {...} 
 							UpdateButtons(option, color, "MyTarget", nil, nil ,"SetBackdropBorderColor", ...)
 						end,
+						hasAlpha = true,
 						order = 7
 					},
 					MyFocus_Color = {
@@ -409,6 +404,7 @@ function BattleGroundEnemies:SetupOptions()
 							local color = {...} 
 							UpdateButtons(option, color, "MyFocus", nil, nil, "SetBackdropBorderColor", ...)
 						end,
+						hasAlpha = true,
 						order = 8
 					},
 					HealthBarSettings = {
@@ -424,10 +420,10 @@ function BattleGroundEnemies:SetupOptions()
 								--inline = true,
 								order = 1,
 								args = {
-									BarTexture = {
+									HealthBar_Texture = {
 										type = "select",
 										name = L.BarTexture,
-										desc = L.BarTexture_Desc,
+										desc = L.HealthBar_Texture_Desc,
 										set = function(option, value)
 											UpdateButtons(option, value, "Health", nil, nil, "SetStatusBarTexture", LSM:Fetch("statusbar", value))
 										end,
@@ -437,30 +433,25 @@ function BattleGroundEnemies:SetupOptions()
 										order = 1
 									},
 									Fake = addHorizontalSpacing(2),
-									BarBackground = {
+									HealthBar_Background = {
 										type = "color",
 										name = L.BarBackground,
-										desc = L.BarBackground_Desc,
+										desc = L.HealthBar_Background_Desc,
 										set = function(option, ...)
 											local color = {...} 
 											UpdateButtons(option, color, "Health", "Background", nil, "SetVertexColor", ...)
 										end,
+										hasAlpha = true,
 										width = "normal",
 										order = 3
 									}
 								}
 							},
-							Fake = {
-								type = "description",
-								name = " ",
-								fontSize = "large",
-								order = 2
-							},
 							Name = {
 								type = "group",
 								name = L.Name,
 								desc = L.Name_Desc,
-								order = 3,
+								order = 2,
 								args = {
 									Name_Fontsize = {
 										type = "range",
@@ -484,6 +475,7 @@ function BattleGroundEnemies:SetupOptions()
 											local color = {...} 
 											UpdateButtons(option, color, "Name", nil, nil, "SetTextColor", ...)
 										end,
+										hasAlpha = true,
 										width = "half",
 										order = 3
 									},
@@ -521,6 +513,7 @@ function BattleGroundEnemies:SetupOptions()
 											local color = {...}
 											UpdateButtons(option, color, "Name", nil, nil, "SetShadowColor", ...)
 										end,
+										hasAlpha = true,
 										order = 8
 									},
 									Fake4 = addVerticalSpacing(9),
@@ -553,11 +546,38 @@ function BattleGroundEnemies:SetupOptions()
 									}
 								}
 							},
-							Fake2 = {
-								type = "description",
-								name = " ",
-								fontSize = "large",
-								order = 4
+							RoleIconSettings = {
+								type = "group",
+								name = L.RoleIconSettings,
+								desc = L.RoleIconSettings_Desc,
+								--childGroups = "select",
+								--inline = true,
+								order = 3,
+								args = {
+									RoleIcon_Enabled = {
+										type = "toggle",
+										name = L.RoleIcon_Enabled,
+										desc = L.RoleIcon_Enabled_Desc,
+										set = function(option, value)
+											UpdateButtons(option, value, "Role", nil, nil, "SetSize", value and self.db.profile.RoleIcon_Size or 0.01, value and self.db.profile.RoleIcon_Size or 0.01)
+										end,
+										width = "normal",
+										order = 1
+									},
+									RoleIcon_Size = {
+										type = "range",
+										name = L.Size,
+										desc = L.RoleIcon_Size_Desc,
+										set = function(option, value)
+											UpdateButtons(option, value, "Role", nil, nil, "SetSize", value, value)
+										end,
+										min = 2,
+										max = 20,
+										step = 1,
+										width = "normal",
+										order = 2
+									}
+								}
 							},
 							TargetIndicator = {
 								type = "group",
@@ -565,7 +585,7 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.TargetIndicator_Desc,
 								--childGroups = "select",
 								--inline = true,
-								order = 5,
+								order = 4,
 								args = {
 									NumericTargetindicator_Enabled = {
 										type = "toggle",
@@ -601,6 +621,7 @@ function BattleGroundEnemies:SetupOptions()
 											local color = {...} 
 											UpdateButtons(option, color, "TargetCounter", "Text", nil, "SetTextColor", ...)
 										end,
+										hasAlpha = true,
 										width = "half",
 										order = 4
 									},
@@ -636,6 +657,7 @@ function BattleGroundEnemies:SetupOptions()
 											local color = {...}
 											UpdateButtons(option, color, "TargetCounter", "Text", nil, "SetShadowColor", ...)
 										end,
+										hasAlpha = true,
 										order = 7
 									},
 									Fake2 = addVerticalSpacing(6),
@@ -652,12 +674,75 @@ function BattleGroundEnemies:SetupOptions()
 								}
 							}
 						}
-					},	
+					},
+					PowerBarSettings = {
+						type = "group",
+						name = L.PowerBarSettings,
+						desc = L.PowerBarSettings_Desc,
+						order = 10,
+						args = {
+							PowerBar_Enabled = {
+								type = "toggle",
+								name = L.PowerBar_Enabled,
+								desc = L.PowerBar_Enabled_Desc,
+								set = function(option, value)
+									if value then
+										if self:IsShown() and not self.TestmodeActive then
+											self:RegisterEvent("UNIT_POWER_FREQUENT")
+										end
+									else
+										self:UnregisterEvent("UNIT_POWER_FREQUENT")
+									end
+									UpdateButtons(option, value, "Power", nil, nil, "SetHeight", value and self.db.profile.PowerBar_Height or 0.01)
+								end,
+								order = 1
+							},
+							PowerBar_Height = {
+								type = "range",
+								name = L.Height,
+								desc = L.PowerBar_Height_Desc,
+								disabled = function() return not self.db.profile.Power_Enabled end,
+								set = function(option, value)
+									UpdateButtons(option, value, "Power", nil, nil, "SetHeight", value)
+								end,
+								min = 1,
+								max = 10,
+								step = 1,
+								width = "normal",
+								order = 2
+							},
+							PowerBar_Texture = {
+								type = "select",
+								name = L.BarTexture,
+								desc = L.PowerBar_Texture_Desc,
+								set = function(option, value)
+									UpdateButtons(option, value, "Power", nil, nil, "SetStatusBarTexture", LSM:Fetch("statusbar", value))
+								end,
+								dialogControl = 'LSM30_Statusbar',
+								values = AceGUIWidgetLSMlists.statusbar,
+								width = "normal",
+								order = 3
+							},
+							Fake = addHorizontalSpacing(4),
+							PowerBar_Background = {
+								type = "color",
+								name = L.BarBackground,
+								desc = L.PowerBar_Background_Desc,
+								set = function(option, ...)
+									local color = {...} 
+									UpdateButtons(option, color, "Power", "Background", nil, "SetVertexColor", ...)
+								end,
+								hasAlpha = true,
+								width = "normal",
+								order = 5
+							}
+						}
+					},
 					TrinketSettings = {
 						type = "group",
 						name = L.TrinketSettings,
 						desc = L.TrinketSettings_Desc,
-						order = 10,
+						order = 11,
 						args = {
 							Trinket_Enabled = {
 								type = "toggle",
@@ -684,7 +769,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.RacialSettings,
 						desc = L.RacialSettings_Desc,
-						order = 11,
+						order = 12,
 						args = {
 							Racial_Enabled = {
 								type = "toggle",
@@ -711,7 +796,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.SpecSettings,
 						desc = L.SpecSettings_Desc,
-						order = 12,
+						order = 13,
 						args = {
 							Spec_Width = {
 								type = "range",
@@ -731,7 +816,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.ObjectiveAndRespawnSettings,
 						desc = L.ObjectiveAndRespawnSettings_Desc,
-						order = 13,
+						order = 14,
 						args = {
 							ObjectiveAndRespawn_ObjectiveEnabled = {
 								type = "toggle",
@@ -788,6 +873,7 @@ function BattleGroundEnemies:SetupOptions()
 									local color = {...} 
 									UpdateButtons(option, color, "ObjectiveAndRespawn", "AuraText", nil, "SetTextColor", ...)
 								end,
+								hasAlpha = true,
 								width = "half",
 								order = 5
 							}, 
@@ -824,6 +910,7 @@ function BattleGroundEnemies:SetupOptions()
 									local color = {...}
 									UpdateButtons(option, color, "ObjectiveAndRespawn", "AuraText", nil, "SetShadowColor", ...)
 								end,
+								hasAlpha = true,
 								order = 9
 							},
 						}
@@ -832,7 +919,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.DrTrackingSettings,
 						desc = L.DrTrackingSettings_Desc,
-						order = 14,
+						order = 15,
 						args = {
 							DrTracking_Enabled = {
 								type = "toggle",
@@ -869,7 +956,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.MyDebuffSettings,
 						desc = L.MyDebuffSettings_Desc,
-						order = 15,
+						order = 16,
 						args = {
 							MyDebuffs_Enabled = {
 								type = "toggle",
@@ -928,6 +1015,7 @@ function BattleGroundEnemies:SetupOptions()
 									UpdateButtons(option, color, "Stacks", nil, "MyDebuffs", "SetTextColor", ...)
 									UpdateButtons(option, color, "Stacks", nil, "InactiveDebuffs", "SetTextColor", ...)
 								end,
+								hasAlpha = true,
 								width = "half",
 								order = 7
 							},
@@ -981,6 +1069,7 @@ function BattleGroundEnemies:SetupOptions()
 									UpdateButtons(option, color, "Stacks", nil, "MyDebuffs", "SetShadowColor", ...)
 									UpdateButtons(option, color, "Stacks", nil, "InactiveDebuffs", "SetShadowColor", ...)
 								end,
+								hasAlpha = true,
 								order = 12
 							}
 						}
@@ -990,7 +1079,7 @@ function BattleGroundEnemies:SetupOptions()
 						name = L.RBGSpecificSettings,
 						desc = L.RBGSpecificSettings_Desc,
 						--inline = true,
-						order = 16,
+						order = 17,
 						args = {
 							Notificatoins_Enabled = {
 								type = "toggle",

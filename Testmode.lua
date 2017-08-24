@@ -29,17 +29,10 @@ local function SetupTestmode()
 		DrCategoryToSpell[categorieName] = {}
 		i = i + 1
 	end
-	
-
 
 	for spellID, categorieName in pairs(DRData.spells) do
 		tinsert(DrCategoryToSpell[categorieName], spellID)
 	end
-
-
-	
-	
-
 
 	do
 		local count = 1
@@ -47,7 +40,6 @@ local function SetupTestmode()
 			randomTrinkets[count] = triggerSpellID
 			count = count + 1
 		end
-		
 	end
 
 	do
@@ -56,14 +48,8 @@ local function SetupTestmode()
 			randomRacials[count] = racialSpelliD
 			count = count + 1
 		end
-		
 	end
 end
-
-
-
-
-
 
 
 
@@ -71,6 +57,7 @@ function BattleGroundEnemies.ToggleTestmode()
 	if BattleGroundEnemies.TestmodeActive then --disable testmode
 		BattleGroundEnemies:DisableTestMode()
 	else --enable Testmode
+		BattleGroundEnemies.TestmodeActive = true
 		BattleGroundEnemies:EnableTestMode()
 	end
 end
@@ -80,9 +67,6 @@ function BattleGroundEnemies:DisableTestMode()
 	self:Hide()
 	self.TestmodeActive = false
 end
-
-
-
 
 
 
@@ -156,25 +140,7 @@ do
 		self:FillFakeEnemyData(damagerAmount, "DAMAGER")
 		
 		for name, enemyDetails in pairs(fakeEnemies) do
-			local enemyButton = self:GetEnemyButtonForNewPlayer()
-
-			
-			enemyButton.PlayerClass = enemyDetails.PlayerClass
-			enemyButton.PlayerSpec = enemyDetails.PlayerSpec
-			
-			local specData = Data.Classes[enemyDetails.PlayerClass][enemyButton.PlayerSpec]
-			
-			enemyButton.RoleNumber = specData.roleNumber
-			enemyButton.Spec.Icon:SetTexture(specData.specIcon)		
-
-			local c = RAID_CLASS_COLORS[enemyDetails.PlayerClass]
-			enemyButton.Health:SetStatusBarColor(c.r,c.g,c.b)
-			enemyButton.Health:SetValue(1)	
-			
-			enemyButton:SetName(name)
-			
-			enemyButton.UnitIDs = {TargetedByAlly = {}}
-			enemyButton:Show()
+			local enemyButton = self:SetupButtonForNewPlayer(enemyDetails, name)
 			
 			tinsert(self.EnemySortingTable, name)					
 			self.Enemies[name] = enemyButton
@@ -183,7 +149,6 @@ do
 		self:SortEnemies()
 		
 		FakeEnemiesOnUpdateFrame:Show()
-		self.TestmodeActive = true
 	end
 end
 
@@ -270,6 +235,9 @@ do
 							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
 							enemyButton:DebuffChanged(true, nil, spellID, nil, true, true, mathrandom(1, 9), mathrandom(10, 15))
 							enemyButton:UpdateDR(spellID, nil, true, true)
+						elseif number == 6 then --power simulation
+							local power = mathrandom(0, 100)
+							enemyButton.Power:SetValue(power/100)
 						end
 						
 						-- targetcounter simulation

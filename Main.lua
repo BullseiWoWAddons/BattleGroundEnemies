@@ -42,6 +42,7 @@ local IsInInstance = IsInInstance
 local IsItemInRange = IsItemInRange
 local IsRatedBattleground = IsRatedBattleground
 local PlaySound = PlaySound
+local PowerBarColor = PowerBarColor --table
 local RaidNotice_AddMessage = RaidNotice_AddMessage
 local RequestBattlefieldScoreData = RequestBattlefieldScoreData
 local SetMapToCurrentZone = SetMapToCurrentZone
@@ -133,13 +134,19 @@ do
 			Position_Y = false,
 			BarWidth = 220,
 			BarHeight = 28,
-			BarTexture = 'UI-StatusBar',
-			BarBackground = {0, 0, 0, 1},
+			HealthBar_Texture = 'UI-StatusBar',
+			HealthBar_Background = {0, 0, 0, 0.66},
+			
+			PowerBar_Enabled = false,
+			PowerBar_Height = 4,
+			PowerBar_Texture = 'UI-StatusBar',
+			PowerBar_Background = {0, 0, 0, 0.66},
 			
 			SpaceBetweenRows = 1,
 			Growdirection = "downwards",
 			
-			RoleIcon_Enabled = true,
+			RoleIcon_Enabled = false,
+			RoleIcon_Size = 13,
 			
 			RangeIndicator_Enabled = true,
 			RangeIndicator_Range = 28767,
@@ -147,7 +154,7 @@ do
 			
 			ShowRealmnames = true,
 			ConvertCyrillic = true,
-			DisableArenaFrames = true,
+			DisableArenaFrames = false,
 			
 			EnemyCount_Enabled = true,
 			EnemyCount_Fontsize = 14,
@@ -234,6 +241,27 @@ do
 		self:SetToplevel(true)
 		self:SetScale(self.db.profile.Framescale)
 		
+		self:SetScript("OnShow", function(self) 
+			if not self.TestmodeActive then
+				self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+				self:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
+				self:RegisterEvent("PLAYER_TARGET_CHANGED")
+				self:RegisterEvent("PLAYER_FOCUS_CHANGED")
+				self:RegisterEvent("UNIT_TARGET")
+				self:RegisterEvent("UNIT_HEALTH_FREQUENT")
+				self:RegisterEvent("UNIT_POWER_FREQUENT")
+				self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+				self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+				self:RegisterEvent("ARENA_OPPONENT_UPDATE")
+				self:RegisterEvent("ARENA_CROWD_CONTROL_SPELL_UPDATE")
+				self:RegisterEvent("ARENA_COOLDOWNS_UPDATE")
+				self:RegisterEvent("GROUP_ROSTER_UPDATE")
+				-- self:RegisterEvent("LOSS_OF_CONTROL_ADDED")
+				self:RegisterEvent("PLAYER_ALIVE")
+				self:RegisterEvent("PLAYER_UNGHOST")
+			end
+		end)
+		
 		self:ClearAllPoints()
 		if not self.db.profile.Position_X and not self.db.profile.Position_X then
 			self:SetPoint("CENTER")
@@ -270,9 +298,13 @@ do
 					local unitIDs = enemyButton.UnitIDs
 					local activeUnitID = unitIDs.Active
 					if unitIDs.UpdateHealth then
+						if unitIDs.UpdatePower then
+							enemyButton:UpdatePower(activeUnitID)
+						end
 						enemyButton:UpdateHealth(activeUnitID)
 					end
-					enemyButton:UpdateRange(activeUnitID)
+					
+					enemyButton:UpdateRange(IsItemInRange(self.db.profile.RangeIndicator_Range, activeUnitID))
 				end
 			end
 		end
@@ -280,7 +312,7 @@ do
 	BattleGroundEnemies:SetScript("OnUpdate", BattleGroundEnemies.RealEnemies)
 end
 
-function BattleGroundEnemies:GetEnemyButtonForNewPlayer()
+function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails, name)
 	
 	local enemyButton = self.InactiveEnemyButtons[#self.InactiveEnemyButtons] 
 	if enemyButton then --recycle a previous used button
@@ -294,17 +326,51 @@ function BattleGroundEnemies:GetEnemyButtonForNewPlayer()
 		enemyButton.Racial.Cooldown:Clear()	--reset Racial Cooldown
 		enemyButton.MyTarget:Hide()	--reset possible shown target indicator frame
 		enemyButton.MyFocus:Hide()	--reset possible shown target indicator frame
-		wipe(enemyButton.UnitIDs.TargetedByAlly)
-		enemyButton:UpdateTargetIndicators() --update numerical and symbolic target indicator
+		if enemyButton.UnitIDs then  --check because of testmode
+			wipe(enemyButton.UnitIDs.TargetedByAlly)  
+			enemyButton:UpdateTargetIndicators() --update numerical and symbolic target indicator
+			enemyButton:DeleteActiveUnitID()
+		end
 		enemyButton.ObjectiveAndRespawn:Hide()
 		enemyButton.ObjectiveAndRespawn.Cooldown:Clear()
-		enemyButton:DeleteActiveUnitID()
+		
 		for categorie, drFrame in pairs(enemyButton.DR) do --set status of DR-Tracker to 1
 			drFrame.status = 1
 		end
 	else --no recycleable buttons remaining => create a new one
 		enemyButton = self:CreateNewPlayerButton()
 	end
+	
+
+	enemyButton.PlayerRace = enemyDetails.PlayerRace
+	enemyButton.PlayerClass = enemyDetails.PlayerClass
+	enemyButton.PlayerSpec = enemyDetails.PlayerSpec
+	
+	
+	local specData = Data.Classes[enemyButton.PlayerClass][enemyButton.PlayerSpec]
+	
+	
+	enemyButton.PlayerRoleNumber = specData.roleNumber
+	enemyButton.PlayerRoleID = specData.roleID
+	enemyButton.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(enemyButton.PlayerRoleID))
+	if enemyButton.config.RoleIcon_Enabled then 
+		enemyButton.Role:SetSize(enemyButton.config.RoleIcon_Size, enemyButton.config.RoleIcon_Size) 
+	else
+		enemyButton.Role:SetSize(0.01, 0.01)
+	end
+	
+	enemyButton.Spec.Icon:SetTexture(specData.specIcon)
+	
+	local c = RAID_CLASS_COLORS[enemyButton.PlayerClass]
+	enemyButton.Health:SetStatusBarColor(c.r,c.g,c.b)
+	enemyButton.Health:SetValue(1)
+	
+	c = PowerBarColor[Data.Classes[enemyButton.PlayerClass][enemyButton.PlayerSpec].Ressource]
+	enemyButton.Power:SetStatusBarColor(c.r, c.g, c.b)
+	
+	enemyButton:SetName(name)
+	
+	enemyButton:Show()
 
 	return enemyButton
 end
@@ -331,11 +397,11 @@ do
 	local function PlayerSortingByRoleClassName(a, b)-- a and b are playernames
 		local playerA = BattleGroundEnemies.Enemies[a]
 		local playerB = BattleGroundEnemies.Enemies[b]
-		if playerA.RoleNumber == playerB.RoleNumber then
+		if playerA.PlayerRoleNumber == playerB.PlayerRoleNumber then
 			if BlizzardsSortOrder[ playerA.PlayerClass ] == BlizzardsSortOrder[ playerB.PlayerClass ] then
 				if a < b then return true end
 			elseif BlizzardsSortOrder[ playerA.PlayerClass ] < BlizzardsSortOrder[ playerB.PlayerClass ] then return true end
-		elseif playerA.RoleNumber < playerB.RoleNumber then return true end
+		elseif playerA.PlayerRoleNumber < playerB.PlayerRoleNumber then return true end
 	end
 
 	function BattleGroundEnemies:SortEnemies()
@@ -353,12 +419,12 @@ end
 
 
 
-function BattleGroundEnemies:SavePosition()
-	self:StopMovingOrSizing()
+function BattleGroundEnemies.SavePosition()
+	BattleGroundEnemies:StopMovingOrSizing()
 	if not InCombatLockdown() then
-		local scale = self:GetEffectiveScale()
-		self.db.profile.Position_X = self:GetLeft() * scale
-		self.db.profile.Position_Y = self:GetTop() * scale
+		local scale = BattleGroundEnemies:GetEffectiveScale()
+		BattleGroundEnemies.db.profile.Position_X = BattleGroundEnemies:GetLeft() * scale
+		BattleGroundEnemies.db.profile.Position_Y = BattleGroundEnemies:GetTop() * scale
 	end
 end
 
@@ -392,7 +458,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			objective:Hide()
 
 			enemyButton.UnitIDs.Arena = false
-			enemyButton:UnitIDUpdate()
+			enemyButton:FetchAnotherUnitID()
 		end
 	else -- "unseen", "seen" or "destroyed"
 		--self:Debug(UnitName(unitID))
@@ -559,7 +625,7 @@ do
 			oldTarget.UnitIDs.TargetedByAlly[PlayerDetails] = nil
 			oldTarget:UpdateTargetIndicators()			
 			oldTarget.UnitIDs.Target = false
-			oldTarget:UnitIDUpdate()
+			if oldTarget.UnitIDs.Active == "target" then oldTarget:FetchAnotherUnitID() end
 		end
 		
 		if enemyButton then --ally targets an existing enemy
@@ -567,7 +633,7 @@ do
 			enemyButton.UnitIDs.TargetedByAlly[PlayerDetails] = true
 			enemyButton:UpdateTargetIndicators()
 			enemyButton.UnitIDs.Target = "target"
-			enemyButton:UnitIDUpdate()
+			enemyButton:FetchAnotherUnitID()
 			oldTarget = enemyButton
 		else
 			oldTarget = false
@@ -582,12 +648,12 @@ do
 		if oldFocus then
 			oldFocus.MyFocus:Hide()
 			oldFocus.UnitIDs.Focus = false
-			oldFocus:UnitIDUpdate()
+			if oldFocus.UnitIDs.Active == "focus" then oldFocus:FetchAnotherUnitID() end
 		end
 		if enemyButton then
 			enemyButton.MyFocus:Show()
 			enemyButton.UnitIDs.Focus = "focus"
-			enemyButton:UnitIDUpdate()
+			enemyButton:FetchAnotherUnitID()
 			oldFocus = enemyButton
 		else
 			oldFocus = false
@@ -602,6 +668,13 @@ function BattleGroundEnemies:UNIT_HEALTH_FREQUENT(unitID) --gets health of namep
 	end
 end
 
+function BattleGroundEnemies:UNIT_POWER_FREQUENT(unitID, powerToken) --gets power of nameplates, player, target, focus, raid1 to raid40, partymember
+	local enemyButton = self:GetEnemybuttonByUnitID(unitID)
+	if enemyButton then --unit is a shown enemy
+		enemyButton:UpdatePower(unitID, powerToken)
+	end
+end
+
 function BattleGroundEnemies:UPDATE_MOUSEOVER_UNIT()
 	local enemyButton = self:GetEnemybuttonByUnitID("mouseover")
 	if enemyButton then --unit is a shown enemy
@@ -613,7 +686,7 @@ function BattleGroundEnemies:NAME_PLATE_UNIT_ADDED(unitID)
 	local enemyButton = self:GetEnemybuttonByUnitID(unitID)
 	if enemyButton then
 		enemyButton.UnitIDs.Nameplate = unitID
-		enemyButton:UnitIDUpdate()
+		enemyButton:FetchAnotherUnitID()
 	end
 end
 
@@ -622,7 +695,7 @@ function BattleGroundEnemies:NAME_PLATE_UNIT_REMOVED(unitID)
 	local enemyButton = self:GetEnemybuttonByUnitID(unitID)
 	if enemyButton then
 		enemyButton.UnitIDs.Nameplate = false
-		enemyButton:UnitIDUpdate()
+		if enemyButton.UnitIDs.Active == unitID then enemyButton:FetchAnotherUnitID() end
 	end
 end	
 
@@ -709,11 +782,12 @@ do
 		local BattleGroundDebuffs = {} --contains battleground specific enemy debbuffs to watchout for of the current active battlefield
 		
 
-		local function MyCreateFrame(frameType, parent, tablepoint1, tablepoint2, width)
+		local function MyCreateFrame(frameType, parent, tablepoint1, tablepoint2, width, height)
 			local frame = CreateFrame(frameType, nil, parent)
 			frame:SetPoint(unpack(tablepoint1))
-			frame:SetPoint(unpack(tablepoint2))
+			if tablepoint2 then frame:SetPoint(unpack(tablepoint2)) end
 			if width then frame:SetWidth(width) end
+			if height then frame:SetHeight(height) end
 			return frame 
 		end
 		
@@ -818,11 +892,10 @@ do
 			end
 			
 			function enemyButtonFunctions:SetName(playername)
-				local conf = BattleGroundEnemies.db.profile
-				
+
 				local name, realm = strsplit( "-", playername, 2 )
 					
-				if conf.ConvertCyrillic then
+				if self.config.ConvertCyrillic then
 					playername = ""
 					for i = 1, name:utf8len() do
 						local c = name:utf8sub(i,i)
@@ -843,7 +916,7 @@ do
 					end
 				end
 				
-				if conf.ShowRealmnames then
+				if self.config.ShowRealmnames then
 					self.Name:SetText(playername)
 				else
 					self.Name:SetText(name)
@@ -851,10 +924,10 @@ do
 				
 				self.DisplayedName = playername
 			end
-
-			
+	
+	
 			function enemyButtonFunctions:ArenaOpponentShown(unitID)
-				if BattleGroundEnemies.db.profile.ObjectiveAndRespawn_ObjectiveEnabled then
+				if self.config.ObjectiveAndRespawn_ObjectiveEnabled then
 					local objective = self.ObjectiveAndRespawn
 					if BattlegroundBuff then
 						--BattleGroundEnemies:Debug("has buff")
@@ -866,7 +939,7 @@ do
 					objective.Value = false
 					BattleGroundEnemies.ArenaEnemyIDToEnemyButton[unitID] = self
 					self.UnitIDs.Arena = unitID
-					self:UnitIDUpdate()
+					self:FetchAnotherUnitID()
 				end
 				RequestCrowdControlSpell(unitID)
 			end
@@ -878,18 +951,20 @@ do
 					self.UnitIDs.RangeUpdate = i
 				end
 				self:UpdateHealth(self.UnitIDs.Active)
+				self:UpdatePower(self.UnitIDs.Active)
 			end
 			--Remove from RangeUpdate
 			function enemyButtonFunctions:DeleteActiveUnitID() --Delete from RangeUpdate
 				--BattleGroundEnemies:Debug("DeleteActiveUnitID")
 				local unitIDs = self.UnitIDs
 				unitIDs.Active = false
-				self:SetAlpha(BattleGroundEnemies.db.profile.RangeIndicator_Alpha)
+				self:UpdateRange(false)
 				
 				local rangeUpdate = self.UnitIDs.RangeUpdate
 				if rangeUpdate then
 					unitIDs.RangeUpdate = false
 					unitIDs.UpdateHealth = false
+					unitIDs.UpdatePower = false
 					local BGErangeUpdate = BattleGroundEnemies.RangeUpdate
 					tremove(BGErangeUpdate, rangeUpdate)
 					for i = rangeUpdate, #BGErangeUpdate do
@@ -899,7 +974,7 @@ do
 				end
 			end
 			
-			function enemyButtonFunctions:UnitIDUpdate()
+			function enemyButtonFunctions:FetchAnotherUnitID()
 				local unitIDs = self.UnitIDs
 				unitIDs.Active = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
 				if unitIDs.Active then
@@ -908,6 +983,9 @@ do
 					if unitIDs.Ally then 
 						unitIDs.Active = unitIDs.Ally
 						unitIDs.UpdateHealth = true
+						if self.config.PowerBar_Enabled then
+							unitIDs.UpdatePower = true
+						end
 						self:RegisterForRangeUpdate()
 					else
 						self:DeleteActiveUnitID()
@@ -950,7 +1028,7 @@ do
 			
 				local i = 1
 				for allyDetails in pairs(self.UnitIDs.TargetedByAlly) do
-					if BattleGroundEnemies.db.profile.SymbolicTargetindicator_Enabled then
+					if self.config.SymbolicTargetindicator_Enabled then
 						local indicator = self.TargetIndicators[i]
 						if not indicator then
 							indicator = CreateFrame("frame",nil,self.Health)
@@ -968,7 +1046,7 @@ do
 					end
 					i = i+1
 				end
-				if BattleGroundEnemies.db.profile.NumericTargetindicator_Enabled then 
+				if self.config.NumericTargetindicator_Enabled then 
 					self.TargetCounter.Text:SetText(i-1)
 				end
 				while self.TargetIndicators[i] do --hide no longer used ones
@@ -992,27 +1070,44 @@ do
 				self.Health:SetValue(UnitHealth(unitID)/UnitHealthMax(unitID))
 			end
 			
-			function enemyButtonFunctions:UpdateRange(unitID)
-				local settings = BattleGroundEnemies.db.profile
-				if settings.RangeIndicator_Enabled then
-					-- Range Check
-					if IsItemInRange(settings.RangeIndicator_Range, unitID) then
-						self:SetAlpha(1)
-					else
-						self:SetAlpha(settings.RangeIndicator_Alpha)
+			function enemyButtonFunctions:CheckForNewPowerColor(powerToken)
+				if self.Power.powerToken ~= powerToken then
+					local color = PowerBarColor[powerToken]
+					if color then
+						self.Power:SetStatusBarColor(color.r, color.g, color.b)
+						self.Power.powerToken = powerToken
 					end
+				end
+			end
+
+			function enemyButtonFunctions:UpdatePower(unitID, powerToken)
+				if powerToken then
+					self:CheckForNewPowerColor(powerToken)
+				else
+					local powerType, powerToken, altR, altG, altB = UnitPowerType(unitID)
+					self:CheckForNewPowerColor(powerToken)
+				end
+				self.Power:SetValue(UnitPower(unitID)/UnitPowerMax(unitID))
+			end
+			
+			function enemyButtonFunctions:UpdateRange(inRange)
+				if self.config.RangeIndicator_Enabled and not inRange then
+					self:SetAlpha(self.config.RangeIndicator_Alpha)
+				else
+					self:SetAlpha(1)
 				end
 			end
 			
 			function enemyButtonFunctions:UpdateAll(unitID)
-				self:UpdateRange(unitID)
+				self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID))
 				self:UpdateHealth(unitID)
+				if self.config.PowerBar_Enabled then self:UpdatePower(unitID) end
 			end
 		
 			
 			--Relentless maybe
 			function enemyButtonFunctions:RelentlessCheck(spellID, spellName)
-				if not BattleGroundEnemies.db.profile.Trinket_Enabled then return end
+				if not self.config.Trinket_Enabled then return end
 				
 				if self.Trinket.HasTrinket then
 					return
@@ -1057,7 +1152,7 @@ do
 			end
 			
 			function enemyButtonFunctions:RacialUsed(spellID)
-				if not BattleGroundEnemies.db.profile.Racial_Enabled then return end
+				if not self.config.Racial_Enabled then return end
 				local insi = self.Trinket
 				local racial = self.Racial
 				racial.Icon:SetTexture(Data.TriggerSpellIDToDisplayFileId[spellID])
@@ -1074,7 +1169,7 @@ do
 				local anchor = self.DrContainerStartAnchor
 				for categorie, drFrame in pairs(self.DR) do
 					if drFrame:IsShown() then
-						local spacing = BattleGroundEnemies.db.profile.DrTracking_Spacing
+						local spacing = self.config.DrTracking_Spacing
 						drFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
 						drFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
 						anchor = drFrame
@@ -1091,7 +1186,7 @@ do
 				local anchor = self.DebuffContainerStartAnchor
 				for spellID, debuffFrame in pairs(self.MyDebuffs) do
 	
-					local spacing = BattleGroundEnemies.db.profile.MyDebuffs_Spacing
+					local spacing = self.config.MyDebuffs_Spacing
 					debuffFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
 					debuffFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
 					anchor = debuffFrame
@@ -1126,15 +1221,14 @@ do
 					else -- create a new Frame 
 					
 						debuffFrame = CreateFrame('Frame', nil, self)
-						debuffFrame:SetWidth(BattleGroundEnemies.db.profile.BarHeight)
+						debuffFrame:SetWidth(self.config.BarHeight)
 						
 						debuffFrame.Icon = debuffFrame:CreateTexture(nil, "BACKGROUND")
 						debuffFrame.Icon:SetAllPoints()
+
+						debuffFrame.Stacks = CreateFontString(debuffFrame, true, nil, nil, "RIGHT", "BOTTOM", self.config.MyDebuffs_Fontsize, self.config.MyDebuffs_Outline, self.config.MyDebuffs_Textcolor, self.config.MyDebuffs_EnableTextshadow, self.config.MyDebuffs_TextShadowcolor)
 						
-						local conf = BattleGroundEnemies.db.profile
-						debuffFrame.Stacks = CreateFontString(debuffFrame, true, nil, nil, "RIGHT", "BOTTOM", conf.MyDebuffs_Fontsize, conf.MyDebuffs_Outline, conf.MyDebuffs_Textcolor, conf.MyDebuffs_EnableTextshadow, conf.MyDebuffs_TextShadowcolor)
-						
-						debuffFrame.Cooldown = CreateCooldown(debuffFrame, BattleGroundEnemies.db.profile.MyDebuffs_ShowNumbers, true, false)
+						debuffFrame.Cooldown = CreateCooldown(debuffFrame, self.config.MyDebuffs_ShowNumbers, true, false)
 						debuffFrame.Cooldown:SetScript("OnHide", debuffFrameCooldown_OnHide)
 					end
 
@@ -1153,7 +1247,7 @@ do
 				
 				function enemyButtonFunctions:DebuffChanged(testmode, srcName, _spellID, spellName, applied, removed, count, duration)
 					
-					if not BattleGroundEnemies.db.profile.MyDebuffs_Enabled then return end
+					if not self.config.MyDebuffs_Enabled then return end
 					
 					local myDebuffFrame = self.MyDebuffs[_spellID]
 					if removed and myDebuffFrame then
@@ -1214,7 +1308,7 @@ do
 				end
 			
 				function enemyButtonFunctions:UpdateDR(spellID, spellName, applied, removed)
-					if not BattleGroundEnemies.db.profile.DrTracking_Enabled then return end
+					if not self.config.DrTracking_Enabled then return end
 					
 					local drCat = DRData:GetSpellCategory(spellID)
 					--BattleGroundEnemies:Debug(operation, spellID)
@@ -1225,7 +1319,7 @@ do
 					if not drFrame then  --create a new frame for this categorie
 						
 						drFrame = CreateFrame("Frame", nil, self)
-						drFrame:SetWidth(BattleGroundEnemies.db.profile.BarHeight)
+						drFrame:SetWidth(self.config.BarHeight)
 
 						drFrame = SetBackdrop(drFrame, {0,0,0,0}, nil)
 			
@@ -1233,7 +1327,7 @@ do
 						drFrame.Icon = drFrame:CreateTexture(nil, "BORDER", nil, -1) -- -1 to make it behind the SetBackdrop bg
 						drFrame.Icon:SetAllPoints()
 						
-						drFrame.Cooldown = CreateCooldown(drFrame, BattleGroundEnemies.db.profile.DrTracking_ShowNumbers, false, false)
+						drFrame.Cooldown = CreateCooldown(drFrame, self.config.DrTracking_ShowNumbers, false, false)
 						
 						drFrame.status = 1
 						-- for _, region in next, {drFrame.Cooldown:GetRegions()} do
@@ -1261,7 +1355,7 @@ do
 					end
 					
 					if applied and drFrame.status < 4 then --applied
-						if self.UnitIDs.Active and spellName then --check for spellname for testmode, we don't wanna show a long duration in testmode
+						if spellName and self.UnitIDs.Active then --check for spellname for testmode, we don't wanna show a long duration in testmode
 							local _, _, _, _, _, actualDuration = UnitDebuff(self.UnitIDs.Active, spellName) 
 							--BattleGroundEnemies:Debug(GetTime(), actualDuration, GetTime() + actualDuration)
 							if actualDuration then
@@ -1291,10 +1385,6 @@ do
 		
 		local function button_OnDragStart()
 			return BattleGroundEnemies.db.profile.Locked or BattleGroundEnemies:StartMoving()
-		end
-		
-		local function button_OnDragStop()
-			BattleGroundEnemies:SavePosition()
 		end
 		
 		function BattleGroundEnemies:CropImage(texture, width, height)
@@ -1330,6 +1420,8 @@ do
 				for spellID, debuffFrame in pairs(self.MyDebuffs) do
 					debuffFrame:SetWidth(height)
 				end
+				
+				
 			end)
 			
 			
@@ -1344,7 +1436,7 @@ do
 			button:SetAttribute('type2','macro')-- type2 = Right-Click, type3 = Middle-Click
 
 			button:SetScript('OnDragStart', button_OnDragStart)
-			button:SetScript('OnDragStop', button_OnDragStop)
+			button:SetScript('OnDragStop', BattleGroundEnemies.SavePosition)
 			
 			
 			-- spec
@@ -1352,36 +1444,55 @@ do
 			
 			button.Spec.Icon = button.Spec:CreateTexture(nil, 'BACKGROUND')
 			button.Spec.Icon:SetAllPoints()
-			--button.Spec.Icon:SetTexCoord( 5/64, 59/64, 5/64, 59/64 ) 
 		
 			button.Spec:SetScript("OnSizeChanged", function(self, width, height)
 				BattleGroundEnemies:CropImage(self.Icon, width, height)
 			end)
+
+			-- power
+			button.Power = MyCreateFrame('StatusBar', button, {'BOTTOMLEFT', button.Spec, "BOTTOMRIGHT", 1, 1}, {'BOTTOMRIGHT', button, "BOTTOMRIGHT", -1, 1}, nil, conf.PowerBar_Height)
+			button.Power:SetStatusBarTexture(LSM:Fetch("statusbar", conf.PowerBar_Texture))--enemyButton.Health:SetStatusBarTexture(137012)
+			button.Power:SetMinMaxValues(0, 1)
+
+			
+			--button.Power.Background = button.Power:CreateTexture(nil, 'BACKGROUND', nil, 2)
+			button.Power.Background = button.Power:CreateTexture(nil, 'BACKGROUND')
+			button.Power.Background:SetAllPoints()
+			button.Power.Background:SetTexture("Interface/Buttons/WHITE8X8")
+			button.Power.Background:SetVertexColor(unpack(conf.PowerBar_Background))
 			
 			-- health
-			button.Health = MyCreateFrame('StatusBar', button, {'TOPLEFT', button.Spec, "TOPRIGHT", 1, -1}, {'BOTTOMRIGHT', button, "BOTTOMRIGHT", -1, 1}, nil)
-			button.Health:SetStatusBarTexture(LSM:Fetch("statusbar", conf.BarTexture))--enemyButton.Health:SetStatusBarTexture(137012)
+			button.Health = MyCreateFrame('StatusBar', button, {'BOTTOMLEFT', button.Power, "TOPLEFT", 0, 0}, {'TOPRIGHT', button, "TOPRIGHT", -1, -1})
+			button.Health:SetStatusBarTexture(LSM:Fetch("statusbar", conf.HealthBar_Texture))--enemyButton.Health:SetStatusBarTexture(137012)
 			button.Health:SetMinMaxValues(0, 1)
+			
+			-- role
+			button.Role = MyCreateFrame("Frame", button, {'TOPLEFT', button.Health, 'TOPLEFT', 2, -2}, nil, 12, 12)
+			
+			button.Role.Icon = button.Role:CreateTexture(nil, 'OVERLAY')
+			button.Role.Icon:SetAllPoints()		
+			button.Role.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
+
 			
 			--button.Health.Background = button.Health:CreateTexture(nil, 'BACKGROUND', nil, 2)
 			button.Health.Background = button.Health:CreateTexture(nil, 'BACKGROUND')
 			button.Health.Background:SetAllPoints()
 			button.Health.Background:SetTexture("Interface/Buttons/WHITE8X8")
-			button.Health.Background:SetVertexColor(0,0,0,1)
+			button.Health.Background:SetVertexColor(unpack(conf.HealthBar_Background))
 			
 			--MyTarget, indicating the current target of the player
 			
-			button.MyTarget = MyCreateFrame('Frame', button.Health, {"TOPLEFT", button.Health, "TOPLEFT", -1, 1}, {"BOTTOMRIGHT", button.Health, "BOTTOMRIGHT", 1, -1}, nil)
+			button.MyTarget = MyCreateFrame('Frame', button.Health, {"TOPLEFT", button.Health, "TOPLEFT", -1, 1}, {"BOTTOMRIGHT", button.Power, "BOTTOMRIGHT", 1, -1}, nil)
 			button.MyTarget = SetBackdrop(button.MyTarget, {0, 0, 0, 0}, conf.MyTarget_Color)
 			button.MyTarget:Hide()
 			
 			--MyFocus, indicating the current focus of the player
-			button.MyFocus = MyCreateFrame('Frame', button.Health, {"TOPLEFT", button.Health, "TOPLEFT", -1, 1}, {"BOTTOMRIGHT", button.Health, "BOTTOMRIGHT", 1, -1}, nil)
+			button.MyFocus = MyCreateFrame('Frame', button.Health, {"TOPLEFT", button.Health, "TOPLEFT", -1, 1}, {"BOTTOMRIGHT", button.Power, "BOTTOMRIGHT", 1, -1}, nil)
 			button.MyFocus = SetBackdrop(button.MyFocus, {0, 0, 0, 0}, conf.MyFocus_Color)
 			button.MyFocus:Hide()
 			
 			-- numerical target indicator
-			button.TargetCounter = MyCreateFrame("Frame", button, {'TOPRIGHT', -5, 0}, {'BOTTOMRIGHT', -5, 0}, 20)
+			button.TargetCounter = MyCreateFrame("Frame", button, {'TOPRIGHT', button.Health, "TOPRIGHT", -5, 0}, {'BOTTOMRIGHT', button.Health, "BOTTOMRIGHT", -5, 0}, 20)
 			
 			button.TargetCounter.Text = CreateFontString(button.TargetCounter, true, nil, nil, 'RIGHT', nil, conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_Textcolor, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
 			button.TargetCounter.Text:SetText(0)
@@ -1390,7 +1501,7 @@ do
 			button.TargetIndicators = {}
 
 			-- name
-			button.Name = CreateFontString(button.Health, false, {'LEFT', 5, 0}, {'RIGHT', button.TargetCounter, "RIGHT", 0, 0}, 'LEFT', nil, conf.Name_Fontsize, conf.Name_Outline, conf.Name_Textcolor, conf.Name_EnableTextshadow, conf.Name_TextShadowcolor)
+			button.Name = CreateFontString(button.Health, false, {'TOPLEFT', button.Role, "TOPRIGHT", 5, 2}, {'BOTTOMRIGHT', button.TargetCounter, "BOTTOMLEFT", 0, 0}, 'LEFT', nil, conf.Name_Fontsize, conf.Name_Outline, conf.Name_Textcolor, conf.Name_EnableTextshadow, conf.Name_TextShadowcolor)
 			
 			-- trinket
 			button.Trinket = MyCreateFrame("Frame", button, {'TOPLEFT', button, 'TOPRIGHT', 1, 0}, {'BOTTOMLEFT', button, 'BOTTOMRIGHT', 1, 0}, conf.BarHeight)
@@ -1461,6 +1572,8 @@ do
 				button.ObjectiveAndRespawn:Hide()
 				button.ObjectiveAndRespawn.ActiveRespawnTimer = false
 			end)
+			
+			button.config = conf
 			return button
 		end
 		
@@ -1573,23 +1686,7 @@ do
 				
 				
 				--self:Debug("test")
-				if not BrawlCheck or IsInBrawl() then
-					self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-					self:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
-					self:RegisterEvent("PLAYER_TARGET_CHANGED")
-					self:RegisterEvent("PLAYER_FOCUS_CHANGED")
-					self:RegisterEvent("UNIT_TARGET")
-					self:RegisterEvent("UNIT_HEALTH_FREQUENT")
-					self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-					self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
-					self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-					self:RegisterEvent("ARENA_CROWD_CONTROL_SPELL_UPDATE")
-					self:RegisterEvent("ARENA_COOLDOWNS_UPDATE")
-					self:RegisterEvent("GROUP_ROSTER_UPDATE")
-					-- self:RegisterEvent("LOSS_OF_CONTROL_ADDED")
-					self:RegisterEvent("PLAYER_ALIVE")
-					self:RegisterEvent("PLAYER_UNGHOST")
-				else
+				if BrawlCheck and not IsInBrawl() then
 					RequestFrame:Hide() --stopp the OnUpdateScript
 					self:UnregisterEvent("UPDATE_BATTLEFIELD_SCORE")--stopping the onupdate script should do it but other addons make "UPDATE_BATTLEFIELD_SCORE" trigger aswell
 					return --no valid zone
@@ -1673,7 +1770,8 @@ do
 					if enemyButton then	--already existing
 						enemyButton.Status = 1 --1 means found, already existing
 						if enemyButton.PlayerSpec ~= spec then--its possible to change spec in battleground
-							enemyButton.RoleNumber = Data.Classes[classTag][spec].roleNumber
+							enemyButton.PlayerRoleNumber = Data.Classes[classTag][spec].roleNumber
+							enemyButton.PlayerRoleID = Data.Classes[classTag][spec].roleID
 							enemyButton.Spec.Icon:SetTexture(Data.Classes[classTag][spec].specIcon)
 							enemyButton.PlayerSpec = spec
 							
@@ -1703,9 +1801,10 @@ do
 				end 
 			end
 			for name, enemyDetails in pairs(newPlayerDetails) do
-				local enemyButton = self:GetEnemyButtonForNewPlayer()
+				local enemyButton = self:SetupButtonForNewPlayer(enemyDetails, name)
 				
-				--self:Debug(name, "is new")
+				-- set data for real enemies
+				enemyButton.Status = 2
 				
 				enemyButton:SetAttribute('macrotext1',
 					'/cleartarget\n'..
@@ -1717,31 +1816,7 @@ do
 					'/focus\n'..
 					'/targetlasttarget'
 				)
-				
-				enemyButton.PlayerRace = enemyDetails.PlayerRace
-				enemyButton.PlayerClass = enemyDetails.PlayerClass
-				enemyButton.PlayerSpec = enemyDetails.PlayerSpec
-				enemyButton.Status = 2
-				
-				
-				local specData = Data.Classes[enemyDetails.PlayerClass][enemyButton.PlayerSpec]
-				
-				--enemyButton.Role.Icon:SetTexCoord(GetTexCoordsForRole(enemyDetails.RoleID))		
-				-- enemyButton.Role.Icon:SetTexture(RoleIcons[enemyDetails.RoleID])	
-				-- enemyButton.Role:Show()
-				
-				enemyButton.RoleNumber = specData.roleNumber
-				enemyButton.Spec.Icon:SetTexture(specData.specIcon)		
-			
 
-				local c = RAID_CLASS_COLORS[enemyDetails.PlayerClass]
-				enemyButton.Health:SetStatusBarColor(c.r,c.g,c.b)
-				enemyButton.Health:SetValue(1)
-				
-				enemyButton:SetName(name)
-				
-
-				
 				if BattleGroundDebuffs then
 					if CurrentMapID == 856 then --8456 is kotmogu
 						enemyButton.ObjectiveAndRespawn:SetScript('OnEvent', objectiveFrameFunctions.Kotmoguorbs)
@@ -1751,8 +1826,8 @@ do
 				end
 				
 				enemyButton.UnitIDs = {TargetedByAlly = {}}
-				--enemyButton.GUID = false
-				enemyButton:Show()
+				enemyButton:UpdateRange(false)
+				-- end set data for real enemies
 				
 				tinsert(self.EnemySortingTable, name)				
 				self.Enemies[name] = enemyButton
@@ -1799,6 +1874,7 @@ do
 			self:UnregisterEvent("PLAYER_FOCUS_CHANGED")
 			self:UnregisterEvent("UNIT_TARGET")
 			self:UnregisterEvent("UNIT_HEALTH_FREQUENT") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
+			self:UnregisterEvent("UNIT_POWER_FREQUENT") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 			self:UnregisterEvent("UPDATE_BATTLEFIELD_SCORE")
 			self:UnregisterEvent("NAME_PLATE_UNIT_ADDED")
 			self:UnregisterEvent("NAME_PLATE_UNIT_REMOVED")

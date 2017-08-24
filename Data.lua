@@ -440,13 +440,66 @@ do
 		["HEALER"] = 1,
 		["TANK"] = 2
 	}
-	for classId = 1, MAX_CLASSES do --example classes[EnglishClass][SpecName].
-		local _, classTag = GetClassInfoByID(classId)
+	local specIdToRessource = {
+		--Death Knight
+		[250] = "RUNIC_POWER",	--Blood
+		[251] = "RUNIC_POWER",	--Frost
+		[252] = "RUNIC_POWER",	--Unholy
+		--Demon Hunter
+		[577] = "FURY",			--Havoc
+		[581] = "PAIN",			--Vengeance
+		--Druid 
+		[102] = "LUNAR_POWER",	--Balance
+		[103] = "ENERGY",		--Feral Combat
+		[104] = "RAGE",			--Guardian
+		[105] = "MANA",			--Restoration
+		--Hunter 
+		[253] = "FOCUS",		--Beast Mastery
+		[254] = "FOCUS",		--Marksmanship
+		[255] = "FOCUS",		--Survival
+		--Mage
+		[62] = "MANA",			--Arcane
+		[63] = "MANA",			--Fire
+		[64] = "MANA",			--Frost
+		--Monk
+		[268] = "ENERGY",		--Brewmaster
+		[269] = "ENERGY",		--Windwalker
+		[270] = "MANA",			--Mistweaver
+		--Paladin
+		[65] = "MANA",			--Holy
+		[66] = "MANA",			--Protection
+		[70] = "MANA",			--Retribution
+		--Priest
+		[256] = "MANA",			--Discipline
+		[257] = "MANA",			--Holy
+		[258] = "INSANITY",		--Shadow
+		--Rogue
+		[259] = "ENERGY",		--Assassination
+		[260] = "ENERGY",		--Outlaw
+		[261] = "ENERGY",		--Subtlety
+		--Shaman,
+		[262] = "MAELSTROM",	--Elemental
+		[263] = "MAELSTROM",	--Enhancement
+		[264] = "MANA",			--Restoration
+		--Warlock
+		[265] = "MANA",			--Affliction
+		[266] = "MANA",			--Demonology
+		[267] = "MANA",			--Destruction
+		--Warrior
+		[71] = "RAGE",			--Arms
+		[72] = "RAGE",			--Fury
+		[73] = "RAGE"			--Protection
+	}
+	
+	
+	for classID = 1, MAX_CLASSES do --example classes[EnglishClass][SpecName].
+		local _, classTag = GetClassInfoByID(classID)
 		Data.Classes[classTag] = {}
-		for i = 1, GetNumSpecializationsForClassID(classId) do
-			local id,specName,_,icon,role = GetSpecializationInfoForClassID(classId, i)
+		for i = 1, GetNumSpecializationsForClassID(classID) do
+			local specID,specName,_,icon,role = GetSpecializationInfoForClassID(classID, i)
 			Data.Classes[classTag][specName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specIcon = icon}
-			table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = specName})
+			Data.Classes[classTag][specName].Ressource = specIdToRessource[specID] -- for testmode
+			table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = specName}) --for testmode
 		end
 	end
 end
