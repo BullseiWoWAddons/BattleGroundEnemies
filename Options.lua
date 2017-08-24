@@ -184,10 +184,6 @@ function BattleGroundEnemies:SetupOptions()
 						values = AceGUIWidgetLSMlists.font,
 						order = 5
 					},
-				
-
-					
-		
 					Growdirection = {
 						type = "select",
 						name = L.Growdirection,
@@ -491,7 +487,7 @@ function BattleGroundEnemies:SetupOptions()
 										order = 5
 									},
 									Fake3 = addVerticalSpacing(6),
-									EnemyCount_EnableTextshadow = {
+									Name_EnableTextshadow = {
 										type = "toggle",
 										name = L.FontShadow_Enabled,
 										desc = L.FontShadow_Enabled_Desc,
@@ -504,7 +500,7 @@ function BattleGroundEnemies:SetupOptions()
 										end,
 										order = 7
 									},
-									EnemyCount_TextShadowcolor = {
+									Name_TextShadowcolor = {
 										type = "color",
 										name = L.FontShadowColor,
 										desc = L.FontShadowColor_Desc,
@@ -629,6 +625,7 @@ function BattleGroundEnemies:SetupOptions()
 										type = "select",
 										name = L.Font_Outline,
 										desc = L.Font_Outline_Desc,
+										disabled = function() return not self.db.profile.NumericTargetindicator_Enabled end,
 										set = function(option, value)
 											UpdateButtons(option, value, "TargetCounter", "Text", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.NumericTargetindicator_Fontsize, value)
 										end,
@@ -639,6 +636,7 @@ function BattleGroundEnemies:SetupOptions()
 										type = "toggle",
 										name = L.FontShadow_Enabled,
 										desc = L.FontShadow_Enabled_Desc,
+										disabled = function() return not self.db.profile.NumericTargetindicator_Enabled end,
 										set = function(option, value)
 											if value then
 												UpdateButtons(option, value, "TargetCounter", "Text", nil, "SetShadowOffset", 1, -1)
@@ -660,7 +658,7 @@ function BattleGroundEnemies:SetupOptions()
 										hasAlpha = true,
 										order = 7
 									},
-									Fake2 = addVerticalSpacing(6),
+									Fake2 = addVerticalSpacing(8),
 									SymbolicTargetindicator_Enabled = {
 										type = "toggle",
 										name = L.SymbolicTargetindicator_Enabled,
@@ -669,7 +667,7 @@ function BattleGroundEnemies:SetupOptions()
 											UpdateButtons(option, value, nil, nil, "TargetIndicators", "SetShown", value)
 										end,
 										width = "full",
-										order = 7
+										order = 9
 									}
 								}
 							}
@@ -788,7 +786,7 @@ function BattleGroundEnemies:SetupOptions()
 								set = function(option, value)
 									UpdateButtons(option, value, "Racial", "Cooldown", nil, "SetHideCountdownNumbers", not value)
 								end,
-								order = 3
+								order = 2
 							}
 						}
 					},

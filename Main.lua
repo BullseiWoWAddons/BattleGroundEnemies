@@ -170,7 +170,6 @@ do
 			
 			
 			Spec_Width = 36,
-			Role_Width = 28,
 			
 			SymbolicTargetindicator_Enabled = true,
 			
@@ -1450,7 +1449,7 @@ do
 			end)
 
 			-- power
-			button.Power = MyCreateFrame('StatusBar', button, {'BOTTOMLEFT', button.Spec, "BOTTOMRIGHT", 1, 1}, {'BOTTOMRIGHT', button, "BOTTOMRIGHT", -1, 1}, nil, conf.PowerBar_Height)
+			button.Power = MyCreateFrame('StatusBar', button, {'BOTTOMLEFT', button.Spec, "BOTTOMRIGHT", 1, 1}, {'BOTTOMRIGHT', button, "BOTTOMRIGHT", -1, 1}, nil, conf.PowerBar_Enabled and conf.PowerBar_Height or 0.01)
 			button.Power:SetStatusBarTexture(LSM:Fetch("statusbar", conf.PowerBar_Texture))--enemyButton.Health:SetStatusBarTexture(137012)
 			button.Power:SetMinMaxValues(0, 1)
 
@@ -1496,6 +1495,8 @@ do
 			
 			button.TargetCounter.Text = CreateFontString(button.TargetCounter, true, nil, nil, 'RIGHT', nil, conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_Textcolor, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
 			button.TargetCounter.Text:SetText(0)
+			button.TargetCounter:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
+			
 			
 			-- symbolic target indicator
 			button.TargetIndicators = {}
