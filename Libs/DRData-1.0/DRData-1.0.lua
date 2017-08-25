@@ -359,6 +359,9 @@ local spellsAndProvidersByCategory = {
 		[ 33395] = true, -- Freeze (Water Elemental)
 		-- [157997] = true, -- Ice Nova -- since 6.1, ice nova doesn't DR with anything
 		[228600] = true, -- Glacial spike (talent)
+		[198121] = true, -- Frostbite
+		
+		
 		-- Monk
 		[116706] = 116095, -- Disable
 		-- Priest
@@ -535,41 +538,32 @@ local function debuffGained(spellID, destName, destGUID, isEnemy, isPlayer)
 	if( not isPlayer and not DRData:IsPVE(drCat) ) then
 		return
 	end
-
 	if( not trackedPlayers[destGUID] ) then
 		trackedPlayers[destGUID] = {}
 	end
-
 	-- See if we should reset it back to undiminished
 	local tracked = trackedPlayers[destGUID][drCat]
 	if( tracked and tracked.reset <= GetTime() ) then
 		tracked.diminished = 1.0
 	end
 end
-
 local function debuffFaded(spellID, destName, destGUID, isEnemy, isPlayer)
 	local drCat = DRData:GetSpellCategory(spellID)
 	if( not isPlayer and not DRData:IsPVE(drCat) ) then
 		return
 	end
-
 	if( not trackedPlayers[destGUID] ) then
 		trackedPlayers[destGUID] = {}
 	end
-
 	if( not trackedPlayers[destGUID][drCat] ) then
 		trackedPlayers[destGUID][drCat] = { reset = 0, diminished = 1.0 }
 	end
-
 	local time = GetTime()
 	local tracked = trackedPlayers[destGUID][drCat]
-
 	tracked.reset = time + DRData:GetResetTime(drCat)
 	tracked.diminished = DRData:NextDR(tracked.diminished, drCat)
-
 	-- Diminishing returns changed, now you can do an update
 end
-
 local function resetDR(destGUID)
 	-- Reset the tracked DRs for this person
 	if( trackedPlayers[destGUID] ) then
@@ -579,24 +573,20 @@ local function resetDR(destGUID)
 		end
 	end
 end
-
 local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local COMBATLOG_OBJECT_REACTION_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE
 local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
-
 local eventRegistered = {["SPELL_AURA_APPLIED"] = true, ["SPELL_AURA_REFRESH"] = true, ["SPELL_AURA_REMOVED"] = true, ["PARTY_KILL"] = true, ["UNIT_DIED"] = true}
 local function COMBAT_LOG_EVENT_UNFILTERED(self, event, timestamp, eventType, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellID, spellName, spellSchool, auraType)
 	if( not eventRegistered[eventType] ) then
 		return
 	end
-
 	-- Enemy gained a debuff
 	if( eventType == "SPELL_AURA_APPLIED" ) then
 		if( auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) ) then
 			local isPlayer = ( bit.band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) == COMBATLOG_OBJECT_TYPE_PLAYER or bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) == COMBATLOG_OBJECT_CONTROL_PLAYER )
 			debuffGained(spellID, destName, destGUID, (bit.band(destFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) == COMBATLOG_OBJECT_REACTION_HOSTILE), isPlayer)
 		end
-
 	-- Enemy had a debuff refreshed before it faded, so fade + gain it quickly
 	elseif( eventType == "SPELL_AURA_REFRESH" ) then
 		if( auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) ) then
@@ -605,14 +595,12 @@ local function COMBAT_LOG_EVENT_UNFILTERED(self, event, timestamp, eventType, so
 			debuffFaded(spellID, destName, destGUID, isHostile, isPlayer)
 			debuffGained(spellID, destName, destGUID, isHostile, isPlayer)
 		end
-
 	-- Buff or debuff faded from an enemy
 	elseif( eventType == "SPELL_AURA_REMOVED" ) then
 		if( auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) ) then
 			local isPlayer = ( bit.band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) == COMBATLOG_OBJECT_TYPE_PLAYER or bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) == COMBATLOG_OBJECT_CONTROL_PLAYER )
 			debuffFaded(spellID, destName, destGUID, (bit.band(destFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) == COMBATLOG_OBJECT_REACTION_HOSTILE), isPlayer)
 		end
-
 	-- Don't use UNIT_DIED inside arenas due to accuracy issues, outside of arenas we don't care too much
 	elseif( ( eventType == "UNIT_DIED" and select(2, IsInInstance()) ~= "arena" ) or eventType == "PARTY_KILL" ) then
 		resetDR(destGUID)

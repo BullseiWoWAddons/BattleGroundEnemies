@@ -79,9 +79,11 @@ do
 			local randomSpec = Data.RolesToSpec[role][mathrandom(1, #Data.RolesToSpec[role])]
 			local classTag = randomSpec.classTag
 			local specName = randomSpec.specName
-			fakeEnemies["Enemy"..counter.."-Realm"..counter] = {
+			local name = "Enemy"..counter.."-Realm"..counter
+			fakeEnemies[name] = {
 				PlayerClass = classTag,
-				PlayerSpec = specName,
+				PlayerName = name,
+				PlayerSpec = specName
 			}
 			counter = counter + 1
 		end
@@ -140,7 +142,7 @@ do
 		self:FillFakeEnemyData(damagerAmount, "DAMAGER")
 		
 		for name, enemyDetails in pairs(fakeEnemies) do
-			local enemyButton = self:SetupButtonForNewPlayer(enemyDetails, name)
+			local enemyButton = self:SetupButtonForNewPlayer(enemyDetails)
 			
 			tinsert(self.EnemySortingTable, name)					
 			self.Enemies[name] = enemyButton
