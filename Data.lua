@@ -83,6 +83,12 @@ Data.FontOutlines = {
     ["THICKOUTLINE"] = L["Thick"],
 }
 
+Data.Buttons = {
+    Target = TARGET,
+	Focus = FOCUS,
+	Custom = CHANNEL_CATEGORY_CUSTOM
+}
+
 
 
 
@@ -496,10 +502,16 @@ do
 		local _, classTag = GetClassInfoByID(classID)
 		Data.Classes[classTag] = {}
 		for i = 1, GetNumSpecializationsForClassID(classID) do
-			local specID,specName,_,icon,role = GetSpecializationInfoForClassID(classID, i)
-			Data.Classes[classTag][specName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specIcon = icon}
-			Data.Classes[classTag][specName].Ressource = specIdToRessource[specID] -- for testmode
-			table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = specName}) --for testmode
+			
+			local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version
+			Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specIcon = icon, Ressource = specIdToRessource[specID]}
+			table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = maleSpecName}) --for testmode
+			
+			--if specName == "Танцующий с ветром" then specName = "Танцующая с ветром" end -- fix for russian bug, fix added on 2017.08.27
+			local specID,specName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 3) -- female version	
+			if not Data.Classes[classTag][specName] then --there is a female version of that specName
+				Data.Classes[classTag][specName] = Data.Classes[classTag][maleSpecName]
+			end
 		end
 	end
 end

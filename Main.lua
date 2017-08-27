@@ -18,6 +18,7 @@ local pairs = pairs
 local print = print
 local type = type
 local unpack = unpack
+local gsub = gsub
 local floor = math.floor
 local tinsert = table.insert
 local tremove = table.remove
@@ -121,6 +122,7 @@ function BattleGroundEnemies:ApplyAllSettings()
 	for name, enemyButton in pairs(self.Enemies) do
 		self:ApplyButtonSettings(enemyButton)
 		enemyButton:SetName()
+		enemyButton:SetBindings()
 	end
 	
 	for number, enemyButton in pairs(self.InactiveEnemyButtons) do
@@ -128,57 +130,56 @@ function BattleGroundEnemies:ApplyAllSettings()
 	end
 end
 
-function BattleGroundEnemies:ApplyButtonSettings(button)
-	local conf = button.config
+function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
+	enemyButton.config = self.db.profile
+	local conf = enemyButton.config
 
-	button:SetHeight(conf.BarHeight)
+	enemyButton:SetHeight(conf.BarHeight)
 	
 	--spec
-	button.Spec:SetWidth(conf.Spec_Width)
+	enemyButton.Spec:SetWidth(conf.Spec_Width)
 	
 	-- power
-	button.Power:SetHeight(conf.PowerBar_Enabled and conf.PowerBar_Height or 0.01)
-	button.Power:SetStatusBarTexture(LSM:Fetch("statusbar", conf.PowerBar_Texture))--enemyButton.Health:SetStatusBarTexture(137012)
-	button.Power.Background:SetVertexColor(unpack(conf.PowerBar_Background))
+	enemyButton.Power:SetHeight(conf.PowerBar_Enabled and conf.PowerBar_Height or 0.01)
+	enemyButton.Power:SetStatusBarTexture(LSM:Fetch("statusbar", conf.PowerBar_Texture))--enemyButton.Health:SetStatusBarTexture(137012)
+	enemyButton.Power.Background:SetVertexColor(unpack(conf.PowerBar_Background))
 	
 	-- health
-	button.Health:SetStatusBarTexture(LSM:Fetch("statusbar", conf.HealthBar_Texture))--enemyButton.Health:SetStatusBarTexture(137012)
-	button.Health.Background:SetVertexColor(unpack(conf.HealthBar_Background))
+	enemyButton.Health:SetStatusBarTexture(LSM:Fetch("statusbar", conf.HealthBar_Texture))--enemyButton.Health:SetStatusBarTexture(137012)
+	enemyButton.Health.Background:SetVertexColor(unpack(conf.HealthBar_Background))
 	
 	-- role
 	if conf.RoleIcon_Enabled then 
-		button.Role:SetSize(conf.RoleIcon_Size, conf.RoleIcon_Size) 
+		enemyButton.Role:SetSize(conf.RoleIcon_Size, conf.RoleIcon_Size) 
 	else
-		button.Role:SetSize(0.01, 0.01)
+		enemyButton.Role:SetSize(0.01, 0.01)
 	end
 
 
 	--MyTarget, indicating the current target of the player
-	button.MyTarget:SetBackdropBorderColor(conf.MyTarget_Color)
+	enemyButton.MyTarget:SetBackdropBorderColor(conf.MyTarget_Color)
 	
 	--MyFocus, indicating the current focus of the player
-	button.MyTarget:SetBackdropBorderColor(conf.MyFocus_Color)
+	enemyButton.MyTarget:SetBackdropBorderColor(conf.MyFocus_Color)
 	
 	-- numerical target indicator
-	button.TargetCounter:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
-	ApplyFontStringSettings(button.TargetCounter.Text, true, nil, nil, 'RIGHT', nil, conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_Textcolor, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
-	button.TargetCounter.Text:SetText(0)
-
+	enemyButton.TargetCounter:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
+	ApplyFontStringSettings(enemyButton.TargetCounter.Text, true, nil, nil, 'RIGHT', nil, conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_Textcolor, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
+	enemyButton.TargetCounter.Text:SetText(0)
 
 	-- name
-	ApplyFontStringSettings(button.Name, false, {'TOPLEFT', button.Role, "TOPRIGHT", 5, 2}, {'BOTTOMRIGHT', button.TargetCounter, "BOTTOMLEFT", 0, 0}, 'LEFT', nil, conf.Name_Fontsize, conf.Name_Outline, conf.Name_Textcolor, conf.Name_EnableTextshadow, conf.Name_TextShadowcolor)
+	ApplyFontStringSettings(enemyButton.Name, false, {'TOPLEFT', enemyButton.Role, "TOPRIGHT", 5, 2}, {'BOTTOMRIGHT', enemyButton.TargetCounter, "BOTTOMLEFT", 0, 0}, 'LEFT', nil, conf.Name_Fontsize, conf.Name_Outline, conf.Name_Textcolor, conf.Name_EnableTextshadow, conf.Name_TextShadowcolor)
 	
 	-- trinket
-	button.Trinket.Cooldown:ApplyCooldownSettings(conf.Trinket_ShowNumbers, false, true, {0, 0, 0, 0.75})
-
+	enemyButton.Trinket.Cooldown:ApplyCooldownSettings(conf.Trinket_ShowNumbers, false, true, {0, 0, 0, 0.75})
 
 	-- RACIALS	
-	button.Racial.Cooldown:ApplyCooldownSettings(conf.Racial_ShowNumbers, false, true, {0, 0, 0, 0.75})
+	enemyButton.Racial.Cooldown:ApplyCooldownSettings(conf.Racial_ShowNumbers, false, true, {0, 0, 0, 0.75})
 
-
-	button.ObjectiveAndRespawn:SetWidth(conf.ObjectiveAndRespawn_Width)
-	ApplyFontStringSettings(button.ObjectiveAndRespawn.AuraText, true, nil, nil, "CENTER", nil, conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline, conf.ObjectiveAndRespawn_Textcolor, conf.ObjectiveAndRespawn_EnableTextshadow, conf.ObjectiveAndRespawn_TextShadowcolor)
-	button.ObjectiveAndRespawn.Cooldown:ApplyCooldownSettings(conf.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})
+	-- objective and respawn
+	enemyButton.ObjectiveAndRespawn:SetWidth(conf.ObjectiveAndRespawn_Width)
+	ApplyFontStringSettings(enemyButton.ObjectiveAndRespawn.AuraText, true, nil, nil, "CENTER", nil, conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline, conf.ObjectiveAndRespawn_Textcolor, conf.ObjectiveAndRespawn_EnableTextshadow, conf.ObjectiveAndRespawn_TextShadowcolor)
+	enemyButton.ObjectiveAndRespawn.Cooldown:ApplyCooldownSettings(conf.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})
 end
 
 
@@ -301,6 +302,14 @@ do
 			Notificatoins_Enabled = true,
 			PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
 			NegativeSound = [[Sound\Interface\UI_BattlegroundCountdown_Timer.ogg]],
+			
+			
+			LeftButtonType = "Target",
+			LeftButtonValue = "",
+			RightButtonType = "Focus",
+			RightButtonValue = "",
+			MiddleButtonType = "Custom",
+			MiddleButtonValue = ""
 		}
 	}
 
@@ -308,13 +317,13 @@ do
 		PlayerDetails.PlayerName = UnitName("player")
 		PlayerDetails.ClassColor = RAID_CLASS_COLORS[(select(2, UnitClass("player")))]
 		PlayerDetails.TargetUnitID = "target"
-		-- ArenaFrameCvar = GetCVar("showArenaEnemyFrames")
-		-- self:Debug("ArenaFrameCvar login", ArenaFrameCvar)
 		
 		self.db = LibStub("AceDB-3.0"):New("BattleGroundEnemiesDB", DefaultSettings, true)
-		-- self.db.RegisterCallback(self, "OnProfileChanged", "UpdateFrames")
-		-- self.db.RegisterCallback(self, "OnProfileCopied", "UpdateFrames")
-		-- self.db.RegisterCallback(self, "OnProfileReset", "UpdateFrames")
+		
+
+		self.db.RegisterCallback(self, "OnProfileChanged", "ApplyAllSettings")
+		self.db.RegisterCallback(self, "OnProfileCopied", "ApplyAllSettings")
+		self.db.RegisterCallback(self, "OnProfileReset", "ApplyAllSettings")
 		
 		self:SetupOptions()
 		--DBObjectLib:ResetProfile(noChildren, noCallbacks)
@@ -402,7 +411,7 @@ function BattleGroundEnemies:ButtonPositioning()
 	end
 end
 
-function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails, name)
+function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 	
 	local enemyButton = self.InactiveEnemyButtons[#self.InactiveEnemyButtons] 
 	if enemyButton then --recycle a previous used button
@@ -455,6 +464,7 @@ function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails, name)
 	enemyButton.Power:SetStatusBarColor(c.r, c.g, c.b)
 	
 	enemyButton:SetName()
+	enemyButton:SetBindings()
 	
 	enemyButton:Show()
 
@@ -523,23 +533,13 @@ end
 
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
-	--self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent)
-	if unitEvent == "cleared" then 
+	self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
+	if unitEvent ~= "seen" then --"unseen", "cleared" or "destroyed"
 		local enemyButton = self.ArenaEnemyIDToEnemyButton[unitID]
 		if enemyButton then
-			local objective = enemyButton.ObjectiveAndRespawn
-			
-			--self:Debug("ARENA_OPPONENT_UPDATE", enemyButton.DisplayedName, "cleared")
-			self.ArenaEnemyIDToEnemyButton[unitID] = nil
-			objective.Icon:SetTexture()
-			objective.Value = false
-			objective:UnregisterAllEvents()
-			objective:Hide()
-
-			enemyButton.UnitIDs.Arena = false
-			enemyButton:FetchAnotherUnitID()
+			enemyButton:ObjectiveLost()
 		end
-	else -- "unseen", "seen" or "destroyed"
+	else --seen
 		--self:Debug(UnitName(unitID))
 		local enemyButton = self:GetEnemybuttonByUnitID(unitID)
 		if enemyButton then
@@ -590,7 +590,7 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED(timestamp,subevent,hide
 		--self:Debug("subevent", destName, "UNIT_DIED")
 		local enemyButton = self.Enemies[destName]
 		if enemyButton then
-			enemyButton.ObjectiveAndRespawn:ShowRespawnTimer(27)
+			enemyButton:UnitIsDead()
 		end
 	end
 end
@@ -926,8 +926,9 @@ do
 			
 			function objectiveFrameFunctions:NotKotmogu(event, unitID)
 				local battleGroundDebuffs = BattleGroundDebuffs
+				local name, count, _
 				for i = 1, #battleGroundDebuffs do
-					local _, _, _, count = UnitDebuff(unitID, battleGroundDebuffs[i])
+					name, _, _, count = UnitDebuff(unitID, battleGroundDebuffs[i])
 					--values for orb debuff:
 					--BattleGroundEnemies:Debug(value0, value1, value2, value3, value4, value5)
 					-- value2 = Reduces healing received by value2
@@ -943,20 +944,6 @@ do
 					end
 				end
 			end 
-			
-			function objectiveFrameFunctions:ShowRespawnTimer(duration)
-				--BattleGroundEnemies:Debug("ShowRespawnTimer")
-				if (IsRatedBG or BattleGroundEnemies.TestmodeActive) and BattleGroundEnemies.db.profile.ObjectiveAndRespawn_RespawnEnabled  then
-					--BattleGroundEnemies:Debug("ShowRespawnTimer SetCooldown")
-					if not self.ActiveRespawnTimer then
-						self:Show()
-						self.Icon:SetTexture(GetSpellTexture(8326))
-						self.AuraText:SetText("")
-						self.Cooldown:SetCooldown(GetTime(), duration)
-						self.ActiveRespawnTimer = true
-					end
-				end
-			end
 		end
 		
 		local enemyButtonFunctions = {}
@@ -994,6 +981,44 @@ do
 				self.Name:SetText(name)
 				self.DisplayedName = name
 			end
+			
+			do
+				local mouseButtonNumberToBindingType = {
+					[1] = "LeftButtonType",
+					[2] = "RightButtonType",
+					[3] = "MiddleButtonType"
+				}
+				
+				local mouseButtonNumberToBindingMacro = {
+					[1] = "LeftButtonValue",
+					[2] = "RightButtonValue",
+					[3] = "MiddleButtonValue"
+				}
+				
+				function enemyButtonFunctions:SetBindings()
+					
+					for i = 1, 3 do
+						local bindingType = self.config[mouseButtonNumberToBindingType[i]]
+					
+						if bindingType == "Target" then
+							self:SetAttribute('macrotext'..i,
+								'/cleartarget\n'..
+								'/targetexact '..self.PlayerName
+							)
+						elseif bindingType == "Focus" then
+							self:SetAttribute('macrotext'..i,
+								'/targetexact '..self.PlayerName..'\n'..
+								'/focus\n'..
+								'/targetlasttarget'
+							)
+						
+						else -- Custom
+							local macrotext = self.config[mouseButtonNumberToBindingMacro[i]]:gsub("%%n", self.PlayerName)
+							self:SetAttribute('macrotext'..i, macrotext)
+						end
+					end
+				end
+			end
 	
 	
 			function enemyButtonFunctions:ArenaOpponentShown(unitID)
@@ -1012,6 +1037,21 @@ do
 					self:FetchAnotherUnitID()
 				end
 				RequestCrowdControlSpell(unitID)
+			end
+			
+			function enemyButtonFunctions:UnitIsDead()
+				--BattleGroundEnemies:Debug("UnitIsDead")
+				local objective = self.ObjectiveAndRespawn
+				if (IsRatedBG or BattleGroundEnemies.TestmodeActive) and BattleGroundEnemies.db.profile.ObjectiveAndRespawn_RespawnEnabled  then
+					--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
+					if not objective.ActiveRespawnTimer then
+						objective:Show()
+						objective.Icon:SetTexture(GetSpellTexture(8326))
+						objective.AuraText:SetText("")
+						objective.Cooldown:SetCooldown(GetTime(), 26)
+						objective.ActiveRespawnTimer = true
+					end
+				end
 			end
 			
 			function enemyButtonFunctions:RegisterForRangeUpdate() --Add to RangeUpdate
@@ -1129,7 +1169,7 @@ do
 			function enemyButtonFunctions:UpdateHealth(unitID)
 				if UnitIsDead(unitID) then
 					--BattleGroundEnemies:Debug("UpdateAll", UnitName(unitID), "UnitIsDead")
-					self.ObjectiveAndRespawn:ShowRespawnTimer(27)
+					self:UnitIsDead()
 				elseif self.ObjectiveAndRespawn.ActiveRespawnTimer then --player is alive again
 					self.ObjectiveAndRespawn.Cooldown:Clear()
 				end
@@ -1168,6 +1208,22 @@ do
 				self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID))
 				self:UpdateHealth(unitID)
 				if self.config.PowerBar_Enabled then self:UpdatePower(unitID) end
+			end
+			
+			
+			function enemyButtonFunctions:ObjectiveLost()
+			
+				--self:Debug("ARENA_OPPONENT_UPDATE", enemyButton.DisplayedName, "cleared")
+				BattleGroundEnemies.ArenaEnemyIDToEnemyButton[self.UnitIDs.Arena] = nil
+				
+				local objective = self.ObjectiveAndRespawn
+				objective.Icon:SetTexture()
+				objective.Value = false
+				objective:UnregisterAllEvents()
+				objective:Hide()
+
+				self.UnitIDs.Arena = false
+				self:FetchAnotherUnitID()
 			end
 		
 			
@@ -1496,7 +1552,8 @@ do
 			button:RegisterForClicks('AnyUp')
 			button:RegisterForDrag('LeftButton')
 			button:SetAttribute('type1','macro')-- type1 = Left-Click
-			button:SetAttribute('type2','macro')-- type2 = Right-Click, type3 = Middle-Click
+			button:SetAttribute('type2','macro')-- type2 = Right-Click
+			button:SetAttribute('type3','macro')-- type3 = Middle-Click
 
 			button:SetScript('OnDragStart', button_OnDragStart)
 			button:SetScript('OnDragStop', BattleGroundEnemies.SavePosition)
@@ -1610,8 +1667,6 @@ do
 				button:DrPositioning()
 			end)
 			
-			button.ObjectiveAndRespawn.ShowRespawnTimer = objectiveFrameFunctions.ShowRespawnTimer
-			
 			button.ObjectiveAndRespawn.Icon = button.ObjectiveAndRespawn:CreateTexture(nil, "BORDER")
 			button.ObjectiveAndRespawn.Icon:SetAllPoints()
 			
@@ -1631,9 +1686,7 @@ do
 				button.ObjectiveAndRespawn.ActiveRespawnTimer = false
 			end)
 			
-			button.config = self.db.profile
 			self:ApplyButtonSettings(button)
-			
 			return button
 		end
 		
@@ -1866,17 +1919,6 @@ do
 				
 				-- set data for real enemies
 				enemyButton.Status = 2
-				
-				enemyButton:SetAttribute('macrotext1',
-					'/cleartarget\n'..
-					'/targetexact '..name
-				)
-
-				enemyButton:SetAttribute('macrotext2',
-					'/targetexact '..name..'\n'..
-					'/focus\n'..
-					'/targetlasttarget'
-				)
 
 				if BattleGroundDebuffs then
 					if CurrentMapID == 856 then --8456 is kotmogu

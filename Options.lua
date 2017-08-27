@@ -84,17 +84,6 @@ local function addHorizontalSpacing(order)
 	return horizontalSpacing
 end
 
-local function addHorizontalSpacingFull(order)
-	local horizontalSpacing = {
-		type = "description",
-		name = " ",
-		width = "double",	
-		order = order,
-	}
-	return horizontalSpacing
-end
-
-
 function BattleGroundEnemies:SetupOptions()
 	self.options = {
 		type = "group",
@@ -1100,12 +1089,76 @@ function BattleGroundEnemies:SetupOptions()
 						}
 					}
 				}
+			},
+			KeybindSettings = {
+				type = "group",
+				name = KEY_BINDING,
+				desc = L.KeybindSettings_Desc,
+				disabled = InCombatLockdown,
+				set = function(option, value) 
+					UpdateButtons(option, value, nil, nil, nil, "SetBindings")
+				end,
+				--childGroups = "tab",
+				order = 4,
+				args = {
+					LeftButtonType = {
+						type = "select",
+						name = KEY_BUTTON1,
+						order = 1,
+						values =  Data.Buttons,
+					},
+					LeftButtonValue = {
+						type = "input",
+						name = ENTER_MACRO_LABEL,
+						desc = L.CustomMacro_Desc,
+						disabled = function() return self.db.profile.LeftButtonType == "Target" or self.db.profile.LeftButtonType == "Focus" end,
+						multiline = true,
+						order = 2,
+						width = 'double',
+					},
+					RightButtonType = {
+						type = "select",
+						name = KEY_BUTTON2,
+						order = 3,
+						values =  Data.Buttons,
+					},
+					RightButtonValue = {
+						type = "input",
+						name = ENTER_MACRO_LABEL,
+						desc = L.CustomMacro_Desc,
+						disabled = function() return self.db.profile.RightButtonType == "Target" or self.db.profile.RightButtonType == "Focus" end,
+						multiline = true,
+						order = 4,
+						width = 'double',
+					},
+					MiddleButtonType = {
+						type = "select",
+						name = KEY_BUTTON3,
+						order = 5,
+						values =  Data.Buttons,
+					},
+					MiddleButtonValue = {
+						type = "input",
+						name = ENTER_MACRO_LABEL,
+						desc = L.CustomMacro_Desc,
+						disabled = function() return self.db.profile.MiddleButtonType == "Target" or self.db.profile.MiddleButtonType == "Focus" end,
+						multiline = true,
+						order = 6,
+						width = 'double',
+					}
+				}
 			}
 		}
 	}
 
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("BattleGroundEnemies", self.options)
+	
+	--profiles
+	self.options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+	self.options.args.profiles.order = -1
+	self.options.args.profiles.disabled = InCombatLockdown
+	
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
 end
 
