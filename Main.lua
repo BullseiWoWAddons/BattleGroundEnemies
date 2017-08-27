@@ -232,7 +232,7 @@ do
 			SpaceBetweenRows = 1,
 			Growdirection = "downwards",
 			
-			RoleIcon_Enabled = false,
+			RoleIcon_Enabled = true,
 			RoleIcon_Size = 13,
 			
 			RangeIndicator_Enabled = true,
@@ -282,6 +282,9 @@ do
 			MyDebuffs_EnableTextshadow = true,
 			MyDebuffs_TextShadowcolor = {0, 0, 0, 1},
 			MyDebuffs_Spacing = 2,
+			
+			MyDebuffsFiltering_Enabled = false,
+			MyDebuffsFiltering_Filterlist = {},
 
 			ObjectiveAndRespawn_ObjectiveEnabled = true,
 			ObjectiveAndRespawn_RespawnEnabled = true,
@@ -1381,8 +1384,10 @@ do
 					
 					
 					if applied then
-						if not testmode then
+						if self.config.MyDebuffsFiltering_Enabled and not self.config.MyDebuffsFiltering_Filterlist[_spellID] then return end
 						
+						if not testmode then
+							
 							local activeUnitID = self.UnitIDs.Active
 							if not activeUnitID or srcName ~= PlayerDetails.PlayerName then return end
 						

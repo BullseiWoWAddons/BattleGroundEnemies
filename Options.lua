@@ -9,6 +9,7 @@ local DRData = LibStub("DRData-1.0")
 local function getOption(option)
 	local value = option.arg and BattleGroundEnemies.db.profile[option.arg] or BattleGroundEnemies.db.profile[option[#option]]
 	if type(value) == "table" then
+		--print("is table")
 		return unpack(value)
 	else
 		return value
@@ -23,6 +24,7 @@ local function setOption(option, value)
 	-- setting = value
 	-- BattleGroundEnemies:Debug(option.arg, value, option[0], option[1], option[2], option[3], option[4])
 	local key = option[#option]
+	--print(type(value), value)
 	-- BattleGroundEnemies:Debug(key, value)
 	-- BattleGroundEnemies:Debug(unpack(value))
 	BattleGroundEnemies.db.profile[key] = value
@@ -1035,6 +1037,50 @@ function BattleGroundEnemies:SetupOptions()
 								end,
 								hasAlpha = true,
 								order = 12
+							},
+							MyDebuffsFilteringSettings = {
+								type = "group",
+								name = FILTER,
+								desc = L.MyDebuffsFilteringSettings_Desc,
+								--inline = true,
+								order = 13,
+								args = {
+									MyDebuffsFiltering_Enabled = {
+										type = "toggle",
+										name = L.MyDebuffsFiltering_Enabled,
+										desc = L.MyDebuffsFiltering_Enabled_Desc,
+										width = 'normal',
+										order = 1
+									},
+									MyDebuffsFiltering_AddSpellID = {
+										type = "input",
+										name = L.MyDebuffsFiltering_AddSpellID,
+										desc = L.MyDebuffsFiltering_AddSpellID_Desc,
+										disabled = function() return not self.db.profile.MyDebuffsFiltering_Enabled end,
+										get = function() return "" end,
+										set = function(option, value, state)
+											local numbers = {strsplit(",", value)}
+											for i = 1, #numbers do
+												local number = tonumber(numbers[i])
+												self.db.profile.MyDebuffsFiltering_Filterlist[number] = number..": "..(GetSpellInfo(number) or "")
+											end
+										end,
+										width = 'double',
+										order = 2
+									},
+									Fake = addVerticalSpacing(3),
+									MyDebuffsFiltering_Filterlist = {
+										type = "multiselect",
+										name = L.MyDebuffsFiltering_Filterlist,
+										desc = L.MyDebuffsFiltering_Filterlist_Desc,
+										disabled = function() return not self.db.profile.MyDebuffsFiltering_Enabled end,
+										set = function(option, value) 
+											self.db.profile.MyDebuffsFiltering_Filterlist[value] = nil
+										end,
+										values = self.db.profile.MyDebuffsFiltering_Filterlist,
+										order = 4
+									}
+								}
 							}
 						}
 					},
@@ -1104,8 +1150,8 @@ function BattleGroundEnemies:SetupOptions()
 					LeftButtonType = {
 						type = "select",
 						name = KEY_BUTTON1,
-						order = 1,
 						values =  Data.Buttons,
+						order = 1
 					},
 					LeftButtonValue = {
 						type = "input",
@@ -1113,14 +1159,14 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.CustomMacro_Desc,
 						disabled = function() return self.db.profile.LeftButtonType == "Target" or self.db.profile.LeftButtonType == "Focus" end,
 						multiline = true,
-						order = 2,
 						width = 'double',
+						order = 2
 					},
 					RightButtonType = {
 						type = "select",
 						name = KEY_BUTTON2,
-						order = 3,
 						values =  Data.Buttons,
+						order = 3
 					},
 					RightButtonValue = {
 						type = "input",
@@ -1128,14 +1174,14 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.CustomMacro_Desc,
 						disabled = function() return self.db.profile.RightButtonType == "Target" or self.db.profile.RightButtonType == "Focus" end,
 						multiline = true,
-						order = 4,
 						width = 'double',
+						order = 4
 					},
 					MiddleButtonType = {
 						type = "select",
 						name = KEY_BUTTON3,
-						order = 5,
 						values =  Data.Buttons,
+						order = 5
 					},
 					MiddleButtonValue = {
 						type = "input",
@@ -1143,8 +1189,8 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.CustomMacro_Desc,
 						disabled = function() return self.db.profile.MiddleButtonType == "Target" or self.db.profile.MiddleButtonType == "Focus" end,
 						multiline = true,
-						order = 6,
 						width = 'double',
+						order = 6
 					}
 				}
 			}
