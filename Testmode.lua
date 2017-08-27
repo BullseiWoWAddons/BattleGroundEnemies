@@ -183,7 +183,7 @@ do
 					if health == 0 and holdsflag ~= enemyButton then --don't let players die that are holding a flag at the moment
 						--BattleGroundEnemies:Debug("dead")
 						enemyButton.Health:SetValue(0)
-						enemyButton.ObjectiveAndRespawn:ShowRespawnTimer(27)
+						enemyButton:UnitIsDead(27)
 					else
 						enemyButton.Health:SetValue(health/100) --player still alive
 						
