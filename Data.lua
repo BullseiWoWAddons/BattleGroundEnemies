@@ -86,7 +86,7 @@ Data.FontOutlines = {
 Data.Buttons = {
     Target = TARGET,
 	Focus = MINIMAP_TRACKING_FOCUS,
-	Custom = CHANNEL_CATEGORY_CUSTOM
+	Custom = L.UserDefined
 }
 
 
