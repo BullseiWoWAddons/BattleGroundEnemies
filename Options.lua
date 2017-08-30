@@ -1074,6 +1074,9 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.MyDebuffsFiltering_Filterlist,
 										desc = L.MyDebuffsFiltering_Filterlist_Desc,
 										disabled = function() return not self.db.profile.MyDebuffsFiltering_Enabled end,
+										get = function(option)
+											return true --to make it checked
+										end,
 										set = function(option, value) 
 											self.db.profile.MyDebuffsFiltering_Filterlist[value] = nil
 										end,

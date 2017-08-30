@@ -160,7 +160,7 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 	enemyButton.MyTarget:SetBackdropBorderColor(conf.MyTarget_Color)
 	
 	--MyFocus, indicating the current focus of the player
-	enemyButton.MyTarget:SetBackdropBorderColor(conf.MyFocus_Color)
+	enemyButton.MyFocus:SetBackdropBorderColor(conf.MyFocus_Color)
 	
 	-- numerical target indicator
 	enemyButton.TargetCounter:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
@@ -395,24 +395,7 @@ do
 	BattleGroundEnemies:SetScript("OnUpdate", BattleGroundEnemies.RealEnemies)
 end
 
-function BattleGroundEnemies:ButtonPositioning()
 
-	local previousButton = self
-	for number, name in ipairs(self.EnemySortingTable) do
-		local enemyButton = self.Enemies[name]
-		enemyButton.Position = number
-		
-		enemyButton:ClearAllPoints()
-		if self.db.profile.Growdirection == "downwards" then
-			enemyButton:SetPoint("TOPLEFT", previousButton, "BOTTOMLEFT", 0, -self.db.profile.SpaceBetweenRows)
-			enemyButton:SetPoint("TOPRIGHT", previousButton, "BOTTOMRIGHT", 0, -self.db.profile.SpaceBetweenRows)
-		else
-			enemyButton:SetPoint("BOTTOMLEFT", previousButton, "TOPLEFT", 0, self.db.profile.SpaceBetweenRows)
-			enemyButton:SetPoint("BOTTOMRIGHT", previousButton, "TOPRIGHT", 0, self.db.profile.SpaceBetweenRows)
-		end
-		previousButton = enemyButton
-	end
-end
 
 function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 	
@@ -428,6 +411,7 @@ function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 		enemyButton.Racial.Cooldown:Clear()	--reset Racial Cooldown
 		enemyButton.MyTarget:Hide()	--reset possible shown target indicator frame
 		enemyButton.MyFocus:Hide()	--reset possible shown target indicator frame
+		enemyButton.TargetCounter.Text:SetText("") --reset testmode
 		if enemyButton.UnitIDs then  --check because of testmode
 			wipe(enemyButton.UnitIDs.TargetedByAlly)  
 			enemyButton:UpdateTargetIndicators() --update numerical and symbolic target indicator
@@ -484,6 +468,25 @@ function BattleGroundEnemies:RemoveEnemy(name, enemyButton)
 
 	tinsert(self.InactiveEnemyButtons, enemyButton)
 	self.Enemies[name] = nil
+end
+
+function BattleGroundEnemies:ButtonPositioning()
+
+	local previousButton = self
+	for number, name in ipairs(self.EnemySortingTable) do
+		local enemyButton = self.Enemies[name]
+		enemyButton.Position = number
+		
+		enemyButton:ClearAllPoints()
+		if self.db.profile.Growdirection == "downwards" then
+			enemyButton:SetPoint("TOPLEFT", previousButton, "BOTTOMLEFT", 0, -self.db.profile.SpaceBetweenRows)
+			enemyButton:SetPoint("TOPRIGHT", previousButton, "BOTTOMRIGHT", 0, -self.db.profile.SpaceBetweenRows)
+		else
+			enemyButton:SetPoint("BOTTOMLEFT", previousButton, "TOPLEFT", 0, self.db.profile.SpaceBetweenRows)
+			enemyButton:SetPoint("BOTTOMRIGHT", previousButton, "TOPRIGHT", 0, self.db.profile.SpaceBetweenRows)
+		end
+		previousButton = enemyButton
+	end
 end
 
 
@@ -892,8 +895,6 @@ do
 				edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
 				edgeSize = 1
 				})
-			if backdropColor then frame:SetBackdropColor(unpack(backdropColor)) end
-			if backdropBorderColor then frame:SetBackdropBorderColor(unpack(backdropBorderColor)) end
 			return frame
 		end
 		
@@ -1136,7 +1137,6 @@ do
 			end
 
 			-- Shows/Hides targeting indicators for a button
-			-- Updates the TargetedByAlly tables.
 			function enemyButtonFunctions:UpdateTargetIndicators()
 			
 				local i = 1
@@ -1846,10 +1846,10 @@ do
 				if IsRatedBG and self.db.profile.Notificatoins_Enabled then
 					if numEnemies < oldNumEnemies then
 						RaidNotice_AddMessage(RaidWarningFrame, L.EnemyLeft, ChatTypeInfo["RAID_WARNING"]) 
-						PlaySound("LEVELUPSOUND")
+						PlaySound(124) --LEVELUPSOUND
 					else -- numEnemies > oldNumEnemies
 						RaidNotice_AddMessage(RaidWarningFrame, L.EnemyJoined, ChatTypeInfo["RAID_WARNING"]) 
-						PlaySound("RaidWarning")
+						PlaySound(8959) --RaidWarning
 					end
 				end
 				if self.db.profile.EnemyCount_Enabled then
