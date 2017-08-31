@@ -330,37 +330,58 @@ function BattleGroundEnemies:SetupOptions()
 						step = 1,
 						order = 3
 					},
-					RangeIndicator_Enabled = {
-						type = "toggle",
-						name = L.RangeIndicator_Enabled,
-						desc = L.RangeIndicator_Enabled_Desc,
-						set = function(option, value) 
-							UpdateButtons(option, value, nil, nil, nil, "SetAlpha", value and 0.55 or 1)
-						end,
-						order = 4
-					},
-					RangeIndicator_Range = {
-						type = "select",
-						name = L.RangeIndicator_Range,
-						desc = L.RangeIndicator_Range_Desc,
-						disabled = function() return not self.db.profile.RangeIndicator_Enabled end,
-						get = function() return Data.ItemIDToRange[self.db.profile.RangeIndicator_Range] end,
-						set = function(option, value)
-							value = Data.RangeToItemID[value]
-							setOption(option, value)
-						end,
-						values = Data.RangeToRange,
-						order = 5
-					},
-					RangeIndicator_Alpha = {
-						type = "range",
-						name = L.RangeIndicator_Alpha,
-						desc = L.RangeIndicator_Alpha_Desc,
-						disabled = function() return not self.db.profile.RangeIndicator_Enabled end,
-						min = 0,
-						max = 1,
-						step = 0.05,
-						order = 6
+					RangeIndicator_Settings = {
+						type = "group",
+						name = L.RangeIndicator_Settings,
+						desc = L.RangeIndicator_Settings_Desc,
+						order = 4,
+						args = {
+							RangeIndicator_Enabled = {
+								type = "toggle",
+								name = L.RangeIndicator_Enabled,
+								desc = L.RangeIndicator_Enabled_Desc,
+								set = function(option, value) 
+									UpdateButtons(option, value, "RangeIndicator_Frame", nil, nil, "SetAlpha", value and self.db.profile.RangeIndicator_Alpha or 1)
+								end,
+								order = 1
+							},
+							RangeIndicator_Range = {
+								type = "select",
+								name = L.RangeIndicator_Range,
+								desc = L.RangeIndicator_Range_Desc,
+								disabled = function() return not self.db.profile.RangeIndicator_Enabled end,
+								get = function() return Data.ItemIDToRange[self.db.profile.RangeIndicator_Range] end,
+								set = function(option, value)
+									value = Data.RangeToItemID[value]
+									setOption(option, value)
+								end,
+								values = Data.RangeToRange,
+								width = "half",
+								order = 2
+							},
+							RangeIndicator_Alpha = {
+								type = "range",
+								name = L.RangeIndicator_Alpha,
+								desc = L.RangeIndicator_Alpha_Desc,
+								disabled = function() return not self.db.profile.RangeIndicator_Enabled end,
+								min = 0,
+								max = 1,
+								step = 0.05,
+								order = 3
+							},
+							RangeIndicator_Frame = {
+								type = "select",
+								name = L.RangeIndicator_Frame,
+								desc = L.RangeIndicator_Frame_Desc,
+								disabled = function() return not self.db.profile.RangeIndicator_Enabled end,
+								set = function(option, value) 
+									UpdateButtons(option, value, nil, nil, nil, "SetRangeIncicatorFrame")
+								end,
+								values = {All = L.Everything, PowerAndHealth = L.HealthBarSettings.." "..L.AND.." "..L.PowerBarSettings},
+								width = "double",
+								order = 4
+							}
+						}
 					},
 					MyTarget_Color = {
 						type = "color",
@@ -371,7 +392,7 @@ function BattleGroundEnemies:SetupOptions()
 							UpdateButtons(option, color, "MyTarget", nil, nil ,"SetBackdropBorderColor", ...)
 						end,
 						hasAlpha = true,
-						order = 7
+						order = 5
 					},
 					MyFocus_Color = {
 						type = "color",
@@ -382,13 +403,13 @@ function BattleGroundEnemies:SetupOptions()
 							UpdateButtons(option, color, "MyFocus", nil, nil, "SetBackdropBorderColor", ...)
 						end,
 						hasAlpha = true,
-						order = 8
+						order = 6
 					},
 					HealthBarSettings = {
 						type = "group",
 						name = L.HealthBarSettings,
 						desc = L.HealthBarSettings_Desc,
-						order = 9,
+						order = 7,
 						args = {
 							General = {
 								type = "group",
@@ -652,7 +673,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.PowerBarSettings,
 						desc = L.PowerBarSettings_Desc,
-						order = 10,
+						order = 8,
 						args = {
 							PowerBar_Enabled = {
 								type = "toggle",
@@ -718,7 +739,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.TrinketSettings,
 						desc = L.TrinketSettings_Desc,
-						order = 11,
+						order = 9,
 						args = {
 							Trinket_Enabled = {
 								type = "toggle",
@@ -745,7 +766,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.RacialSettings,
 						desc = L.RacialSettings_Desc,
-						order = 12,
+						order = 10,
 						args = {
 							Racial_Enabled = {
 								type = "toggle",
@@ -772,7 +793,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.SpecSettings,
 						desc = L.SpecSettings_Desc,
-						order = 13,
+						order = 11,
 						args = {
 							Spec_Width = {
 								type = "range",
@@ -792,7 +813,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.ObjectiveAndRespawnSettings,
 						desc = L.ObjectiveAndRespawnSettings_Desc,
-						order = 14,
+						order = 12,
 						args = {
 							ObjectiveAndRespawn_ObjectiveEnabled = {
 								type = "toggle",
@@ -897,7 +918,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.DrTrackingSettings,
 						desc = L.DrTrackingSettings_Desc,
-						order = 15,
+						order = 13,
 						args = {
 							DrTracking_Enabled = {
 								type = "toggle",
@@ -934,7 +955,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.MyDebuffSettings,
 						desc = L.MyDebuffSettings_Desc,
-						order = 16,
+						order = 14,
 						args = {
 							MyDebuffs_Enabled = {
 								type = "toggle",
@@ -1092,7 +1113,7 @@ function BattleGroundEnemies:SetupOptions()
 						name = L.RBGSpecificSettings,
 						desc = L.RBGSpecificSettings_Desc,
 						--inline = true,
-						order = 17,
+						order = 15,
 						args = {
 							Notificatoins_Enabled = {
 								type = "toggle",
@@ -1199,24 +1220,21 @@ function BattleGroundEnemies:SetupOptions()
 			}
 		}
 	}
-
-
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("BattleGroundEnemies", self.options)
+	
+	local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+	
+	AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 700, 500)
 	
 	--profiles
 	self.options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	self.options.args.profiles.order = -1
 	self.options.args.profiles.disabled = InCombatLockdown
 	
-	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
+	AceConfigDialog:AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
 end
 
 SLASH_BattleGroundEnemies1, SLASH_BattleGroundEnemies2, SLASH_BattleGroundEnemies3 = "/BattleGroundEnemies", "/bge", "/BattleGroundEnemies"
 SlashCmdList["BattleGroundEnemies"] = function(msg)
-	local AceDialog = LibStub("AceConfigDialog-3.0")
-	if not BattleGroundEnemies.options then
-		BattleGroundEnemies:SetupOptions()
-		AceDialog:SetDefaultSize("BattleGroundEnemies", 830, 500)
-	end
-	AceDialog:Open("BattleGroundEnemies")
+	LibStub("AceConfigDialog-3.0"):Open("BattleGroundEnemies")
 end

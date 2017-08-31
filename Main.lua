@@ -162,6 +162,8 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 	--MyFocus, indicating the current focus of the player
 	enemyButton.MyFocus:SetBackdropBorderColor(conf.MyFocus_Color)
 	
+	enemyButton:SetRangeIncicatorFrame()
+		
 	-- numerical target indicator
 	enemyButton.TargetCounter:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
 	ApplyFontStringSettings(enemyButton.TargetCounter.Text, true, nil, nil, 'RIGHT', nil, conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_Textcolor, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
@@ -238,6 +240,7 @@ do
 			RangeIndicator_Enabled = true,
 			RangeIndicator_Range = 28767,
 			RangeIndicator_Alpha = 0.55,
+			RangeIndicator_Frame = "All",
 			
 			ShowRealmnames = true,
 			ConvertCyrillic = true,
@@ -329,6 +332,7 @@ do
 		self.db.RegisterCallback(self, "OnProfileReset", "ApplyAllSettings")
 		
 		self:SetupOptions()
+		
 		--DBObjectLib:ResetProfile(noChildren, noCallbacks)
 		self:SetClampedToScreen(true)
 		self:SetMovable(true)
@@ -403,7 +407,7 @@ function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 	if enemyButton then --recycle a previous used button
 		tremove(self.InactiveEnemyButtons, #self.InactiveEnemyButtons)
 		--Cleanup previous shown stuff of another player
-		enemyButton:SetAlpha(self.db.profile.RangeIndicator_Alpha)
+		enemyButton.RangeIndicator_Frame:SetAlpha(self.db.profile.RangeIndicator_Alpha)
 		enemyButton.Trinket.HasTrinket = nil
 		enemyButton.Trinket.Icon:SetTexture(nil)
 		enemyButton.Trinket.Cooldown:Clear()	--reset Trinket Cooldown
@@ -1023,7 +1027,15 @@ do
 					end
 				end
 			end
-	
+			
+			function enemyButtonFunctions:SetRangeIncicatorFrame()
+				if self.config.RangeIndicator_Frame == "All" then
+					self.RangeIndicator_Frame = self
+				else
+					self.RangeIndicator_Frame = self.Power
+				end
+				self:SetAlpha(1)
+			end
 	
 			function enemyButtonFunctions:ArenaOpponentShown(unitID)
 				if self.config.ObjectiveAndRespawn_ObjectiveEnabled then
@@ -1201,9 +1213,9 @@ do
 			
 			function enemyButtonFunctions:UpdateRange(inRange)
 				if self.config.RangeIndicator_Enabled and not inRange then
-					self:SetAlpha(self.config.RangeIndicator_Alpha)
+					self.RangeIndicator_Frame:SetAlpha(self.config.RangeIndicator_Alpha)
 				else
-					self:SetAlpha(1)
+					self.RangeIndicator_Frame:SetAlpha(1)
 				end
 			end
 			
@@ -1585,7 +1597,7 @@ do
 			button.Power.Background:SetTexture("Interface/Buttons/WHITE8X8")
 			
 			-- health
-			button.Health = MyCreateFrame('StatusBar', button, {'BOTTOMLEFT', button.Power, "TOPLEFT", 0, 0}, {'TOPRIGHT', button, "TOPRIGHT", -1, -1})
+			button.Health = MyCreateFrame('StatusBar', button.Power, {'BOTTOMLEFT', button.Power, "TOPLEFT", 0, 0}, {'TOPRIGHT', button, "TOPRIGHT", -1, -1})
 			button.Health:SetMinMaxValues(0, 1)
 			
 			--button.Health.Background = button.Health:CreateTexture(nil, 'BACKGROUND', nil, 2)

@@ -253,7 +253,7 @@ do
 				end
 				if number == 6 then --toggle range
 					if settings.RangeIndicator_Enabled then
-						enemyButton:SetAlpha(enemyButton:GetAlpha() == 1 and settings.RangeIndicator_Alpha or 1)
+						enemyButton:UpdateRange((enemyButton.RangeIndicator_Frame:GetAlpha() ~= 1) and true or false)
 					end
 				end
 			end
