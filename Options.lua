@@ -270,7 +270,7 @@ function BattleGroundEnemies:SetupOptions()
 								type = "color",
 								name = L.FontShadowColor,
 								desc = L.FontShadowColor_Desc,
-								disabled = function() return not self.db.profile.EnemyCount_EnableTextshadow end,
+								disabled = function() return not self.db.profile.EnemyCount_EnableTextshadow or not self.db.profile.EnemyCount_Enabled end,
 								set = function(option, ...)
 									local color = {...}
 									self.EnemyCount:SetShadowColor(...)
@@ -646,7 +646,7 @@ function BattleGroundEnemies:SetupOptions()
 										type = "color",
 										name = L.FontShadowColor,
 										desc = L.FontShadowColor_Desc,
-										disabled = function() return not self.db.profile.NumericTargetindicator_EnableTextshadow end,
+										disabled = function() return not self.db.profile.NumericTargetindicator_EnableTextshadow or not self.db.profile.NumericTargetindicator_Enabled  end,
 										set = function(option, ...)
 											local color = {...}
 											UpdateButtons(option, color, "TargetCounter", "Text", nil, "SetShadowColor", ...)
@@ -786,6 +786,42 @@ function BattleGroundEnemies:SetupOptions()
 									UpdateButtons(option, value, "Racial", "Cooldown", nil, "SetHideCountdownNumbers", not value)
 								end,
 								order = 2
+							},
+							RacialFilteringSettings = {
+								type = "group",
+								name = FILTER,
+								desc = L.MyDebuffsFilteringSettings_Desc,
+								--inline = true,
+								order = 3,
+								args = {
+									RacialFiltering_Enabled = {
+										type = "toggle",
+										name = L.Filtering_Enabled,
+										desc = L.RacialFiltering_Enabled_Desc,
+										disabled = function() return not self.db.profile.Racial_Enabled end,
+										width = 'normal',
+										order = 1
+									},
+									Fake = addHorizontalSpacing(2),
+									RacialFiltering_Filterlist = {
+										type = "multiselect",
+										name = L.Filtering_Filterlist,
+										desc = L.RacialFiltering_Filterlist_Desc,
+										disabled = function() return not self.db.profile.RacialFiltering_Enabled or not self.db.profile.Racial_Enabled end,
+										get = function(option, key)
+											for spellID in pairs(Data.RacialNameToSpellIDs[key]) do
+												return self.db.profile.RacialFiltering_Filterlist[spellID]
+											end
+										end,
+										set = function(option, key, state) -- value = spellname
+											for spellID in pairs(Data.RacialNameToSpellIDs[key]) do
+												self.db.profile.RacialFiltering_Filterlist[spellID] = state or nil
+											end
+										end,
+										values = Data.Racialnames,
+										order = 3
+									}
+								}
 							}
 						}
 					},
@@ -948,6 +984,29 @@ function BattleGroundEnemies:SetupOptions()
 								max = 10,
 								step = 1,
 								order = 3
+							},
+							Fake = addVerticalSpacing(4),
+							DrTrackingFiltering_Enabled = {
+								type = "toggle",
+								name = L.Filtering_Enabled,
+								desc = L.DrTrackingFiltering_Enabled_Desc,
+								disabled = function() return not self.db.profile.DrTracking_Enabled end,
+								width = 'normal',
+								order = 5
+							},
+							DrTrackingFiltering_Filterlist = {
+								type = "multiselect",
+								name = L.Filtering_Filterlist,
+								desc = L.DrTrackingFiltering_Filterlist_Desc,
+								disabled = function() return not self.db.profile.DrTrackingFiltering_Enabled or not self.db.profile.DrTracking_Enabled end,
+								get = function(option, key)
+									return self.db.profile.DrTrackingFiltering_Filterlist[key]
+								end,
+								set = function(option, key, state) -- key = category name
+									self.db.profile.DrTrackingFiltering_Filterlist[key] = state or nil
+								end,
+								values = Data.DrCategorys,
+								order = 6
 							}
 						}
 					},
@@ -1039,9 +1098,9 @@ function BattleGroundEnemies:SetupOptions()
 								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, value)
 									if value then 
-										UpdateButtons(option, color, "Stacks", nil, "MyDebuffs", "SetShadowOffset", 1, -1)
+										UpdateButtons(option, value, "Stacks", nil, "MyDebuffs", "SetShadowOffset", 1, -1)
 									else
-										UpdateButtons(option, color, "Stacks", nil, "MyDebuffs", "SetShadowOffset", 0, 0)
+										UpdateButtons(option, value, "Stacks", nil, "MyDebuffs", "SetShadowOffset", 0, 0)
 									end
 								end,
 								order = 11
@@ -1050,7 +1109,7 @@ function BattleGroundEnemies:SetupOptions()
 								type = "color",
 								name = L.FontShadowColor,
 								desc = L.FontShadowColor_Desc,
-								disabled = function() return not self.db.profile.MyDebuffs_EnableTextshadow end,
+								disabled = function() return not self.db.profile.MyDebuffs_EnableTextshadow or not self.db.profile.MyDebuffs_Enabled end,
 								set = function(option, ...)
 									local color = {...}
 									UpdateButtons(option, color, "Stacks", nil, "MyDebuffs", "SetShadowColor", ...)
@@ -1068,8 +1127,9 @@ function BattleGroundEnemies:SetupOptions()
 								args = {
 									MyDebuffsFiltering_Enabled = {
 										type = "toggle",
-										name = L.MyDebuffsFiltering_Enabled,
+										name = L.Filtering_Enabled,
 										desc = L.MyDebuffsFiltering_Enabled_Desc,
+										disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 										width = 'normal',
 										order = 1
 									},
@@ -1077,7 +1137,7 @@ function BattleGroundEnemies:SetupOptions()
 										type = "input",
 										name = L.MyDebuffsFiltering_AddSpellID,
 										desc = L.MyDebuffsFiltering_AddSpellID_Desc,
-										disabled = function() return not self.db.profile.MyDebuffsFiltering_Enabled end,
+										disabled = function() return not self.db.profile.MyDebuffsFiltering_Enabled or not self.db.profile.MyDebuffs_Enabled end,
 										get = function() return "" end,
 										set = function(option, value, state)
 											local numbers = {strsplit(",", value)}
@@ -1092,10 +1152,10 @@ function BattleGroundEnemies:SetupOptions()
 									Fake = addVerticalSpacing(3),
 									MyDebuffsFiltering_Filterlist = {
 										type = "multiselect",
-										name = L.MyDebuffsFiltering_Filterlist,
+										name = L.Filtering_Filterlist,
 										desc = L.MyDebuffsFiltering_Filterlist_Desc,
-										disabled = function() return not self.db.profile.MyDebuffsFiltering_Enabled end,
-										get = function(option)
+										disabled = function() return not self.db.profile.MyDebuffsFiltering_Enabled or not self.db.profile.MyDebuffs_Enabled end,
+										get = function()
 											return true --to make it checked
 										end,
 										set = function(option, value) 
@@ -1162,7 +1222,7 @@ function BattleGroundEnemies:SetupOptions()
 			},
 			KeybindSettings = {
 				type = "group",
-				name = KEY_BINDING,
+				name = KEY_BINDINGS,
 				desc = L.KeybindSettings_Desc,
 				disabled = InCombatLockdown,
 				set = function(option, value) 

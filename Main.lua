@@ -277,6 +277,9 @@ do
 			DrTracking_ShowNumbers = true,
 			DrTracking_Spacing = 2,
 			
+			DrTrackingFiltering_Enabled = false,
+			DrTrackingFiltering_Filterlist = {},
+			
 			MyDebuffs_Enabled = true,
 			MyDebuffs_ShowNumbers = true,
 			MyDebuffs_Fontsize = 12,
@@ -304,6 +307,9 @@ do
 			
 			Racial_Enabled = true,
 			Racial_ShowNumbers = true,
+			
+			RacialFiltering_Enabled = false,
+			RacialFiltering_Filterlist = {}, --key = spellID, value = spellName or false
 			
 			Notificatoins_Enabled = true,
 			PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
@@ -1292,12 +1298,15 @@ do
 				if not self.config.Racial_Enabled then return end
 				local insi = self.Trinket
 				local racial = self.Racial
-				racial.Icon:SetTexture(Data.TriggerSpellIDToDisplayFileId[spellID])
-				racial.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID])
-																		-- relentless check						only set if shorter than 30 seconds
+				
 				if Data.RacialSpellIDtoCooldownTrigger[spellID] and not insi.HasTrinket == 4 and insi.Cooldown:GetCooldownDuration() < 30000 then
 					insi.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldownTrigger[spellID])
 				end
+				
+				if self.config.RacialFiltering_Enabled and not self.config.RacialFiltering_Filterlist[spellID] then return end
+				
+				racial.Icon:SetTexture(Data.TriggerSpellIDToDisplayFileId[spellID])
+				racial.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID])
 			end
 			
 		
@@ -1455,6 +1464,8 @@ do
 					local drCat = DRData:GetSpellCategory(spellID)
 					--BattleGroundEnemies:Debug(operation, spellID)
 					if not drCat then return end
+					
+					if self.config.DrTrackingFiltering_Enabled and not self.config.DrTrackingFiltering_Filterlist[drCat] then return end
 
 					--refreshed (for example a resheep) is basically removed + applied 
 					local drFrame = self.DR[drCat]
@@ -1606,7 +1617,7 @@ do
 			button.Health.Background:SetTexture("Interface/Buttons/WHITE8X8")
 			
 			-- role
-			button.Role = MyCreateFrame("Frame", button, {'TOPLEFT', button.Health, 'TOPLEFT', 2, -2})
+			button.Role = MyCreateFrame("Frame", button.Health, {'TOPLEFT', button.Health, 'TOPLEFT', 2, -2})
 			
 			button.Role.Icon = button.Role:CreateTexture(nil, 'OVERLAY')
 			button.Role.Icon:SetAllPoints()		

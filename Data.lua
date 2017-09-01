@@ -85,8 +85,17 @@ Data.FontOutlines = {
 
 Data.Buttons = {
     Target = TARGET,
-	Focus = MINIMAP_TRACKING_FOCUS,
+	Focus = SET_FOCUS,
 	Custom = L.UserDefined
+}
+
+Data.DrCategorys = {
+	disorient = L.DR_Disorient,
+	incapacitate = L.DR_Incapacitate,
+	knockback = L.DR_Knockback,
+	root = L.DR_Root,
+	silence  = L.DR_Silence,
+	stun = L.DR_Stun
 }
 
 
@@ -393,8 +402,16 @@ for triggerSpellID in pairs(Data.TriggerSpellIDToTrinketnumber) do
 	end
 end
 
+Data.RacialNameToSpellIDs = {}
+Data.Racialnames = {}
 for spellID in pairs(Data.RacialSpellIDtoCooldown) do
-	Data.TriggerSpellIDToDisplayFileId[spellID] = GetSpellTexture(spellID) 
+	Data.TriggerSpellIDToDisplayFileId[spellID] = GetSpellTexture(spellID)
+	local racialName = GetSpellInfo(spellID)
+	if not Data.RacialNameToSpellIDs[racialName] then
+		Data.RacialNameToSpellIDs[racialName] = {}
+		Data.Racialnames[GetSpellInfo(spellID)] = GetSpellInfo(spellID)
+	end
+	Data.RacialNameToSpellIDs[racialName][spellID] = true
 end
 
 Data.TrinketTriggerSpellIDtoCooldown = {
