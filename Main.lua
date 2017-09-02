@@ -157,10 +157,10 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 
 
 	--MyTarget, indicating the current target of the player
-	enemyButton.MyTarget:SetBackdropBorderColor(conf.MyTarget_Color)
+	enemyButton.MyTarget:SetBackdropBorderColor(unpack(conf.MyTarget_Color))
 	
 	--MyFocus, indicating the current focus of the player
-	enemyButton.MyFocus:SetBackdropBorderColor(conf.MyFocus_Color)
+	enemyButton.MyFocus:SetBackdropBorderColor(unpack(conf.MyFocus_Color))
 	
 	enemyButton:SetRangeIncicatorFrame()
 		
@@ -270,7 +270,7 @@ do
 			NumericTargetindicator_EnableTextshadow = false,
 			NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
 			
-			MyTarget_Color = {17, 27, 161, 1},
+			MyTarget_Color = {1, 1, 1, 1},
 			MyFocus_Color = {0, 0.988235294117647, 0.729411764705882, 1},
 			
 			DrTracking_Enabled = true,
