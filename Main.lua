@@ -88,37 +88,32 @@ BattleGroundEnemies.AllyUnitIDToAllyDetails = {} --index = unitID ("raid"..i) of
 --4. player's focus
 --5. ally targets, UNIT_TARGET fires if the target changes
 
-
-
-local function ApplyFontStringSettings(fontString, Setallpoints, tablePoint1, tablePoint2, justifyH, justifyV, Fontsize, FontOutline, Textcolor, enableShadow, shadowColor)
-	if Setallpoints then
-		fontString:SetAllPoints()
-	else
-		fontString:SetPoint(unpack(tablePoint1))
-		fontString:SetPoint(unpack(tablePoint2))
-	end
-
-	fontString:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), Fontsize, FontOutline)
-	fontString:SetTextColor(unpack(Textcolor))
-	
-	if justifyH then
-		fontString:SetJustifyH(justifyH)
-	end
-	if justifyV then
-		fontString:SetJustifyV(justifyV)
-	end
-	
-	fontString:SetShadowColor(unpack(shadowColor))
+local function EnableShadowColor(fontString, enableShadow, shadowColor)
+	if shadowColor then fontString:SetShadowColor(unpack(shadowColor)) end
 	if enableShadow then 
 		fontString:SetShadowOffset(1, -1)
 	else
 		fontString:SetShadowOffset(0, 0)
 	end
+end
+
+local function ApplyFontStringSettings(fontString, Fontsize, FontOutline, enableShadow, shadowColor)
+	fontString:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), Fontsize, FontOutline)
+
+	fontString:EnableShadowColor(enableShadow, shadowColor)
+end
+
+local function MyCreateFontString(parent)
+	local fontString = parent:CreateFontString(nil, "OVERLAY")
+	fontString.ApplyFontStringSettings = ApplyFontStringSettings
+	fontString.EnableShadowColor = EnableShadowColor
 	fontString:SetDrawLayer('OVERLAY', 2)
+	return fontString
 end
 
 function BattleGroundEnemies:ApplyAllSettings()
 	self:ApplyMainFrameSettings()
+	self:ButtonPositioning()
 	for name, enemyButton in pairs(self.Enemies) do
 		self:ApplyButtonSettings(enemyButton)
 		enemyButton:SetName()
@@ -157,31 +152,56 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 
 
 	--MyTarget, indicating the current target of the player
-	enemyButton.MyTarget:SetBackdropBorderColor(unpack(conf.MyTarget_Color))
+	enemyButton.MyTarget:SetBackdropBorderColor(conf.MyTarget_Color)
 	
 	--MyFocus, indicating the current focus of the player
-	enemyButton.MyFocus:SetBackdropBorderColor(unpack(conf.MyFocus_Color))
+	enemyButton.MyFocus:SetBackdropBorderColor(conf.MyFocus_Color)
 	
 	enemyButton:SetRangeIncicatorFrame()
 		
 	-- numerical target indicator
 	enemyButton.TargetCounter:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
-	ApplyFontStringSettings(enemyButton.TargetCounter.Text, true, nil, nil, 'RIGHT', nil, conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_Textcolor, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
+	
+	enemyButton.TargetCounter.Text:SetTextColor(unpack(conf.NumericTargetindicator_Textcolor))
+	enemyButton.TargetCounter.Text:ApplyFontStringSettings(conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
+	
 	enemyButton.TargetCounter.Text:SetText(0)
 
 	-- name
-	ApplyFontStringSettings(enemyButton.Name, false, {'TOPLEFT', enemyButton.Role, "TOPRIGHT", 5, 2}, {'BOTTOMRIGHT', enemyButton.TargetCounter, "BOTTOMLEFT", 0, 0}, 'LEFT', nil, conf.Name_Fontsize, conf.Name_Outline, conf.Name_Textcolor, conf.Name_EnableTextshadow, conf.Name_TextShadowcolor)
+	enemyButton.Name:SetTextColor(unpack(conf.Name_Textcolor))
+	enemyButton.Name:ApplyFontStringSettings(conf.Name_Fontsize, conf.Name_Outline, conf.Name_EnableTextshadow, conf.Name_TextShadowcolor)
 	
 	-- trinket
 	enemyButton.Trinket.Cooldown:ApplyCooldownSettings(conf.Trinket_ShowNumbers, false, true, {0, 0, 0, 0.75})
+	enemyButton.Trinket.Cooldown.Text:ApplyFontStringSettings(conf.Trinket_Cooldown_Fontsize, conf.Trinket_Cooldown_Outline, conf.Trinket_Cooldown_EnableTextshadow, conf.Trinket_Cooldown_TextShadowcolor)
 
 	-- RACIALS	
 	enemyButton.Racial.Cooldown:ApplyCooldownSettings(conf.Racial_ShowNumbers, false, true, {0, 0, 0, 0.75})
+	enemyButton.Racial.Cooldown.Text:ApplyFontStringSettings(conf.Racial_Cooldown_Fontsize, conf.Racial_Cooldown_Outline, conf.Racial_Cooldown_EnableTextshadow, conf.Racial_Cooldown_TextShadowcolor)
 
 	-- objective and respawn
 	enemyButton.ObjectiveAndRespawn:SetWidth(conf.ObjectiveAndRespawn_Width)
-	ApplyFontStringSettings(enemyButton.ObjectiveAndRespawn.AuraText, true, nil, nil, "CENTER", nil, conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline, conf.ObjectiveAndRespawn_Textcolor, conf.ObjectiveAndRespawn_EnableTextshadow, conf.ObjectiveAndRespawn_TextShadowcolor)
+	
+	
+	enemyButton.ObjectiveAndRespawn.AuraText:SetTextColor(unpack(conf.ObjectiveAndRespawn_Textcolor))
+	enemyButton.ObjectiveAndRespawn.AuraText:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline, conf.ObjectiveAndRespawn_EnableTextshadow, conf.ObjectiveAndRespawn_TextShadowcolor)
+	
 	enemyButton.ObjectiveAndRespawn.Cooldown:ApplyCooldownSettings(conf.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})
+	enemyButton.ObjectiveAndRespawn.Cooldown.Text:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Cooldown_Fontsize, conf.ObjectiveAndRespawn_Cooldown_Outline, conf.ObjectiveAndRespawn_Cooldown_EnableTextshadow, conf.ObjectiveAndRespawn_Cooldown_TextShadowcolor)
+	
+	--Dr Tracking
+	enemyButton:ApplyAllDrFrameSettings()
+	
+	--MyDebuffs
+	enemyButton:ApplyAllDebuffFrameSettings()
+end
+
+function BattleGroundEnemies:SetEnemyCountJustifyV(direction)
+	if direction == "downwards" then
+		self.EnemyCount:SetJustifyV("BOTTOM")
+	else
+		self.EnemyCount:SetJustifyV("TOP")
+	end
 end
 
 
@@ -199,12 +219,13 @@ function BattleGroundEnemies:ApplyMainFrameSettings()
 		self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", conf.Position_X / scale, conf.Position_Y / scale)
 	end
 	
-	self.EnemyCount = self:CreateFontString(nil, "OVERLAY")
-	if conf.Growdirection == "downwards" then
-		ApplyFontStringSettings(self.EnemyCount, true, false, false, 'LEFT', "BOTTOM", conf.EnemyCount_Fontsize, conf.EnemyCount_Outline, conf.EnemyCount_Textcolor, conf.EnemyCount_EnableTextshadow, conf.EnemyCount_TextShadowcolor )
-	else
-		ApplyFontStringSettings(self.EnemyCount, true, false, false, 'LEFT', "TOP", conf.EnemyCount_Fontsize, conf.EnemyCount_Outline, conf.EnemyCount_Textcolor, conf.EnemyCount_EnableTextshadow, conf.EnemyCount_TextShadowcolor)
-	end 
+	self.EnemyCount:SetAllPoints()
+	self.EnemyCount:SetJustifyH("LEFT")
+	self.EnemyCount:SetTextColor(unpack(conf.EnemyCount_Textcolor))
+	
+	self:SetEnemyCountJustifyV(conf.Growdirection)
+	
+	self.EnemyCount:ApplyFontStringSettings(conf.EnemyCount_Fontsize, conf.EnemyCount_Outline, conf.EnemyCount_EnableTextshadow, conf.EnemyCount_TextShadowcolor)
 end
 
 
@@ -270,44 +291,76 @@ do
 			NumericTargetindicator_EnableTextshadow = false,
 			NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
 			
-			MyTarget_Color = {1, 1, 1, 1},
+			MyTarget_Color = {17, 27, 161, 1},
 			MyFocus_Color = {0, 0.988235294117647, 0.729411764705882, 1},
 			
 			DrTracking_Enabled = true,
-			DrTracking_ShowNumbers = true,
 			DrTracking_Spacing = 2,
+			
+			DrTracking_ShowNumbers = true,
+			
+			DrTracking_Cooldown_Fontsize = 12,
+			DrTracking_Cooldown_Outline = "OUTLINE",
+			DrTracking_Cooldown_EnableTextshadow = false,
+			DrTracking_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+			
 			
 			DrTrackingFiltering_Enabled = false,
 			DrTrackingFiltering_Filterlist = {},
 			
 			MyDebuffs_Enabled = true,
-			MyDebuffs_ShowNumbers = true,
+			MyDebuffs_Spacing = 2,
+			
 			MyDebuffs_Fontsize = 12,
 			MyDebuffs_Outline = "OUTLINE",
 			MyDebuffs_Textcolor = {1, 1, 1, 1},
 			MyDebuffs_EnableTextshadow = true,
 			MyDebuffs_TextShadowcolor = {0, 0, 0, 1},
-			MyDebuffs_Spacing = 2,
+			
+			MyDebuffs_ShowNumbers = true,
+			
+			MyDebuffs_Cooldown_Fontsize = 12,
+			MyDebuffs_Cooldown_Outline = "OUTLINE",
+			MyDebuffs_Cooldown_EnableTextshadow = false,
+			MyDebuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 			
 			MyDebuffsFiltering_Enabled = false,
 			MyDebuffsFiltering_Filterlist = {},
 
 			ObjectiveAndRespawn_ObjectiveEnabled = true,
-			ObjectiveAndRespawn_RespawnEnabled = true,
 			ObjectiveAndRespawn_Width = 36,
-			ObjectiveAndRespawn_ShowNumbers = true,
+			
+			ObjectiveAndRespawn_RespawnEnabled = true,
+			
 			ObjectiveAndRespawn_Fontsize = 17,
 			ObjectiveAndRespawn_Outline = "THICKOUTLINE",
 			ObjectiveAndRespawn_Textcolor = {1, 1, 1, 1},
 			ObjectiveAndRespawn_EnableTextshadow = false,
 			ObjectiveAndRespawn_TextShadowcolor = {0, 0, 0, 1},
 			
+			ObjectiveAndRespawn_ShowNumbers = true,
+			
+			ObjectiveAndRespawn_Cooldown_Fontsize = 12,
+			ObjectiveAndRespawn_Cooldown_Outline = "OUTLINE",
+			ObjectiveAndRespawn_Cooldown_EnableTextshadow = false,
+			ObjectiveAndRespawn_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+			
 			Trinket_Enabled = true,
 			Trinket_ShowNumbers = true,
+			
+			Trinket_Cooldown_Fontsize = 12,
+			Trinket_Cooldown_Outline = "OUTLINE",
+			Trinket_Cooldown_EnableTextshadow = false,
+			Trinket_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 			
 			Racial_Enabled = true,
 			Racial_ShowNumbers = true,
 			
+			Racial_Cooldown_Fontsize = 12,
+			Racial_Cooldown_Outline = "OUTLINE",
+			Racial_Cooldown_EnableTextshadow = false,
+			Racial_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+
 			RacialFiltering_Enabled = false,
 			RacialFiltering_Filterlist = {}, --key = spellID, value = spellName or false
 			
@@ -368,6 +421,8 @@ do
 			end
 		end)
 		
+		self.EnemyCount = MyCreateFontString(self)
+		
 		self:ApplyMainFrameSettings()
 		
 		self:UnregisterEvent("PLAYER_LOGIN")
@@ -421,7 +476,7 @@ function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 		enemyButton.Racial.Cooldown:Clear()	--reset Racial Cooldown
 		enemyButton.MyTarget:Hide()	--reset possible shown target indicator frame
 		enemyButton.MyFocus:Hide()	--reset possible shown target indicator frame
-		enemyButton.TargetCounter.Text:SetText("") --reset testmode
+		enemyButton.TargetCounter.Text:SetText(0) --reset testmode
 		if enemyButton.UnitIDs then  --check because of testmode
 			wipe(enemyButton.UnitIDs.TargetedByAlly)  
 			enemyButton:UpdateTargetIndicators() --update numerical and symbolic target indicator
@@ -549,13 +604,13 @@ end
 
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
-	self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
-	if unitEvent ~= "seen" then --"unseen", "cleared" or "destroyed"
+	--self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
+	if unitEvent == "cleared" then --"unseen", "cleared" or "destroyed"
 		local enemyButton = self.ArenaEnemyIDToEnemyButton[unitID]
 		if enemyButton then
 			enemyButton:ObjectiveLost()
 		end
-	else --seen
+	else --seen, "unseen" or "destroyed"
 		--self:Debug(UnitName(unitID))
 		local enemyButton = self:GetEnemybuttonByUnitID(unitID)
 		if enemyButton then
@@ -896,6 +951,17 @@ do
 			cooldown:SetAllPoints()
 			cooldown:SetSwipeTexture('Interface/Buttons/WHITE8X8')
 			cooldown.ApplyCooldownSettings = ApplyCooldownSettings
+			
+			-- Find fontstring of the cooldown
+			for _, region in pairs{cooldown:GetRegions()} do
+				if region:GetObjectType() == "FontString" then
+					cooldown.Text = region
+					cooldown.Text.ApplyFontStringSettings = ApplyFontStringSettings
+					cooldown.Text.EnableShadowColor = EnableShadowColor
+					break
+				end
+			end
+			
 			return cooldown
 		end
 			
@@ -1233,8 +1299,7 @@ do
 			
 			
 			function enemyButtonFunctions:ObjectiveLost()
-			
-				--self:Debug("ARENA_OPPONENT_UPDATE", enemyButton.DisplayedName, "cleared")
+				--BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", self.DisplayedName, "ObjectiveLost")
 				BattleGroundEnemies.ArenaEnemyIDToEnemyButton[self.UnitIDs.Arena] = nil
 				
 				local objective = self.ObjectiveAndRespawn
@@ -1357,6 +1422,21 @@ do
 					enemyButton.InactiveDebuffs[#enemyButton.InactiveDebuffs + 1] = debuffFrame
 				end
 				
+				function enemyButtonFunctions:ApplyDebuffFrameSettings(debuffFrame)
+					local conf = self.config
+					debuffFrame.Stacks:ApplyFontStringSettings(conf.MyDebuffs_Fontsize, conf.MyDebuffs_Outline, conf.MyDebuffs_EnableTextshadow, conf.MyDebuffs_TextShadowcolor)
+					debuffFrame.Cooldown:ApplyCooldownSettings(conf.MyDebuffs_ShowNumbers, true, false)
+					debuffFrame.Cooldown.Text:ApplyFontStringSettings(conf.MyDebuffs_Cooldown_Fontsize, conf.MyDebuffs_Cooldown_Outline, conf.MyDebuffs_Cooldown_EnableTextshadow, conf.MyDebuffs_Cooldown_TextShadowcolor)
+				end
+				
+				function enemyButtonFunctions:ApplyAllDebuffFrameSettings()
+					for spellID, debuffFrame in pairs(self.MyDebuffs) do
+						self:ApplyDebuffFrameSettings(debuffFrame)
+					end
+					for spellID, debuffFrame in pairs(self.InactiveDebuffs) do
+						self:ApplyDebuffFrameSettings(debuffFrame)
+					end
+				end
 				
 				function enemyButtonFunctions:SetNewDebuff(spellID, count, duration)
 
@@ -1373,12 +1453,16 @@ do
 						debuffFrame.Icon:SetAllPoints()
 
 						
-						debuffFrame.Stacks = debuffFrame:CreateFontString(nil, "OVERLAY")
-						ApplyFontStringSettings(debuffFrame.Stacks, true, nil, nil, "RIGHT", "BOTTOM", self.config.MyDebuffs_Fontsize, self.config.MyDebuffs_Outline, self.config.MyDebuffs_Textcolor, self.config.MyDebuffs_EnableTextshadow, self.config.MyDebuffs_TextShadowcolor)
-						
+						debuffFrame.Stacks = MyCreateFontString(debuffFrame)
+						debuffFrame.Stacks:SetAllPoints()
+						debuffFrame.Stacks:SetJustifyH("RIGHT")
+						debuffFrame.Stacks:SetJustifyV("BOTTOM")
+						debuffFrame.Stacks:SetTextColor(unpack(self.config.MyDebuffs_Textcolor))
+					
 						debuffFrame.Cooldown = MyCreateCooldown(debuffFrame)
-						debuffFrame.Cooldown:ApplyCooldownSettings(self.config.MyDebuffs_ShowNumbers, true, false)
 						debuffFrame.Cooldown:SetScript("OnHide", debuffFrameCooldown_OnHide)
+						
+						self:ApplyDebuffFrameSettings(debuffFrame)
 					end
 
 					debuffFrame.SpellID = spellID
@@ -1457,6 +1541,18 @@ do
 					drFrame.status = 1
 					drFrame:GetParent():DrPositioning() --enemyButton:DrPositioning()
 				end
+				
+				function enemyButtonFunctions:ApplyDrFrameSettings(drFrame)
+					local conf = self.config
+					drFrame.Cooldown:ApplyCooldownSettings(conf.DrTracking_ShowNumbers, false, false)
+					drFrame.Cooldown.Text:ApplyFontStringSettings(conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline, conf.DrTracking_Cooldown_EnableTextshadow, conf.DrTracking_Cooldown_TextShadowcolor)
+				end
+				
+				function enemyButtonFunctions:ApplyAllDrFrameSettings()
+					for drCategory, drFrame in pairs(self.DR) do
+						self:ApplyDrFrameSettings(drFrame)
+					end
+				end
 			
 				function enemyButtonFunctions:UpdateDR(spellID, spellName, applied, removed)
 					if not self.config.DrTracking_Enabled then return end
@@ -1481,7 +1577,7 @@ do
 						drFrame.Icon:SetAllPoints()
 						
 						drFrame.Cooldown = MyCreateCooldown(drFrame)
-						drFrame.Cooldown:ApplyCooldownSettings(self.config.DrTracking_ShowNumbers, false, false)
+						self:ApplyDrFrameSettings(drFrame)
 						drFrame.status = 1
 						-- for _, region in next, {drFrame.Cooldown:GetRegions()} do
 							-- if ( region:GetObjectType() == "FontString" ) then
@@ -1639,13 +1735,18 @@ do
 			-- numerical target indicator
 			button.TargetCounter = MyCreateFrame("Frame", button, {'TOPRIGHT', button.Health, "TOPRIGHT", -5, 0}, {'BOTTOMRIGHT', button.Health, "BOTTOMRIGHT", -5, 0})
 			button.TargetCounter:SetWidth(20)
-			button.TargetCounter.Text = button.TargetCounter:CreateFontString(nil, "OVERLAY")
+			button.TargetCounter.Text = MyCreateFontString(button.TargetCounter)
+			button.TargetCounter.Text:SetAllPoints()
+			button.TargetCounter.Text:SetJustifyH("RIGHT")
 			
 			-- symbolic target indicator
 			button.TargetIndicators = {}
 
 			-- name
-			button.Name = button.Health:CreateFontString(nil, "OVERLAY")
+			button.Name = MyCreateFontString(button.Health)
+			button.Name:SetPoint('TOPLEFT', button.Role, "TOPRIGHT", 5, 2)
+			button.Name:SetPoint('BOTTOMRIGHT', button.TargetCounter, "BOTTOMLEFT", 0, 0)
+			button.Name:SetJustifyH("LEFT")
 			
 			-- trinket
 			button.Trinket = MyCreateFrame("Frame", button, {'TOPLEFT', button, 'TOPRIGHT', 1, 0}, {'BOTTOMLEFT', button, 'BOTTOMRIGHT', 1, 0})
@@ -1702,7 +1803,9 @@ do
 				BattleGroundEnemies:CropImage(self.Icon, width, height)
 			end)
 			
-			button.ObjectiveAndRespawn.AuraText = button.ObjectiveAndRespawn:CreateFontString(nil, "OVERLAY")
+			button.ObjectiveAndRespawn.AuraText = MyCreateFontString(button.ObjectiveAndRespawn)
+			button.ObjectiveAndRespawn.AuraText:SetAllPoints()
+			button.ObjectiveAndRespawn.AuraText:SetJustifyH("CENTER")
 			
 			button.ObjectiveAndRespawn.Cooldown = MyCreateCooldown(button.ObjectiveAndRespawn)	
 			
