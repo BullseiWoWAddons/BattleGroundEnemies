@@ -89,6 +89,16 @@ Data.Buttons = {
 	Custom = L.UserDefined
 }
 
+Data.ObjectiveAndRespawnPosition = {
+	Left = L.Left,
+	Right = L.Right,
+}
+
+Data.DrTrackingDisplayType = {
+	Frame = L.Frame,
+	Countdowntext = L.Countdowntext,
+}
+
 Data.DrCategorys = {
 	disorient = L.DR_Disorient,
 	incapacitate = L.DR_Incapacitate,

@@ -209,11 +209,19 @@ function BattleGroundEnemies:SetupOptions()
 				func  = self.ToggleTestmode,
 				order = 1	
 			},
+			Testmode_ToggleAnimation = {
+				type = "execute",
+				name = L.Testmode_ToggleAnimation,
+				desc = L.Testmode_ToggleAnimation_Desc,
+				hidden = function() return not self.TestmodeActive end,
+				func  = self.ToggleTestmodeOnUpdate,
+				order = 2
+			},
 			GeneralSettings = {
 				type = "group",
 				name = L.GeneralSettings,
 				desc = L.GeneralSettings_Desc,
-				order = 2,
+				order = 3,
 				args = {
 					Locked = {
 						type = "toggle",
@@ -377,7 +385,7 @@ function BattleGroundEnemies:SetupOptions()
 				name = L.BarSettings,
 				desc = L.BarSettings_Desc,
 				--childGroups = "tab",
-				order = 3,
+				order = 4,
 				args = {
 					BarWidth = {
 						type = "range",
@@ -828,7 +836,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Trinket_Enabled,
 								desc = L.Trinket_Enabled_Desc,
 								set = function(option, value)
-									UpdateButtons(option, value, nil, "Trinket", nil, nil, "SetShown", value)
+									UpdateButtons(option, value, nil, nil, nil, nil, "EnableTrinket")
 								end,
 								order = 1
 							},
@@ -854,7 +862,7 @@ function BattleGroundEnemies:SetupOptions()
 								name = L.Racial_Enabled,
 								desc = L.Racial_Enabled_Desc,
 								set = function(option, value)
-									UpdateButtons(option, value, nil, "Racial", nil, nil, "SetShown", value)
+									UpdateButtons(option, value, nil, nil, nil, nil, "EnableRacial")
 								end,
 								order = 1
 							},
@@ -871,6 +879,7 @@ function BattleGroundEnemies:SetupOptions()
 								type = "group",
 								name = FILTER,
 								desc = L.MyDebuffsFilteringSettings_Desc,
+								disabled = function() return not self.db.profile.Racial_Enabled end,
 								--inline = true,
 								order = 4,
 								args = {
@@ -962,6 +971,17 @@ function BattleGroundEnemies:SetupOptions()
 								step = 1,
 								order = 2
 							},
+							ObjectiveAndRespawn_Position = {
+								type = "select",
+								name = L.ObjectiveAndRespawn_Position,
+								desc = L.ObjectiveAndRespawn_Position_Desc,
+								disabled = function() return not self.db.profile.ObjectiveAndRespawn_ObjectiveEnabled end,
+								set = function(option, value)
+									UpdateButtons(option, value, nil, nil, nil, nil, "SetObjectivePosition", value)
+								end,
+								values = Data.ObjectiveAndRespawnPosition,
+								order = 3
+							},
 							ObjectiveAndRespawn_Fontsize = {
 								type = "range",
 								name = L.Fontsize,
@@ -974,9 +994,9 @@ function BattleGroundEnemies:SetupOptions()
 								max = 20,
 								step = 1,
 								width = "normal",
-								order = 3
+								order = 4
 							},
-							Fake = addHorizontalSpacing(4),
+							Fake = addHorizontalSpacing(5),
 							ObjectiveAndRespawn_Textcolor = {
 								type = "color",
 								name = L.Fontcolor,
@@ -988,7 +1008,7 @@ function BattleGroundEnemies:SetupOptions()
 								end,
 								hasAlpha = true,
 								width = "half",
-								order = 5
+								order = 6
 							}, 
 							ObjectiveAndRespawn_Outline = {
 								type = "select",
@@ -999,9 +1019,9 @@ function BattleGroundEnemies:SetupOptions()
 									UpdateButtons(option, value, nil, "ObjectiveAndRespawn", "AuraText", nil, "SetFont", LSM:Fetch("font", self.db.profile.Font), self.db.profile.ObjectiveAndRespawn_Fontsize, value)
 								end,
 								values = Data.FontOutlines,
-								order = 6
+								order = 7
 							},
-							Fake3 = addVerticalSpacing(7),
+							Fake3 = addVerticalSpacing(8),
 							ObjectiveAndRespawn_EnableTextshadow = {
 								type = "toggle",
 								name = L.FontShadow_Enabled,
@@ -1010,7 +1030,7 @@ function BattleGroundEnemies:SetupOptions()
 								set = function(option, value)
 									UpdateButtons(option, value, nil, "ObjectiveAndRespawn", "AuraText", nil, "EnableShadowColor", value)
 								end,
-								order = 8
+								order = 9
 							},
 							NumericTargetindicator_TextShadowcolor = {
 								type = "color",
@@ -1022,7 +1042,7 @@ function BattleGroundEnemies:SetupOptions()
 									UpdateButtons(option, color, nil, "ObjectiveAndRespawn", "AuraText", nil, "SetShadowColor", ...)
 								end,
 								hasAlpha = true,
-								order = 9
+								order = 10
 							},
 						}
 					},
@@ -1051,22 +1071,33 @@ function BattleGroundEnemies:SetupOptions()
 								step = 1,
 								order = 2
 							},
+							DrTracking_DisplayType = {
+								type = "select",
+								name = L.DrTracking_DisplayType,
+								desc = L.DrTracking_DisplayType_Desc,
+								disabled = function() return not self.db.profile.DrTracking_Enabled end,
+								set = function(option, value)
+									UpdateButtons(option, value, "DR", nil, nil, nil, "ChangeDisplayType")
+								end,
+								values = Data.DrTrackingDisplayType,
+								order = 3
+							},
 							DrTrackingCooldownTextSettings = {
 								type = "group",
 								name = L.Countdowntext,
 								--desc = L.TrinketSettings_Desc,
 								disabled = function() return not self.db.profile.DrTracking_Enabled end,
-								inline = true,
-								order = 3,
+								order = 4,
 								args = addCooldownTextsettings("DrTracking", "DR")
 							},
-							Fake = addVerticalSpacing(4),
+							Fake1 = addVerticalSpacing(5),
 							DrTrackingFilteringSettings = {
 								type = "group",
 								name = FILTER,
 								--desc = L.DrTrackingFilteringSettings_Desc,
+								disabled = function() return not self.db.profile.DrTracking_Enabled end,
 								--inline = true,
-								order = 5,
+								order = 6,
 								args = {
 									DrTrackingFiltering_Enabled = {
 										type = "toggle",
@@ -1124,6 +1155,8 @@ function BattleGroundEnemies:SetupOptions()
 								type = "group",
 								name = L.MyDebuffsStacktextSettings,
 								--desc = L.MyDebuffSettings_Desc,
+								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
+								inline = true,
 								order = 4,
 								args = {
 									MyDebuffs_Fontsize = {
@@ -1208,6 +1241,7 @@ function BattleGroundEnemies:SetupOptions()
 								type = "group",
 								name = FILTER,
 								desc = L.MyDebuffsFilteringSettings_Desc,
+								disabled = function() return not self.db.profile.MyDebuffs_Enabled end,
 								--inline = true,
 								order = 6,
 								args = {
@@ -1314,7 +1348,7 @@ function BattleGroundEnemies:SetupOptions()
 					UpdateButtons(option, value, nil, nil, nil, nil, "SetBindings")
 				end,
 				--childGroups = "tab",
-				order = 4,
+				order = 5,
 				args = {
 					LeftButtonType = {
 						type = "select",

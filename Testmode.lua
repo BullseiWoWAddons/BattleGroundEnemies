@@ -51,7 +51,9 @@ local function SetupTestmode()
 	end
 end
 
-
+function BattleGroundEnemies.ToggleTestmodeOnUpdate()
+	FakeEnemiesOnUpdateFrame:SetShown(not FakeEnemiesOnUpdateFrame:IsShown())
+end
 
 function BattleGroundEnemies.ToggleTestmode()
 	if BattleGroundEnemies.TestmodeActive then --disable testmode
@@ -67,8 +69,6 @@ function BattleGroundEnemies:DisableTestMode()
 	self:Hide()
 	self.TestmodeActive = false
 end
-
-
 
 do
 	local counter

@@ -152,10 +152,10 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 
 
 	--MyTarget, indicating the current target of the player
-	enemyButton.MyTarget:SetBackdropBorderColor(conf.MyTarget_Color)
+	enemyButton.MyTarget:SetBackdropBorderColor(unpack(conf.MyTarget_Color))
 	
 	--MyFocus, indicating the current focus of the player
-	enemyButton.MyFocus:SetBackdropBorderColor(conf.MyFocus_Color)
+	enemyButton.MyFocus:SetBackdropBorderColor(unpack(conf.MyFocus_Color))
 	
 	enemyButton:SetRangeIncicatorFrame()
 		
@@ -164,7 +164,6 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 	
 	enemyButton.TargetCounter.Text:SetTextColor(unpack(conf.NumericTargetindicator_Textcolor))
 	enemyButton.TargetCounter.Text:ApplyFontStringSettings(conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
-	
 	enemyButton.TargetCounter.Text:SetText(0)
 
 	-- name
@@ -172,15 +171,19 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 	enemyButton.Name:ApplyFontStringSettings(conf.Name_Fontsize, conf.Name_Outline, conf.Name_EnableTextshadow, conf.Name_TextShadowcolor)
 	
 	-- trinket
+	enemyButton:EnableTrinket()
 	enemyButton.Trinket.Cooldown:ApplyCooldownSettings(conf.Trinket_ShowNumbers, false, true, {0, 0, 0, 0.75})
 	enemyButton.Trinket.Cooldown.Text:ApplyFontStringSettings(conf.Trinket_Cooldown_Fontsize, conf.Trinket_Cooldown_Outline, conf.Trinket_Cooldown_EnableTextshadow, conf.Trinket_Cooldown_TextShadowcolor)
 
 	-- RACIALS	
+	enemyButton:EnableRacial()
 	enemyButton.Racial.Cooldown:ApplyCooldownSettings(conf.Racial_ShowNumbers, false, true, {0, 0, 0, 0.75})
 	enemyButton.Racial.Cooldown.Text:ApplyFontStringSettings(conf.Racial_Cooldown_Fontsize, conf.Racial_Cooldown_Outline, conf.Racial_Cooldown_EnableTextshadow, conf.Racial_Cooldown_TextShadowcolor)
 
 	-- objective and respawn
 	enemyButton.ObjectiveAndRespawn:SetWidth(conf.ObjectiveAndRespawn_Width)
+	
+	enemyButton:SetObjectivePosition(conf.ObjectiveAndRespawn_Position)
 	
 	
 	enemyButton.ObjectiveAndRespawn.AuraText:SetTextColor(unpack(conf.ObjectiveAndRespawn_Textcolor))
@@ -291,11 +294,12 @@ do
 			NumericTargetindicator_EnableTextshadow = false,
 			NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
 			
-			MyTarget_Color = {17, 27, 161, 1},
+			MyTarget_Color = {1, 1, 1, 1},
 			MyFocus_Color = {0, 0.988235294117647, 0.729411764705882, 1},
 			
 			DrTracking_Enabled = true,
 			DrTracking_Spacing = 2,
+			DrTracking_DisplayType = "Frame",
 			
 			DrTracking_ShowNumbers = true,
 			
@@ -329,6 +333,7 @@ do
 
 			ObjectiveAndRespawn_ObjectiveEnabled = true,
 			ObjectiveAndRespawn_Width = 36,
+			ObjectiveAndRespawn_Position = "Left",
 			
 			ObjectiveAndRespawn_RespawnEnabled = true,
 			
@@ -486,7 +491,7 @@ function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 		enemyButton.ObjectiveAndRespawn.Cooldown:Clear()
 		
 		for categorie, drFrame in pairs(enemyButton.DR) do --set status of DR-Tracker to 1
-			drFrame.status = 1
+			drFrame.status = 0
 		end
 	else --no recycleable buttons remaining => create a new one
 		enemyButton = self:CreateNewPlayerButton()
@@ -934,7 +939,7 @@ do
 
 		local function MyCreateFrame(frameType, parent, tablepoint1, tablepoint2)
 			local frame = CreateFrame(frameType, nil, parent)
-			frame:SetPoint(unpack(tablepoint1))
+			if tablepoint1 then frame:SetPoint(unpack(tablepoint1)) end
 			if tablepoint2 then frame:SetPoint(unpack(tablepoint2)) end
 			return frame 
 		end
@@ -1097,6 +1102,67 @@ do
 							self:SetAttribute('macrotext'..i, macrotext)
 						end
 					end
+				end
+			end
+			
+			function enemyButtonFunctions:EnableTrinket()
+				if self.config.Trinket_Enabled then
+					self.Trinket:Show()
+					self.Trinket:SetWidth(self.config.BarHeight)
+				else
+					--dont SetWidth before Hide() otherwise it won't work as aimed
+					self.Trinket:Hide()
+					self.Trinket:SetWidth(0.01)
+				end
+			end
+			
+			function enemyButtonFunctions:EnableRacial()
+				if self.config.Racial_Enabled then
+					self.Racial:SetWidth(self.config.BarHeight)
+					self.Racial:Show()
+				else
+					self.Racial:Hide()
+					self.Racial:SetWidth(0.01)
+				end
+			end
+			
+			function enemyButtonFunctions:SetDrAtSelf()
+				self.DrContainerStartAnchor = self
+				self:DrPositioning()
+			end
+			
+			function enemyButtonFunctions:SetDrAtObjective()
+				self.DrContainerStartAnchor = self.ObjectiveAndRespawn
+				self:DrPositioning()
+			end
+			
+			function enemyButtonFunctions:SetObjectivePosition(position)
+				self.ObjectiveAndRespawn:ClearAllPoints()
+				if position == "Left" then
+					self.ObjectiveAndRespawn:SetPoint('TOPRIGHT', self, 'TOPLEFT', -1, 0)
+					self.ObjectiveAndRespawn:SetPoint('BOTTOMRIGHT', self, 'BOTTOMRIGHT', -1, 0)
+					
+					
+					self.ObjectiveAndRespawn:SetScript("OnHide", function() 
+						--BattleGroundEnemies:Debug("ObjectiveAndRespawn hidden")
+						self:SetDrAtSelf()
+					end)
+					self.ObjectiveAndRespawn:SetScript("OnShow", function() 
+						--BattleGroundEnemies:Debug("ObjectiveAndRespawn shown")
+						self:SetDrAtObjective()
+					end)
+					if self.ObjectiveAndRespawn:IsShown() then
+						self:SetDrAtObjective()
+					else
+						self:SetDrAtSelf()
+					end
+				else --"Right"
+					self.ObjectiveAndRespawn:SetPoint('TOPLEFT', self.Racial, 'TOPRIGHT', 1, 0)
+					self.ObjectiveAndRespawn:SetPoint('BOTTOMLEFT', self.Racial, 'BOTTOMLEFT', 1, 0)
+					self:SetDrAtSelf()
+					
+					self.ObjectiveAndRespawn:SetScript("OnHide", nil)
+					self.ObjectiveAndRespawn:SetScript("OnShow", nil)
 				end
 			end
 			
@@ -1538,7 +1604,7 @@ do
 				local function drFrameCooldown_OnHide(self)
 					local drFrame = self:GetParent()
 					drFrame:Hide()
-					drFrame.status = 1
+					drFrame.status = 0
 					drFrame:GetParent():DrPositioning() --enemyButton:DrPositioning()
 				end
 				
@@ -1553,7 +1619,34 @@ do
 						self:ApplyDrFrameSettings(drFrame)
 					end
 				end
-			
+				
+				local drFrameFunctions = {}
+				
+				function drFrameFunctions:UpdateStatusBorder()
+					self:SetBackdropBorderColor(unpack(dRstates[self.status]))
+				end
+				
+				function drFrameFunctions:UpdateStatusText()
+					self.Cooldown.Text:SetTextColor(unpack(dRstates[self.status]))
+				end
+				
+				function drFrameFunctions:ChangeDisplayType()
+					self:SetDisplayType()
+					
+					--reset settings
+					self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
+					self:SetBackdropBorderColor(0, 0, 0, 0)
+					if self.status ~= 0 then self:SetStatus() end
+				end
+				
+				function drFrameFunctions:SetDisplayType()
+					if BattleGroundEnemies.db.profile.DrTracking_DisplayType == "Frame" then
+						self.SetStatus = drFrameFunctions.UpdateStatusBorder
+					else
+						self.SetStatus = drFrameFunctions.UpdateStatusText
+					end
+				end
+
 				function enemyButtonFunctions:UpdateDR(spellID, spellName, applied, removed)
 					if not self.config.DrTracking_Enabled then return end
 					
@@ -1568,6 +1661,12 @@ do
 					if not drFrame then  --create a new frame for this categorie
 						
 						drFrame = CreateFrame("Frame", nil, self)
+						
+						drFrame.SetDisplayType = drFrameFunctions.SetDisplayType
+						drFrame.ChangeDisplayType = drFrameFunctions.ChangeDisplayType
+						
+						drFrame:SetDisplayType()
+						
 						drFrame:SetWidth(self.config.BarHeight)
 
 						drFrame = SetBackdrop(drFrame)
@@ -1578,7 +1677,7 @@ do
 						
 						drFrame.Cooldown = MyCreateCooldown(drFrame)
 						self:ApplyDrFrameSettings(drFrame)
-						drFrame.status = 1
+						drFrame.status = 0
 						-- for _, region in next, {drFrame.Cooldown:GetRegions()} do
 							-- if ( region:GetObjectType() == "FontString" ) then
 								-- region:SetFont("Fonts\\FRIZQT__.TTF", , "OUTLINE")
@@ -1595,15 +1694,15 @@ do
 					
 					
 					if removed then --removed
-						if drFrame.status == 1 then -- we didn't get the applied, so we set the color and increase the dr state
+						if drFrame.status == 0 then -- we didn't get the applied, so we set the color and increase the dr state
 							--BattleGroundEnemies:Debug("DR Problem")
-							drFrame:SetBackdropBorderColor(unpack(dRstates[drFrame.status]))
 							drFrame.status = drFrame.status + 1
+							drFrame:SetStatus()
 						end
 						drFrame_SetCooldown(self, drFrame, GetTime(), DRData:GetResetTime(drCat), spellID)
 					end
 					
-					if applied and drFrame.status < 4 then --applied
+					if applied and drFrame.status < 3 then --applied
 						if spellName and self.UnitIDs.Active then --check for spellname for testmode, we don't wanna show a long duration in testmode
 							local _, _, _, _, _, actualDuration = UnitDebuff(self.UnitIDs.Active, spellName) 
 							--BattleGroundEnemies:Debug(GetTime(), actualDuration, GetTime() + actualDuration)
@@ -1611,12 +1710,11 @@ do
 								drFrame_SetCooldown(self, drFrame, GetTime(), DRData:GetResetTime(drCat) + actualDuration, spellID)
 							end
 						end
-						drFrame:SetBackdropBorderColor(unpack(dRstates[drFrame.status]))
 						drFrame.status = drFrame.status + 1
+						drFrame:SetStatus()
 					end
 				end
 			end
-			
 		end
 			
 		
@@ -1661,8 +1759,8 @@ do
 			end
 			
 			button:SetScript("OnSizeChanged", function(self, width, height)
-				self.Trinket:SetWidth(height)
-				self.Racial:SetWidth(height)
+				self:EnableTrinket()
+				self:EnableRacial()
 				for drCategorie, drFrame in pairs(self.DR) do
 					drFrame:SetWidth(height)
 				end
@@ -1756,12 +1854,7 @@ do
 			button.Trinket.Icon:SetTexCoord(0.075, 0.925, 0.075, 0.925)
 			
 			button.Trinket.Cooldown = MyCreateCooldown(button.Trinket)
-			
-			-- for _, region in next, {button.Trinket.Cooldown:GetRegions()} do
-				-- if ( region:GetObjectType() == "FontString" ) then
-					-- region:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
-				-- end
-			-- end
+		
 			button.Trinket.TrinketCheck = TrinketFrameFunctions.TrinketCheck 
 	
 			
@@ -1783,18 +1876,7 @@ do
 			button.InactiveDebuffs = {}
 
 			
-			button.ObjectiveAndRespawn = MyCreateFrame("Frame", button, {'TOPRIGHT', button, 'TOPLEFT', -1, 0}, {'BOTTOMRIGHT', button, 'BOTTOMRIGHT', -1, 0})
-			
-			button.ObjectiveAndRespawn:SetScript("OnHide", function() 
-				--self:Debug("ObjectiveAndRespawn hidden")
-				button.DrContainerStartAnchor = button.Spec
-				button:DrPositioning()
-			end)
-			button.ObjectiveAndRespawn:SetScript("OnShow", function() 
-				--self:Debug("ObjectiveAndRespawn shown")
-				button.DrContainerStartAnchor = button.ObjectiveAndRespawn
-				button:DrPositioning()
-			end)
+			button.ObjectiveAndRespawn = MyCreateFrame("Frame", button)
 			
 			button.ObjectiveAndRespawn.Icon = button.ObjectiveAndRespawn:CreateTexture(nil, "BORDER")
 			button.ObjectiveAndRespawn.Icon:SetAllPoints()
