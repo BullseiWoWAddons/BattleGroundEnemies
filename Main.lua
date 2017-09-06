@@ -53,6 +53,7 @@ local UnitExists = UnitExists
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 local UnitIsDead = UnitIsDead
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsGhost = UnitIsGhost
 local UnitName = UnitName
 
@@ -82,11 +83,11 @@ BattleGroundEnemies.AllyUnitIDToAllyDetails = {} --index = unitID ("raid"..i) of
 
 --Notes about UnitIDs
 --priority of unitIDs:
---1. Arena, detected by UNIT_HEALTH_FREQUENT (health upate), ARENA_OPPONENT_UPDATE (this units exist, don't exist anymore)
+--1. Arena, detected by UNIT_HEALTH_FREQUENT (health upate), ARENA_OPPONENT_UPDATE (this units exist, don't exist anymore), we need to check for UnitExists() since there is a small time frame after the objective isn't on that target anymore where UnitExists returns false for that unitID
 --2. nameplates, detected by UNIT_HEALTH_FREQUENT, NAME_PLATE_UNIT_ADDED, NAME_PLATE_UNIT_REMOVED
 --3. player's target
 --4. player's focus
---5. ally targets, UNIT_TARGET fires if the target changes
+--5. ally targets, UNIT_TARGET fires if the target changes, we need to check for UnitExists() since there is a small time frame after an ally lost that enemy where UnitExists returns false for that unitID
 
 local function EnableShadowColor(fontString, enableShadow, shadowColor)
 	if shadowColor then fontString:SetShadowColor(unpack(shadowColor)) end
@@ -160,11 +161,11 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 	enemyButton:SetRangeIncicatorFrame()
 		
 	-- numerical target indicator
-	enemyButton.TargetCounter:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
+	enemyButton.NumericTargetindicator:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
 	
-	enemyButton.TargetCounter.Text:SetTextColor(unpack(conf.NumericTargetindicator_Textcolor))
-	enemyButton.TargetCounter.Text:ApplyFontStringSettings(conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
-	enemyButton.TargetCounter.Text:SetText(0)
+	enemyButton.NumericTargetindicator:SetTextColor(unpack(conf.NumericTargetindicator_Textcolor))
+	enemyButton.NumericTargetindicator:ApplyFontStringSettings(conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
+	enemyButton.NumericTargetindicator:SetText(0)
 
 	-- name
 	enemyButton.Name:SetTextColor(unpack(conf.Name_Textcolor))
@@ -221,9 +222,6 @@ function BattleGroundEnemies:ApplyMainFrameSettings()
 		local scale = self:GetEffectiveScale()
 		self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", conf.Position_X / scale, conf.Position_Y / scale)
 	end
-	
-	self.EnemyCount:SetAllPoints()
-	self.EnemyCount:SetJustifyH("LEFT")
 	self.EnemyCount:SetTextColor(unpack(conf.EnemyCount_Textcolor))
 	
 	self:SetEnemyCountJustifyV(conf.Growdirection)
@@ -427,6 +425,8 @@ do
 		end)
 		
 		self.EnemyCount = MyCreateFontString(self)
+		self.EnemyCount:SetAllPoints()
+		self.EnemyCount:SetJustifyH("LEFT")
 		
 		self:ApplyMainFrameSettings()
 		
@@ -481,7 +481,7 @@ function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 		enemyButton.Racial.Cooldown:Clear()	--reset Racial Cooldown
 		enemyButton.MyTarget:Hide()	--reset possible shown target indicator frame
 		enemyButton.MyFocus:Hide()	--reset possible shown target indicator frame
-		enemyButton.TargetCounter.Text:SetText(0) --reset testmode
+		enemyButton.NumericTargetindicator:SetText(0) --reset testmode
 		if enemyButton.UnitIDs then  --check because of testmode
 			wipe(enemyButton.UnitIDs.TargetedByAlly)  
 			enemyButton:UpdateTargetIndicators() --update numerical and symbolic target indicator
@@ -1196,15 +1196,15 @@ do
 			function enemyButtonFunctions:UnitIsDead()
 				--BattleGroundEnemies:Debug("UnitIsDead")
 				local objective = self.ObjectiveAndRespawn
-				if (IsRatedBG or BattleGroundEnemies.TestmodeActive) and BattleGroundEnemies.db.profile.ObjectiveAndRespawn_RespawnEnabled  then
+				if (IsRatedBG or BattleGroundEnemies.TestmodeActive) and self.config.ObjectiveAndRespawn_RespawnEnabled  then
 					--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 					if not objective.ActiveRespawnTimer then
 						objective:Show()
 						objective.Icon:SetTexture(GetSpellTexture(8326))
 						objective.AuraText:SetText("")
-						objective.Cooldown:SetCooldown(GetTime(), 26)
 						objective.ActiveRespawnTimer = true
 					end
+					objective.Cooldown:SetCooldown(GetTime(), 26) --overwrite an already active timer
 				end
 			end
 			
@@ -1229,6 +1229,7 @@ do
 					unitIDs.RangeUpdate = false
 					unitIDs.UpdateHealth = false
 					unitIDs.UpdatePower = false
+					unitIDs.CheckIfUnitExists = false
 					local BGErangeUpdate = BattleGroundEnemies.RangeUpdate
 					tremove(BGErangeUpdate, rangeUpdate)
 					for i = rangeUpdate, #BGErangeUpdate do
@@ -1240,20 +1241,29 @@ do
 			
 			function enemyButtonFunctions:FetchAnotherUnitID()
 				local unitIDs = self.UnitIDs
-				unitIDs.Active = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
-				if unitIDs.Active then
+				unitIDs.CheckIfUnitExists = false -- we need to do UnitExists() for allytargets and Arena-UnitIDs since there is a delay of like 1 second
+				
+				if unitIDs.Arena then
+					unitIDs.Active = unitIDs.Arena
+					unitIDs.CheckIfUnitExists = true
 					self:RegisterForRangeUpdate()
 				else
-					if unitIDs.Ally then 
-						unitIDs.Active = unitIDs.Ally
-						unitIDs.UpdateHealth = true
-						if self.config.PowerBar_Enabled then
-							unitIDs.UpdatePower = true
-						end
+					unitIDs.Active = unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
+					if unitIDs.Active then
 						self:RegisterForRangeUpdate()
 					else
-						self:DeleteActiveUnitID()
-					end 
+						if unitIDs.Ally then 
+							unitIDs.Active = unitIDs.Ally
+							unitIDs.UpdateHealth = true
+							if self.config.PowerBar_Enabled then
+								unitIDs.UpdatePower = true
+							end
+							unitIDs.CheckIfUnitExists = true
+							self:RegisterForRangeUpdate()
+						else
+							self:DeleteActiveUnitID()
+						end 
+					end
 				end
 			end
 			
@@ -1311,7 +1321,7 @@ do
 					i = i+1
 				end
 				if self.config.NumericTargetindicator_Enabled then 
-					self.TargetCounter.Text:SetText(i-1)
+					self.NumericTargetindicator:SetText(i-1)
 				end
 				while self.TargetIndicators[i] do --hide no longer used ones
 					self.TargetIndicators[i]:Hide()
@@ -1320,7 +1330,8 @@ do
 			end
 			
 			function enemyButtonFunctions:UpdateHealth(unitID)
-				if UnitIsDead(unitID) then
+				if self.UnitIDs.CheckIfUnitExists and not UnitExists(unitID) then return end
+				if UnitIsDeadOrGhost(unitID) then
 					--BattleGroundEnemies:Debug("UpdateAll", UnitName(unitID), "UnitIsDead")
 					self:UnitIsDead()
 				elseif self.ObjectiveAndRespawn.ActiveRespawnTimer then --player is alive again
@@ -1678,11 +1689,6 @@ do
 						drFrame.Cooldown = MyCreateCooldown(drFrame)
 						self:ApplyDrFrameSettings(drFrame)
 						drFrame.status = 0
-						-- for _, region in next, {drFrame.Cooldown:GetRegions()} do
-							-- if ( region:GetObjectType() == "FontString" ) then
-								-- region:SetFont("Fonts\\FRIZQT__.TTF", , "OUTLINE")
-							-- end
-						-- end
 						
 						drFrame.Cooldown:SetScript("OnHide", drFrameCooldown_OnHide)
 						drFrame:Hide()
@@ -1831,11 +1837,11 @@ do
 			button.MyFocus:Hide()
 			
 			-- numerical target indicator
-			button.TargetCounter = MyCreateFrame("Frame", button, {'TOPRIGHT', button.Health, "TOPRIGHT", -5, 0}, {'BOTTOMRIGHT', button.Health, "BOTTOMRIGHT", -5, 0})
-			button.TargetCounter:SetWidth(20)
-			button.TargetCounter.Text = MyCreateFontString(button.TargetCounter)
-			button.TargetCounter.Text:SetAllPoints()
-			button.TargetCounter.Text:SetJustifyH("RIGHT")
+			button.NumericTargetindicator = MyCreateFontString(button)
+			button.NumericTargetindicator:SetPoint('TOPRIGHT', button.Health, "TOPRIGHT", -5, 0)
+			button.NumericTargetindicator:SetPoint('BOTTOMRIGHT', button.Health, "BOTTOMRIGHT", -5, 0)
+			button.NumericTargetindicator:SetWidth(20)
+			button.NumericTargetindicator:SetJustifyH("RIGHT")
 			
 			-- symbolic target indicator
 			button.TargetIndicators = {}
@@ -1843,7 +1849,7 @@ do
 			-- name
 			button.Name = MyCreateFontString(button.Health)
 			button.Name:SetPoint('TOPLEFT', button.Role, "TOPRIGHT", 5, 2)
-			button.Name:SetPoint('BOTTOMRIGHT', button.TargetCounter, "BOTTOMLEFT", 0, 0)
+			button.Name:SetPoint('BOTTOMRIGHT', button.NumericTargetindicator, "BOTTOMLEFT", 0, 0)
 			button.Name:SetJustifyH("LEFT")
 			
 			-- trinket

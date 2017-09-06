@@ -246,7 +246,7 @@ do
 						if targetCounts < 15 then
 							local targetCounter = mathrandom(0,3)
 							if targetCounts + targetCounter <= 15 then
-								enemyButton.TargetCounter.Text:SetText(targetCounter)
+								enemyButton.NumericTargetindicator:SetText(targetCounter)
 							end
 						end
 					end		
