@@ -1,4 +1,7 @@
 
+v2.4.8
+retag of v2.4.7 (Also updated changelog to trigger the packager)
+
 v2.4.7
 Included the new version of LibRaces (The previous release caused an error Thanks @zibra for reporting )
 
