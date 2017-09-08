@@ -1,7 +1,7 @@
 
 v.2.5
 New Feature: Added CC icons on specicon, like its known from Gladius, sArena, BigDebuffs
-BugFix: Fixed an bug with target counter (frame hat the wrong parent)
+BugFix: Fixed an bug with target counter (frame had the wrong parent)
 
 v2.4.8
 retag of v2.4.7 (Also updated changelog to trigger the packager)
