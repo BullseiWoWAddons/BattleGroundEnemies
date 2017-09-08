@@ -2,7 +2,6 @@ local addonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 
 local LibRaces = LibStub("LibRaces-1.0")
-local DRData = LibStub("DRData-1.0")
 local LibPlayerSpells = LibStub("LibPlayerSpells-1.0")
 
 
@@ -14,26 +13,12 @@ local playerFaction = UnitFactionGroup("player")
 local fakeEnemies = {}
 local randomTrinkets = {}
 local randomRacials = {}
-local randomDrCategory = {} --key = number, value = categorieName
-local DrCategoryToSpell = {} --key = categorieName, value = table with key = number and value = spellID
 local harmfulPlayerSpells = {} --key = number, value = spellID
 local FakeEnemiesOnUpdateFrame = CreateFrame("frame")
 FakeEnemiesOnUpdateFrame:Hide()
 
 
 local function SetupTestmode()
-	
-	local i = 1
-	for categorieName, localizedCategoryName in pairs(DRData.categoryNames) do
-		randomDrCategory[i] = categorieName
-		DrCategoryToSpell[categorieName] = {}
-		i = i + 1
-	end
-
-	for spellID, categorieName in pairs(DRData.spells) do
-		tinsert(DrCategoryToSpell[categorieName], spellID)
-	end
-
 	do
 		local count = 1
 		for triggerSpellID, tinketNumber in pairs(Data.TriggerSpellIDToTrinketnumber) do
@@ -229,14 +214,16 @@ do
 							enemyButton:RacialUsed(randomRacials[mathrandom(1, #randomRacials)])
 						elseif number == 4 then --player got an diminishing CC applied
 							--self:Debug("Nummber4")
-							local dRCategory = randomDrCategory[mathrandom(1, #randomDrCategory)]
-							local spellID = DrCategoryToSpell[dRCategory][mathrandom(1, #DrCategoryToSpell[dRCategory])]
+							local dRCategory = Data.RandomDrCategory[mathrandom(1, #Data.RandomDrCategory)]
+							local spellID = Data.DrCategoryToSpell[dRCategory][mathrandom(1, #Data.DrCategoryToSpell[dRCategory])]
 							enemyButton:UpdateDR(spellID, nil, false, true)
+							enemyButton:UpdateAuras(spellID, (GetSpellInfo(spellID)), true, false)
 						elseif number == 5 then --player got one of the players debuff's applied
 							--self:Debug("Nummber5")
 							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
 							enemyButton:DebuffChanged(true, nil, spellID, nil, true, true, mathrandom(1, 9), mathrandom(10, 15))
 							enemyButton:UpdateDR(spellID, nil, true, true)
+							enemyButton:UpdateAuras(spellID, (GetSpellInfo(spellID)), true, true)
 						elseif number == 6 then --power simulation
 							local power = mathrandom(0, 100)
 							enemyButton.Power:SetValue(power/100)

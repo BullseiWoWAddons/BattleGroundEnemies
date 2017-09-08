@@ -1,6 +1,7 @@
 local addonName, Data = ...
 
 local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
+local DRData = LibStub("DRData-1.0")
 
 local GetClassInfoByID = GetClassInfoByID
 local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
@@ -133,8 +134,50 @@ Data.DrCategorys = {
     -- [106839] = 4, -- [Feral] Skull Bash
 	-- [93985] = 4,  -- [Feral] Skull Bash
 -- }
+-- Data.AuraPriority = {
+
+
+
+
+
+
+
+
+
+
+
+-- }
+
+Data.RandomDrCategory = {} --key = number, value = categorieName, used for Testmode
+Data.DrCategoryToSpell = {} --key = categorieName, value = table with key = number and value = spellID
+Data.SpellPriorities = {}
+
+local i = 1
+for categorieName, localizedCategoryName in pairs(DRData.categoryNames) do
+	Data.RandomDrCategory[i] = categorieName
+	Data.DrCategoryToSpell[categorieName] = {}
+	i = i + 1
+end
+
+do
+	local drCategoryToPriority = {
+		stun = 7,
+		disorient = 6,
+		incapacitate = 5,
+		silence = 4,
+		root = 3,
+		knockback = 2,
+		taunt = 1
+	}
+
+	for spellID, categorieName in pairs(DRData.spells) do
+		tinsert(Data.DrCategoryToSpell[categorieName], spellID)
+		Data.SpellPriorities[spellID] = drCategoryToPriority[categorieName]
+	end
+end
+
 		
-Data.cCduration = {	-- this is basically data from DRData-1 with durations
+Data.cCduration = {	-- this is basically data from DRData-1 with durations, used for Relentless check
 	--[[ INCAPACITATES ]]--
 	incapacitate = {
 		-- Druid
@@ -284,7 +327,14 @@ Data.cCduration = {	-- this is basically data from DRData-1 with durations
 		-- Shaman
 		[ 64695] = 8 -- Earthgrab Totem
 	}
-}		
+}
+
+Data.cCdurationBySpellID = {}
+for category, spellIDs in pairs(Data.cCduration) do
+	for spellID, duration in pairs(spellIDs) do
+		Data.cCdurationBySpellID[spellID] = duration
+	end
+end	
 		
 
 Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = faction(0 for hode, 1 for alliance) value spellID of the flag, minecart

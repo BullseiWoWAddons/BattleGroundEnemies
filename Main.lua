@@ -283,6 +283,15 @@ do
 			
 			Spec_Width = 36,
 			
+			Spec_AuraDisplay_Enabled = true,
+			Spec_AuraDisplay_ShowNumbers = true,
+			
+			Spec_AuraDisplay_Cooldown_Fontsize = 12,
+			Spec_AuraDisplay_Cooldown_Outline = "OUTLINE",
+			Spec_AuraDisplay_Cooldown_EnableTextshadow = false,
+			Spec_AuraDisplay_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+			
+			
 			SymbolicTargetindicator_Enabled = true,
 			
 			NumericTargetindicator_Enabled = true,
@@ -631,6 +640,7 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED(timestamp,subevent,hide
 			local enemyButton = self.Enemies[destName]
 			if enemyButton then
 				enemyButton:UpdateDR(spellID, spellName, true)
+				enemyButton:UpdateAuras(spellID, spellName, true)
 				enemyButton:RelentlessCheck(spellID, spellName)
 				enemyButton.Trinket:TrinketCheck(spellID, true) --adaptation used, maybe?
 				enemyButton:DebuffChanged(false, srcName, spellID, spellName, true, false)
@@ -641,6 +651,7 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED(timestamp,subevent,hide
 			local enemyButton = self.Enemies[destName]
 			if enemyButton then
 				enemyButton:UpdateDR(spellID, spellName, true, true)
+				enemyButton:UpdateAuras(spellID, spellName, true, true)
 				enemyButton:RelentlessCheck(spellID, spellName)
 				enemyButton:DebuffChanged(false, srcName, spellID, spellName, true, true)
 			end
@@ -650,6 +661,7 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED(timestamp,subevent,hide
 			local enemyButton = self.Enemies[destName]
 			if enemyButton then
 				enemyButton:UpdateDR(spellID, spellName, false, true)
+				enemyButton:UpdateAuras(spellID, spellName, false, true)
 				enemyButton:DebuffChanged(false, srcName, spellID, spellName, false, true)
 			end
 		end
@@ -1553,8 +1565,6 @@ do
 					self:DebuffPositioning()
 				end
 				
-				
-				
 				function enemyButtonFunctions:DebuffChanged(testmode, srcName, _spellID, spellName, applied, removed, count, duration)
 					
 					if not self.config.MyDebuffs_Enabled then return end
@@ -1696,9 +1706,7 @@ do
 						self.DR[drCat] = drFrame
 					end
 
-					
-					
-					
+
 					if removed then --removed
 						if drFrame.status == 0 then -- we didn't get the applied, so we set the color and increase the dr state
 							--BattleGroundEnemies:Debug("DR Problem")
@@ -1722,6 +1730,51 @@ do
 				end
 			end
 		end
+	
+		function enemyButtonFunctions:UpdateAuras(spellID, spellName, applied, removed)
+			if not self.config.Spec_AuraDisplay_Enabled then return end
+		
+			local priority = Data.SpellPriorities[spellID]
+			if not priority then return end
+			
+			local auraFrame = self.Spec_AuraDisplay
+			
+			if removed then
+				if self.ActiveAuras then self.ActiveAuras[spellID] = nil end
+				if auraFrame.DisplayedAura and auraFrame.DisplayedAura.spellID == spellID then
+				--Look for another one
+				auraFrame:ActiveAuraRemoved()
+				end
+			end
+			
+			if applied then
+				local actualDuration, _
+				if BattleGroundEnemies.TestmodeActive then
+					actualDuration = Data.cCdurationBySpellID[spellID]
+					if actualDuration then
+						local drCat = DRData:GetSpellCategory(spellID)
+						if drCat and self.DR[drCat] then
+							actualDuration = actualDuration/2^(self.DR[drCat].status)
+						end
+					end
+				elseif spellName and self.UnitIDs.Active then
+					_, _, _, _, _, actualDuration = UnitDebuff(self.UnitIDs.Active, spellName) 
+					--BattleGroundEnemies:Debug(GetTime(), actualDuration, GetTime() + actualDuration)
+				end
+				if actualDuration then
+					if not auraFrame.ActiveAuras[spellID] then auraFrame.ActiveAuras[spellID] = {} end
+					local startTime = GetTime()
+					local activAuraSpell = auraFrame.ActiveAuras[spellID]
+					activAuraSpell.spellID = spellID
+					activAuraSpell.startTime = startTime
+					activAuraSpell.endTime = actualDuration + startTime
+					activAuraSpell.priority = priority
+					if not auraFrame.DisplayedAura or priority > auraFrame.DisplayedAura.priority then
+						auraFrame:SetNewAura(activAuraSpell)
+					end
+				end
+			end
+		end
 			
 		
 		local TrinketFrameFunctions = {}
@@ -1733,6 +1786,42 @@ do
 			if setCooldown then
 				self.Cooldown:SetCooldown(GetTime(), Data.TrinketTriggerSpellIDtoCooldown[spellID])
 			end
+		end
+		
+		
+		local AuraFrameFunctions = {}
+		function AuraFrameFunctions:ActiveAuraRemoved()
+			local activeAuras = self.ActiveAuras
+			if self.DisplayedAura then
+				activeAuras[self.DisplayedAura.spellID] = nil
+				self.DisplayedAura = false
+			end
+			
+			
+			local highestPrioritySpell
+			
+			for spellID, spellDetails in pairs(activeAuras) do
+				
+				if spellDetails.endTime > GetTime() then
+					activeAuras[spellID] = nil
+				else
+					if not highestPrioritySpell or spellDetails.priority > highestPrioritySpell.priority then 
+						highestPrioritySpell = spellDetails
+					end
+				end
+			end
+			if highestPrioritySpell then
+				self:SetNewAura(highestPrioritySpell)
+			else
+				self:Hide()
+			end
+		end
+		
+		function AuraFrameFunctions:SetNewAura(spellDetails)
+			self.DisplayedAura = spellDetails
+			self:Show()
+			self.Icon:SetTexture(GetSpellTexture(spellDetails.spellID))
+			self.Cooldown:SetCooldown(spellDetails.startTime, spellDetails.endTime - spellDetails.startTime)
 		end
 		
 		
@@ -1789,14 +1878,33 @@ do
 			
 			-- spec
 			button.Spec = MyCreateFrame("Frame", button, {'TOPLEFT'}, {'BOTTOMLEFT'})
+			button.Spec:SetScript("OnSizeChanged", function(self, width, height)
+				BattleGroundEnemies:CropImage(self.Icon, width, height)
+				BattleGroundEnemies:CropImage(button.Spec_AuraDisplay.Icon, width, height)
+			end)
 			
 			button.Spec.Icon = button.Spec:CreateTexture(nil, 'BACKGROUND')
 			button.Spec.Icon:SetAllPoints()
+			
+			button.Spec_AuraDisplay = MyCreateFrame("Frame", button.Spec)
 		
-			button.Spec:SetScript("OnSizeChanged", function(self, width, height)
-				BattleGroundEnemies:CropImage(self.Icon, width, height)
+			
+			button.Spec_AuraDisplay = MyCreateFrame("Frame", button.Spec)
+			button.Spec_AuraDisplay.ActiveAuraRemoved = AuraFrameFunctions.ActiveAuraRemoved
+			button.Spec_AuraDisplay.SetNewAura = AuraFrameFunctions.SetNewAura
+			button.Spec_AuraDisplay:SetAllPoints()
+			button.Spec_AuraDisplay:SetFrameLevel(button.Spec:GetFrameLevel() + 1)
+			button.Spec_AuraDisplay.ActiveAuras = {}
+			button.Spec_AuraDisplay.Icon = button.Spec_AuraDisplay:CreateTexture(nil, 'BACKGROUND')
+			button.Spec_AuraDisplay.Icon:SetAllPoints()
+			button.Spec_AuraDisplay.Cooldown = MyCreateCooldown(button.Spec_AuraDisplay)
+			button.Spec_AuraDisplay.Cooldown:ApplyCooldownSettings(conf.Trinket_ShowNumbers, false, true, {0, 0, 0, 0.75})
+			
+			button.Spec_AuraDisplay.Cooldown:SetScript("OnHide", function(self) 
+				--self:Debug("ObjectiveAndRespawn.Cooldown hidden")
+				self:GetParent():ActiveAuraRemoved()
 			end)
-
+			
 			-- power
 			button.Power = MyCreateFrame('StatusBar', button, {'BOTTOMLEFT', button.Spec, "BOTTOMRIGHT", 1, 1}, {'BOTTOMRIGHT', button, "BOTTOMRIGHT", -1, 1})
 			button.Power:SetMinMaxValues(0, 1)
@@ -1837,7 +1945,7 @@ do
 			button.MyFocus:Hide()
 			
 			-- numerical target indicator
-			button.NumericTargetindicator = MyCreateFontString(button)
+			button.NumericTargetindicator = MyCreateFontString(button.Health)
 			button.NumericTargetindicator:SetPoint('TOPRIGHT', button.Health, "TOPRIGHT", -5, 0)
 			button.NumericTargetindicator:SetPoint('BOTTOMRIGHT', button.Health, "BOTTOMRIGHT", -5, 0)
 			button.NumericTargetindicator:SetWidth(20)

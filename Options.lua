@@ -213,62 +213,67 @@ local function addCooldownTextsettings(optionname, maindisable, loopInButton1, l
 			type = "toggle",
 			name = L.ShowNumbers,
 			desc = L[showNumbers.."_Desc"],
-			disabled = function() return maindisable and not conf[maindisable] end,
 			set = function(option, value)
 				UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", subsubtablename, "SetHideCountdownNumbers", not value)
 			end,
 			order = 1
 		},
-		Fake = addVerticalSpacing(2),
-		[fontsize] = {
-			type = "range",
-			name = L.Fontsize,
-			desc = L[fontsize.."_Desc"],
+		asdfasdf = {
+			type = "group",
+			name = "",
+			desc = "",
 			disabled = function() return maindisable and not conf[maindisable] or not conf[showNumbers] end, 
-			set = function(option, value)
-				UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", conf.Font), value, conf[outline])
-			end,
-			min = 6,
-			max = 40,
-			step = 1,
-			width = "normal",
-			order = 3
-		},
-		[outline] = {
-			type = "select",
-			name = L.Font_Outline,
-			desc = L.Font_Outline_Desc,
-			disabled = function() return maindisable and not conf[maindisable] or not conf[showNumbers] end, 
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile
-				UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", conf.Font), conf[fontsize], value)
-			end,
-			values = Data.FontOutlines,
-			order = 4
-		},
-		Fake1 = addVerticalSpacing(5),
-		[enableTextShadow] = {
-			type = "toggle",
-			name = L.FontShadow_Enabled,
-			desc = L.FontShadow_Enabled_Desc,
-			disabled = function() return maindisable and not conf[maindisable] or not conf[showNumbers] end, 
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile
-				UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", value, conf[textShadowcolor])
-			end,
-			order = 6
-		},
-		[textShadowcolor] = {
-			type = "color",
-			name = L.FontShadowColor,
-			desc = L.FontShadowColor_Desc,
-			disabled = function() return maindisable and not conf[maindisable] or not conf[showNumbers] or not conf[enableTextShadow] end, 
-			set = function(option, ...)
-				local color = {...}
-				UpdateButtons(option, color, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", conf[enableTextShadow], color)
-			end,
-			hasAlpha = true,
-			order = 7
+			inline = true,
+			order = 2,
+			args = {
+				[fontsize] = {
+					type = "range",
+					name = L.Fontsize,
+					desc = L[fontsize.."_Desc"],
+					set = function(option, value)
+						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", conf.Font), value, conf[outline])
+					end,
+					min = 6,
+					max = 40,
+					step = 1,
+					width = "normal",
+					order = 3
+				},
+				[outline] = {
+					type = "select",
+					name = L.Font_Outline,
+					desc = L.Font_Outline_Desc,
+					set = function(option, value)
+						local conf = BattleGroundEnemies.db.profile
+						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", conf.Font), conf[fontsize], value)
+					end,
+					values = Data.FontOutlines,
+					order = 4
+				},
+				Fake1 = addVerticalSpacing(5),
+				[enableTextShadow] = {
+					type = "toggle",
+					name = L.FontShadow_Enabled,
+					desc = L.FontShadow_Enabled_Desc,
+					set = function(option, value)
+						local conf = BattleGroundEnemies.db.profile
+						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", value, conf[textShadowcolor])
+					end,
+					order = 6
+				},
+				[textShadowcolor] = {
+					type = "color",
+					name = L.FontShadowColor,
+					desc = L.FontShadowColor_Desc,
+					disabled = function() return maindisable and not conf[maindisable] or not conf[showNumbers] or not conf[enableTextShadow] end, 
+					set = function(option, ...)
+						local color = {...}
+						UpdateButtons(option, color, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", conf[enableTextShadow], color)
+					end,
+					hasAlpha = true,
+					order = 7
+				}
+			}
 		}
 	}
 	return options
@@ -791,7 +796,7 @@ function BattleGroundEnemies:SetupOptions()
 								--desc = L.TrinketSettings_Desc,
 								disabled = function() return not self.db.profile.Racial_Enabled end,
 								inline = true,
-								order = 3,
+								order = 2,
 								args = addCooldownTextsettings("Racial", "Racial_Enabled", nil, nil, "Racial")
 							},
 							RacialFilteringSettings = {
@@ -850,6 +855,22 @@ function BattleGroundEnemies:SetupOptions()
 								max = 50,
 								step = 1,
 								order = 1
+							},
+							Spec_AuraDisplay_Enabled = {
+								type = "toggle",
+								name = L.Spec_AuraDisplay_Enabled,
+								desc = L.Spec_AuraDisplay_Enabled_Desc,
+								order = 2,
+							},
+							Fake = addVerticalSpacing(3),
+							DrTrackingCooldownTextSettings = {
+								type = "group",
+								name = L.Countdowntext,
+								--desc = L.TrinketSettings_Desc,
+								disabled = function() return not self.db.profile.Spec_AuraDisplay_Enabled end,
+								inline = true,
+								order = 4,
+								args = addCooldownTextsettings("Spec_AuraDisplay", "Spec_AuraDisplay_Enabled", nil, nil, "Spec_AuraDisplay")
 							}
 						}
 					},
