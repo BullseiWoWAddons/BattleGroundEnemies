@@ -1,4 +1,8 @@
 
+v2.5.1
+Bugfix: The settings for the new CC icons on specicon apply now when a button is created.
+Changed the way the buttons are anchored, the new way is way more performant
+
 v.2.5
 New Feature: Added CC icons on specicon, like its known from Gladius, sArena, BigDebuffs
 BugFix: Fixed an bug with target counter (frame had the wrong parent)
