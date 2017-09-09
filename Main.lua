@@ -129,11 +129,17 @@ end
 function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 	enemyButton.config = self.db.profile
 	local conf = enemyButton.config
-
+	
+	enemyButton:SetWidth(conf.BarWidth)
 	enemyButton:SetHeight(conf.BarHeight)
+	
 	
 	--spec
 	enemyButton.Spec:SetWidth(conf.Spec_Width)
+	
+	-- auras on spec
+	enemyButton.Spec_AuraDisplay.Cooldown:ApplyCooldownSettings(conf.Spec_AuraDisplay_ShowNumbers, false, true, {0, 0, 0, 0.75})
+	enemyButton.Spec_AuraDisplay.Cooldown.Text:ApplyFontStringSettings(conf.Spec_AuraDisplay_Cooldown_Fontsize, conf.Spec_AuraDisplay_Cooldown_Outline, conf.Spec_AuraDisplay_Cooldown_EnableTextshadow, conf.Spec_AuraDisplay_Cooldown_TextShadowcolor)
 	
 	-- power
 	enemyButton.Power:SetHeight(conf.PowerBar_Enabled and conf.PowerBar_Height or 0.01)
@@ -194,10 +200,19 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 	enemyButton.ObjectiveAndRespawn.Cooldown.Text:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Cooldown_Fontsize, conf.ObjectiveAndRespawn_Cooldown_Outline, conf.ObjectiveAndRespawn_Cooldown_EnableTextshadow, conf.ObjectiveAndRespawn_Cooldown_TextShadowcolor)
 	
 	--Dr Tracking
-	enemyButton:ApplyAllDrFrameSettings()
+	for drCategory, drFrame in pairs(enemyButton.DR) do
+		drFrame:ChangeDisplayType()
+		drFrame:ApplyDrFrameSettings()
+	end
+				
 	
 	--MyDebuffs
-	enemyButton:ApplyAllDebuffFrameSettings()
+	for spellID, debuffFrame in pairs(enemyButton.MyDebuffs) do
+		enemyButton:ApplyDebuffFrameSettings(debuffFrame)
+	end
+	for spellID, debuffFrame in pairs(enemyButton.InactiveDebuffs) do
+		enemyButton:ApplyDebuffFrameSettings(debuffFrame)
+	end
 end
 
 function BattleGroundEnemies:SetEnemyCountJustifyV(direction)
@@ -212,8 +227,8 @@ end
 function BattleGroundEnemies:ApplyMainFrameSettings()
 	local conf = self.db.profile
 
-	self:SetSize(self.db.profile.BarWidth, 30)
-	self:SetScale(self.db.profile.Framescale)
+	self:SetSize(conf.BarWidth, 30)
+	self:SetScale(conf.Framescale)
 
 	self:ClearAllPoints()
 	if not conf.Position_X and not conf.Position_X then
@@ -550,22 +565,24 @@ function BattleGroundEnemies:RemoveEnemy(name, enemyButton)
 end
 
 function BattleGroundEnemies:ButtonPositioning()
-
-	local previousButton = self
-	for number, name in ipairs(self.EnemySortingTable) do
-		local enemyButton = self.Enemies[name]
-		enemyButton.Position = number
-		
-		enemyButton:ClearAllPoints()
-		if self.db.profile.Growdirection == "downwards" then
-			enemyButton:SetPoint("TOPLEFT", previousButton, "BOTTOMLEFT", 0, -self.db.profile.SpaceBetweenRows)
-			enemyButton:SetPoint("TOPRIGHT", previousButton, "BOTTOMRIGHT", 0, -self.db.profile.SpaceBetweenRows)
-		else
-			enemyButton:SetPoint("BOTTOMLEFT", previousButton, "TOPLEFT", 0, self.db.profile.SpaceBetweenRows)
-			enemyButton:SetPoint("BOTTOMRIGHT", previousButton, "TOPRIGHT", 0, self.db.profile.SpaceBetweenRows)
-		end
-		previousButton = enemyButton
-	end
+ 
+    local previousButton = self
+	local enemyButtons = self.Enemies
+    local spaceBetweenRows = self.db.profile.SpaceBetweenRows
+    local growDownwards = (self.db.profile.Growdirection == "downwards")
+   
+   for number, name in ipairs(self.EnemySortingTable) do
+        local enemyButton = enemyButtons[name]
+        enemyButton.Position = number
+        
+        enemyButton:ClearAllPoints()
+        if growDownwards then
+            enemyButton:SetPoint("TOPLEFT", previousButton, "BOTTOMLEFT", 0, -spaceBetweenRows)
+        else
+            enemyButton:SetPoint("BOTTOMLEFT", previousButton, "TOPLEFT", 0, spaceBetweenRows)
+        end
+        previousButton = enemyButton
+    end
 end
 
 
@@ -1513,18 +1530,10 @@ do
 				
 				function enemyButtonFunctions:ApplyDebuffFrameSettings(debuffFrame)
 					local conf = self.config
+					debuffFrame.Stacks:SetTextColor(unpack(conf.MyDebuffs_Textcolor))
 					debuffFrame.Stacks:ApplyFontStringSettings(conf.MyDebuffs_Fontsize, conf.MyDebuffs_Outline, conf.MyDebuffs_EnableTextshadow, conf.MyDebuffs_TextShadowcolor)
 					debuffFrame.Cooldown:ApplyCooldownSettings(conf.MyDebuffs_ShowNumbers, true, false)
 					debuffFrame.Cooldown.Text:ApplyFontStringSettings(conf.MyDebuffs_Cooldown_Fontsize, conf.MyDebuffs_Cooldown_Outline, conf.MyDebuffs_Cooldown_EnableTextshadow, conf.MyDebuffs_Cooldown_TextShadowcolor)
-				end
-				
-				function enemyButtonFunctions:ApplyAllDebuffFrameSettings()
-					for spellID, debuffFrame in pairs(self.MyDebuffs) do
-						self:ApplyDebuffFrameSettings(debuffFrame)
-					end
-					for spellID, debuffFrame in pairs(self.InactiveDebuffs) do
-						self:ApplyDebuffFrameSettings(debuffFrame)
-					end
 				end
 				
 				function enemyButtonFunctions:SetNewDebuff(spellID, count, duration)
@@ -1628,27 +1637,23 @@ do
 					drFrame.status = 0
 					drFrame:GetParent():DrPositioning() --enemyButton:DrPositioning()
 				end
-				
-				function enemyButtonFunctions:ApplyDrFrameSettings(drFrame)
-					local conf = self.config
-					drFrame.Cooldown:ApplyCooldownSettings(conf.DrTracking_ShowNumbers, false, false)
-					drFrame.Cooldown.Text:ApplyFontStringSettings(conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline, conf.DrTracking_Cooldown_EnableTextshadow, conf.DrTracking_Cooldown_TextShadowcolor)
-				end
-				
-				function enemyButtonFunctions:ApplyAllDrFrameSettings()
-					for drCategory, drFrame in pairs(self.DR) do
-						self:ApplyDrFrameSettings(drFrame)
-					end
-				end
-				
+
 				local drFrameFunctions = {}
 				
-				function drFrameFunctions:UpdateStatusBorder()
-					self:SetBackdropBorderColor(unpack(dRstates[self.status]))
+				
+				function drFrameFunctions:ApplyDrFrameSettings()
+					local conf = BattleGroundEnemies.db.profile
+					
+					self.Cooldown:ApplyCooldownSettings(conf.DrTracking_ShowNumbers, false, false)
+					self.Cooldown.Text:ApplyFontStringSettings(conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline, conf.DrTracking_Cooldown_EnableTextshadow, conf.DrTracking_Cooldown_TextShadowcolor)
 				end
 				
-				function drFrameFunctions:UpdateStatusText()
-					self.Cooldown.Text:SetTextColor(unpack(dRstates[self.status]))
+				local function drFrameUpdateStatusBorder(drFrame)
+					drFrame:SetBackdropBorderColor(unpack(dRstates[drFrame.status]))
+				end
+				
+				local function drFrameUpdateStatusText(drFrame)
+					drFrame.Cooldown.Text:SetTextColor(unpack(dRstates[drFrame.status]))
 				end
 				
 				function drFrameFunctions:ChangeDisplayType()
@@ -1662,9 +1667,9 @@ do
 				
 				function drFrameFunctions:SetDisplayType()
 					if BattleGroundEnemies.db.profile.DrTracking_DisplayType == "Frame" then
-						self.SetStatus = drFrameFunctions.UpdateStatusBorder
+						self.SetStatus = drFrameUpdateStatusBorder
 					else
-						self.SetStatus = drFrameFunctions.UpdateStatusText
+						self.SetStatus = drFrameUpdateStatusText
 					end
 				end
 
@@ -1685,6 +1690,7 @@ do
 						
 						drFrame.SetDisplayType = drFrameFunctions.SetDisplayType
 						drFrame.ChangeDisplayType = drFrameFunctions.ChangeDisplayType
+						drFrame.ApplyDrFrameSettings = drFrameFunctions.ApplyDrFrameSettings
 						
 						drFrame:SetDisplayType()
 						
@@ -1697,8 +1703,8 @@ do
 						drFrame.Icon:SetAllPoints()
 						
 						drFrame.Cooldown = MyCreateCooldown(drFrame)
-						self:ApplyDrFrameSettings(drFrame)
 						drFrame.status = 0
+						drFrame:ApplyDrFrameSettings()
 						
 						drFrame.Cooldown:SetScript("OnHide", drFrameCooldown_OnHide)
 						drFrame:Hide()
@@ -1862,6 +1868,9 @@ do
 				for spellID, debuffFrame in pairs(self.MyDebuffs) do
 					debuffFrame:SetWidth(height)
 				end
+				for spellID, debuffFrame in pairs(self.InactiveDebuffs) do
+					debuffFrame:SetWidth(height)
+				end
 			end)
 			
 					
@@ -1890,6 +1899,7 @@ do
 		
 			
 			button.Spec_AuraDisplay = MyCreateFrame("Frame", button.Spec)
+			button.Spec_AuraDisplay:Hide()
 			button.Spec_AuraDisplay.ActiveAuraRemoved = AuraFrameFunctions.ActiveAuraRemoved
 			button.Spec_AuraDisplay.SetNewAura = AuraFrameFunctions.SetNewAura
 			button.Spec_AuraDisplay:SetAllPoints()
@@ -1898,7 +1908,6 @@ do
 			button.Spec_AuraDisplay.Icon = button.Spec_AuraDisplay:CreateTexture(nil, 'BACKGROUND')
 			button.Spec_AuraDisplay.Icon:SetAllPoints()
 			button.Spec_AuraDisplay.Cooldown = MyCreateCooldown(button.Spec_AuraDisplay)
-			button.Spec_AuraDisplay.Cooldown:ApplyCooldownSettings(conf.Trinket_ShowNumbers, false, true, {0, 0, 0, 0.75})
 			
 			button.Spec_AuraDisplay.Cooldown:SetScript("OnHide", function(self) 
 				--self:Debug("ObjectiveAndRespawn.Cooldown hidden")

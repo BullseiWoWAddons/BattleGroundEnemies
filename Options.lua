@@ -422,7 +422,7 @@ function BattleGroundEnemies:SetupOptions()
 						disabled = InCombatLockdown,
 						set = function(option, value)
 							self:SetWidth(value)
-							setOption(option, value)
+							UpdateButtons(option, value, nil, nil, nil, nil, nil, "SetWidth", value)
 						end,
 						min = 1,
 						max = 400,

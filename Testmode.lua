@@ -134,7 +134,9 @@ do
 		end
 		
 		self:SortEnemies()
+
 		
+		self:Show()
 		FakeEnemiesOnUpdateFrame:Show()
 	end
 end
