@@ -1246,6 +1246,22 @@ do
 				self:UpdateHealth(self.UnitIDs.Active)
 				self:UpdatePower(self.UnitIDs.Active)
 			end
+			
+			function enemyButtonFunctions:FetchAnAllyUnitID()
+				local unitIDs = self.UnitIDs
+				if unitIDs.Ally then 
+					unitIDs.Active = unitIDs.Ally
+					unitIDs.UpdateHealth = true
+					if self.config.PowerBar_Enabled then
+						unitIDs.UpdatePower = true
+					end
+					unitIDs.CheckIfUnitExists = true
+					self:RegisterForRangeUpdate()
+				else
+					self:DeleteActiveUnitID()
+				end 
+			end
+			
 			--Remove from RangeUpdate
 			function enemyButtonFunctions:DeleteActiveUnitID() --Delete from RangeUpdate
 				--BattleGroundEnemies:Debug("DeleteActiveUnitID")
@@ -1281,17 +1297,7 @@ do
 					if unitIDs.Active then
 						self:RegisterForRangeUpdate()
 					else
-						if unitIDs.Ally then 
-							unitIDs.Active = unitIDs.Ally
-							unitIDs.UpdateHealth = true
-							if self.config.PowerBar_Enabled then
-								unitIDs.UpdatePower = true
-							end
-							unitIDs.CheckIfUnitExists = true
-							self:RegisterForRangeUpdate()
-						else
-							self:DeleteActiveUnitID()
-						end 
+						self:FetchAnAllyUnitID()
 					end
 				end
 			end
@@ -1321,7 +1327,7 @@ do
 				end
 				
 				if allyLostDetails.TargetUnitID == unitIDs.Active then
-					self:DeleteActiveUnitID()
+					self:FetchAnAllyUnitID()
 				end
 			end
 
@@ -2108,13 +2114,13 @@ do
 		
 		function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
-			--self:Debug(GetCurrentMapAreaID())
+			-- self:Debug(GetCurrentMapAreaID())
 			-- self:Debug("UPDATE_BATTLEFIELD_SCORE")
 			-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
 			-- self:Debug("C_PvP.IsInBrawl", C_PvP.IsInBrawl())
 			-- self:Debug("GetCurrentMapAreaID", GetCurrentMapAreaID())
-			--self:Debug("horde players:", GetBattlefieldTeamInfo(0))
-			--self:Debug("alliance players:", GetBattlefieldTeamInfo(1))
+			-- self:Debug("horde players:", GetBattlefieldTeamInfo(0))
+			-- self:Debug("alliance players:", GetBattlefieldTeamInfo(1))
 					
 			
 
