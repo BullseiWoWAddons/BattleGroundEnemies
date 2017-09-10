@@ -8,7 +8,7 @@ New features:
 
 Other improvements:
 - Rewrote functions for debuff handling
-- Added an additional check for the faction in a BG, this is espacially useful for the new brawl since the previous used method wasn't working will because a function returned incorrect value (GetBattlefieldArenaFaction()). This means the addon should no longer show your team as the enemies in the new brawl (Shadow-Pan Showdown)
+- Added an additional check for the faction in a BG, this is espacially useful for the new brawl since the previous used method wasn't working well because a function returned a incorrect value (GetBattlefieldArenaFaction()). This means the addon should no longer show your team as the enemies in the new brawl (Shadow-Pan Showdown)
 
 v2.5.1
 Bugfix: The settings for the new CC icons on specicon apply now when a button is created.
