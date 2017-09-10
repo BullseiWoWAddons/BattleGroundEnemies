@@ -1,5 +1,6 @@
 
 v2.6
+
 New features:
 - Added interrupts on the Aura Display on Spec Icon
 - Added settings for Racial and Trinket width
