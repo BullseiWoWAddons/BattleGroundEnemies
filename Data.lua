@@ -113,40 +113,47 @@ Data.DrCategorys = {
 
 
 
--- BattleGroundEnemies.Interruptdurations = {
-    -- [6552] = 4,   -- [Warrior] Pummel
-    -- [96231] = 4,  -- [Paladin] Rebuke
-    -- [231665] = 3, -- [Paladin] Avengers Shield
-    -- [147362] = 3, -- [Hunter] Countershot
-    -- [187707] = 3, -- [Hunter] Muzzle
-    -- [1766] = 5,   -- [Rogue] Kick
-    -- [183752] = 3, -- [DH] Consume Magic
-    -- [47528] = 3,  -- [DK] Mind Freeze
-    -- [91802] = 2,  -- [DK] Shambling Rush
-    -- [57994] = 3,  -- [Shaman] Wind Shear
-    -- [115781] = 6, -- [Warlock] Optical Blast
-    -- [19647] = 6,  -- [Warlock] Spell Lock
-    -- [212619] = 6, -- [Warlock] Call Felhunter
-    -- [132409] = 6, -- [Warlock] Spell Lock
-    -- [171138] = 6, -- [Warlock] Shadow Lock
-    -- [2139] = 6,   -- [Mage] Counterspell
-    -- [116705] = 4, -- [Monk] Spear Hand Strike
-    -- [106839] = 4, -- [Feral] Skull Bash
-	-- [93985] = 4,  -- [Feral] Skull Bash
--- }
--- Data.AuraPriority = {
+Data.Interruptdurations = {
+    [6552] = 4,   -- [Warrior] Pummel
+    [96231] = 4,  -- [Paladin] Rebuke
+    [231665] = 3, -- [Paladin] Avengers Shield
+    [147362] = 3, -- [Hunter] Countershot
+    [187707] = 3, -- [Hunter] Muzzle
+    [1766] = 5,   -- [Rogue] Kick
+    [183752] = 3, -- [DH] Consume Magic
+    [47528] = 3,  -- [DK] Mind Freeze
+    [91802] = 2,  -- [DK] Shambling Rush
+    [57994] = 3,  -- [Shaman] Wind Shear
+    [115781] = 6, -- [Warlock] Optical Blast
+    [19647] = 6,  -- [Warlock] Spell Lock
+    [212619] = 6, -- [Warlock] Call Felhunter
+    [132409] = 6, -- [Warlock] Spell Lock
+    [171138] = 6, -- [Warlock] Shadow Lock
+    [2139] = 6,   -- [Mage] Counterspell
+    [116705] = 4, -- [Monk] Spear Hand Strike
+    [106839] = 4, -- [Feral] Skull Bash
+	[93985] = 4,  -- [Feral] Skull Bash
+}
 
+-- for spellID, lockoutDuration in pairs(Data.Interruptdurations) do
+	-- Data.SpellPriorities[spellID] = 4
+-- end
 
+Data.SpecIDsWithInterruptDurations = { --Specs that have a 30% reduced interrupt duration
+	[258] = true, 	-- [Priest] Shadow
+	[264] = true, 	-- [Shaman] Restoration
+	[265] = true, 	-- [Warlock] Affliction
+	[266] = true, 	-- [Warlock] Demonology
+	[267] = true 	-- [Warlock] Destruction
+}
 
-
-
-
-
-
-
-
-
--- }
+-- pvp talents that reduce lockouts by 70%
+Data.PvPTalentsReducingInterruptTime = { 
+	[GetSpellInfo(221404)] = true, --  [Mage] Burning Determination
+	[GetSpellInfo(221677)] = true, --  [Shaman] Calming Waters
+	[GetSpellInfo(221660)] = true, --  [Priest] Holy Concentration
+	[GetSpellInfo(221703)] = true, --  [Warlock] Casting Circle
+}
 
 Data.RandomDrCategory = {} --key = number, value = categorieName, used for Testmode
 Data.DrCategoryToSpell = {} --key = categorieName, value = table with key = number and value = spellID
@@ -161,10 +168,10 @@ end
 
 do
 	local drCategoryToPriority = {
-		stun = 7,
-		disorient = 6,
-		incapacitate = 5,
-		silence = 4,
+		stun = 8,
+		disorient = 7,
+		incapacitate = 6,
+		silence = 5,
 		root = 3,
 		knockback = 2,
 		taunt = 1
@@ -581,7 +588,7 @@ do
 		for i = 1, GetNumSpecializationsForClassID(classID) do
 			
 			local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version
-			Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specIcon = icon, Ressource = specIdToRessource[specID]}
+			Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
 			table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = maleSpecName}) --for testmode
 			
 			--if specName == "Танцующий с ветром" then specName = "Танцующая с ветром" end -- fix for russian bug, fix added on 2017.08.27

@@ -68,7 +68,8 @@ do
 			fakeEnemies[name] = {
 				PlayerClass = classTag,
 				PlayerName = name,
-				PlayerSpec = specName
+				PlayerSpecName = specName,
+				PlayerSpecID = randomSpec.specID
 			}
 			counter = counter + 1
 		end
@@ -218,18 +219,16 @@ do
 							--self:Debug("Nummber4")
 							local dRCategory = Data.RandomDrCategory[mathrandom(1, #Data.RandomDrCategory)]
 							local spellID = Data.DrCategoryToSpell[dRCategory][mathrandom(1, #Data.DrCategoryToSpell[dRCategory])]
-							enemyButton:UpdateDR(spellID, nil, false, true)
-							enemyButton:UpdateAuras(spellID, (GetSpellInfo(spellID)), true, false)
+							enemyButton:DebuffApplied(spellID, (GetSpellInfo(spellID)))
 						elseif number == 5 then --player got one of the players debuff's applied
 							--self:Debug("Nummber5")
 							local spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
-							enemyButton:DebuffChanged(true, nil, spellID, nil, true, true, mathrandom(1, 9), mathrandom(10, 15))
-							enemyButton:UpdateDR(spellID, nil, true, true)
-							enemyButton:UpdateAuras(spellID, (GetSpellInfo(spellID)), true, true)
+							enemyButton:DebuffApplied(spellID, (GetSpellInfo(spellID)), UnitName("player"))
 						elseif number == 6 then --power simulation
 							local power = mathrandom(0, 100)
 							enemyButton.Power:SetValue(power/100)
 						end
+						
 						
 						-- targetcounter simulation
 						if targetCounts < 15 then

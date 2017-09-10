@@ -764,13 +764,25 @@ function BattleGroundEnemies:SetupOptions()
 								end,
 								order = 1
 							},
+							Trinket_Width = {
+								type = "range",
+								name = L.Width,
+								desc = L.Trinket_Width_Desc,
+								set = function(option, value)
+									UpdateButtons(option, value, nil, nil, nil, nil, nil, "EnableTrinket")
+								end,
+								min = 1,
+								max = 40,
+								step = 1,
+								order = 2
+							},
 							TrinketCooldownTextSettings = {
 								type = "group",
 								name = L.Countdowntext,
 								--desc = L.TrinketSettings_Desc,
 								disabled = function() return not self.db.profile.Trinket_Enabled end,
 								inline = true,
-								order = 2,
+								order = 3,
 								args = addCooldownTextsettings("Trinket", "Trinket_Enabled", nil, nil, "Trinket")
 							}
 						}
@@ -790,13 +802,25 @@ function BattleGroundEnemies:SetupOptions()
 								end,
 								order = 1
 							},
+							Racial_Width = {
+								type = "range",
+								name = L.Width,
+								desc = L.Racial_Width_Desc,
+								set = function(option, value)
+									UpdateButtons(option, value, nil, nil, nil, nil, nil, "EnableRacial")
+								end,
+								min = 1,
+								max = 40,
+								step = 1,
+								order = 2
+							},
 							RacialCooldownTextSettings = {
 								type = "group",
 								name = L.Countdowntext,
 								--desc = L.TrinketSettings_Desc,
 								disabled = function() return not self.db.profile.Racial_Enabled end,
 								inline = true,
-								order = 2,
+								order = 3,
 								args = addCooldownTextsettings("Racial", "Racial_Enabled", nil, nil, "Racial")
 							},
 							RacialFilteringSettings = {

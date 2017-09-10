@@ -20,6 +20,7 @@ local type = type
 local unpack = unpack
 local gsub = gsub
 local floor = math.floor
+local random = math.random
 local tinsert = table.insert
 local tremove = table.remove
 
@@ -138,7 +139,7 @@ function BattleGroundEnemies:ApplyButtonSettings(enemyButton)
 	enemyButton.Spec:SetWidth(conf.Spec_Width)
 	
 	-- auras on spec
-	enemyButton.Spec_AuraDisplay.Cooldown:ApplyCooldownSettings(conf.Spec_AuraDisplay_ShowNumbers, false, true, {0, 0, 0, 0.75})
+	enemyButton.Spec_AuraDisplay.Cooldown:ApplyCooldownSettings(conf.Spec_AuraDisplay_ShowNumbers, true, true, {0, 0, 0, 0.5})
 	enemyButton.Spec_AuraDisplay.Cooldown.Text:ApplyFontStringSettings(conf.Spec_AuraDisplay_Cooldown_Fontsize, conf.Spec_AuraDisplay_Cooldown_Outline, conf.Spec_AuraDisplay_Cooldown_EnableTextshadow, conf.Spec_AuraDisplay_Cooldown_TextShadowcolor)
 	
 	-- power
@@ -373,6 +374,7 @@ do
 			ObjectiveAndRespawn_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 			
 			Trinket_Enabled = true,
+			Trinket_Width = 28,
 			Trinket_ShowNumbers = true,
 			
 			Trinket_Cooldown_Fontsize = 12,
@@ -381,6 +383,7 @@ do
 			Trinket_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 			
 			Racial_Enabled = true,
+			Racial_Width = 28,
 			Racial_ShowNumbers = true,
 			
 			Racial_Cooldown_Fontsize = 12,
@@ -524,10 +527,14 @@ function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 	enemyButton.PlayerClass = enemyDetails.PlayerClass
 	enemyButton.PlayerName = enemyDetails.PlayerName
 	enemyButton.PlayerRace = enemyDetails.PlayerRace
-	enemyButton.PlayerSpec = enemyDetails.PlayerSpec
+	enemyButton.PlayerSpecName = enemyDetails.PlayerSpecName
+	enemyButton.PlayerSpecID = enemyDetails.PlayerSpecID
+	
+	enemyButton.Spec_AuraDisplay.SpecHasReducedInterruptTime = Data.SpecIDsWithInterruptDurations[enemyButton.PlayerSpecID] or false
+	enemyButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
 	
 	
-	local specData = Data.Classes[enemyButton.PlayerClass][enemyButton.PlayerSpec]
+	local specData = Data.Classes[enemyButton.PlayerClass][enemyButton.PlayerSpecName]
 	
 	
 	enemyButton.PlayerRoleNumber = specData.roleNumber
@@ -541,7 +548,7 @@ function BattleGroundEnemies:SetupButtonForNewPlayer(enemyDetails)
 	enemyButton.Health:SetStatusBarColor(c.r,c.g,c.b)
 	enemyButton.Health:SetValue(1)
 	
-	c = PowerBarColor[Data.Classes[enemyButton.PlayerClass][enemyButton.PlayerSpec].Ressource]
+	c = PowerBarColor[Data.Classes[enemyButton.PlayerClass][enemyButton.PlayerSpecName].Ressource]
 	enemyButton.Power:SetStatusBarColor(c.r, c.g, c.b)
 	
 	enemyButton:SetName()
@@ -651,53 +658,92 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 	end
 end
 
-function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType)
-	if subevent == "SPELL_AURA_APPLIED" then
+local CombatLogevents = {}
+
+function CombatLogevents.SPELL_AURA_APPLIED(self, srcName, destName, spellID, spellName, auraType)
+	local enemyButton = self.Enemies[destName]
+	if enemyButton then
 		if auraType == "DEBUFF" then
-			local enemyButton = self.Enemies[destName]
-			if enemyButton then
-				enemyButton:UpdateDR(spellID, spellName, true)
-				enemyButton:UpdateAuras(spellID, spellName, true)
-				enemyButton:RelentlessCheck(spellID, spellName)
-				enemyButton.Trinket:TrinketCheck(spellID, true) --adaptation used, maybe?
-				enemyButton:DebuffChanged(false, srcName, spellID, spellName, true, false)
-			end
-		end
-	elseif subevent == "SPELL_AURA_REFRESH" then
-		if auraType == "DEBUFF" then
-			local enemyButton = self.Enemies[destName]
-			if enemyButton then
-				enemyButton:UpdateDR(spellID, spellName, true, true)
-				enemyButton:UpdateAuras(spellID, spellName, true, true)
-				enemyButton:RelentlessCheck(spellID, spellName)
-				enemyButton:DebuffChanged(false, srcName, spellID, spellName, true, true)
-			end
-		end
-	elseif subevent == "SPELL_AURA_REMOVED" then
-		if auraType == "DEBUFF" then
-			local enemyButton = self.Enemies[destName]
-			if enemyButton then
-				enemyButton:UpdateDR(spellID, spellName, false, true)
-				enemyButton:UpdateAuras(spellID, spellName, false, true)
-				enemyButton:DebuffChanged(false, srcName, spellID, spellName, false, true)
-			end
-		end
-	elseif subevent == "SPELL_CAST_SUCCESS" then
-		local enemyButton = self.Enemies[srcName]
-		if enemyButton then
-			if Data.RacialSpellIDtoCooldown[spellID] then --racial used, maybe?
-				enemyButton:RacialUsed(spellID)
-			else
-				enemyButton.Trinket:TrinketCheck(spellID, true)
-			end
-		end
-	elseif subevent == "UNIT_DIED" then
-		--self:Debug("subevent", destName, "UNIT_DIED")
-		local enemyButton = self.Enemies[destName]
-		if enemyButton then
-			enemyButton:UnitIsDead()
+			enemyButton:DebuffApplied(spellID, spellName, srcName)
+			enemyButton.Trinket:TrinketCheck(spellID, true) --adaptation used, maybe?
+		elseif Data.PvPTalentsReducingInterruptTime[spellName] then
+			enemyButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = true
 		end
 	end
+end
+
+function CombatLogevents.SPELL_AURA_REFRESH(self, srcName, destName, spellID, spellName, auraType)
+	if auraType == "DEBUFF" then
+		local enemyButton = self.Enemies[destName]
+		if enemyButton then
+			enemyButton:DebuffRemoved(spellID)
+			enemyButton:DebuffApplied(spellID, spellName, srcName)
+		end
+	end
+end
+
+function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellID, spellName, auraType)
+	local enemyButton = self.Enemies[destName]
+	if enemyButton then
+		if auraType == "DEBUFF" then
+			enemyButton:DebuffRemoved(spellID)
+		elseif Data.PvPTalentsReducingInterruptTime[spellName] then
+			enemyButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
+		end
+	end
+end
+
+function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellID)
+
+	local enemyButton = self.Enemies[srcName]
+	if enemyButton then
+		if Data.RacialSpellIDtoCooldown[spellID] then --racial used, maybe?
+			enemyButton:RacialUsed(spellID)
+		else
+			enemyButton.Trinket:TrinketCheck(spellID, true)
+		end
+	end
+	
+	local enemyButton = self.Enemies[destName]
+	if enemyButton then
+		local defaultInterruptDuration = Data.Interruptdurations[spellID]
+		if defaultInterruptDuration then -- check if enemy got interupted
+			local unitIDs = enemyButton.UnitIDs
+			local activeUnitID = unitIDs.Active
+			if activeUnitID then
+				if not unitIDs.CheckIfUnitExists or UnitExists(activeUnitID) then
+					local _,_,_,_,_,_,_, notInterruptible = UnitChannelInfo(activeUnitID)
+					if notInterruptible == false then --spell is interruptable
+						enemyButton.Spec_AuraDisplay:GotInterrupted(spellID, defaultInterruptDuration)
+					end
+				end
+			end
+		end
+	end
+end
+
+function CombatLogevents.SPELL_INTERRUPT(self, srcName, destName, spellID)
+	print(destName)
+	local enemyButton = self.Enemies[destName]
+	if enemyButton then
+		local defaultInterruptDuration = Data.Interruptdurations[spellID]
+		if defaultInterruptDuration then
+			enemyButton.Spec_AuraDisplay:GotInterrupted(spellID, defaultInterruptDuration)
+		end
+	end
+end
+
+function CombatLogevents.UNIT_DIED(self, srcName, destName)
+	--self:Debug("subevent", destName, "UNIT_DIED")
+	local enemyButton = self.Enemies[destName]
+	if enemyButton then
+		enemyButton:UnitIsDead()
+	end
+end
+
+
+function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType)
+	if CombatLogevents[subevent] then return CombatLogevents[subevent](self, srcName, destName, spellID, spellName, auraType) end
 end
 
 -- if lets say raid1 leaves all remaining players get shifted up, so raid2 is the new raid1, raid 3 gets raid2 etc.
@@ -1137,7 +1183,7 @@ do
 			function enemyButtonFunctions:EnableTrinket()
 				if self.config.Trinket_Enabled then
 					self.Trinket:Show()
-					self.Trinket:SetWidth(self.config.BarHeight)
+					self.Trinket:SetWidth(self.config.Trinket_Width)
 				else
 					--dont SetWidth before Hide() otherwise it won't work as aimed
 					self.Trinket:Hide()
@@ -1147,7 +1193,7 @@ do
 			
 			function enemyButtonFunctions:EnableRacial()
 				if self.config.Racial_Enabled then
-					self.Racial:SetWidth(self.config.BarHeight)
+					self.Racial:SetWidth(self.config.Racial_Width)
 					self.Racial:Show()
 				else
 					self.Racial:Hide()
@@ -1423,53 +1469,6 @@ do
 				self.UnitIDs.Arena = false
 				self:FetchAnotherUnitID()
 			end
-		
-			
-			--Relentless maybe
-			function enemyButtonFunctions:RelentlessCheck(spellID, spellName)
-				if not self.config.Trinket_Enabled then return end
-				
-				if self.Trinket.HasTrinket then
-					return
-				end
-				
-				local activeUnitID = self.UnitIDs.Active
-				if not activeUnitID then
-					return 
-				end
-				
-				local drCat = DRData:GetSpellCategory(spellID)
-				if not Data.cCduration[drCat] then 
-					return 
-				end
-				
-				local normalDuration = Data.cCduration[drCat][spellID]
-				if not normalDuration then 
-					return 
-				end
-				
-				local _, _, _, _, _, actualDuration = UnitDebuff(activeUnitID, spellName)
-
-				if not actualDuration then
-					return 
-				end
-				local Racefaktor = 1
-				if drCat == "stun" and self.PlayerRace == "Orc" then
-					Racefaktor = 0.8	--Hardiness
-				end
-
-				
-				--local diminish = actualduraion/(Racefaktor * normalDuration * Trinketfaktor)
-				--local trinketFaktor * diminish = actualDuration/(Racefaktor * normalDuration) 
-				--trinketTimesDiminish = trinketFaktor * diminish
-				--trinketTimesDiminish = without relentless : 1, 0.5, 0.25, with relentless: 0.8, 0.4, 0.2
-				local trinketTimesDiminish = (actualDuration/(Racefaktor * normalDuration))
-				
-				if trinketTimesDiminish == 0.8 or trinketTimesDiminish == 0.4 or trinketTimesDiminish == 0.2 then --Relentless
-					self.Trinket.HasTrinket = 4
-					self.Trinket.Icon:SetTexture(GetSpellTexture(196029))
-				end
-			end
 			
 			function enemyButtonFunctions:RacialUsed(spellID)
 				if not self.config.Racial_Enabled then return end
@@ -1517,13 +1516,7 @@ do
 			end
 			
 			do
-				local UAspellIDs = {
-					[233490] = true,
-					[233496] = true,
-					[233497] = true,
-					[233498] = true,
-					[233499] = true,	
-				}
+			
 				local function debuffFrameCooldown_OnHide(self)
 					local debuffFrame = self:GetParent()
 					debuffFrame.Stacks:SetText("")
@@ -1542,7 +1535,7 @@ do
 					debuffFrame.Cooldown.Text:ApplyFontStringSettings(conf.MyDebuffs_Cooldown_Fontsize, conf.MyDebuffs_Cooldown_Outline, conf.MyDebuffs_Cooldown_EnableTextshadow, conf.MyDebuffs_Cooldown_TextShadowcolor)
 				end
 				
-				function enemyButtonFunctions:SetNewDebuff(spellID, count, duration)
+				function enemyButtonFunctions:SetNewDebuff(spellID, count, duration, endTime)
 
 					local debuffFrame = self.InactiveDebuffs[#self.InactiveDebuffs] 
 					if debuffFrame then --recycle a previous used Frame
@@ -1574,220 +1567,236 @@ do
 					if count > 0 then
 						debuffFrame.Stacks:SetText(count)
 					end
-					debuffFrame.Cooldown:SetCooldown(GetTime(), duration)
+					debuffFrame.Cooldown:SetCooldown(endTime - duration, duration)
 					
 					self.MyDebuffs[spellID] = debuffFrame
 					self:DebuffPositioning()
 				end
 				
-				function enemyButtonFunctions:DebuffChanged(testmode, srcName, _spellID, spellName, applied, removed, count, duration)
+				
+				
+				do
+					local dRstates = {
+						[1] = { 0, 1, 0, 1}, --green (next cc in DR time will be only half duration)
+						[2] = { 1, 1, 0, 1}, --yellow (next cc in DR time will be only 1/4 duration)
+						[3] = { 1, 0, 0, 1}, --red (next cc in DR time will not apply, player is immune)
+					}
 					
-					if not self.config.MyDebuffs_Enabled then return end
+					local function drFrameCooldown_OnHide(self)
+						local drFrame = self:GetParent()
+						drFrame:Hide()
+						drFrame.status = 0
+						drFrame:GetParent():DrPositioning() --enemyButton:DrPositioning()
+					end
+
+					local drFrameFunctions = {}
 					
-					local myDebuffFrame = self.MyDebuffs[_spellID]
-					if removed and myDebuffFrame then
-						myDebuffFrame.Cooldown:Clear()
+					
+					function drFrameFunctions:ApplyDrFrameSettings()
+						local conf = BattleGroundEnemies.db.profile
+						
+						self.Cooldown:ApplyCooldownSettings(conf.DrTracking_ShowNumbers, false, false)
+						self.Cooldown.Text:ApplyFontStringSettings(conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline, conf.DrTracking_Cooldown_EnableTextshadow, conf.DrTracking_Cooldown_TextShadowcolor)
 					end
 					
+					local function drFrameUpdateStatusBorder(drFrame)
+						drFrame:SetBackdropBorderColor(unpack(dRstates[drFrame.status] or dRstates[3]))
+					end
 					
-					if applied then
-						if self.config.MyDebuffsFiltering_Enabled and not self.config.MyDebuffsFiltering_Filterlist[_spellID] then return end
+					local function drFrameUpdateStatusText(drFrame)
+						drFrame.Cooldown.Text:SetTextColor(unpack(dRstates[drFrame.status] or dRstates[3]))
+					end
+					
+					function drFrameFunctions:ChangeDisplayType()
+						self:SetDisplayType()
 						
-						if not testmode then
+						--reset settings
+						self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
+						self:SetBackdropBorderColor(0, 0, 0, 0)
+						if self.status ~= 0 then self:SetStatus() end
+					end
+					
+					function drFrameFunctions:IncreaseDRState()
+						self.status = self.status + 1
+						self:SetStatus()
+					end
+					
+					function drFrameFunctions:SetDisplayType()
+						if BattleGroundEnemies.db.profile.DrTracking_DisplayType == "Frame" then
+							self.SetStatus = drFrameUpdateStatusBorder
+						else
+							self.SetStatus = drFrameUpdateStatusText
+						end
+					end
+					
+					function drFrameFunctions:DisplayDR(duration, spellID)
+						if not self:IsShown() then
+							self:Show()
+							self:GetParent():DrPositioning() --enemyButton:DrPositioning()
+						end
+						self.Icon:SetTexture(GetSpellTexture(spellID))
+						self.Cooldown:SetCooldown(GetTime(), duration)
+					end
+				
+				
+					function enemyButtonFunctions:GetDrFrame(drCat)
+					
+						local drFrame = self.DR[drCat]
+						if not drFrame then  --create a new frame for this categorie
 							
-							local activeUnitID = self.UnitIDs.Active
-							if not activeUnitID or srcName ~= PlayerDetails.PlayerName then return end
+							drFrame = CreateFrame("Frame", nil, self)
+							
+							for funcName, func in pairs(drFrameFunctions) do
+								drFrame[funcName] = func
+							end
+							
+							drFrame:SetDisplayType()
+							
+							drFrame:SetWidth(self.config.BarHeight)
+
+							drFrame = SetBackdrop(drFrame)
+							drFrame:SetBackdropColor(0,0,0,0)
+
+							drFrame.Icon = drFrame:CreateTexture(nil, "BORDER", nil, -1) -- -1 to make it behind the SetBackdrop bg
+							drFrame.Icon:SetAllPoints()
+							
+							drFrame.Cooldown = MyCreateCooldown(drFrame)
+							drFrame.status = 0
+							drFrame:ApplyDrFrameSettings()
+							
+							drFrame.Cooldown:SetScript("OnHide", drFrameCooldown_OnHide)
+							drFrame:Hide()
+							
+							self.DR[drCat] = drFrame
+						end
+						return drFrame
+					end
+				end
+				
+				local UAspellIDs = {
+					[233490] = true,
+					[233496] = true,
+					[233497] = true,
+					[233498] = true,
+					[233499] = true,	
+				}
+				
+				
+				function enemyButtonFunctions:DebuffApplied(spellID, spellName, srcName)
+					local config = self.config
+					local drCat = DRData:GetSpellCategory(spellID)
+					--BattleGroundEnemies:Debug(operation, spellID)
+					local showAuras = config.Spec_AuraDisplay_Enabled
+					local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])
+					local myDebuffsEnabled = config.MyDebuffs_Enabled and srcName == PlayerDetails.PlayerName and (not config.MyDebuffsFiltering_Enabled or config.MyDebuffsFiltering_Filterlist[spellID])
+					local trinketEnabled = config.Trinket_Enabled and not self.Trinket.HasTrinket and drCat and Data.cCduration[drCat] and Data.cCduration[drCat][spellID]
+					
+					if not (showAuras or drTrackingEnabled or myDebuffsEnabled or trinketEnabled) then return end
+					
+
+					local unitCaster, count, actualDuration, endTime, _
+					
+					if BattleGroundEnemies.TestmodeActive then
+						actualDuration = Data.cCdurationBySpellID[spellID] or random(10, 15)
+						count = random(1, 20)
+						if actualDuration then
+							if drCat and self.DR[drCat] then
+								actualDuration = actualDuration/2^self.DR[drCat].status
+							end
+							endTime = GetTime() + actualDuration
+						end
+					elseif spellName then 
+						local activeUnitID = self.UnitIDs.Active
+						if activeUnitID then
 						
-							local spellID, _
-							if UAspellIDs[_spellID] then --more expensier way since we need to iterate through all debuffs
+							if UAspellIDs[spellID] then --more expensier way since we need to iterate through all debuffs
 								for i = 1, 40 do
-									_, _, _, count, _, duration, _, _, _, _, spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, i, "PLAYER")
+									local _spellID
+									_, _, _, count, _, actualDuration, endTime, unitCaster, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, i, "PLAYER")
 									if spellID == _spellID then
 										break
 									end
 								end
 							else
-								local spellName = GetSpellInfo(_spellID)
-								_, _, _, count, _, duration, _, _, _, _, spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, spellName, nil, "PLAYER")
+								_, _, _, count, _, actualDuration, endTime, unitCaster, _, _, spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, spellName)
 							end
 						end
-						
-						if duration and duration > 0 then
-							self:SetNewDebuff(_spellID, count, duration)
+					end
+					if actualDuration and actualDuration > 0 then
+						if showAuras then 
+							local priority = Data.SpellPriorities[spellID]
+							if priority then
+								self.Spec_AuraDisplay:NewAura(spellID, actualDuration, endTime, priority)
+							end
+						end
+						if drTrackingEnabled then
+							local drFrame = self:GetDrFrame(drCat)
+
+							drFrame:DisplayDR(DRData:GetResetTime(drCat) + actualDuration, spellID)
+							drFrame:IncreaseDRState()
+						end
+						if myDebuffsEnabled then
+							self:SetNewDebuff(spellID, count, actualDuration, endTime)
+						end
+						if trinketEnabled then
+
+							local Racefaktor = 1
+							if drCat == "stun" and self.PlayerRace == "Orc" then
+								Racefaktor = 0.8	--Hardiness
+							end
+
+							
+							--local diminish = actualduraion/(Racefaktor * normalDuration * Trinketfaktor)
+							--local trinketFaktor * diminish = actualDuration/(Racefaktor * normalDuration) 
+							--trinketTimesDiminish = trinketFaktor * diminish
+							--trinketTimesDiminish = without relentless : 1, 0.5, 0.25, with relentless: 0.8, 0.4, 0.2
+							local trinketTimesDiminish = (actualDuration/(Racefaktor * Data.cCduration[drCat][spellID]))
+							
+							if trinketTimesDiminish == 0.8 or trinketTimesDiminish == 0.4 or trinketTimesDiminish == 0.2 then --Relentless
+								self.Trinket.HasTrinket = 4
+								self.Trinket.Icon:SetTexture(GetSpellTexture(196029))
+							end
 						end
 					end
 				end
-			end
-			
-			
-			--Checks if an enemy uses Relentless
-			do
-				local dRstates = {
-					[1] = { 0, 1, 0, 1}, --green (next cc in DR time will be only half duration)
-					[2] = { 1, 1, 0, 1}, --yellow (next cc in DR time will be only 1/4 duration)
-					[3] = { 1, 0, 0, 1}, --red (next cc in DR time will not apply, player is immune)
-				}
-				
-				local function drFrame_SetCooldown(enemyButton, drFrame, starttime, duration, spellID)
-					if not drFrame:IsShown() then
-						drFrame:Show()
-						enemyButton:DrPositioning() 
-					end
-					drFrame.Icon:SetTexture(GetSpellTexture(spellID))
-					drFrame.Cooldown:SetCooldown(starttime, duration)
-				end
-				
-				local function drFrameCooldown_OnHide(self)
-					local drFrame = self:GetParent()
-					drFrame:Hide()
-					drFrame.status = 0
-					drFrame:GetParent():DrPositioning() --enemyButton:DrPositioning()
-				end
-
-				local drFrameFunctions = {}
-				
-				
-				function drFrameFunctions:ApplyDrFrameSettings()
-					local conf = BattleGroundEnemies.db.profile
-					
-					self.Cooldown:ApplyCooldownSettings(conf.DrTracking_ShowNumbers, false, false)
-					self.Cooldown.Text:ApplyFontStringSettings(conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline, conf.DrTracking_Cooldown_EnableTextshadow, conf.DrTracking_Cooldown_TextShadowcolor)
-				end
-				
-				local function drFrameUpdateStatusBorder(drFrame)
-					drFrame:SetBackdropBorderColor(unpack(dRstates[drFrame.status]))
-				end
-				
-				local function drFrameUpdateStatusText(drFrame)
-					drFrame.Cooldown.Text:SetTextColor(unpack(dRstates[drFrame.status]))
-				end
-				
-				function drFrameFunctions:ChangeDisplayType()
-					self:SetDisplayType()
-					
-					--reset settings
-					self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
-					self:SetBackdropBorderColor(0, 0, 0, 0)
-					if self.status ~= 0 then self:SetStatus() end
-				end
-				
-				function drFrameFunctions:SetDisplayType()
-					if BattleGroundEnemies.db.profile.DrTracking_DisplayType == "Frame" then
-						self.SetStatus = drFrameUpdateStatusBorder
-					else
-						self.SetStatus = drFrameUpdateStatusText
-					end
-				end
-
-				function enemyButtonFunctions:UpdateDR(spellID, spellName, applied, removed)
-					if not self.config.DrTracking_Enabled then return end
-					
+		
+				function enemyButtonFunctions:DebuffRemoved(spellID)
+					local config = self.config
 					local drCat = DRData:GetSpellCategory(spellID)
 					--BattleGroundEnemies:Debug(operation, spellID)
-					if not drCat then return end
+					local showAuras = config.Spec_AuraDisplay_Enabled
+					local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])
+					local myDebuffsEnabled = config.MyDebuffs_Enabled and (not config.MyDebuffsFiltering_Enabled or config.MyDebuffsFiltering_Filterlist[spellID])
 					
-					if self.config.DrTrackingFiltering_Enabled and not self.config.DrTrackingFiltering_Filterlist[drCat] then return end
-
-					--refreshed (for example a resheep) is basically removed + applied 
-					local drFrame = self.DR[drCat]
-					if not drFrame then  --create a new frame for this categorie
+					
+					if not (showAuras or drTrackingEnabled or myDebuffsEnabled) then return end
 						
-						drFrame = CreateFrame("Frame", nil, self)
-						
-						drFrame.SetDisplayType = drFrameFunctions.SetDisplayType
-						drFrame.ChangeDisplayType = drFrameFunctions.ChangeDisplayType
-						drFrame.ApplyDrFrameSettings = drFrameFunctions.ApplyDrFrameSettings
-						
-						drFrame:SetDisplayType()
-						
-						drFrame:SetWidth(self.config.BarHeight)
-
-						drFrame = SetBackdrop(drFrame)
-						drFrame:SetBackdropColor(0,0,0,0)
-
-						drFrame.Icon = drFrame:CreateTexture(nil, "BORDER", nil, -1) -- -1 to make it behind the SetBackdrop bg
-						drFrame.Icon:SetAllPoints()
-						
-						drFrame.Cooldown = MyCreateCooldown(drFrame)
-						drFrame.status = 0
-						drFrame:ApplyDrFrameSettings()
-						
-						drFrame.Cooldown:SetScript("OnHide", drFrameCooldown_OnHide)
-						drFrame:Hide()
-						
-						self.DR[drCat] = drFrame
-					end
-
-
-					if removed then --removed
+					if drTrackingEnabled then
+						local drFrame = self:GetDrFrame(drCat)
 						if drFrame.status == 0 then -- we didn't get the applied, so we set the color and increase the dr state
 							--BattleGroundEnemies:Debug("DR Problem")
-							drFrame.status = drFrame.status + 1
-							drFrame:SetStatus()
+							drFrame:IncreaseDRState()
 						end
-						drFrame_SetCooldown(self, drFrame, GetTime(), DRData:GetResetTime(drCat), spellID)
+						drFrame:DisplayDR(DRData:GetResetTime(drCat), spellID)
 					end
-					
-					if applied and drFrame.status < 3 then --applied
-						if spellName and self.UnitIDs.Active then --check for spellname for testmode, we don't wanna show a long duration in testmode
-							local _, _, _, _, _, actualDuration = UnitDebuff(self.UnitIDs.Active, spellName) 
-							--BattleGroundEnemies:Debug(GetTime(), actualDuration, GetTime() + actualDuration)
-							if actualDuration then
-								drFrame_SetCooldown(self, drFrame, GetTime(), DRData:GetResetTime(drCat) + actualDuration, spellID)
-							end
+					if showAuras then 
+						local auraFrame = self.Spec_AuraDisplay
+						if self.ActiveAuras then self.ActiveAuras[spellID] = nil end
+						if auraFrame.DisplayedAura and auraFrame.DisplayedAura.spellID == spellID then
+							--Look for another one
+							auraFrame:ActiveAuraRemoved()
 						end
-						drFrame.status = drFrame.status + 1
-						drFrame:SetStatus()
+					end
+					if myDebuffsEnabled then
+						local myDebuffFrame = self.MyDebuffs[spellID]
+						if myDebuffFrame then
+							myDebuffFrame.Cooldown:Clear()
+						end
 					end
 				end
 			end
 		end
-	
-		function enemyButtonFunctions:UpdateAuras(spellID, spellName, applied, removed)
-			if not self.config.Spec_AuraDisplay_Enabled then return end
 		
-			local priority = Data.SpellPriorities[spellID]
-			if not priority then return end
-			
-			local auraFrame = self.Spec_AuraDisplay
-			
-			if removed then
-				if self.ActiveAuras then self.ActiveAuras[spellID] = nil end
-				if auraFrame.DisplayedAura and auraFrame.DisplayedAura.spellID == spellID then
-				--Look for another one
-				auraFrame:ActiveAuraRemoved()
-				end
-			end
-			
-			if applied then
-				local actualDuration, _
-				if BattleGroundEnemies.TestmodeActive then
-					actualDuration = Data.cCdurationBySpellID[spellID]
-					if actualDuration then
-						local drCat = DRData:GetSpellCategory(spellID)
-						if drCat and self.DR[drCat] then
-							actualDuration = actualDuration/2^(self.DR[drCat].status)
-						end
-					end
-				elseif spellName and self.UnitIDs.Active then
-					_, _, _, _, _, actualDuration = UnitDebuff(self.UnitIDs.Active, spellName) 
-					--BattleGroundEnemies:Debug(GetTime(), actualDuration, GetTime() + actualDuration)
-				end
-				if actualDuration then
-					if not auraFrame.ActiveAuras[spellID] then auraFrame.ActiveAuras[spellID] = {} end
-					local startTime = GetTime()
-					local activAuraSpell = auraFrame.ActiveAuras[spellID]
-					activAuraSpell.spellID = spellID
-					activAuraSpell.startTime = startTime
-					activAuraSpell.endTime = actualDuration + startTime
-					activAuraSpell.priority = priority
-					if not auraFrame.DisplayedAura or priority > auraFrame.DisplayedAura.priority then
-						auraFrame:SetNewAura(activAuraSpell)
-					end
-				end
-			end
-		end
-			
 		
 		local TrinketFrameFunctions = {}
 		function TrinketFrameFunctions:TrinketCheck(spellID, setCooldown)
@@ -1823,17 +1832,41 @@ do
 				end
 			end
 			if highestPrioritySpell then
-				self:SetNewAura(highestPrioritySpell)
+				self:DisplayNewAura(highestPrioritySpell)
 			else
 				self:Hide()
 			end
 		end
 		
-		function AuraFrameFunctions:SetNewAura(spellDetails)
+		function AuraFrameFunctions:GotInterrupted(spellID, interruptDuration)
+			if self.SpecHasReducedInterruptTime then
+				interruptDuration = interruptDuration * 0.7
+			end
+			if self.HasAdditionalReducedInterruptTime then
+				interruptDuration = interruptDuration * 0.3
+			end
+			self:NewAura(spellID, interruptDuration, GetTime() + interruptDuration, 4)
+		end		
+		
+		function AuraFrameFunctions:NewAura(spellID, actualDuration, endTime, priority)
+			if not self.ActiveAuras[spellID] then self.ActiveAuras[spellID] = {} end
+			local activAuraSpell = self.ActiveAuras[spellID]
+			activAuraSpell.spellID = spellID
+			activAuraSpell.duration = actualDuration
+			activAuraSpell.endTime = endTime
+			activAuraSpell.priority = priority
+			if not self.DisplayedAura or priority > self.DisplayedAura.priority then
+				self:DisplayNewAura(activAuraSpell)
+			end
+		end
+		
+		
+		
+		function AuraFrameFunctions:DisplayNewAura(spellDetails)
 			self.DisplayedAura = spellDetails
 			self:Show()
 			self.Icon:SetTexture(GetSpellTexture(spellDetails.spellID))
-			self.Cooldown:SetCooldown(spellDetails.startTime, spellDetails.endTime - spellDetails.startTime)
+			self.Cooldown:SetCooldown(spellDetails.endTime - spellDetails.duration, spellDetails.duration)
 		end
 		
 		
@@ -1842,16 +1875,16 @@ do
 		end
 		
 		function BattleGroundEnemies:CropImage(texture, width, height)
+			local left, right, top, bottom = 0.075, 0.925, 0.075, 0.925
 			local ratio = height / width
-			local left, right, top, bottom = 5, 59, 5, 59
 			if ratio > 1 then --crop the sides
 				ratio = 1/ratio 
-				texture:SetTexCoord( (left/64) + ((1- ratio) / 2), (right/64) - ((1- ratio) / 2), top/64, bottom/64) 
+				texture:SetTexCoord( (left) + ((1- ratio) / 2), right - ((1- ratio) / 2), top, bottom) 
 			elseif ratio == 1 then
-				texture:SetTexCoord( left/64, right/64, top/64, bottom/64 ) 
+				texture:SetTexCoord(left, right, top, bottom) 
 			else
 				-- crop the height
-				texture:SetTexCoord( left/64, right/64, (top/64) + ((1- ratio) / 2), (bottom/64) - ( (1- ratio) / 2)) 
+				texture:SetTexCoord(left, right, top + ((1- ratio) / 2), bottom - ( (1- ratio) / 2)) 
 			end
 		end
 		
@@ -1866,8 +1899,6 @@ do
 			end
 			
 			button:SetScript("OnSizeChanged", function(self, width, height)
-				self:EnableTrinket()
-				self:EnableRacial()
 				for drCategorie, drFrame in pairs(self.DR) do
 					drFrame:SetWidth(height)
 				end
@@ -1906,8 +1937,9 @@ do
 			
 			button.Spec_AuraDisplay = MyCreateFrame("Frame", button.Spec)
 			button.Spec_AuraDisplay:Hide()
-			button.Spec_AuraDisplay.ActiveAuraRemoved = AuraFrameFunctions.ActiveAuraRemoved
-			button.Spec_AuraDisplay.SetNewAura = AuraFrameFunctions.SetNewAura
+			for funcName, func in pairs(AuraFrameFunctions) do
+				button.Spec_AuraDisplay[funcName] = func
+			end
 			button.Spec_AuraDisplay:SetAllPoints()
 			button.Spec_AuraDisplay:SetFrameLevel(button.Spec:GetFrameLevel() + 1)
 			button.Spec_AuraDisplay.ActiveAuras = {}
@@ -1980,7 +2012,9 @@ do
 			
 			button.Trinket.Icon = button.Trinket:CreateTexture()
 			button.Trinket.Icon:SetAllPoints()
-			button.Trinket.Icon:SetTexCoord(0.075, 0.925, 0.075, 0.925)
+			button.Trinket:SetScript("OnSizeChanged", function(self, width, height)
+				BattleGroundEnemies:CropImage(self.Icon, width, height)
+			end)
 			
 			button.Trinket.Cooldown = MyCreateCooldown(button.Trinket)
 		
@@ -1992,7 +2026,9 @@ do
 
 			button.Racial.Icon = button.Racial:CreateTexture()
 			button.Racial.Icon:SetAllPoints()
-			button.Racial.Icon:SetTexCoord(0.075, 0.925, 0.075, 0.925)
+			button.Racial:SetScript("OnSizeChanged", function(self, width, height)
+				BattleGroundEnemies:CropImage(self.Icon, width, height)
+			end)
 			
 			button.Racial.Cooldown = MyCreateCooldown(button.Racial)		
 			
@@ -2221,14 +2257,17 @@ do
 				--locale dependent are: race, spec
 				
 				if faction == EnemyFaction and name and race and classTag and spec then
+					if name == PlayerDetails.PlayerName then EnemyFaction = EnemyFaction == 1 and 0 or 1 return end --support for the new brawl because GetBattlefieldArenaFaction() returns wrong data on that BG
+					
 					local enemyButton = self.Enemies[name]
 					if enemyButton then	--already existing
 						enemyButton.Status = 1 --1 means found, already existing
-						if enemyButton.PlayerSpec ~= spec then--its possible to change spec in battleground
+						if enemyButton.PlayerSpecName ~= spec then--its possible to change spec in battleground
 							enemyButton.PlayerRoleNumber = Data.Classes[classTag][spec].roleNumber
 							enemyButton.PlayerRoleID = Data.Classes[classTag][spec].roleID
 							enemyButton.Spec.Icon:SetTexture(Data.Classes[classTag][spec].specIcon)
-							enemyButton.PlayerSpec = spec
+							enemyButton.PlayerSpecName = spec
+							enemyButton.PlayerSpecID = Data.Classes[classTag][spec].specID
 							
 							resort = true
 						end
@@ -2237,7 +2276,8 @@ do
 							PlayerClass = classTag,
 							PlayerName = name,
 							PlayerRace = LibRaces:GetRaceToken(race), --delifers are local independent token for relentless check
-							PlayerSpec = spec
+							PlayerSpecName = spec,
+							PlayerSpecID = Data.Classes[classTag][spec].specID
 						}
 						resort = true
 					end
