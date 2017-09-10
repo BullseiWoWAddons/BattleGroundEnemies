@@ -4,6 +4,7 @@ New features:
 - Added interrupts on the Aura Display on Spec Icon
 - Added settings for Racial and Trinket width
 - Grab a new ally target unitID for an enemy if the current active unitID was an ally
+
 Other improvements:
 - Rewrote functions for debuff handling
 - Added an additional check for the faction in a BG, this is espacially useful for the new brawl since the previous used method wasn't working will because a function returned incorrect value (GetBattlefieldArenaFaction()). This means the addon should no longer show your team as the enemies in the new brawl (Shadow-Pan Showdown)
