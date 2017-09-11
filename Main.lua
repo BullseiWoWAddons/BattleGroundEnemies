@@ -646,7 +646,17 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 	if unitEvent == "cleared" then --"unseen", "cleared" or "destroyed"
 		local enemyButton = self.ArenaEnemyIDToEnemyButton[unitID]
 		if enemyButton then
-			enemyButton:ObjectiveLost()
+			--BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", enemyButton.DisplayedName, "ObjectiveLost")
+			BattleGroundEnemies.ArenaEnemyIDToEnemyButton[enemyButton.UnitIDs.Arena] = nil
+			
+			local objective = enemyButton.ObjectiveAndRespawn
+			objective.Icon:SetTexture()
+			objective.Value = false
+			objective:UnregisterAllEvents()
+			objective:Hide()
+
+			enemyButton.UnitIDs.Arena = false
+			enemyButton:FetchAnotherUnitID()
 		end
 	else --seen, "unseen" or "destroyed"
 		--self:Debug(UnitName(unitID))
@@ -682,7 +692,7 @@ function CombatLogevents.SPELL_AURA_REFRESH(self, srcName, destName, spellID, sp
 	end
 end
 
-function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellID, spellName, auraType)
+function CombatLogevents.SPELL_AURA_REMOVED(self, _, destName, spellID, spellName, auraType)
 	local enemyButton = self.Enemies[destName]
 	if enemyButton then
 		if auraType == "DEBUFF" then
@@ -722,8 +732,7 @@ function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellID)
 	end
 end
 
-function CombatLogevents.SPELL_INTERRUPT(self, srcName, destName, spellID)
-	print(destName)
+function CombatLogevents.SPELL_INTERRUPT(self, _, destName, spellID, _, _)
 	local enemyButton = self.Enemies[destName]
 	if enemyButton then
 		local defaultInterruptDuration = Data.Interruptdurations[spellID]
@@ -733,7 +742,7 @@ function CombatLogevents.SPELL_INTERRUPT(self, srcName, destName, spellID)
 	end
 end
 
-function CombatLogevents.UNIT_DIED(self, srcName, destName)
+function CombatLogevents.UNIT_DIED(self, _, destName, _, _, _)
 	--self:Debug("subevent", destName, "UNIT_DIED")
 	local enemyButton = self.Enemies[destName]
 	if enemyButton then
@@ -1455,21 +1464,6 @@ do
 				if self.config.PowerBar_Enabled then self:UpdatePower(unitID) end
 			end
 			
-			
-			function enemyButtonFunctions:ObjectiveLost()
-				--BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", self.DisplayedName, "ObjectiveLost")
-				BattleGroundEnemies.ArenaEnemyIDToEnemyButton[self.UnitIDs.Arena] = nil
-				
-				local objective = self.ObjectiveAndRespawn
-				objective.Icon:SetTexture()
-				objective.Value = false
-				objective:UnregisterAllEvents()
-				objective:Hide()
-
-				self.UnitIDs.Arena = false
-				self:FetchAnotherUnitID()
-			end
-			
 			function enemyButtonFunctions:RacialUsed(spellID)
 				if not self.config.Racial_Enabled then return end
 				local insi = self.Trinket
@@ -1535,7 +1529,7 @@ do
 					debuffFrame.Cooldown.Text:ApplyFontStringSettings(conf.MyDebuffs_Cooldown_Fontsize, conf.MyDebuffs_Cooldown_Outline, conf.MyDebuffs_Cooldown_EnableTextshadow, conf.MyDebuffs_Cooldown_TextShadowcolor)
 				end
 				
-				function enemyButtonFunctions:SetNewDebuff(spellID, count, duration, endTime)
+				function enemyButtonFunctions:DisplayMyDebuff(spellID, count, duration, endTime)
 
 					local debuffFrame = self.InactiveDebuffs[#self.InactiveDebuffs] 
 					if debuffFrame then --recycle a previous used Frame
@@ -1628,18 +1622,8 @@ do
 							self.SetStatus = drFrameUpdateStatusText
 						end
 					end
-					
-					function drFrameFunctions:DisplayDR(duration, spellID)
-						if not self:IsShown() then
-							self:Show()
-							self:GetParent():DrPositioning() --enemyButton:DrPositioning()
-						end
-						self.Icon:SetTexture(GetSpellTexture(spellID))
-						self.Cooldown:SetCooldown(GetTime(), duration)
-					end
-				
-				
-					function enemyButtonFunctions:GetDrFrame(drCat)
+									
+					function enemyButtonFunctions:DisplayDR(drCat, spellID, additionalDuration)
 					
 						local drFrame = self.DR[drCat]
 						if not drFrame then  --create a new frame for this categorie
@@ -1668,8 +1652,14 @@ do
 							drFrame:Hide()
 							
 							self.DR[drCat] = drFrame
+						end						
+						
+						if not drFrame:IsShown() then
+							drFrame:Show()
+							self:DrPositioning()
 						end
-						return drFrame
+						drFrame.Icon:SetTexture(GetSpellTexture(spellID))
+						drFrame.Cooldown:SetCooldown(GetTime(), DRData:GetResetTime(drCat) + additionalDuration)
 					end
 				end
 				
@@ -1730,13 +1720,11 @@ do
 							end
 						end
 						if drTrackingEnabled then
-							local drFrame = self:GetDrFrame(drCat)
-
-							drFrame:DisplayDR(DRData:GetResetTime(drCat) + actualDuration, spellID)
-							drFrame:IncreaseDRState()
+							self:DisplayDR(drCat, spellID, actualDuration)
+							self.DR[drCat]:IncreaseDRState()
 						end
 						if myDebuffsEnabled then
-							self:SetNewDebuff(spellID, count, actualDuration, endTime)
+							self:DisplayMyDebuff(spellID, count, actualDuration, endTime)
 						end
 						if trinketEnabled then
 
@@ -1772,12 +1760,12 @@ do
 					if not (showAuras or drTrackingEnabled or myDebuffsEnabled) then return end
 						
 					if drTrackingEnabled then
-						local drFrame = self:GetDrFrame(drCat)
+						self:DisplayDR(drCat, spellID, 0)
+						local drFrame = self.DR[drCat]
 						if drFrame.status == 0 then -- we didn't get the applied, so we set the color and increase the dr state
 							--BattleGroundEnemies:Debug("DR Problem")
 							drFrame:IncreaseDRState()
 						end
-						drFrame:DisplayDR(DRData:GetResetTime(drCat), spellID)
 					end
 					if showAuras then 
 						local auraFrame = self.Spec_AuraDisplay
@@ -1859,8 +1847,6 @@ do
 				self:DisplayNewAura(activAuraSpell)
 			end
 		end
-		
-		
 		
 		function AuraFrameFunctions:DisplayNewAura(spellDetails)
 			self.DisplayedAura = spellDetails
@@ -2301,13 +2287,16 @@ do
 				
 				-- set data for real enemies
 				enemyButton.Status = 2
-
+				
+				
 				if BattleGroundDebuffs then
 					if CurrentMapID == 856 then --8456 is kotmogu
 						enemyButton.ObjectiveAndRespawn:SetScript('OnEvent', objectiveFrameFunctions.Kotmoguorbs)
 					else
 						enemyButton.ObjectiveAndRespawn:SetScript('OnEvent', objectiveFrameFunctions.NotKotmogu)
 					end
+				else
+					enemyButton.ObjectiveAndRespawn:SetScript('OnEvent', nil) --delete an maybe attached script from a previous bg
 				end
 				
 				enemyButton.UnitIDs = {TargetedByAlly = {}}

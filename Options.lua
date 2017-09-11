@@ -768,6 +768,7 @@ function BattleGroundEnemies:SetupOptions()
 								type = "range",
 								name = L.Width,
 								desc = L.Trinket_Width_Desc,
+								disabled = function() return not self.db.profile.Trinket_Enabled end,
 								set = function(option, value)
 									UpdateButtons(option, value, nil, nil, nil, nil, nil, "EnableTrinket")
 								end,
@@ -806,6 +807,7 @@ function BattleGroundEnemies:SetupOptions()
 								type = "range",
 								name = L.Width,
 								desc = L.Racial_Width_Desc,
+								disabled = function() return not self.db.profile.Racial_Enabled end,
 								set = function(option, value)
 									UpdateButtons(option, value, nil, nil, nil, nil, nil, "EnableRacial")
 								end,
