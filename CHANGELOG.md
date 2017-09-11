@@ -1,4 +1,8 @@
 
+v2.6.2
+Fixed an error message that was related to the code rewrite of debuffs in v 2.6
+When the display type of DR Tracking is changed it now properly hides the border of new DR Icons
+
 v2.6.1
 -Deleted unnecessary message when an enemy got interrupted
 -Fixed an error with battleground specific debuffs
