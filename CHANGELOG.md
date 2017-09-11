@@ -1,4 +1,10 @@
 
+v2.6.1
+-Deleted unnecessary message when an enemy got interrupted
+-Fixed an error with battleground specific debuffs
+-Disabled sliders for trinket and racial width when the main-toggle is disabled
+
+
 v2.6
 
 New features:
