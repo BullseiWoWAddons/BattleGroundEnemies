@@ -1,4 +1,7 @@
 
+v2.6.3
+Fixed the error i intended to fix in 2.6.2 but i didn't upload the new file LOL. This time its fixed for real
+
 v2.6.2
 Fixed an error message that was related to the code rewrite of debuffs in v 2.6
 When the display type of DR Tracking is changed it now properly hides the border of new DR Icons
