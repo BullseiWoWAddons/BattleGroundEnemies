@@ -1684,7 +1684,7 @@ do
 					if not (showAuras or drTrackingEnabled or myDebuffsEnabled or trinketEnabled) then return end
 					
 
-					local unitCaster, count, actualDuration, endTime, _
+					local count, actualDuration, endTime, _
 					
 					if BattleGroundEnemies.TestmodeActive then
 						actualDuration = Data.cCdurationBySpellID[spellID] or random(10, 15)
@@ -1702,13 +1702,13 @@ do
 							if UAspellIDs[spellID] then --more expensier way since we need to iterate through all debuffs
 								for i = 1, 40 do
 									local _spellID
-									_, _, _, count, _, actualDuration, endTime, unitCaster, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, i, "PLAYER")
+									_, _, _, count, _, actualDuration, endTime, _, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, i, "PLAYER")
 									if spellID == _spellID then
 										break
 									end
 								end
 							else
-								_, _, _, count, _, actualDuration, endTime, unitCaster, _, _, spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, spellName)
+								_, _, _, count, _, actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, spellName)
 							end
 						end
 					end
