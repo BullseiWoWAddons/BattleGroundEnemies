@@ -7,7 +7,7 @@ New Features:
 
 Improvements:
 - Improved the detection of Adaptation for stealth players
-BugFix:
+BugFixes:
 - Hide the border or DR icons if the user switched from frame to text mode
 
 v2.6.3
