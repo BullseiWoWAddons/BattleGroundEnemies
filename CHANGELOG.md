@@ -1,8 +1,9 @@
 
 v3.0
 New Features: 
--Added support for allies and 40 man BGs
--Added selection highlight for player bars
+- Added support for allies and 40 man BGs
+- Added selection highlight for player bars
+
 Improvements:
 - Improved the detection of Adaptation for stealth players
 BugFix:
