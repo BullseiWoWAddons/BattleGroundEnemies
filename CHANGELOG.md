@@ -1,4 +1,15 @@
 
+v3.0
+
+New Features: 
+- Added support for allies and 40 man BGs
+- Added selection highlight for player bars
+
+Improvements:
+- Improved the detection of Adaptation for stealth players
+BugFixes:
+- Hide the border or DR icons if the user switched from frame to text mode
+
 v2.6.3
 Fixed the error i intended to fix in 2.6.2 but i didn't upload the new file LOL. This time its fixed for real
 
