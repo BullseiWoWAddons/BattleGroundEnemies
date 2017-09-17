@@ -1400,7 +1400,7 @@ do
 		
 		local oldCount = self.PlayerCount.oldPlayerNumber
 		if not oldCount or oldCount ~= currentCount then
-			if IsRatedBG and self.bgSizeConfig.Notificatoins_Enabled then
+			if IsRatedBG and self.bgSizeConfig.Notifications_Enabled then
 				if currentCount < oldCount then
 					RaidNotice_AddMessage(RaidWarningFrame, L[isEnemy and "EnemyLeft" or "AllyLeft"], ChatTypeInfo["RAID_WARNING"]) 
 					PlaySound(isEnemy and 124 or 8959) --LEVELUPSOUND
@@ -2062,7 +2062,7 @@ do
 					RacialFiltering_Enabled = false,
 					RacialFiltering_Filterlist = {}, --key = spellID, value = spellName or false
 					
-					Notificatoins_Enabled = true,
+					Notifications_Enabled = true,
 					-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
 					-- NegativeSound = [[Sound\Interface\UI_BattlegroundCountdown_Timer.ogg]],
 				},
@@ -2333,7 +2333,7 @@ do
 					RacialFiltering_Enabled = false,
 					RacialFiltering_Filterlist = {}, --key = spellID, value = spellName or false
 					
-					Notificatoins_Enabled = true,
+					Notifications_Enabled = true,
 					-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
 					-- NegativeSound = [[Sound\Interface\UI_BattlegroundCountdown_Timer.ogg]],
 				},

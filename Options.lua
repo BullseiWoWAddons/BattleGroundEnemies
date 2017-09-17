@@ -1342,10 +1342,10 @@ local function addEnemyAndAllySettings(self)
 		--inline = true,
 		order = 14,
 		args = {
-			Notificatoins_Enabled = {
+			Notifications_Enabled = {
 				type = "toggle",
-				name = L.Notificatoins_Enabled,
-				desc = L.Notificatoins_Enabled_Desc,
+				name = L.Notifications_Enabled,
+				desc = L.Notifications_Enabled_Desc,
 				--inline = true,
 				order = 1
 			},
@@ -1353,7 +1353,7 @@ local function addEnemyAndAllySettings(self)
 				-- type = "select",
 				-- name = L.PositiveSound,
 				-- desc = L.PositiveSound_Desc,
-				-- disabled = function() return not self.config[BGSize].Notificatoins_Enabled end,
+				-- disabled = function() return not self.config[BGSize].Notifications_Enabled end,
 				-- dialogControl = 'LSM30_Sound',
 				-- values = AceGUIWidgetLSMlists.sound,
 				-- order = 2
@@ -1362,7 +1362,7 @@ local function addEnemyAndAllySettings(self)
 				-- type = "select",
 				-- name = L.NegativeSound,
 				-- desc = L.NegativeSound_Desc,
-				-- disabled = function() return not self.config[BGSize].Notificatoins_Enabled end,
+				-- disabled = function() return not self.config[BGSize].Notifications_Enabled end,
 				-- dialogControl = 'LSM30_Sound',
 				-- values = AceGUIWidgetLSMlists.sound,
 				-- order = 3
