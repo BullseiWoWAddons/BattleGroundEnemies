@@ -60,7 +60,7 @@ local function setOption(option, value)
 		-- setting = setting[option[i]]
 	-- end
 	-- setting = value
-	print(option.arg, value, option[0], option[1], option[2], option[3], option[4])
+	--print(option.arg, value, option[0], option[1], option[2], option[3], option[4])
 	local location = Optionslocation(option)
 	--print(type(value), value)
 	-- BattleGroundEnemies:Debug(key, value)
@@ -104,7 +104,7 @@ local function UpdateButtons(option, value, loopInButton1, loopInButton2, fixeds
 	
 	local playerType, IsGeneralsetting = OptionsType(option)
 	
-	print("IsEnemyOrAlly:", IsEnemyOrAlly, "playerType:", playerType)
+	--print("IsEnemyOrAlly:", IsEnemyOrAlly, "playerType:", playerType)
 	
 	if playerType and not IsGeneralsetting and BattleGroundEnemies.BGSize ~= tonumber(option[2]) then return end
 	
@@ -383,7 +383,7 @@ local function addEnemyAndAllySettings(self)
 				name = L.CopySettings:format(oppositePlayerType),
 				desc = L.CopySettings_Desc:format(oppositePlayerType),
 				func = function()
-					print(playerType, oppositePlayerType)
+					--print(playerType, oppositePlayerType)
 					BattleGroundEnemies.db.profile[playerType] = copy(BattleGroundEnemies.db.profile[oppositePlayerType])
 					BattleGroundEnemies:ProfileChanged()
 				end,
@@ -558,7 +558,7 @@ local function addEnemyAndAllySettings(self)
 					name = L.CopySettings:format(oppositePlayerType..": "..L["BGSize_"..BGSize]),
 					desc = L.CopySettings_Desc:format(oppositePlayerType..": "..L["BGSize_"..BGSize]),
 					func = function()
-						print(playerType, oppositePlayerType)
+						--print(playerType, oppositePlayerType)
 						BattleGroundEnemies.db.profile[playerType][BGSize] = copy(BattleGroundEnemies.db.profile[oppositePlayerType][BGSize])
 						if BattleGroundEnemies.BGSize and BattleGroundEnemies.BGSize == tonumber(BGSize) then BattleGroundEnemies:ProfileChanged() end
 						
@@ -1345,7 +1345,7 @@ local function addEnemyAndAllySettings(self)
 			Notifications_Enabled = {
 				type = "toggle",
 				name = L.Notifications_Enabled,
-				desc = L.Notifications_Enabled_Desc,
+				desc = L.Notifications_Enabled_Desc:format(playerType == "Enemies" and "enemies" or "allies"),
 				--inline = true,
 				order = 1
 			},
