@@ -83,7 +83,6 @@ BattleGroundEnemies:Hide()
 
 local RequestFrame = CreateFrame("Frame", nil, BattleGroundEnemies)
 
-BattleGroundEnemies.BGSize = false
 
 
 BattleGroundEnemies.ArenaEnemyIDToPlayerButton = {} --key = arenaID: arenaX, value = playerButton of that unitID
@@ -124,7 +123,6 @@ BattleGroundEnemies:SetScript("OnShow", function(self)
 	else
 		RequestFrame:Hide()
 	end
-	self:EnableAlliesAndEnemies()
 end)
 
 BattleGroundEnemies:SetScript("OnHide", function(self)
@@ -360,11 +358,25 @@ local function SetBackdrop(frame, backdropColor)
 	return frame
 end
 
-function BattleGroundEnemies:EnableAlliesAndEnemies()
-	self.Allies:CheckIfEnabled()
-	self.Enemies:CheckIfEnabled()
+function BattleGroundEnemies:BGSizeChanged(newBGSize)
+	self.BGSize = newBGSize
+	self.Enemies:ApplyBGSizeSettings()
+	self.Allies:ApplyBGSizeSettings()
 end
 
+function BattleGroundEnemies:BGSizeCheck(newBGSize)
+	if newBGSize then
+		if newBGSize > 15 then
+			if not self.BGSize or self.BGSize ~= 40 then
+				self:BGSizeChanged(40)
+			end
+		else
+			if not self.BGSize or self.BGSize ~= 15 then
+				self:BGSizeChanged(15)
+			end
+		end
+	end
+end
 
 
 local TrinketFrameFunctions = {}
@@ -603,8 +615,8 @@ do
 		end
 					
 		
-		--MyAuras
-		for spellID, auraFrame in pairs(self.MyAuras) do
+		--Auras
+		for spellID, auraFrame in pairs(self.Auras) do
 			self:ApplyAuraFrameSettings(auraFrame)
 		end
 		for spellID, auraFrame in pairs(self.InactiveAuras) do
@@ -1005,9 +1017,9 @@ do
 		function buttonFunctions:AuraPositioning()
 
 			local anchor = self.AuraContainerStartAnchor
-			for spellID, auraFrame in pairs(self.MyAuras) do
+			for spellID, auraFrame in pairs(self.Auras) do
 
-				local spacing = self.bgSizeConfig.MyAuras_Spacing
+				local spacing = self.bgSizeConfig.Auras_Spacing
 				auraFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
 				auraFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
 				anchor = auraFrame
@@ -1019,22 +1031,29 @@ do
 			auraFrame.Stacks:SetText("")
 			auraFrame:Hide()
 			local playerButton = auraFrame:GetParent()
-			playerButton.MyAuras[auraFrame.SpellID] = nil
+			playerButton.Auras[auraFrame.SpellID] = nil
 			playerButton:AuraPositioning()
 			playerButton.InactiveAuras[#playerButton.InactiveAuras + 1] = auraFrame
 		end
 		
 		function buttonFunctions:ApplyAuraFrameSettings(auraFrame)
 			local conf = self.bgSizeConfig
-			auraFrame.Stacks:SetTextColor(unpack(conf.MyAuras_Textcolor))
-			auraFrame.Stacks:ApplyFontStringSettings(conf.MyAuras_Fontsize, conf.MyAuras_Outline, conf.MyAuras_EnableTextshadow, conf.MyAuras_TextShadowcolor)
-			auraFrame.Cooldown:ApplyCooldownSettings(conf.MyAuras_ShowNumbers, true, false)
-			auraFrame.Cooldown.Text:ApplyFontStringSettings(conf.MyAuras_Cooldown_Fontsize, conf.MyAuras_Cooldown_Outline, conf.MyAuras_Cooldown_EnableTextshadow, conf.MyAuras_Cooldown_TextShadowcolor)
+			if auraFrame.IsDebuff then
+				auraFrame.Stacks:SetTextColor(unpack(conf.Auras_Debuffs_Textcolor))
+				auraFrame.Stacks:ApplyFontStringSettings(conf.Auras_Debuffs_Fontsize, conf.Auras_Debuffs_Outline, conf.Auras_Debuffs_EnableTextshadow, conf.Auras_Debuffs_TextShadowcolor)
+				auraFrame.Cooldown:ApplyCooldownSettings(conf.Auras_Debuffs_ShowNumbers, true, false)
+				auraFrame.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline, conf.Auras_Debuffs_Cooldown_EnableTextshadow, conf.Auras_Debuffs_Cooldown_TextShadowcolor)
+			else
+				auraFrame.Stacks:SetTextColor(unpack(conf.Auras_Buffs_Textcolor))
+				auraFrame.Stacks:ApplyFontStringSettings(conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline, conf.Auras_Buffs_EnableTextshadow, conf.Auras_Buffs_TextShadowcolor)
+				auraFrame.Cooldown:ApplyCooldownSettings(conf.Auras_Buffs_ShowNumbers, true, false)
+				auraFrame.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline, conf.Auras_Buffs_Cooldown_EnableTextshadow, conf.Auras_Buffs_Cooldown_TextShadowcolor)
+			end
 		end
-		
-		function buttonFunctions:DisplayMyAura(spellID, count, duration, endTime)
 
-			local auraFrame = self.InactiveAuras[#self.InactiveAuras] 
+		function buttonFunctions:DisplayAura(isDebuff, spellID, amount, duration, endTime)
+
+			local auraFrame = self.Auras[spellID] or self.InactiveAuras[#self.InactiveAuras] 
 			if auraFrame then --recycle a previous used Frame
 				tremove(self.InactiveAuras, #self.InactiveAuras)
 				auraFrame:Show()
@@ -1051,25 +1070,24 @@ do
 				auraFrame.Stacks:SetAllPoints()
 				auraFrame.Stacks:SetJustifyH("RIGHT")
 				auraFrame.Stacks:SetJustifyV("BOTTOM")
-				auraFrame.Stacks:SetTextColor(unpack(self.bgSizeConfig.MyAuras_Textcolor))
 			
 				auraFrame.Cooldown = MyCreateCooldown(auraFrame)
 				auraFrame.Cooldown:SetScript("OnHide", auraFrameCooldown_OnHide)
 				
 				self:ApplyAuraFrameSettings(auraFrame)
 			end
-
+			auraFrame.IsDebuff = isDebuff
 			auraFrame.SpellID = spellID
 			auraFrame.Icon:SetTexture(GetSpellTexture(spellID))
-			if count > 1 then
-				auraFrame.Stacks:SetText(count)
+			if amount > 1 then
+				auraFrame.Stacks:SetText(amount)
 			else
 				auraFrame.Stacks:SetText()
 			end
 			auraFrame.Cooldown:SetCooldown(endTime - duration, duration)
 			--print("SetCooldown", endTime - duration, duration)
 			auraFrame:Show()
-			self.MyAuras[spellID] = auraFrame
+			self.Auras[spellID] = auraFrame
 			self:AuraPositioning()
 		end
 	end
@@ -1081,28 +1099,28 @@ do
 		[233498] = true,
 		[233499] = true,	
 	}
-	
-	
-	function buttonFunctions:AuraApplied(spellID, spellName, srcName, auraType)
+
+	function buttonFunctions:AuraApplied(spellID, spellName, srcName, auraType, amount)
 		local isDebuff = auraType == "DEBUFF"
+		local isMine = srcName == PlayerDetails.PlayerName
 		local config = self.bgSizeConfig
 		local drCat = DRData:GetSpellCategory(spellID)
 		--BattleGroundEnemies:Debug(operation, spellID)
-		local showAuras = config.Spec_AuraDisplay_Enabled
+		local showAurasOnSpecicon = config.Spec_AuraDisplay_Enabled
 		local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])
-		local myAurasEnabled = config.MyAuras_Enabled and srcName == PlayerDetails.PlayerName and (not config.MyAurasFiltering_Enabled or config.MyAurasFiltering_Filterlist[spellID])
+		local aurasEnabled = config.Auras_Enabled and (isDebuff and (config.Auras_Debuffs_Enabled and (not config.Auras_Debuffs_OnlyShowMine or isMine) and (not config.Auras_Debuffs_DebuffTypeFiltering_Enabled or config.Auras_Debuffs_DebuffTypeFiltering_Filterlist[spellID])) or (config.Auras_Buffs_Enabled and (not config.Auras_Buffs_OnlyShowMine or isMine) and (not config.Auras_Buffs_SpellIDFiltering_Enabled or config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID])))
 		local relentlessCheck = drCat and config.Trinket_Enabled and not self.Trinket.HasTrinket and Data.cCduration[drCat] and Data.cCduration[drCat][spellID]
 		local isAdaptation = isDebuff and spellID == 195901
 		
-		--if srcName == PlayerDetails.PlayerName then print(myAurasEnabled, config.MyAuras_Enabled, config.MyAurasFiltering_Enabled, config.MyAurasFiltering_Filterlist[spellID]) end
-		if not (showAuras or drTrackingEnabled or myAurasEnabled or relentlessCheck) then return end
+		--if srcName == PlayerDetails.PlayerName then print(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
+		if not (showAurasOnSpecicon or drTrackingEnabled or aurasEnabled or relentlessCheck) then return end
 		
 
-		local count, actualDuration, endTime, _
+		local count, actualDuration, endTime, debuffType, _
 		
 		if BattleGroundEnemies.TestmodeActive then
 			actualDuration = Data.cCdurationBySpellID[spellID] or random(10, 15)
-			count = random(1, 20)
+			amount = random(1, 20)
 			if actualDuration then
 				if drCat and self.DR[drCat] then
 					actualDuration = actualDuration/2^self.DR[drCat].status
@@ -1117,20 +1135,20 @@ do
 				if UAspellIDs[spellID] then --more expensier way since we need to iterate through all debuffs
 					for i = 1, 40 do
 						local _spellID
-						_, _, _, count, _, actualDuration, endTime, _, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitAura(activeUnitID, i, "PLAYER")
+						_, _, _, count, debuffType , actualDuration, endTime, _, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, i, "PLAYER")
 						if spellID == _spellID then
 							break
 						end
 					end
 				else
-					_, _, _, count, _, actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = UnitAura(activeUnitID, spellName, nil, isDebuff and "HARMFUL" or "HELPFUL")
+					_, _, _, count, debuffType , actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = UnitAura(activeUnitID, spellName, nil, isDebuff and "HARMFUL" or "HELPFUL")
 				end
 			end
 		end
-		--if srcName == PlayerDetails.PlayerName then print(myAurasEnabled, config.MyAuras_Enabled, config.MyAurasFiltering_Enabled, config.MyAurasFiltering_Filterlist[spellID], actualDuration) end
+		--if srcName == PlayerDetails.PlayerName then print(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID], actualDuration) end
 		
 		if actualDuration and actualDuration > 0 then
-			if showAuras then 
+			if showAurasOnSpecicon then 
 				local priority = Data.SpellPriorities[spellID]
 				if priority then
 					self.Spec_AuraDisplay:NewAura(spellID, actualDuration, endTime, priority)
@@ -1140,9 +1158,11 @@ do
 				self:DisplayDR(drCat, spellID, actualDuration)
 				self.DR[drCat]:IncreaseDRState()
 			end
-			if myAurasEnabled then
-				--print("myAurasEnabled", spellID, count, actualDuration, endTime, GetTime())
-				self:DisplayMyAura(spellID, count, actualDuration, endTime)
+			if aurasEnabled then
+				if not isDebuff or not Auras_Debuffs_DebuffTypeFiltering_Enabled or Auras_Debuffs_DebuffTypeFiltering_Filterlist[debuffType] then
+					--print("aurasEnabled", spellID, amount, actualDuration, endTime, GetTime())
+					self:DisplayAura(isDebuff, spellID, amount or count, actualDuration, endTime)
+				end
 			end
 			if relentlessCheck then
 
@@ -1174,12 +1194,11 @@ do
 		local config = self.bgSizeConfig
 		local drCat = DRData:GetSpellCategory(spellID)
 		--BattleGroundEnemies:Debug(operation, spellID)
-		local showAuras = config.Spec_AuraDisplay_Enabled
+		local showAurasOnSpecicon = config.Spec_AuraDisplay_Enabled
 		local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])
-		local myAurasEnabled = config.MyAuras_Enabled and (not config.MyAurasFiltering_Enabled or config.MyAurasFiltering_Filterlist[spellID])
 		
 		
-		if not (showAuras or drTrackingEnabled or myAurasEnabled) then return end
+		if not (showAurasOnSpecicon or drTrackingEnabled) then return end
 			
 		if drTrackingEnabled then
 			self:DisplayDR(drCat, spellID, 0)
@@ -1189,7 +1208,7 @@ do
 				drFrame:IncreaseDRState()
 			end
 		end
-		if showAuras then 
+		if showAurasOnSpecicon then 
 			local auraFrame = self.Spec_AuraDisplay
 			if self.ActiveAuras then self.ActiveAuras[spellID] = nil end
 			if auraFrame.DisplayedAura and auraFrame.DisplayedAura.spellID == spellID then
@@ -1197,11 +1216,9 @@ do
 				auraFrame:ActiveAuraRemoved()
 			end
 		end
-		if myAurasEnabled then
-			local myDebuffFrame = self.MyAuras[spellID]
-			if myDebuffFrame then
-				myDebuffFrame.Cooldown:Clear()
-			end
+		local AuraFrame = self.Auras[spellID]
+		if AuraFrame then
+			AuraFrame.Cooldown:Clear()
 		end
 	end
 	
@@ -1368,10 +1385,14 @@ end
 
 local MainFrameFunctions = {}
 do
-	function MainFrameFunctions:ApplyMainFrameSettings()
-		print(self.PlayerType)
+	function MainFrameFunctions:ApplyAllSettings()
+		--print(self.PlayerType)
 		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
-		self.bgSizeConfig = self.config[tostring(BattleGroundEnemies.BGSize or 15)]
+		self:ApplyBGSizeSettings()
+	end
+	
+	function MainFrameFunctions:ApplyBGSizeSettings()
+		self.bgSizeConfig = self.config[tostring(BattleGroundEnemies.BGSize)]
 		local conf = self.bgSizeConfig
 
 		self:SetSize(conf.BarWidth, 30)
@@ -1389,6 +1410,24 @@ do
 		self:SetPlayerCountJustifyV(conf.BarVerticalGrowdirection)
 		
 		self.PlayerCount:ApplyFontStringSettings(conf.PlayerCount_Fontsize, conf.PlayerCount_Outline, conf.PlayerCount_EnableTextshadow, conf.PlayerCount_TextShadowcolor)
+	
+		for name, playerButton in pairs(self.Players) do
+			playerButton:ApplyButtonSettings()
+			playerButton:SetName()
+			playerButton:SetBindings()
+		end
+		self:ButtonPositioning()
+		
+		for number, playerButton in pairs(self.InactivePlayerButtons) do
+			playerButton:ApplyButtonSettings()
+		end
+		
+
+		if self.config.Enabled and self.bgSizeConfig.Enabled then
+			self:Show()
+		else
+			self:Hide()
+		end
 	end
 	
 	function MainFrameFunctions:UpdatePlayerCount(currentCount)
@@ -1430,28 +1469,6 @@ do
 			self.PlayerCount:SetJustifyV("BOTTOM")
 		else
 			self.PlayerCount:SetJustifyV("TOP")
-		end
-	end
-	
-	function MainFrameFunctions:CheckIfEnabled()
-		if self.config.Enabled and self.bgSizeConfig.Enabled then
-			self:Show()
-		else
-			self:Hide()
-		end
-	end
-	
-	function MainFrameFunctions:ApplyAllSettings()	
-		self:ApplyMainFrameSettings()
-		for name, playerButton in pairs(self.Players) do
-			playerButton:ApplyButtonSettings()
-			playerButton:SetName()
-			playerButton:SetBindings()
-		end
-		self:ButtonPositioning()
-		
-		for number, playerButton in pairs(self.InactivePlayerButtons) do
-			playerButton:ApplyButtonSettings()
 		end
 	end
 
@@ -1497,7 +1514,7 @@ do
 				for drCategorie, drFrame in pairs(self.DR) do
 					drFrame:SetWidth(height)
 				end
-				for spellID, auraFrame in pairs(self.MyAuras) do
+				for spellID, auraFrame in pairs(self.Auras) do
 					auraFrame:SetWidth(height)
 				end
 				for spellID, auraFrame in pairs(self.InactiveAuras) do
@@ -1662,8 +1679,8 @@ do
 			playerButton.DR = {}
 			
 			
-			-- MyAuras
-			playerButton.MyAuras = {}
+			-- Auras
+			playerButton.Auras = {}
 			playerButton.InactiveAuras = {}
 
 			
@@ -2003,24 +2020,47 @@ do
 					DrTrackingFiltering_Enabled = false,
 					DrTrackingFiltering_Filterlist = {},
 					
-					MyAuras_Enabled = true,
-					MyAuras_Spacing = 2,
 					
-					MyAuras_Fontsize = 12,
-					MyAuras_Outline = "OUTLINE",
-					MyAuras_Textcolor = {1, 1, 1, 1},
-					MyAuras_EnableTextshadow = true,
-					MyAuras_TextShadowcolor = {0, 0, 0, 1},
+					Auras_Enabled = true,
+					Auras_Spacing = 2,
 					
-					MyAuras_ShowNumbers = true,
+					Auras_Buffs_Enabled = true,
+					Auras_Buffs_Fontsize = 12,
+					Auras_Buffs_Outline = "OUTLINE",
+					Auras_Buffs_Textcolor = {1, 1, 1, 1},
+					Auras_Buffs_EnableTextshadow = true,
+					Auras_Buffs_TextShadowcolor = {0, 0, 0, 1},
 					
-					MyAuras_Cooldown_Fontsize = 12,
-					MyAuras_Cooldown_Outline = "OUTLINE",
-					MyAuras_Cooldown_EnableTextshadow = false,
-					MyAuras_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					Auras_Buffs_ShowNumbers = true,
 					
-					MyAurasFiltering_Enabled = false,
-					MyAurasFiltering_Filterlist = {},
+					Auras_Buffs_Cooldown_Fontsize = 12,
+					Auras_Buffs_Cooldown_Outline = "OUTLINE",
+					Auras_Buffs_Cooldown_EnableTextshadow = false,
+					Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Buffs_OnlyShowMine = true,
+					Auras_Buffs_SpellIDFiltering_Enabled = false,
+					Auras_Buffs_SpellIDFiltering_Filterlist = {},
+					
+					Auras_Debuffs_Enabled = true,
+					Auras_Debuffs_Fontsize = 12,
+					Auras_Debuffs_Outline = "OUTLINE",
+					Auras_Debuffs_Textcolor = {1, 1, 1, 1},
+					Auras_Debuffs_EnableTextshadow = true,
+					Auras_Debuffs_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Debuffs_ShowNumbers = true,
+					
+					Auras_Debuffs_Cooldown_Fontsize = 12,
+					Auras_Debuffs_Cooldown_Outline = "OUTLINE",
+					Auras_Debuffs_Cooldown_EnableTextshadow = false,
+					Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Debuffs_OnlyShowMine = true,
+					Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
+					Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
+					Auras_Debuffs_SpellIDFiltering_Enabled = false,
+					Auras_Debuffs_SpellIDFiltering__Filterlist = {},
 
 					ObjectiveAndRespawn_ObjectiveEnabled = true,
 					ObjectiveAndRespawn_Width = 36,
@@ -2140,24 +2180,47 @@ do
 					DrTrackingFiltering_Enabled = false,
 					DrTrackingFiltering_Filterlist = {},
 					
-					MyAuras_Enabled = true,
-					MyAuras_Spacing = 2,
 					
-					MyAuras_Fontsize = 12,
-					MyAuras_Outline = "OUTLINE",
-					MyAuras_Textcolor = {1, 1, 1, 1},
-					MyAuras_EnableTextshadow = true,
-					MyAuras_TextShadowcolor = {0, 0, 0, 1},
+					Auras_Enabled = true,
+					Auras_Spacing = 2,
 					
-					MyAuras_ShowNumbers = true,
+					Auras_Buffs_Enabled = true,
+					Auras_Buffs_Fontsize = 12,
+					Auras_Buffs_Outline = "OUTLINE",
+					Auras_Buffs_Textcolor = {1, 1, 1, 1},
+					Auras_Buffs_EnableTextshadow = true,
+					Auras_Buffs_TextShadowcolor = {0, 0, 0, 1},
 					
-					MyAuras_Cooldown_Fontsize = 12,
-					MyAuras_Cooldown_Outline = "OUTLINE",
-					MyAuras_Cooldown_EnableTextshadow = false,
-					MyAuras_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					Auras_Buffs_ShowNumbers = true,
 					
-					MyAurasFiltering_Enabled = false,
-					MyAurasFiltering_Filterlist = {},
+					Auras_Buffs_Cooldown_Fontsize = 12,
+					Auras_Buffs_Cooldown_Outline = "OUTLINE",
+					Auras_Buffs_Cooldown_EnableTextshadow = false,
+					Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Buffs_OnlyShowMine = true,
+					Auras_Buffs_SpellIDFiltering_Enabled = false,
+					Auras_Buffs_SpellIDFiltering_Filterlist = {},
+					
+					Auras_Debuffs_Enabled = true,
+					Auras_Debuffs_Fontsize = 12,
+					Auras_Debuffs_Outline = "OUTLINE",
+					Auras_Debuffs_Textcolor = {1, 1, 1, 1},
+					Auras_Debuffs_EnableTextshadow = true,
+					Auras_Debuffs_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Debuffs_ShowNumbers = true,
+					
+					Auras_Debuffs_Cooldown_Fontsize = 12,
+					Auras_Debuffs_Cooldown_Outline = "OUTLINE",
+					Auras_Debuffs_Cooldown_EnableTextshadow = false,
+					Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Debuffs_OnlyShowMine = true,
+					Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
+					Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
+					Auras_Debuffs_SpellIDFiltering_Enabled = false,
+					Auras_Debuffs_SpellIDFiltering__Filterlist = {},
 					
 					Trinket_Enabled = true,
 					Trinket_Width = 28,
@@ -2274,24 +2337,47 @@ do
 					DrTrackingFiltering_Enabled = false,
 					DrTrackingFiltering_Filterlist = {},
 					
-					MyAuras_Enabled = true,
-					MyAuras_Spacing = 2,
 					
-					MyAuras_Fontsize = 12,
-					MyAuras_Outline = "OUTLINE",
-					MyAuras_Textcolor = {1, 1, 1, 1},
-					MyAuras_EnableTextshadow = true,
-					MyAuras_TextShadowcolor = {0, 0, 0, 1},
+					Auras_Enabled = true,
+					Auras_Spacing = 2,
 					
-					MyAuras_ShowNumbers = true,
+					Auras_Buffs_Enabled = true,
+					Auras_Buffs_Fontsize = 12,
+					Auras_Buffs_Outline = "OUTLINE",
+					Auras_Buffs_Textcolor = {1, 1, 1, 1},
+					Auras_Buffs_EnableTextshadow = true,
+					Auras_Buffs_TextShadowcolor = {0, 0, 0, 1},
 					
-					MyAuras_Cooldown_Fontsize = 12,
-					MyAuras_Cooldown_Outline = "OUTLINE",
-					MyAuras_Cooldown_EnableTextshadow = false,
-					MyAuras_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					Auras_Buffs_ShowNumbers = true,
 					
-					MyAurasFiltering_Enabled = false,
-					MyAurasFiltering_Filterlist = {},
+					Auras_Buffs_Cooldown_Fontsize = 12,
+					Auras_Buffs_Cooldown_Outline = "OUTLINE",
+					Auras_Buffs_Cooldown_EnableTextshadow = false,
+					Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Buffs_OnlyShowMine = true,
+					Auras_Buffs_SpellIDFiltering_Enabled = false,
+					Auras_Buffs_SpellIDFiltering_Filterlist = {},
+					
+					Auras_Debuffs_Enabled = true,
+					Auras_Debuffs_Fontsize = 12,
+					Auras_Debuffs_Outline = "OUTLINE",
+					Auras_Debuffs_Textcolor = {1, 1, 1, 1},
+					Auras_Debuffs_EnableTextshadow = true,
+					Auras_Debuffs_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Debuffs_ShowNumbers = true,
+					
+					Auras_Debuffs_Cooldown_Fontsize = 12,
+					Auras_Debuffs_Cooldown_Outline = "OUTLINE",
+					Auras_Debuffs_Cooldown_EnableTextshadow = false,
+					Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Debuffs_OnlyShowMine = true,
+					Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
+					Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
+					Auras_Debuffs_SpellIDFiltering_Enabled = false,
+					Auras_Debuffs_SpellIDFiltering__Filterlist = {},
 
 					ObjectiveAndRespawn_ObjectiveEnabled = true,
 					ObjectiveAndRespawn_Width = 36,
@@ -2411,24 +2497,47 @@ do
 					DrTrackingFiltering_Enabled = false,
 					DrTrackingFiltering_Filterlist = {},
 					
-					MyAuras_Enabled = true,
-					MyAuras_Spacing = 2,
 					
-					MyAuras_Fontsize = 12,
-					MyAuras_Outline = "OUTLINE",
-					MyAuras_Textcolor = {1, 1, 1, 1},
-					MyAuras_EnableTextshadow = true,
-					MyAuras_TextShadowcolor = {0, 0, 0, 1},
+					Auras_Enabled = true,
+					Auras_Spacing = 2,
 					
-					MyAuras_ShowNumbers = true,
+					Auras_Buffs_Enabled = true,
+					Auras_Buffs_Fontsize = 12,
+					Auras_Buffs_Outline = "OUTLINE",
+					Auras_Buffs_Textcolor = {1, 1, 1, 1},
+					Auras_Buffs_EnableTextshadow = true,
+					Auras_Buffs_TextShadowcolor = {0, 0, 0, 1},
 					
-					MyAuras_Cooldown_Fontsize = 12,
-					MyAuras_Cooldown_Outline = "OUTLINE",
-					MyAuras_Cooldown_EnableTextshadow = false,
-					MyAuras_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					Auras_Buffs_ShowNumbers = true,
 					
-					MyAurasFiltering_Enabled = false,
-					MyAurasFiltering_Filterlist = {},
+					Auras_Buffs_Cooldown_Fontsize = 12,
+					Auras_Buffs_Cooldown_Outline = "OUTLINE",
+					Auras_Buffs_Cooldown_EnableTextshadow = false,
+					Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Buffs_OnlyShowMine = true,
+					Auras_Buffs_SpellIDFiltering_Enabled = false,
+					Auras_Buffs_SpellIDFiltering_Filterlist = {},
+					
+					Auras_Debuffs_Enabled = true,
+					Auras_Debuffs_Fontsize = 12,
+					Auras_Debuffs_Outline = "OUTLINE",
+					Auras_Debuffs_Textcolor = {1, 1, 1, 1},
+					Auras_Debuffs_EnableTextshadow = true,
+					Auras_Debuffs_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Debuffs_ShowNumbers = true,
+					
+					Auras_Debuffs_Cooldown_Fontsize = 12,
+					Auras_Debuffs_Cooldown_Outline = "OUTLINE",
+					Auras_Debuffs_Cooldown_EnableTextshadow = false,
+					Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
+					
+					Auras_Debuffs_OnlyShowMine = true,
+					Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
+					Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
+					Auras_Debuffs_SpellIDFiltering_Enabled = false,
+					Auras_Debuffs_SpellIDFiltering__Filterlist = {},
 					
 					Trinket_Enabled = true,
 					Trinket_Width = 28,
@@ -2468,6 +2577,7 @@ do
 		self.PlayerType = playerType
 		self.NumPlayers = false
 		
+		self.config = BattleGroundEnemies.db.profile[playerType]
 		
 		for funcName, func in pairs(MainFrameFunctions) do
 			self[funcName] = func
@@ -2483,8 +2593,6 @@ do
 		self.PlayerCount = MyCreateFontString(self)
 		self.PlayerCount:SetAllPoints()
 		self.PlayerCount:SetJustifyH("LEFT")
-		
-		self:ApplyMainFrameSettings()
 	end
 
 	
@@ -2496,7 +2604,6 @@ do
 		self.db.RegisterCallback(self, "OnProfileChanged", "ProfileChanged")
 		self.db.RegisterCallback(self, "OnProfileCopied", "ProfileChanged")
 		self.db.RegisterCallback(self, "OnProfileReset", "ProfileChanged")
-		
 		
 		CreateMainFrame("Allies")
 		CreateMainFrame("Enemies")
@@ -2559,7 +2666,6 @@ end
 function BattleGroundEnemies:ProfileChanged()
 	self.Enemies:ApplyAllSettings()
 	self.Allies:ApplyAllSettings()
-	self:EnableAlliesAndEnemies()
 end
 
 function BattleGroundEnemies:Debug(...)
@@ -2627,6 +2733,13 @@ function CombatLogevents.SPELL_AURA_APPLIED(self, srcName, destName, spellID, sp
 		if Data.PvPTalentsReducingInterruptTime[spellName] then
 			playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = true
 		end
+	end
+end
+
+function CombatLogevents.SPELL_AURA_APPLIED_DOSE(self, srcName, destName, spellID, spellName, auraType, amount)
+	local playerButton = self.Enemies.Players[destName] or self.Allies.Players[destName]
+	if playerButton then
+		playerButton:AuraApplied(spellID, spellName, srcName, auraType, amount)
 	end
 end
 
@@ -2995,29 +3108,18 @@ do
 			local _, _, _, _, numEnemies = GetBattlefieldTeamInfo(EnemyFaction)
 			local _, _, _, _, numAllies = GetBattlefieldTeamInfo(AllyFaction)
 			
+			self:BGSizeCheck(numEnemies)
+			
 			self.Enemies:UpdatePlayerCount(numEnemies)
 			self.Allies:UpdatePlayerCount(numAllies)
+			
+			
 			
 			
 			if InCombatLockdown() then return end
 			
 			
-			if numEnemies and numEnemies > 0 then
-				if numEnemies > 15 then
-					if not self.BGSize or self.BGSize ~= 40 then
-						self.BGSize = 40
-						self:ProfileChanged()
-					end
-				else
-					if not self.BGSize or self.BGSize ~= 15 then
-						self.BGSize = 15
-						self:ProfileChanged()
-					end
-				end
-				self:EnableAlliesAndEnemies()
-			else
-				return
-			end
+		
 			
 			
 			

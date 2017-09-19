@@ -109,6 +109,13 @@ Data.DrCategorys = {
 	stun = L.DR_Stun
 }
 
+Data.DebuffTypes = {
+	Magic = L.Magic,
+	Disease = L.Disease,
+	Poison = L.Poison,
+	Curse = L.Curse
+}
+
 
 
 

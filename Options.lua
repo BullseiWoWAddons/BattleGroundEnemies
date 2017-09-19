@@ -2,8 +2,58 @@ local addonName, Data = ...
 local GetAddOnMetadata = GetAddOnMetadata
 
 local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
+local AceConfig = LibStub("AceConfig-3.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0")
+
+
+						
+local function addStaticPopupForPlayerTypeConfigImport(playerType, oppositePlayerType)
+	StaticPopupDialogs["CONFIRM_OVERRITE_"..addonName..playerType] = {
+	  text = L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]),
+	  button1 = YES,
+	  button2 = NO,
+	  OnAccept = function (self) 
+			BattleGroundEnemies.db.profile[playerType] = copy(BattleGroundEnemies.db.profile[oppositePlayerType])
+			BattleGroundEnemies:ProfileChanged()
+			AceConfigRegistry:NotifyChange("BattleGroundEnemies")
+	  end,
+	  OnCancel = function (self) end,
+	  OnHide = function (self) self.data = nil; self.selectedIcon = nil; end,
+	  hideOnEscape = 1,
+	  timeout = 30,
+	  exclusive = 1,
+	  whileDead = 1,
+	}
+end
+addStaticPopupForPlayerTypeConfigImport("Enemies", "Allies")
+addStaticPopupForPlayerTypeConfigImport("Allies", "Enemies")
+
+
+local function addStaticPopupBGTypeConfigImport(playerType, oppositePlayerType, BGSize)
+	StaticPopupDialogs["CONFIRM_OVERRITE_"..addonName..playerType..BGSize] = {
+	  text = L.ConfirmProfileOverride:format(L[playerType]..": "..L["BGSize_"..BGSize], L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
+	  button1 = YES,
+	  button2 = NO,
+	  OnAccept = function (self) 
+			BattleGroundEnemies.db.profile[playerType][BGSize] = copy(BattleGroundEnemies.db.profile[oppositePlayerType][BGSize])
+			if BattleGroundEnemies.BGSize and BattleGroundEnemies.BGSize == tonumber(BGSize) then BattleGroundEnemies[playerType]:ApplyBGSizeSettings() end
+			AceConfigRegistry:NotifyChange("BattleGroundEnemies")
+	  end,
+	  OnCancel = function (self) end,
+	  OnHide = function (self) self.data = nil; self.selectedIcon = nil; end,
+	  hideOnEscape = 1,
+	  timeout = 30,
+	  exclusive = 1,
+	  whileDead = 1,
+	}
+end
+addStaticPopupBGTypeConfigImport("Enemies", "Allies", "15")
+addStaticPopupBGTypeConfigImport("Allies", "Enemies", "15")
+addStaticPopupBGTypeConfigImport("Enemies", "Allies", "40")
+addStaticPopupBGTypeConfigImport("Allies", "Enemies", "40")
 
 
 function copy(obj)
@@ -126,6 +176,7 @@ local function ApplySetting(option, value, LoopOverButtons, loopInButton1, loopI
 		UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
 	else
 		local playerType = option[1] == "EnemySettings" and "Enemies" or "Allies"
+		print(playerType, fixedsubtable, subtablename, func, ...)
 		CallInDeepness(BattleGroundEnemies[playerType], fixedsubtable, subtablename, subsubtablename, func, ...)
 	end
 end
@@ -174,13 +225,25 @@ local function applyMainfont(playerButton, value)
 	playerButton.Trinket.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Trinket_Cooldown_Fontsize, conf.Trinket_Cooldown_Outline)
 	playerButton.Racial.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Racial_Cooldown_Fontsize, conf.Racial_Cooldown_Outline)
 
-	for spellID, frame in pairs(playerButton.MyAuras) do
-		frame.Stacks:SetFont(LSM:Fetch("font", value), conf.MyAuras_Fontsize, conf.MyAuras_Outline)
-		frame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.MyAuras_Cooldown_Fontsize, conf.MyAuras_Cooldown_Outline)
+	for spellID, auraFrame in pairs(playerButton.Auras) do
+		local conf = playerButton.bgSizeConfig
+		if auraFrame.IsDebuff then
+			auraFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Debuffs_Fontsize, Auras_Debuffs_Outline)
+			auraFrame.Cooldown:SetFont(LSM:Fetch("font", value), conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline)
+		else
+			auraFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline)
+			auraFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline)
+		end
 	end
-	for spellID, frame in pairs(playerButton.InactiveAuras) do
-		frame.Stacks:SetFont(LSM:Fetch("font", value), conf.MyAuras_Fontsize, conf.MyAuras_Outline)
-		frame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.MyAuras_Cooldown_Fontsize, conf.MyAuras_Cooldown_Outline)
+	for spellID, auraFrame in pairs(playerButton.InactiveAuras) do
+		local conf = playerButton.bgSizeConfig
+		if auraFrame.IsDebuff then
+			auraFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Debuffs_Fontsize, Auras_Debuffs_Outline)
+			auraFrame.Cooldown:SetFont(LSM:Fetch("font", value), conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline)
+		else
+			auraFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline)
+			auraFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline)
+		end
 	end
 	for drCat, drFrame in pairs(playerButton.DR) do
 		drFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline)
@@ -194,16 +257,16 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 	local enableTextShadow = optionname.."_EnableTextshadow"
 	local textShadowcolor = optionname.."_TextShadowcolor"
 	
-	local conf = BattleGroundEnemies.db.profile[playerType][BGSize]
+	local conf = BattleGroundEnemies.db.profile
 	
 	local options = {
 		[fontsize] = {
 			type = "range",
 			name = L.Fontsize,
 			desc = L[fontsize.."_Desc"],
-			disabled = function() return maindisable and not conf[maindisable] end,
+			disabled = function() return maindisable and not conf[playerType][BGSize][maindisable] end,
 			set = function(option, value)
-				ApplySetting(option, value, LoopOverButtons, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, conf[outline])
+				ApplySetting(option, value, LoopOverButtons, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, conf[playerType][BGSize][outline])
 			end,
 			min = 1,
 			max = 40,
@@ -215,9 +278,9 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			type = "select",
 			name = L.Font_Outline,
 			desc = L.Font_Outline_Desc,
-			disabled = function() return maindisable and not conf[maindisable] end,
+			disabled = function() return maindisable and not conf[playerType][BGSize][maindisable] end,
 			set = function(option, value)
-				ApplySetting(option, value, LoopOverButtons, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), conf[fontsize], value)
+				ApplySetting(option, value, LoopOverButtons, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), conf[playerType][BGSize][fontsize], value)
 			end,
 			values = Data.FontOutlines,
 			order = 2
@@ -227,7 +290,7 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			type = "color",
 			name = L.Fontcolor,
 			desc = L[textcolor.."_Desc"],
-			disabled = function() return maindisable and not conf[maindisable] end,
+			disabled = function() return maindisable and not conf[playerType][BGSize][maindisable] end,
 			set = function(option, ...)
 				local color = {...}
 				ApplySetting(option, color, LoopOverButtons, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetTextColor", ...)
@@ -240,7 +303,7 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			type = "toggle",
 			name = L.FontShadow_Enabled,
 			desc = L.FontShadow_Enabled_Desc,
-			disabled = function() return maindisable and not conf[maindisable] end,
+			disabled = function() return maindisable and not conf[playerType][BGSize][maindisable] end,
 			set = function(option, value)
 				ApplySetting(option, value, LoopOverButtons, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "EnableShadowColor", value)
 			end,
@@ -250,7 +313,7 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			type = "color",
 			name = L.FontShadowColor,
 			desc = L.FontShadowColor_Desc,
-			disabled = function() return maindisable and not conf[maindisable] or not conf[enableTextShadow] end,
+			disabled = function() return maindisable and not conf[playerType][BGSize][maindisable] or not conf[playerType][BGSize][enableTextShadow] end,
 			set = function(option, ...)
 				local color = {...}
 				ApplySetting(option, color, LoopOverButtons, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetShadowColor", ...)
@@ -273,7 +336,7 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 	
 	local mainconfig = BattleGroundEnemies.db.profile
 	
-	local conf = BattleGroundEnemies.db.profile[playerType][BGSize]
+	local conf = BattleGroundEnemies.db.profile
 
 	local options = {
 		[showNumbers] = {
@@ -289,7 +352,7 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 			type = "group",
 			name = "",
 			desc = "",
-			disabled = function() return maindisable and not conf[maindisable] or not conf[showNumbers] end, 
+			disabled = function() return maindisable and not conf[playerType][BGSize][maindisable] or not conf[playerType][BGSize][showNumbers] end, 
 			inline = true,
 			order = 2,
 			args = {
@@ -298,7 +361,7 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 					name = L.Fontsize,
 					desc = L[fontsize.."_Desc"],
 					set = function(option, value)
-						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", mainconfig.Font), value, conf[outline])
+						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", mainconfig.Font), value, conf[playerType][BGSize][outline])
 					end,
 					min = 6,
 					max = 40,
@@ -311,7 +374,7 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 					name = L.Font_Outline,
 					desc = L.Font_Outline_Desc,
 					set = function(option, value)
-						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", mainconfig.Font), conf[fontsize], value)
+						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", mainconfig.Font), conf[playerType][BGSize][fontsize], value)
 					end,
 					values = Data.FontOutlines,
 					order = 4
@@ -322,7 +385,7 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 					name = L.FontShadow_Enabled,
 					desc = L.FontShadow_Enabled_Desc,
 					set = function(option, value)
-						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", value, conf[textShadowcolor])
+						UpdateButtons(option, value, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", value, conf[playerType][BGSize][textShadowcolor])
 					end,
 					order = 6
 				},
@@ -330,10 +393,10 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 					type = "color",
 					name = L.FontShadowColor,
 					desc = L.FontShadowColor_Desc,
-					disabled = function() return maindisable and not conf[maindisable] or not conf[showNumbers] or not conf[enableTextShadow] end, 
+					disabled = function() return maindisable and not conf[playerType][BGSize][maindisable] or not conf[playerType][BGSize][showNumbers] or not conf[playerType][BGSize][enableTextShadow] end, 
 					set = function(option, ...)
 						local color = {...}
-						UpdateButtons(option, color, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", conf[enableTextShadow], color)
+						UpdateButtons(option, color, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", conf[playerType][BGSize][enableTextShadow], color)
 					end,
 					hasAlpha = true,
 					order = 7
@@ -381,11 +444,10 @@ local function addEnemyAndAllySettings(self)
 			CopySettings = {
 				type = "execute",
 				name = L.CopySettings:format(oppositePlayerType),
-				desc = L.CopySettings_Desc:format(oppositePlayerType),
+				desc = L.CopySettings_Desc:format(oppositePlayerType)..L.NotAvailableInCombat,
+				disabled = InCombatLockdown,
 				func = function()
-					--print(playerType, oppositePlayerType)
-					BattleGroundEnemies.db.profile[playerType] = copy(BattleGroundEnemies.db.profile[oppositePlayerType])
-					BattleGroundEnemies:ProfileChanged()
+					StaticPopup_Show("CONFIRM_OVERRITE_"..addonName..playerType)
 				end,
 				order = 5
 			},
@@ -473,7 +535,7 @@ local function addEnemyAndAllySettings(self)
 			KeybindSettings = {
 				type = "group",
 				name = KEY_BINDINGS,
-				desc = L.KeybindSettings_Desc,
+				desc = L.KeybindSettings_Desc..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
 				set = function(option, value) 
 					UpdateButtons(option, value, nil, nil, nil, nil, nil, "SetBindings")
@@ -558,10 +620,7 @@ local function addEnemyAndAllySettings(self)
 					name = L.CopySettings:format(oppositePlayerType..": "..L["BGSize_"..BGSize]),
 					desc = L.CopySettings_Desc:format(oppositePlayerType..": "..L["BGSize_"..BGSize]),
 					func = function()
-						--print(playerType, oppositePlayerType)
-						BattleGroundEnemies.db.profile[playerType][BGSize] = copy(BattleGroundEnemies.db.profile[oppositePlayerType][BGSize])
-						if BattleGroundEnemies.BGSize and BattleGroundEnemies.BGSize == tonumber(BGSize) then BattleGroundEnemies:ProfileChanged() end
-						
+						StaticPopup_Show("CONFIRM_OVERRITE_"..addonName..playerType..BGSize)
 					end,
 					width = "double",
 					order = 3
@@ -577,7 +636,7 @@ local function addEnemyAndAllySettings(self)
 						Framescale = {
 							type = "range",
 							name = L.Framescale,
-							desc = L.Framescale_Desc,
+							desc = L.Framescale_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							set = function(option, value)
 								setOption(option, value)
@@ -631,7 +690,7 @@ local function addEnemyAndAllySettings(self)
 						BarWidth = {
 							type = "range",
 							name = L.Width,
-							desc = L.BarWidth_Desc,
+							desc = L.BarWidth_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							set = function(option, value)
 								if BattleGroundEnemies.BGSize and BattleGroundEnemies.BGSize == tonumber(BGSize) then self:SetWidth(value) end
@@ -645,7 +704,7 @@ local function addEnemyAndAllySettings(self)
 						BarHeight = {
 							type = "range",
 							name = L.Height,
-							desc = L.BarHeight_Desc,
+							desc = L.BarHeight_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							set = function(option, value) 
 								UpdateButtons(option, value, nil, nil, nil, nil, nil, "SetHeight", value)
@@ -658,7 +717,8 @@ local function addEnemyAndAllySettings(self)
 						BarVerticalGrowdirection = {
 							type = "select",
 							name = L.VerticalGrowdirection,
-							desc = L.VerticalGrowdirection_Desc,
+							desc = L.VerticalGrowdirection_Desc..L.NotAvailableInCombat,
+							disabled = InCombatLockdown,
 							set = function(option, value) 
 								setOption(option, value)
 								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
@@ -671,8 +731,9 @@ local function addEnemyAndAllySettings(self)
 						},
 						BarVerticalSpacing = {
 							type = "range",
-							name = L.SpaceBetweenRows,
-							desc = L.SpaceBetweenRows_Desc,
+							name = L.VerticalSpacing,
+							desc = L.VerticalSpacing..L.NotAvailableInCombat,
+							disabled = InCombatLockdown,
 							set = function(option, value) 
 								setOption(option, value)
 								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
@@ -687,6 +748,8 @@ local function addEnemyAndAllySettings(self)
 						BarColumns = {
 							type = "range",
 							name = L.Columns,
+							desc = L.Columns_Desc..L.NotAvailableInCombat,
+							disabled = InCombatLockdown,
 							set = function(option, value) 
 								setOption(option, value)
 								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
@@ -701,8 +764,9 @@ local function addEnemyAndAllySettings(self)
 						BarHorizontalGrowdirection = {
 							type = "select",
 							name = L.VerticalGrowdirection,
-							desc = L.VerticalGrowdirection_Desc,
+							desc = L.VerticalGrowdirection_Desc..L.NotAvailableInCombat,
 							hidden = function() return not self.config[BGSize].Enabled or self.config[BGSize].BarColumns < 2 end,
+							disabled = InCombatLockdown,
 							set = function(option, value) 
 								setOption(option, value)
 								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
@@ -715,9 +779,10 @@ local function addEnemyAndAllySettings(self)
 						},
 						BarHorizontalSpacing = {
 							type = "range",
-							name = L.SpaceBetweenRows,
-							desc = L.SpaceBetweenRows_Desc,
+							name = L.HorizontalSpacing,
+							desc = L.HorizontalSpacing..L.NotAvailableInCombat,
 							hidden = function() return not self.config[BGSize].Enabled or self.config[BGSize].BarColumns < 2 end,
+							disabled = InCombatLockdown,
 							set = function(option, value) 
 								setOption(option, value)
 								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
@@ -1143,7 +1208,7 @@ local function addEnemyAndAllySettings(self)
 											type = "multiselect",
 											name = L.Filtering_Filterlist,
 											desc = L.DrTrackingFiltering_Filterlist_Desc,
-											disabled = function() return not self.config[BGSize].DrTrackingFiltering_Enabled or not self.config[BGSize].DrTracking_Enabled end,
+											disabled = function() return not (self.config[BGSize].DrTrackingFiltering_Enabled and self.config[BGSize].DrTracking_Enabled) end,
 											get = function(option, key)
 												return self.config[BGSize].DrTrackingFiltering_Filterlist[key]
 											end,
@@ -1157,23 +1222,23 @@ local function addEnemyAndAllySettings(self)
 								}
 							}
 						},
-						MyAurasSettings = {
+						AurasSettings = {
 							type = "group",
-							name = L.MyAurasSettings,
-							desc = L.MyAurasSettings_Desc,
+							name = L.AurasSettings,
+							desc = L.AurasSettings_Desc,
 							order = 13,
 							args = {
-								MyAuras_Enabled = {
+								Auras_Enabled = {
 									type = "toggle",
-									name = L.MyAuras_Enabled,
-									desc = L.MyAuras_Enabled_Desc,
+									name = L.Auras_Enabled,
+									desc = L.Auras_Enabled_Desc,
 									order = 1
 								},
-								MyAuras_Spacing = {
+								Auras_Spacing = {
 									type = "range",
-									name = L.MyAuras_Spacing,
-									desc = L.MyAuras_Spacing_Desc,
-									disabled = function() return not self.config[BGSize].MyAuras_Enabled end,
+									name = L.Auras_Spacing,
+									desc = L.Auras_Spacing_Desc,
+									disabled = function() return not self.config[BGSize].Auras_Enabled end,
 									set = function(option, value)
 										UpdateButtons(option, value, nil, nil, nil, nil, nil, "AuraPositioning")
 									end,
@@ -1182,77 +1247,228 @@ local function addEnemyAndAllySettings(self)
 									step = 1,
 									order = 2
 								},
-								Fake = addVerticalSpacing(3),
-								MyAurasStacktextSettings = {
+								Auras_BuffsSettings = {
 									type = "group",
-									name = L.MyAurasStacktextSettings,
-									--desc = L.MyAuraSettings_Desc,
-									disabled = function() return not self.config[BGSize].MyAuras_Enabled end,
-									inline = true,
-									order = 4,
-									args = addNormalTextSettings(playerType, BGSize, "MyAuras", "MyAuras_Enabled", true, "MyAuras", "InactiveAuras", "Stacks")
-								},
-								MyAurasCooldownTextSettings = {
-									type = "group",
-									name = L.Countdowntext,
-									--desc = L.TrinketSettings_Desc,
-									disabled = function() return not self.config[BGSize].MyAuras_Enabled end,
-									inline = false,
-									order = 5,
-									args = addCooldownTextsettings(playerType, BGSize, "MyAuras", "MyAuras_Enabled", "MyAuras", "InactiveAuras")
-								},
-								MyAurasFilteringSettings = {
-									type = "group",
-									name = FILTER,
-									desc = L.MyAurasFilteringSettings_Desc,
-									disabled = function() return not self.config[BGSize].MyAuras_Enabled end,
-									--inline = true,
-									order = 6,
+									name = L.Buffs,
+									disabled = function() return not self.config[BGSize].Auras_Enabled end,
+									order = 3,
 									args = {
-										MyAurasFiltering_Enabled = {
+										Auras_Buffs_Enabled = {
 											type = "toggle",
-											name = L.Filtering_Enabled,
-											desc = L.MyAurasFiltering_Enabled_Desc,
-											disabled = function() return not self.config[BGSize].MyAuras_Enabled end,
-											width = 'normal',
+											name = ENABLE,
+											desc = SHOW_BUFFS,
 											order = 1
 										},
-										MyAurasFiltering_AddSpellID = {
-											type = "input",
-											name = L.MyAurasFiltering_AddSpellID,
-											desc = L.MyAurasFiltering_AddSpellID_Desc,
-											disabled = function() return not self.config[BGSize].MyAurasFiltering_Enabled or not self.config[BGSize].MyAuras_Enabled end,
-											get = function() return "" end,
-											set = function(option, value, state)
-												local spellIDs = {strsplit(",", value)}
-												for i = 1, #spellIDs do
-													local spellID = tonumber(spellIDs[i])
-													self.config[BGSize].MyAurasFiltering_Filterlist[spellID] = true
-												end
-											end,
-											width = 'double',
-											order = 2
+										Auras_Buffs_StacktextSettings = {
+											type = "group",
+											name = L.AurasStacktextSettings,
+											--desc = L.MyAuraSettings_Desc,
+											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
+											inline = true,
+											order = 2,
+											args = addNormalTextSettings(playerType, BGSize, "Auras", "Auras_Buffs_Enabled", true, "Auras", "InactiveAuras", "Stacks")
 										},
-										Fake = addVerticalSpacing(3),
-										MyAurasFiltering_Filterlist = {
-											type = "multiselect",
-											name = L.Filtering_Filterlist,
-											desc = L.MyAurasFiltering_Filterlist_Desc,
-											disabled = function() return not self.config[BGSize].MyAurasFiltering_Enabled or not self.config[BGSize].MyAuras_Enabled end,
-											get = function()
-												return true --to make it checked
-											end,
-											set = function(option, value) 
-												self.config[BGSize].MyAurasFiltering_Filterlist[value] = nil
-											end,
-											values = function()
-												local valueTable = {}
-												for spellID in pairs(self.config[BGSize].MyAurasFiltering_Filterlist) do
-													valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
-												end
-												return valueTable
-											end,
-											order = 4
+										Auras_Buffs_CooldownTextSettings = {
+											type = "group",
+											name = L.Countdowntext,
+											--desc = L.TrinketSettings_Desc,
+											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
+											inline = false,
+											order = 3,
+											args = addCooldownTextsettings(playerType, BGSize, "Auras", "Auras_Buffs_Enabled", "Auras", "InactiveAuras")
+										},
+										Auras_Buffs_FilteringSettings = {
+											type = "group",
+											name = FILTER,
+											desc = L.AurasFilteringSettings_Desc,
+											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
+											--inline = true,
+											order = 4,
+											args = {
+												Auras_Buffs_Filtering_Enabled = {
+													type = "toggle",
+													name = L.Filtering_Enabled,
+													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
+													width = 'normal',
+													order = 1
+												},
+												Fake = addVerticalSpacing(2),
+												Auras_Buffs_OnlyShowMine = {
+													type = "toggle",
+													name = L.OnlyShowMine,
+													desc = L.OnlyShowMine_Desc:format(L.Buffs),
+													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled and conf.Auras_Buffs_Filtering_Enabled) end,
+													order = 3,
+												},
+												Fake1 = addVerticalSpacing(4),
+												Auras_Buffs_SpellIDFiltering_Enabled = {
+													type = "toggle",
+													name = L.SpellID_Filtering,
+													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled and conf.Auras_Buffs_Filtering_Enabled) end,
+													order = 5
+												},
+												Fake2 = addVerticalSpacing(6),
+												Auras_Buffs_SpellIDFiltering__AddSpellID = {
+													type = "input",
+													name = L.AurasFiltering_AddSpellID,
+													desc = L.AurasFiltering_AddSpellID_Desc,
+													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled and conf.Auras_Buffs_Filtering_Enabled and conf.Auras_Buffs_SpellIDFiltering_Enabled) end,
+													get = function() return "" end,
+													set = function(option, value, state)
+														local spellIDs = {strsplit(",", value)}
+														for i = 1, #spellIDs do
+															local spellID = tonumber(spellIDs[i])
+															self.config[BGSize].Auras_Buffs_SpellIDFiltering__Filterlist[spellID] = true
+														end
+													end,
+													width = 'double',
+													order = 7
+												},
+												Fake3 = addVerticalSpacing(8),
+												Auras_Buffs_SpellIDFiltering__Filterlist = {
+													type = "multiselect",
+													name = L.Filtering_Filterlist,
+													desc = L.AurasFiltering_Filterlist_Desc:format(L.buff),
+													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled and conf.Auras_Buffs_Filtering_Enabled and conf.Auras_Buffs_SpellIDFiltering_Enabled) end,
+													get = function()
+														return true --to make it checked
+													end,
+													set = function(option, value) 
+														self.config[BGSize].Auras_Buffs_SpellIDFiltering__Filterlist[value] = nil
+													end,
+													values = function()
+														local valueTable = {}
+														for spellID in pairs(self.config[BGSize].Auras_Buffs_SpellIDFiltering__Filterlist) do
+															valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
+														end
+														return valueTable
+													end,
+													order = 9
+												}
+											}
+										}
+									}
+								},
+								Auras_DebuffsSettings = {
+									type = "group",
+									name = L.Debuffs,
+									disabled = function() return not self.config[BGSize].Auras_Enabled end,
+									order = 4,
+									args = {
+										Auras_Debuffs_Enabled = {
+											type = "toggle",
+											name = ENABLE,
+											desc = SHOW_DEBUFFS,
+											order = 1
+										},
+										Auras_Debuffs_StacktextSettings = {
+											type = "group",
+											name = L.AurasStacktextSettings,
+											--desc = L.MyAuraSettings_Desc,
+											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
+											inline = true,
+											order = 2,
+											args = addNormalTextSettings(playerType, BGSize, "Auras", "Auras_Debuffs_Enabled", true, "Auras", "InactiveAuras", "Stacks")
+										},
+										Auras_Debuffs_CooldownTextSettings = {
+											type = "group",
+											name = L.Countdowntext,
+											--desc = L.TrinketSettings_Desc,
+											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
+											inline = false,
+											order = 3,
+											args = addCooldownTextsettings(playerType, BGSize, "Auras", "Auras_Debuffs_Enabled", "Auras", "InactiveAuras")
+										},
+										Auras_Debuffs_FilteringSettings = {
+											type = "group",
+											name = FILTER,
+											desc = L.AurasFilteringSettings_Desc,
+											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
+											order = 4,
+											args = {
+												Auras_Debuffs_Filtering_Enabled = {
+													type = "toggle",
+													name = L.Filtering_Enabled,
+													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
+													width = 'normal',
+													order = 1
+												},
+												Fake = addVerticalSpacing(2),
+												Auras_Debuffs_OnlyShowMine = {
+													type = "toggle",
+													name = L.OnlyShowMine,
+													desc = L.OnlyShowMine_Desc:format(L.Debuffs),
+													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled) end,
+													order = 3,
+												},
+												Fake1 = addVerticalSpacing(4),
+												Auras_Debuffs_DebuffTypeFiltering_Enabled = {
+													type = "toggle",
+													name = L.DebuffType_Filtering,
+													desc = L.DebuffType_Filtering_Desc,
+													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled) end,
+													width = 'normal',
+													order = 5
+												},
+												Auras_Debuffs_DebuffTypeFiltering_Filterlist = {
+													type = "multiselect",
+													name = "",
+													desc = "",
+													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled and conf.Auras_Debuffs_DebuffTypeFiltering_Enabled) end,
+													get = function(option, key)
+														return self.config[BGSize].Auras_Debuffs_DebuffTypeFiltering_Filterlist[key]
+													end,
+													set = function(option, key, state) -- value = spellname
+														self.config[BGSize].Auras_Debuffs_DebuffTypeFiltering_Filterlist[key] = state
+													end,
+													width = 'normal',
+													values = Data.DebuffTypes,
+													order = 6
+												},
+												Auras_Debuffs_SpellIDFiltering_Enabled = {
+													type = "toggle",
+													name = L.SpellID_Filtering,
+													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled) end,
+													order = 7
+												},
+												Auras_Debuffs_SpellIDFiltering__AddSpellID = {
+													type = "input",
+													name = L.AurasFiltering_AddSpellID,
+													desc = L.AurasFiltering_AddSpellID_Desc,
+													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled and conf.Auras_Debuffs_SpellIDFiltering_Enabled) end,
+													get = function() return "" end,
+													set = function(option, value, state)
+														local spellIDs = {strsplit(",", value)}
+														for i = 1, #spellIDs do
+															local spellID = tonumber(spellIDs[i])
+															self.config[BGSize].Auras_Debuffs_SpellIDFiltering__Filterlist[spellID] = true
+														end
+													end,
+													width = 'double',
+													order = 8
+												},
+												Fake2 = addVerticalSpacing(9),
+												Auras_Debuffs_SpellIDFiltering__Filterlist = {
+													type = "multiselect",
+													name = L.Filtering_Filterlist,
+													desc = L.AurasFiltering_Filterlist_Desc:format(L.debuff),
+													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled and conf.Auras_Debuffs_SpellIDFiltering_Enabled) end,
+													get = function()
+														return true --to make it checked
+													end,
+													set = function(option, value) 
+														self.config[BGSize].Auras_Debuffs_SpellIDFiltering__Filterlist[value] = nil
+													end,
+													values = function()
+														local valueTable = {}
+														for spellID in pairs(self.config[BGSize].Auras_Debuffs_SpellIDFiltering__Filterlist) do
+															valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
+														end
+														return valueTable
+													end,
+													order = 10
+												}
+											}
 										}
 									}
 								}
@@ -1345,7 +1561,7 @@ local function addEnemyAndAllySettings(self)
 			Notifications_Enabled = {
 				type = "toggle",
 				name = L.Notifications_Enabled,
-				desc = L.Notifications_Enabled_Desc:format(playerType == "Enemies" and "enemies" or "allies"),
+				desc = L["Notifications_"..playerType.."_Enabled_Desc"],
 				--inline = true,
 				order = 1
 			},
@@ -1415,9 +1631,7 @@ function BattleGroundEnemies:SetupOptions()
 						order = 1,
 						get = function() return self.BGSize end,
 						set = function(option, value)
-							self.BGSize = value
-							self:EnableAlliesAndEnemies()
-							self:ProfileChanged()
+							self:BGSizeCheck(value)
 							
 							if self.TestmodeActive then
 								self:FillData()
@@ -1535,10 +1749,8 @@ function BattleGroundEnemies:SetupOptions()
 			}
 		}
 	}
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("BattleGroundEnemies", self.options)
-	
-	local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-	
+	AceConfigRegistry:RegisterOptionsTable("BattleGroundEnemies", self.options)
+		
 	AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 709, 532)
 	
 	--profiles
@@ -1551,5 +1763,5 @@ end
 
 SLASH_BattleGroundEnemies1, SLASH_BattleGroundEnemies2, SLASH_BattleGroundEnemies3 = "/BattleGroundEnemies", "/bge", "/BattleGroundEnemies"
 SlashCmdList["BattleGroundEnemies"] = function(msg)
-	LibStub("AceConfigDialog-3.0"):Open("BattleGroundEnemies")
+	AceConfigDialog:Open("BattleGroundEnemies")
 end
