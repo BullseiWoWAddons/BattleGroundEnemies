@@ -1,8 +1,11 @@
 local addonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 
+local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
 local LibRaces = LibStub("LibRaces-1.0")
 local LibPlayerSpells = LibStub("LibPlayerSpells-1.0")
+
+local PlayerLevel = UnitLevel("player")
 
 
 local mathrandom = math.random
@@ -64,13 +67,14 @@ do
 			local randomSpec = Data.RolesToSpec[role][mathrandom(1, #Data.RolesToSpec[role])]
 			local classTag = randomSpec.classTag
 			local specName = randomSpec.specName
-			local name = playerType..counter.."-Realm"..counter
+			local name = L[playerType]..counter.."-Realm"..counter
 			fakePlayers[name] = {
 				PlayerClass = classTag,
 				PlayerName = name,
 				PlayerSpecName = specName,
 				PlayerSpecID = randomSpec.specID,
-				PlayerClassColor = RAID_CLASS_COLORS[classTag]
+				PlayerClassColor = RAID_CLASS_COLORS[classTag],
+				PlayerLevel = mathrandom(PlayerLevel - 5, PlayerLevel)
 			}
 			counter = counter + 1
 		end
@@ -82,28 +86,28 @@ do
 		
 			playerType:RemoveAllPlayers()
 			
-			if playerType.config.Enabled and playerType.bgSizeConfig.Enabled then
+		
 			
-				playerType:UpdatePlayerCount(self.BGSize)
-				
-				
-				
-				local healerAmount = mathrandom(1, 3)
-				local tankAmount = mathrandom(1, 2)
-				local damagerAmount = self.BGSize - healerAmount - tankAmount
-				
-				
-				counter = 1
-				BattleGroundEnemies:FillFakePlayerData(healerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "HEALER")
-				BattleGroundEnemies:FillFakePlayerData(tankAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "TANK")
-				BattleGroundEnemies:FillFakePlayerData(damagerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "DAMAGER")
-				
-				for name, enemyDetails in pairs(fakePlayers) do
-					playerType:SetupButtonForNewPlayer(enemyDetails)
-				end
-				playerType:Show()
-				playerType:SortPlayers()
+			playerType:UpdatePlayerCount(self.BGSize)
+			
+			
+			
+			local healerAmount = mathrandom(1, 3)
+			local tankAmount = mathrandom(1, 2)
+			local damagerAmount = self.BGSize - healerAmount - tankAmount
+			
+			
+			counter = 1
+			BattleGroundEnemies:FillFakePlayerData(healerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "HEALER")
+			BattleGroundEnemies:FillFakePlayerData(tankAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "TANK")
+			BattleGroundEnemies:FillFakePlayerData(damagerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "DAMAGER")
+			
+			for name, enemyDetails in pairs(fakePlayers) do
+				playerType:SetupButtonForNewPlayer(enemyDetails)
 			end
+			playerType:Show()
+			playerType:SortPlayers()
+			
 		end
 	end
 
@@ -233,13 +237,11 @@ do
 							elseif number == 5 then --player got one of the players debuff's applied
 								--self:Debug("Nummber5")
 								local auraType, spellID
-								if playerButton.PlayerType == "Enemies" then
-									auraType = "DEBUFF"
-									spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
-								else --"Allies"
-									auraType = "BUFF"
-									spellID = helpfulPlayerSpells[mathrandom(1, #helpfulPlayerSpells)]
-								end
+								auraType = "DEBUFF"
+								spellID = harmfulPlayerSpells[mathrandom(1, #harmfulPlayerSpells)]
+								playerButton:AuraApplied(spellID, (GetSpellInfo(spellID)), UnitName("player"), auraType)
+								auraType = "BUFF"
+								spellID = helpfulPlayerSpells[mathrandom(1, #helpfulPlayerSpells)]
 								playerButton:AuraApplied(spellID, (GetSpellInfo(spellID)), UnitName("player"), auraType)
 							elseif number == 6 then --power simulation
 								local power = mathrandom(0, 100)
@@ -264,7 +266,7 @@ do
 					end
 					if number == 6 then --toggle range
 						if playerType.config.RangeIndicator_Enabled then
-							playerButton:UpdateRange((playerButton.RangeIndicator_Frame:GetAlpha() ~= 1) and true or false)
+							playerButton:UpdateRange((playerButton.RangeIndicator:GetAlpha() ~= 1) and true or false)
 						end
 					end
 				end

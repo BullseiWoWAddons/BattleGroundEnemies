@@ -93,9 +93,10 @@ Data.Buttons = {
 Data.ObjectiveAndRespawnPosition = {
 	Left = L.Left,
 	Right = L.Right,
+	LeftToTargetCounter = L.LeftToTargetCounter
 }
 
-Data.DrTrackingDisplayType = {
+Data.DisplayType = {
 	Frame = L.Frame,
 	Countdowntext = L.Countdowntext,
 }
@@ -114,6 +115,24 @@ Data.DebuffTypes = {
 	Disease = L.Disease,
 	Poison = L.Poison,
 	Curse = L.Curse
+}
+Data.RandomDebuffType =  {} -- for testmode
+
+do
+	local i = 1
+	for engName, color in pairs(DebuffTypeColor) do
+		Data.RandomDebuffType[i] = engName
+		i = i + 1
+	end
+end
+
+
+Data.RangeIndicator_Frames = {
+	ObjectiveAndRespawn = L.ObjectiveAndRespawnSettings,
+	Racial = L.RacialSettings,
+	Trinket = L.TrinketSettings,
+	Power = L.HealthBarSettings.." "..L.AND.." "..L.PowerBarSettings,
+	Spec = L.SpecSettings
 }
 
 

@@ -53,6 +53,7 @@ local UnitHealthMax = UnitHealthMax
 local UnitIsDead = UnitIsDead
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsGhost = UnitIsGhost
+local UnitLevel = UnitLevel
 local UnitName = UnitName
 
 
@@ -63,13 +64,13 @@ local IsRatedBG
 local playerFaction = UnitFactionGroup("player")
 local PlayerDetails = {}
 local PlayerButton
+local PlayerLevel = UnitLevel("player")
+local MaxLevel = GetMaxPlayerLevel()
 local CurrentMapID --contains the map id of the current active battleground
 local EnemyFaction 
 local AllyFaction
 
-
-
-
+local DebuffTypeColor = DebuffTypeColor
 
 
 local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies", UIParent)
@@ -198,7 +199,7 @@ do
 			if BattleGroundEnemies.PlayerIsAlive then
 				for name, allyButton in pairs(self.Players) do
 					if allyButton ~= PlayerButton then
-					--print(IsItemInRange(self.config.RangeIndicator_Range, allyButton.unit), self.config.RangeIndicator_Range, allyButton.unit)
+					--BattleGroundEnemies:Debug(IsItemInRange(self.config.RangeIndicator_Range, allyButton.unit), self.config.RangeIndicator_Range, allyButton.unit)
 						allyButton:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, allyButton.unit))
 					end
 				end
@@ -254,13 +255,20 @@ function BattleGroundEnemies.Allies:GROUP_ROSTER_UPDATE()
 								targetEnemyButton.UnitIDs.Ally = targetUnitID
 							end
 						end
+						
+						allyButton:SetLevel(UnitLevel(unit))
 						allyButton.unit = unit
-						allyButton:SetAttribute('unit', unit)
+						if not InCombatLockdown() then
+							allyButton:SetAttribute('unit', unit)
+						else
+							C_Timer.After(1, self.GROUP_ROSTER_UPDATE)
+						end
 						
 						allyButton.TargetUnitID = targetUnitID
 						self.UnitIDToAllyButton[unit] = allyButton
 						allyButton:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", unit) --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 						allyButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", unit) --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
+						allyButton:RegisterUnitEvent("UNIT_AURA", unit)
 					end
 				end
 			else
@@ -287,12 +295,6 @@ local function EnableShadowColor(fontString, enableShadow, shadowColor)
 	else
 		fontString:SetShadowOffset(0, 0)
 	end
-end
-local function MyCreateFrame(frameType, parent, tablepoint1, tablepoint2)
-	local frame = CreateFrame(frameType, nil, parent)
-	if tablepoint1 then frame:SetPoint(unpack(tablepoint1)) end
-	if tablepoint2 then frame:SetPoint(unpack(tablepoint2)) end
-	return frame 
 end
 
 local function CropImage(texture, width, height)
@@ -349,14 +351,6 @@ local function MyCreateCooldown(parent)
 	return cooldown
 end
 	
-local function SetBackdrop(frame, backdropColor)
-	frame:SetBackdrop({
-		bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-		edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-		edgeSize = 1
-		})
-	return frame
-end
 
 function BattleGroundEnemies:BGSizeChanged(newBGSize)
 	self.BGSize = newBGSize
@@ -407,6 +401,7 @@ do
 		if unitIDs.CheckIfUnitExists and not UnitExists(unitIDs.Active) then return end
 		self:UpdateHealth(unitIDs.Active)
 		self:UpdatePower(unitIDs.Active)
+		self:SetLevel(UnitLevel(unitIDs.Active))
 	end
 	
 	function enemyButtonFunctions:FetchAnAllyUnitID()
@@ -503,6 +498,112 @@ do
 	
 end
 
+local DrContainerFrameFunctions = {}
+
+function DrContainerFrameFunctions:SetWidthOfAuraFrames(height)
+	local borderThickness = self.bgSizeConfig.DrTracking_Container_BorderThickness
+	for drCategorie, drFrame in pairs(self.DR) do
+		drFrame:SetWidth(height - borderThickness * 2)
+	end
+end
+
+function DrContainerFrameFunctions:DrPositioning()
+	local config = self.bgSizeConfig
+	local spacing = config.Auras_Spacing
+	local borderThickness = config.DrTracking_Container_BorderThickness
+	local barHeight = config.BarHeight
+	local anchor = self
+	local totalWidth = 0
+	self:Show()
+	for categorie, drFrame in pairs(self.DR) do
+		if drFrame:IsShown() then
+			if totalWidth == 0 then
+				drFrame:SetPoint("TOPRIGHT", anchor, "TOPRIGHT", -borderThickness, -borderThickness)
+				drFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -borderThickness, borderThickness)
+			else
+				drFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
+				drFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
+			end
+			anchor = drFrame
+			totalWidth = totalWidth + spacing + barHeight - 2 * borderThickness
+		end
+	end
+	if totalWidth == 0 then
+		self:Hide()
+		self:SetWidth(0.001)
+	else
+		totalWidth = totalWidth + 2 * borderThickness - spacing
+		self:SetWidth(totalWidth)
+	end
+end
+
+function DrContainerFrameFunctions:ApplyBackdrop(borderThickness)
+	self:SetBackdrop({
+		bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+		edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+		edgeSize = borderThickness
+	})
+	self:SetBackdropColor(0, 0, 0, 0)
+	self:SetBackdropBorderColor(unpack(self.bgSizeConfig.DrTracking_Container_Color))
+	self:SetWidthOfAuraFrames(self.bgSizeConfig.BarHeight)
+	self:DrPositioning()
+end
+
+
+
+
+local AuraContainerFrameFunctions = {}
+
+function AuraContainerFrameFunctions:SetWidthOfAuraFrames(height)
+	local borderThickness = self.IsDebuff and self.bgSizeConfig.Auras_Debuffs_Container_BorderThickness or self.bgSizeConfig.Auras_Buffs_Container_BorderThickness
+	for identifier, auraFrame in pairs(self.Active) do
+		auraFrame:SetWidth(height - borderThickness * 2)
+	end
+	for identifier, auraFrame in pairs(self.Inactive) do
+		auraFrame:SetWidth(height - borderThickness * 2)
+	end
+end
+
+function AuraContainerFrameFunctions:AuraPositioning()
+	local config = self.bgSizeConfig
+	local spacing = config.Auras_Spacing
+	local borderThickness = self.IsDebuff and config.Auras_Debuffs_Container_BorderThickness or config.Auras_Buffs_Container_BorderThickness
+	local barHeight = config.BarHeight
+	local anchor = self
+	local totalWidth = 0
+	self:Show()
+	for Identifier, auraFrame in pairs(self.Active) do
+		if totalWidth == 0 then
+			auraFrame:SetPoint("TOPRIGHT", anchor, "TOPRIGHT", -borderThickness, -borderThickness)
+			auraFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -borderThickness, borderThickness)
+		else
+			auraFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
+			auraFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
+		end
+		anchor = auraFrame
+		totalWidth = totalWidth + spacing + barHeight - 2 * borderThickness
+	end
+	if totalWidth == 0 then 
+		self:Hide()
+		self:SetWidth(0.001)
+	else
+		totalWidth = totalWidth + 2 * borderThickness - spacing
+		self:SetWidth(totalWidth)
+	end
+end
+
+function AuraContainerFrameFunctions:ApplyBackdrop(borderThickness)
+	self:SetBackdrop({
+		bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+		edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+		edgeSize = borderThickness
+	})
+	self:SetBackdropColor(0, 0, 0, 0)
+	self:SetBackdropBorderColor(unpack(self.IsDebuff and self.bgSizeConfig.Auras_Debuffs_Container_Color or self.bgSizeConfig.Auras_Buffs_Container_Color))
+	self:SetWidthOfAuraFrames(self.bgSizeConfig.BarHeight)
+	self:AuraPositioning()
+end
+
 local buttonFunctions = {}
 do
 
@@ -527,6 +628,23 @@ do
 			self.bgSizeConfig.Position_Y = parent:GetTop() * scale
 		end
 	end
+	
+	function buttonFunctions:SetLevel(level)
+		if not self.PlayerLevel or level ~= self.PlayerLevel then
+			self.PlayerLevel = level
+			self:DisplayLevel()
+		end
+	end
+	
+	function buttonFunctions:DisplayLevel()
+		if self.config.LevelText_Enabled and (not self.config.LevelText_OnlyShowIfNotMaxLevel or (self.PlayerLevel and self.PlayerLevel < MaxLevel)) then
+			self.Level:SetText(MaxLevel - 1) -- to set the width of the frame (the name shoudl have the same space from the role icon/spec icon regardless of level shown)
+			self.Level:SetWidth(0)
+			self.Level:SetText(self.PlayerLevel)
+		else
+			self.Level:SetWidth(0.01)
+		end
+	end
 
 	function buttonFunctions:ApplyButtonSettings()
 		self.bgSizeConfig = self:GetParent().bgSizeConfig
@@ -535,6 +653,7 @@ do
 		self:SetWidth(conf.BarWidth)
 		self:SetHeight(conf.BarHeight)
 		
+		self:SetRangeIncicatorFrame()
 		
 		--spec
 		self.Spec:SetWidth(conf.Spec_Width)
@@ -554,11 +673,15 @@ do
 		
 		-- role
 		if conf.RoleIcon_Enabled then 
-			self.Role:SetSize(conf.RoleIcon_Size, conf.RoleIcon_Size) 
+			self.RoleIcon:SetSize(conf.RoleIcon_Size, conf.RoleIcon_Size) 
 		else
-			self.Role:SetSize(0.01, 0.01)
+			self.RoleIcon:SetSize(0.01, 0.01)
 		end
-
+		
+		-- level
+		self:DisplayLevel()
+		
+		self.Level:ApplyFontStringSettings(self.config.LevelText_Fontsize, self.config.LevelText_Outline, self.config.LevelText_EnableTextshadow, self.config.LevelText_TextShadowcolor)
 
 		--MyTarget, indicating the current target of the player
 		self.MyTarget:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyTarget_Color))
@@ -569,8 +692,6 @@ do
 		--SelectionHighlight, highlighting the frame the mouse is currently on
 		self.SelectionHighlight:SetColorTexture(unpack(BattleGroundEnemies.db.profile.Highlight_Color))
 		
-		self:SetRangeIncicatorFrame()
-			
 		-- numerical target indicator
 		self.NumericTargetindicator:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
 		
@@ -578,7 +699,7 @@ do
 		self.NumericTargetindicator:ApplyFontStringSettings(conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
 		self.NumericTargetindicator:SetText(0)
 		
-
+		
 		-- name
 		self.Name:SetTextColor(unpack(conf.Name_Textcolor))
 		self.Name:ApplyFontStringSettings(conf.Name_Fontsize, conf.Name_Outline, conf.Name_EnableTextshadow, conf.Name_TextShadowcolor)
@@ -608,19 +729,40 @@ do
 			self.ObjectiveAndRespawn.Cooldown.Text:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Cooldown_Fontsize, conf.ObjectiveAndRespawn_Cooldown_Outline, conf.ObjectiveAndRespawn_Cooldown_EnableTextshadow, conf.ObjectiveAndRespawn_Cooldown_TextShadowcolor)
 		
 		end
+		
 		--Dr Tracking
+		self.DRContainer.bgSizeConfig = conf
+		self.DRContainer:ApplyBackdrop(conf.DrTracking_Container_BorderThickness)
+		
+		
 		for drCategory, drFrame in pairs(self.DR) do
-			drFrame:ChangeDisplayType()
 			drFrame:ApplyDrFrameSettings()
+			drFrame:ChangeDisplayType()
 		end
 					
 		
 		--Auras
-		for spellID, auraFrame in pairs(self.Auras) do
-			self:ApplyAuraFrameSettings(auraFrame)
+		self.DebuffContainer.bgSizeConfig = conf
+		self.BuffContainer.bgSizeConfig = conf
+		
+		self.BuffContainer:ApplyBackdrop(conf.Auras_Buffs_Container_BorderThickness)
+		self.DebuffContainer:ApplyBackdrop(conf.Auras_Debuffs_Container_BorderThickness)
+
+		for identifier, buffFrame in pairs(self.Buffs) do
+			buffFrame:ApplyBuffFrameSettings(buffFrame)
 		end
-		for spellID, auraFrame in pairs(self.InactiveAuras) do
-			self:ApplyAuraFrameSettings(auraFrame)
+	
+		for identifier, buffFrame in pairs(self.InactiveBuffs) do
+			buffFrame:ApplyBuffFrameSettings(buffFrame)
+		end
+		for identifier, debuffFrame in pairs(self.Debuffs) do
+			debuffFrame:ApplyDebuffFrameSettings(debuffFrame)
+			debuffFrame:ChangeDisplayType()
+		end
+		
+		for identifier, debuffFrame in pairs(self.InactiveDebuffs) do
+			debuffFrame:ApplyDebuffFrameSettings(debuffFrame)
+			debuffFrame:ChangeDisplayType()
 		end
 	end
 
@@ -730,20 +872,20 @@ do
 	end
 	
 	function buttonFunctions:SetDrAtSelf()
-		self.DrContainerStartAnchor = self
-		self:DrPositioning()
+		self.DRContainer:SetPoint("TOPRIGHT", self, "TOPLEFt", -1, 0)
+		self.DRContainer:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", -1, 0)
 	end
 	
 	function buttonFunctions:SetDrAtObjective()
-		self.DrContainerStartAnchor = self.ObjectiveAndRespawn
-		self:DrPositioning()
+		self.DRContainer:SetPoint("TOPRIGHT", self.ObjectiveAndRespawn, "TOPLEFt", -1, 0)
+		self.DRContainer:SetPoint("BOTTOMRIGHT", self.ObjectiveAndRespawn, "BOTTOMLEFT", -1, 0)
 	end
 	
 	function buttonFunctions:SetObjectivePosition(position)
 		self.ObjectiveAndRespawn:ClearAllPoints()
 		if position == "Left" then
 			self.ObjectiveAndRespawn:SetPoint('TOPRIGHT', self, 'TOPLEFT', -1, 0)
-			self.ObjectiveAndRespawn:SetPoint('BOTTOMRIGHT', self, 'BOTTOMRIGHT', -1, 0)
+			self.ObjectiveAndRespawn:SetPoint('BOTTOMRIGHT', self, 'BOTTOMLEFT', -1, 0)
 			
 			
 			self.ObjectiveAndRespawn:SetScript("OnHide", function() 
@@ -759,9 +901,17 @@ do
 			else
 				self:SetDrAtSelf()
 			end
+		elseif position == "LeftToTargetCounter" then
+			self.ObjectiveAndRespawn:SetPoint('TOPRIGHT', self.NumericTargetindicator, 'TOPLEFT', -3, 0)
+			self.ObjectiveAndRespawn:SetPoint('BOTTOMRIGHT', self.NumericTargetindicator, 'BOTTOMLEFT', -3, 0)
+	
+			self:SetDrAtSelf()
+			
+			self.ObjectiveAndRespawn:SetScript("OnHide", nil)
+			self.ObjectiveAndRespawn:SetScript("OnShow", nil)
 		else --"Right"
 			self.ObjectiveAndRespawn:SetPoint('TOPLEFT', self.Racial, 'TOPRIGHT', 1, 0)
-			self.ObjectiveAndRespawn:SetPoint('BOTTOMLEFT', self.Racial, 'BOTTOMLEFT', 1, 0)
+			self.ObjectiveAndRespawn:SetPoint('BOTTOMLEFT', self.Racial, 'BOTTOMRIGHT', 1, 0)
 			self:SetDrAtSelf()
 			
 			self.ObjectiveAndRespawn:SetScript("OnHide", nil)
@@ -770,10 +920,18 @@ do
 	end
 	
 	function buttonFunctions:SetRangeIncicatorFrame()
-		if self.config.RangeIndicator_Frame == "All" then
-			self.RangeIndicator_Frame = self
+		if self.config.RangeIndicator_Everything then
+			self.RangeIndicator = self
 		else
-			self.RangeIndicator_Frame = self.Power
+			self.RangeIndicator = self.RangeIndicator_Frame
+			for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
+				if enableRange then
+					self[frameName]:SetParent(self.RangeIndicator)
+				else
+					self[frameName]:SetParent(self)
+				end
+				self[frameName]:SetAlpha(1)
+			end
 		end
 		self:SetAlpha(1)
 	end
@@ -783,7 +941,7 @@ do
 			local objective = self.ObjectiveAndRespawn
 			if BattlegroundBuff then
 				--BattleGroundEnemies:Debug("has buff")
-				objective.Icon:SetTexture(GetSpellTexture(BattlegroundBuff))
+				objective.Icon:SetTexture(GetSpellTexture(BattlegroundBuff[self.PlayerIsEnemy and EnemyFaction or AllyFaction]))
 				objective:Show()
 			end
 			self:RegisterUnitEvent("UNIT_AURA", unitID)
@@ -815,7 +973,6 @@ do
 	end
 	
 	
-	
 	-- Shows/Hides targeting indicators for a button
 	function buttonFunctions:UpdateTargetIndicators()
 	
@@ -827,7 +984,11 @@ do
 					indicator = CreateFrame("frame",nil,self.Health)
 					indicator:SetSize(8,10)
 					indicator:SetPoint("TOP",floor(i/2)*(i%2==0 and -10 or 10), 0) --1: 0, 0 2: -10, 0 3: 10, 0 4: -20, 0 > i = even > left, uneven > right 
-					indicator = SetBackdrop(indicator)
+					indicator:SetBackdrop({
+						bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+						edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+						edgeSize = 1
+					})
 					indicator:SetBackdropBorderColor(0,0,0,1)
 					self.TargetIndicators[i] = indicator
 				end
@@ -868,9 +1029,9 @@ do
 	
 	function buttonFunctions:UpdateRange(inRange)
 		if self.config.RangeIndicator_Enabled and not inRange then
-			self.RangeIndicator_Frame:SetAlpha(self.config.RangeIndicator_Alpha)
+			self.RangeIndicator:SetAlpha(self.config.RangeIndicator_Alpha)
 		else
-			self.RangeIndicator_Frame:SetAlpha(1)
+			self.RangeIndicator:SetAlpha(1)
 		end
 	end
 	
@@ -896,24 +1057,7 @@ do
 		racial.Icon:SetTexture(Data.TriggerSpellIDToDisplayFileId[spellID])
 		racial.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID])
 	end
-	
-	function buttonFunctions:DrPositioning()
 
-		local anchor = self.DrContainerStartAnchor
-		for categorie, drFrame in pairs(self.DR) do
-			if drFrame:IsShown() then
-				local spacing = self.bgSizeConfig.DrTracking_Spacing
-				drFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
-				drFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
-				anchor = drFrame
-			end
-		end
-		if self.AuraContainerStartAnchor ~= anchor then
-			self.AuraContainerStartAnchor = anchor
-			self:AuraPositioning()
-		end
-	end
-	
 	do
 		local dRstates = {
 			[1] = { 0, 1, 0, 1}, --green (next cc in DR time will be only half duration)
@@ -925,13 +1069,15 @@ do
 			local drFrame = self:GetParent()
 			drFrame:Hide()
 			drFrame.status = 0
-			drFrame:GetParent():DrPositioning() --enemyButton:DrPositioning()
+			drFrame.Container:DrPositioning()
 		end
 
 		local drFrameFunctions = {}
 		
 		
 		function drFrameFunctions:ApplyDrFrameSettings()
+			self.config = self:GetParent().config
+			self.bgSizeConfig = self:GetParent().bgSizeConfig
 			local conf = self.bgSizeConfig
 			
 			self.Cooldown:ApplyCooldownSettings(conf.DrTracking_ShowNumbers, false, false)
@@ -976,14 +1122,19 @@ do
 				drFrame = CreateFrame("Frame", nil, self)
 				
 				drFrame.bgSizeConfig = self.bgSizeConfig
+				drFrame.Container = self.DRContainer
 				
 				for funcName, func in pairs(drFrameFunctions) do
 					drFrame[funcName] = func
 				end
 				
-				drFrame:SetWidth(drFrame.bgSizeConfig.BarHeight)
+				drFrame:SetWidth(drFrame.bgSizeConfig.BarHeight - self.bgSizeConfig.DrTracking_Container_BorderThickness * 2)
 
-				drFrame = SetBackdrop(drFrame)
+				drFrame:SetBackdrop({
+					bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+					edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+					edgeSize = 1
+				})
 				drFrame:SetBackdropColor(0, 0, 0, 0)
 				drFrame:SetBackdropBorderColor(0, 0, 0, 0)
 
@@ -1005,7 +1156,7 @@ do
 			
 			if not drFrame:IsShown() then
 				drFrame:Show()
-				self:DrPositioning()
+				self.DRContainer:DrPositioning()
 			end
 			drFrame.Icon:SetTexture(GetSpellTexture(spellID))
 			drFrame.Cooldown:SetCooldown(GetTime(), DRData:GetResetTime(drCat) + additionalDuration)
@@ -1014,81 +1165,168 @@ do
 	
 	
 	do
-		function buttonFunctions:AuraPositioning()
-
-			local anchor = self.AuraContainerStartAnchor
-			for spellID, auraFrame in pairs(self.Auras) do
-
-				local spacing = self.bgSizeConfig.Auras_Spacing
-				auraFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
-				auraFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
-				anchor = auraFrame
-			end
-		end
-	
 		local function auraFrameCooldown_OnHide(self)
 			local auraFrame = self:GetParent()
 			auraFrame.Stacks:SetText("")
 			auraFrame:Hide()
-			local playerButton = auraFrame:GetParent()
-			playerButton.Auras[auraFrame.SpellID] = nil
-			playerButton:AuraPositioning()
-			playerButton.InactiveAuras[#playerButton.InactiveAuras + 1] = auraFrame
+			auraFrame.Active[auraFrame.Identifier] = nil
+			auraFrame.Container:AuraPositioning()
+			auraFrame.Inactive[#auraFrame.Inactive + 1] = auraFrame
+		end
+
+		function buttonFunctions:CreateNewAuraFrame()
+			auraFrame = CreateFrame('Frame', nil, self)
+			
+			auraFrame.Icon = auraFrame:CreateTexture(nil, "BACKGROUND")
+			auraFrame.Icon:SetAllPoints()
+
+			auraFrame.Stacks = MyCreateFontString(auraFrame)
+			auraFrame.Stacks:SetAllPoints()
+			auraFrame.Stacks:SetJustifyH("RIGHT")
+			auraFrame.Stacks:SetJustifyV("BOTTOM")
+		
+			auraFrame.Cooldown = MyCreateCooldown(auraFrame)
+			auraFrame.Cooldown:SetScript("OnHide", auraFrameCooldown_OnHide)
+			
+			return auraFrame
 		end
 		
-		function buttonFunctions:ApplyAuraFrameSettings(auraFrame)
-			local conf = self.bgSizeConfig
-			if auraFrame.IsDebuff then
-				auraFrame.Stacks:SetTextColor(unpack(conf.Auras_Debuffs_Textcolor))
-				auraFrame.Stacks:ApplyFontStringSettings(conf.Auras_Debuffs_Fontsize, conf.Auras_Debuffs_Outline, conf.Auras_Debuffs_EnableTextshadow, conf.Auras_Debuffs_TextShadowcolor)
-				auraFrame.Cooldown:ApplyCooldownSettings(conf.Auras_Debuffs_ShowNumbers, true, false)
-				auraFrame.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline, conf.Auras_Debuffs_Cooldown_EnableTextshadow, conf.Auras_Debuffs_Cooldown_TextShadowcolor)
+		
+		local function debuffFrameUpdateStatusBorder(debuffFrame)
+			local color = DebuffTypeColor[debuffFrame.Type or "none"]
+			debuffFrame:SetBackdropBorderColor(color.r, color.g, color.b)
+		end
+		
+		local function debuffFrameUpdateStatusText(debuffFrame)
+			local color = DebuffTypeColor[debuffFrame.Type or "none"]
+			debuffFrame.Cooldown.Text:SetTextColor(color.r, color.g, color.b)
+		end
+		
+		local buffFrameFunctions = {}
+		
+		function buffFrameFunctions:ApplyBuffFrameSettings()
+			local conf = self:GetParent().bgSizeConfig
+			self.Stacks:SetTextColor(unpack(conf.Auras_Debuffs_Textcolor))
+			self.Stacks:ApplyFontStringSettings(conf.Auras_Debuffs_Fontsize, conf.Auras_Debuffs_Outline, conf.Auras_Debuffs_EnableTextshadow, conf.Auras_Debuffs_TextShadowcolor)
+			self.Cooldown:ApplyCooldownSettings(conf.Auras_Debuffs_ShowNumbers, true, false)
+			self.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline, conf.Auras_Debuffs_Cooldown_EnableTextshadow, conf.Auras_Debuffs_Cooldown_TextShadowcolor)
+		end
+		
+		
+		local debuffFrameFunctions = {}
+		
+		function debuffFrameFunctions:ApplyDebuffFrameSettings()
+			local conf = self:GetParent().bgSizeConfig
+			self.Stacks:SetTextColor(unpack(conf.Auras_Debuffs_Textcolor))
+			self.Stacks:ApplyFontStringSettings(conf.Auras_Debuffs_Fontsize, conf.Auras_Debuffs_Outline, conf.Auras_Debuffs_EnableTextshadow, conf.Auras_Debuffs_TextShadowcolor)
+			self.Cooldown:ApplyCooldownSettings(conf.Auras_Debuffs_ShowNumbers, true, false)
+			self.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline, conf.Auras_Debuffs_Cooldown_EnableTextshadow, conf.Auras_Debuffs_Cooldown_TextShadowcolor)
+		end
+		
+		function debuffFrameFunctions:ChangeDisplayType()
+			self:SetDisplayType()
+			
+			--reset settings
+			self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
+			self:SetBackdropBorderColor(0, 0, 0, 0)
+			if self:GetParent().bgSizeConfig.Auras_Debuffs_Coloring_Enabled then self:SetType() end
+		end
+		
+		function debuffFrameFunctions:SetDisplayType()
+			if self:GetParent().bgSizeConfig.Auras_Debuffs_DisplayType == "Frame" then
+				self.SetType = debuffFrameUpdateStatusBorder
 			else
-				auraFrame.Stacks:SetTextColor(unpack(conf.Auras_Buffs_Textcolor))
-				auraFrame.Stacks:ApplyFontStringSettings(conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline, conf.Auras_Buffs_EnableTextshadow, conf.Auras_Buffs_TextShadowcolor)
-				auraFrame.Cooldown:ApplyCooldownSettings(conf.Auras_Buffs_ShowNumbers, true, false)
-				auraFrame.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline, conf.Auras_Buffs_Cooldown_EnableTextshadow, conf.Auras_Buffs_Cooldown_TextShadowcolor)
+				self.SetType = debuffFrameUpdateStatusText
 			end
 		end
-
-		function buttonFunctions:DisplayAura(isDebuff, spellID, amount, duration, endTime)
-
-			local auraFrame = self.Auras[spellID] or self.InactiveAuras[#self.InactiveAuras] 
-			if auraFrame then --recycle a previous used Frame
-				tremove(self.InactiveAuras, #self.InactiveAuras)
-				auraFrame:Show()
-			else -- create a new Frame 
-			
-				auraFrame = CreateFrame('Frame', nil, self)
-				auraFrame:SetWidth(self.bgSizeConfig.BarHeight)
-				
-				auraFrame.Icon = auraFrame:CreateTexture(nil, "BACKGROUND")
-				auraFrame.Icon:SetAllPoints()
-
-				
-				auraFrame.Stacks = MyCreateFontString(auraFrame)
-				auraFrame.Stacks:SetAllPoints()
-				auraFrame.Stacks:SetJustifyH("RIGHT")
-				auraFrame.Stacks:SetJustifyV("BOTTOM")
-			
-				auraFrame.Cooldown = MyCreateCooldown(auraFrame)
-				auraFrame.Cooldown:SetScript("OnHide", auraFrameCooldown_OnHide)
-				
-				self:ApplyAuraFrameSettings(auraFrame)
+		
+		function buttonFunctions:DisplayDebuff(spellID, srcName, amount, duration, endTime, debuffType)
+			local identifier = spellID..srcName
+			local debuffFrame = self.Debuffs[identifier]
+			if not debuffFrame then 
+				debuffFrame = self.InactiveDebuffs[#self.InactiveDebuffs] 
+				if debuffFrame then --recycle a previous used Frame
+					tremove(self.InactiveDebuffs, #self.InactiveDebuffs)
+					debuffFrame:Show()
+				end
 			end
-			auraFrame.IsDebuff = isDebuff
-			auraFrame.SpellID = spellID
-			auraFrame.Icon:SetTexture(GetSpellTexture(spellID))
+			if not debuffFrame then 
+				debuffFrame = self:CreateNewAuraFrame()
+				debuffFrame.Container = self.DebuffContainer
+				debuffFrame.Active = self.Debuffs
+				debuffFrame.Inactive = self.InactiveDebuffs
+				
+				debuffFrame:SetWidth(self.bgSizeConfig.BarHeight - self.bgSizeConfig.Auras_Debuffs_Container_BorderThickness * 2)
+				
+				for funcName, func in pairs(debuffFrameFunctions) do
+					debuffFrame[funcName] = func
+				end
+				
+				debuffFrame.Icon:SetDrawLayer("BORDER", -1) -- 1 to make it behind the SetBackdrop bg
+				
+				debuffFrame:SetBackdrop({
+					bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+					edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+					edgeSize = 1
+				})
+				debuffFrame:SetBackdropColor(0, 0, 0, 0)
+				debuffFrame:SetBackdropBorderColor(0, 0, 0, 0)
+				
+				debuffFrame:ApplyDebuffFrameSettings()
+				debuffFrame:SetDisplayType()
+			end
+			debuffFrame.Identifier = identifier
+			debuffFrame.Type = debuffType
+			debuffFrame.Icon:SetTexture(GetSpellTexture(spellID))
 			if amount > 1 then
-				auraFrame.Stacks:SetText(amount)
+				debuffFrame.Stacks:SetText(amount)
 			else
-				auraFrame.Stacks:SetText()
+				debuffFrame.Stacks:SetText()
 			end
-			auraFrame.Cooldown:SetCooldown(endTime - duration, duration)
-			--print("SetCooldown", endTime - duration, duration)
-			auraFrame:Show()
-			self.Auras[spellID] = auraFrame
-			self:AuraPositioning()
+			if self.bgSizeConfig.Auras_Debuffs_Coloring_Enabled then debuffFrame:SetType() end
+			debuffFrame.Cooldown:SetCooldown(endTime - duration, duration)
+			--BattleGroundEnemies:Debug("SetCooldown", endTime - duration, duration)
+			debuffFrame:Show()
+			self.Debuffs[identifier] = debuffFrame
+			self.DebuffContainer:AuraPositioning()
+		end
+		
+		function buttonFunctions:DisplayBuff(spellID, srcName, amount, duration, endTime)
+			local identifier = spellID..srcName
+			local buffFrame = self.Buffs[identifier]
+			if not buffFrame then 
+				buffFrame = self.InactiveBuffs[#self.InactiveBuffs] 
+				if buffFrame then --recycle a previous used Frame
+					tremove(self.InactiveBuffs, #self.InactiveBuffs)
+					buffFrame:Show()
+				end
+			end
+			if not buffFrame then 
+				buffFrame = self:CreateNewAuraFrame()
+				buffFrame.Container = self.BuffContainer
+				buffFrame.Active = self.Buffs
+				buffFrame.Inactive = self.InactiveBuffs
+				
+				buffFrame:SetWidth(self.bgSizeConfig.BarHeight - self.bgSizeConfig.Auras_Buffs_Container_BorderThickness * 2)
+				
+				for funcName, func in pairs(buffFrameFunctions) do
+					buffFrame[funcName] = func
+				end
+
+				buffFrame:ApplyBuffFrameSettings()
+			end
+			buffFrame.Identifier = identifier
+			buffFrame.Icon:SetTexture(GetSpellTexture(spellID))
+			if amount > 1 then
+				buffFrame.Stacks:SetText(amount)
+			else
+				buffFrame.Stacks:SetText()
+			end
+			buffFrame.Cooldown:SetCooldown(endTime - duration, duration)
+			--BattleGroundEnemies:Debug("SetCooldown", endTime - duration, duration)
+			buffFrame:Show()
+			self.Buffs[identifier] = buffFrame
+			self.BuffContainer:AuraPositioning()
 		end
 	end
 		
@@ -1101,18 +1339,25 @@ do
 	}
 
 	function buttonFunctions:AuraApplied(spellID, spellName, srcName, auraType, amount)
-		local isDebuff = auraType == "DEBUFF"
+		local isDebuff, func
+		if auraType == "DEBUFF" then
+			isDebuff = true
+			func = UnitDebuff
+		else
+			isDebuff = false
+			func = UnitBuff
+		end
 		local isMine = srcName == PlayerDetails.PlayerName
 		local config = self.bgSizeConfig
 		local drCat = DRData:GetSpellCategory(spellID)
 		--BattleGroundEnemies:Debug(operation, spellID)
 		local showAurasOnSpecicon = config.Spec_AuraDisplay_Enabled
 		local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])
-		local aurasEnabled = config.Auras_Enabled and (isDebuff and (config.Auras_Debuffs_Enabled and (not config.Auras_Debuffs_OnlyShowMine or isMine) and (not config.Auras_Debuffs_DebuffTypeFiltering_Enabled or config.Auras_Debuffs_DebuffTypeFiltering_Filterlist[spellID])) or (config.Auras_Buffs_Enabled and (not config.Auras_Buffs_OnlyShowMine or isMine) and (not config.Auras_Buffs_SpellIDFiltering_Enabled or config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID])))
+		local aurasEnabled = config.Auras_Enabled
 		local relentlessCheck = drCat and config.Trinket_Enabled and not self.Trinket.HasTrinket and Data.cCduration[drCat] and Data.cCduration[drCat][spellID]
 		local isAdaptation = isDebuff and spellID == 195901
 		
-		--if srcName == PlayerDetails.PlayerName then print(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
+		--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
 		if not (showAurasOnSpecicon or drTrackingEnabled or aurasEnabled or relentlessCheck) then return end
 		
 
@@ -1121,17 +1366,32 @@ do
 		if BattleGroundEnemies.TestmodeActive then
 			actualDuration = Data.cCdurationBySpellID[spellID] or random(10, 15)
 			amount = random(1, 20)
-			if actualDuration then
-				if drCat and self.DR[drCat] then
-					actualDuration = actualDuration/2^self.DR[drCat].status
-				end
-				endTime = GetTime() + actualDuration
+			debuffType = Data.RandomDebuffType[random(1, #Data.RandomDebuffType)]
+			if drCat and self.DR[drCat] then
+				actualDuration = actualDuration/2^self.DR[drCat].status
 			end
+			endTime = GetTime() + actualDuration
+			
 		elseif spellName then 
 			local unitIDs = self.UnitIDs
-			local activeUnitID = self.PlayerIsEnemy and (isDebuff and unitIDs.Active or ((unitIDs.Active ~= unitIDs.Nameplate and unitIDs.Active) or (unitIDs.Target or unitIDs.Focus or unitIDs.Ally))) or self.unit -- we can't get Buffs from nameplates(we only use nameplates for enemies) > find another unitID for that enemy if auraType is a buff and the active unitID is a nameplate
-			if activeUnitID then
+			local activeUnitID 
+			-- we can't get Buffs from nameplates(we only use nameplates for enemies) > find another unitID for that enemy if auraType is a buff and the active unitID is a nameplate
+			if self.PlayerIsEnemy then
+				if isDebuff then
+					activeUnitID = unitIDs.Active
+				else
+					if unitIDs.Active ~= unitIDs.Nameplate then
+						activeUnitID = unitIDs.Active
+					else
+						activeUnitID = unitIDs.Target or unitIDs.Focus or unitIDs.Ally
+					end
+				end
+			else
+				activeUnitID = self.unit
+			end
 			
+			if not activeUnitID then return end
+			if isMine then
 				if UAspellIDs[spellID] then --more expensier way since we need to iterate through all debuffs
 					for i = 1, 40 do
 						local _spellID
@@ -1141,17 +1401,31 @@ do
 						end
 					end
 				else
-					_, _, _, count, debuffType , actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = UnitAura(activeUnitID, spellName, nil, isDebuff and "HARMFUL" or "HELPFUL")
+					_, _, _, count, debuffType , actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = func(activeUnitID, spellName, nil, "PLAYER")
+				end
+			else
+				for i = 1, 40 do
+					local _spellID, unitCaster
+					_, _, _, count, debuffType , actualDuration, endTime, unitCaster, _, _, _spellID, _, _, _, _, _, _, _, _ = func(activeUnitID, i)
+					if spellID == _spellID and unitCaster then
+						local uName, realm = UnitName(unitCaster)
+						if realm then
+							uName = uName.."-"..realm
+						end
+						if uName == srcName then
+							break
+						end
+					end
 				end
 			end
 		end
-		--if srcName == PlayerDetails.PlayerName then print(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID], actualDuration) end
+		--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID], actualDuration) end
 		
 		if actualDuration and actualDuration > 0 then
 			if showAurasOnSpecicon then 
 				local priority = Data.SpellPriorities[spellID]
 				if priority then
-					self.Spec_AuraDisplay:NewAura(spellID, actualDuration, endTime, priority)
+					self.Spec_AuraDisplay:NewAura(spellID, srcName, actualDuration, endTime, priority)
 				end
 			end
 			if drTrackingEnabled then
@@ -1159,9 +1433,12 @@ do
 				self.DR[drCat]:IncreaseDRState()
 			end
 			if aurasEnabled then
-				if not isDebuff or not Auras_Debuffs_DebuffTypeFiltering_Enabled or Auras_Debuffs_DebuffTypeFiltering_Filterlist[debuffType] then
-					--print("aurasEnabled", spellID, amount, actualDuration, endTime, GetTime())
-					self:DisplayAura(isDebuff, spellID, amount or count, actualDuration, endTime)
+				if isDebuff then
+					if config.Auras_Debuffs_Enabled and not Auras_Debuffs_Filtering_Enabled or (((not config.Auras_Debuffs_OnlyShowMine or isMine) and (config.Auras_Debuffs_DebuffTypeFiltering_Enabled or config.Auras_Debuffs_DebuffTypeFiltering_Filterlist[debuffType])) or (config.Auras_Debuffs_SpellIDFiltering_Enabled and config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID])) then
+						self:DisplayDebuff(spellID, srcName, amount or count, actualDuration, endTime, debuffType)
+					end
+				elseif config.Auras_Buffs_Enabled and not Auras_Buffs_Filtering_Enabled or ((not config.Auras_Buffs_OnlyShowMine or isMine) or (config.Auras_Buffs_SpellIDFiltering_Enabled and config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID])) then
+					self:DisplayBuff(spellID, srcName, amount or count, actualDuration, endTime)
 				end
 			end
 			if relentlessCheck then
@@ -1190,7 +1467,8 @@ do
 		end
 	end
 
-	function buttonFunctions:AuraRemoved(spellID, auraType)
+	function buttonFunctions:AuraRemoved(spellID, srcName, auraType)
+		srcName = srcName or ""
 		local config = self.bgSizeConfig
 		local drCat = DRData:GetSpellCategory(spellID)
 		--BattleGroundEnemies:Debug(operation, spellID)
@@ -1209,14 +1487,15 @@ do
 			end
 		end
 		if showAurasOnSpecicon then 
+			local identifier = spellID..(srcName)
 			local auraFrame = self.Spec_AuraDisplay
-			if self.ActiveAuras then self.ActiveAuras[spellID] = nil end
-			if auraFrame.DisplayedAura and auraFrame.DisplayedAura.spellID == spellID then
+			if self.ActiveAuras then self.ActiveAuras[identifier] = nil end
+			if auraFrame.DisplayedAura and auraFrame.DisplayedAura.identifier == identifier then
 				--Look for another one
 				auraFrame:ActiveAuraRemoved()
 			end
 		end
-		local AuraFrame = self.Auras[spellID]
+		local AuraFrame = self.Buffs[spellID..srcName] or self.Debuffs[spellID..srcName]
 		if AuraFrame then
 			AuraFrame.Cooldown:Clear()
 		end
@@ -1294,7 +1573,7 @@ do
 		end
 		
 		if self.PlayerIsEnemy then
-			newTargetPlayerButton = BattleGroundEnemies.Allies:GetPlayerbuttonByUnitID(self.UnitIDs.Active or "" .."target")
+			newTargetPlayerButton = BattleGroundEnemies.Allies:GetPlayerbuttonByUnitID((self.UnitIDs.Active or "") .."target")
 		else
 			newTargetPlayerButton = BattleGroundEnemies.Enemies:GetPlayerbuttonByUnitID(self.TargetUnitID or "")
 		end
@@ -1323,23 +1602,38 @@ do
 		unitIDs.TargetedByEnemy[enemyButton] = nil
 		self:UpdateTargetIndicators()
 	end
+	
+	allyButtonFunctions.UNIT_HEALTH_FREQUENT = buttonFunctions.UpdateHealth
+	allyButtonFunctions.UNIT_POWER_FREQUENT = buttonFunctions.UpdatePower
+	
+	function allyButtonFunctions:UNIT_AURA()
+		-- local unitID = self.unit
+		-- for i = 1, 40 do
+			-- local _spellID
+			-- _, _, _, count, debuffType , actualDuration, endTime, _, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitDebuff(unitID, i, "PLAYER")
+			-- if spellID == _spellID then
+				-- break
+			-- end
+		-- end
+	end
 end
 
+-- functions for aura on spec icon
 local AuraFrameFunctions = {}
 function AuraFrameFunctions:ActiveAuraRemoved()
 	local activeAuras = self.ActiveAuras
 	if self.DisplayedAura then
-		activeAuras[self.DisplayedAura.spellID] = nil
+		activeAuras[self.DisplayedAura.identifier] = nil
 		self.DisplayedAura = false
 	end
 	
 	
 	local highestPrioritySpell
 	
-	for spellID, spellDetails in pairs(activeAuras) do
+	for identifier, spellDetails in pairs(activeAuras) do
 		
 		if spellDetails.endTime > GetTime() then
-			activeAuras[spellID] = nil
+			activeAuras[identifier] = nil
 		else
 			if not highestPrioritySpell or spellDetails.priority > highestPrioritySpell.priority then 
 				highestPrioritySpell = spellDetails
@@ -1360,12 +1654,14 @@ function AuraFrameFunctions:GotInterrupted(spellID, interruptDuration)
 	if self.HasAdditionalReducedInterruptTime then
 		interruptDuration = interruptDuration * 0.3
 	end
-	self:NewAura(spellID, interruptDuration, GetTime() + interruptDuration, 4)
+	self:NewAura(spellID, nil, interruptDuration, GetTime() + interruptDuration, 4)
 end		
 
-function AuraFrameFunctions:NewAura(spellID, actualDuration, endTime, priority)
-	if not self.ActiveAuras[spellID] then self.ActiveAuras[spellID] = {} end
-	local activAuraSpell = self.ActiveAuras[spellID]
+function AuraFrameFunctions:NewAura(spellID, srcName, actualDuration, endTime, priority)
+	local identifier = spellID..(srcName or "")
+	if not self.ActiveAuras[identifier] then self.ActiveAuras[identifier] = {} end
+	local activAuraSpell = self.ActiveAuras[identifier]
+	activAuraSpell.identifier = identifier
 	activAuraSpell.spellID = spellID
 	activAuraSpell.duration = actualDuration
 	activAuraSpell.endTime = endTime
@@ -1386,9 +1682,9 @@ end
 local MainFrameFunctions = {}
 do
 	function MainFrameFunctions:ApplyAllSettings()
-		--print(self.PlayerType)
+		--BattleGroundEnemies:Debug(self.PlayerType)
 		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
-		self:ApplyBGSizeSettings()
+		if BattleGroundEnemies.BGSize then self:ApplyBGSizeSettings() end
 	end
 	
 	function MainFrameFunctions:ApplyBGSizeSettings()
@@ -1423,12 +1719,17 @@ do
 		end
 		
 
-		if self.config.Enabled and self.bgSizeConfig.Enabled then
+		self:CheckIfShouldShow()
+	end
+	
+	function MainFrameFunctions:CheckIfShouldShow()
+		if self.config.Enabled and BattleGroundEnemies.BGSize and self.bgSizeConfig.Enabled then
 			self:Show()
 		else
 			self:Hide()
 		end
 	end
+	
 	
 	function MainFrameFunctions:UpdatePlayerCount(currentCount)
 		if not currentCount then currentCount = BattleGroundEnemies.BGSize end
@@ -1478,7 +1779,7 @@ do
 			
 			tremove(self.InactivePlayerButtons, #self.InactivePlayerButtons)
 			--Cleanup previous shown stuff of another player
-			playerButton.RangeIndicator_Frame:SetAlpha(self.config.RangeIndicator_Alpha)
+			playerButton.RangeIndicator:SetAlpha(self.config.RangeIndicator_Alpha)
 			playerButton.Trinket.HasTrinket = nil
 			playerButton.Trinket.Icon:SetTexture(nil)
 			playerButton.Trinket.Cooldown:Clear()	--reset Trinket Cooldown
@@ -1511,15 +1812,11 @@ do
 			playerButton.bgSizeConfig = self.bgSizeConfig
 			
 			playerButton:SetScript("OnSizeChanged", function(self, width, height)
-				for drCategorie, drFrame in pairs(self.DR) do
-					drFrame:SetWidth(height)
-				end
-				for spellID, auraFrame in pairs(self.Auras) do
-					auraFrame:SetWidth(height)
-				end
-				for spellID, auraFrame in pairs(self.InactiveAuras) do
-					auraFrame:SetWidth(height)
-				end
+				self.DRContainer:SetWidthOfAuraFrames(height)
+				self.BuffContainer:SetWidthOfAuraFrames(height)
+				self.DebuffContainer:SetWidthOfAuraFrames(height)
+				playerButton.Level:SetHeight(height)
+				playerButton:DisplayLevel()
 			end)
 			
 			for functionName, func in pairs(buttonFunctions) do
@@ -1533,13 +1830,10 @@ do
 			else
 				for funcName, func in pairs(allyButtonFunctions) do
 					playerButton[funcName] = func
-					playerButton:SetAttribute('unit', playerButton.unit)
-					
 				end
+				RegisterUnitWatch(playerButton, true)
 				playerButton:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 				playerButton:SetScript("OnHide", playerButton.UnregisterAllEvents)
-				playerButton.UNIT_HEALTH_FREQUENT = playerButton.UpdateHealth
-				playerButton.UNIT_POWER_FREQUENT = playerButton.UpdatePower
 			end
 					
 			-- events/scripts
@@ -1555,9 +1849,15 @@ do
 			playerButton:SetScript('OnLeave', playerButton.OnLeave)
 			
 			
+			playerButton.RangeIndicator_Frame = CreateFrame("Frame", nil, playerButton)
+			--playerButton.RangeIndicator_Frame:SetFrameLevel(playerButton:GetFrameLevel())
+			-- playerButton.RangeIndicator = playerButton.RangeIndicator_Frame
 			
 			-- spec
-			playerButton.Spec = MyCreateFrame("Frame", playerButton, {'TOPLEFT'}, {'BOTTOMLEFT'})
+			playerButton.Spec = CreateFrame("Frame", nil, playerButton) 
+			playerButton.Spec:SetPoint('TOPLEFT', playerButton, 'TOPLEFT', 0, 0)
+			playerButton.Spec:SetPoint('BOTTOMLEFT' , playerButton, 'BOTTOMLEFT', 0, 0)
+			
 			playerButton.Spec:SetScript("OnSizeChanged", function(self, width, height)
 				CropImage(self.Icon, width, height)
 				CropImage(playerButton.Spec_AuraDisplay.Icon, width, height)
@@ -1565,11 +1865,9 @@ do
 			
 			playerButton.Spec.Icon = playerButton.Spec:CreateTexture(nil, 'BACKGROUND')
 			playerButton.Spec.Icon:SetAllPoints()
+					
 			
-			playerButton.Spec_AuraDisplay = MyCreateFrame("Frame", playerButton.Spec)
-		
-			
-			playerButton.Spec_AuraDisplay = MyCreateFrame("Frame", playerButton.Spec)
+			playerButton.Spec_AuraDisplay = CreateFrame("Frame", nil, playerButton.Spec)
 			playerButton.Spec_AuraDisplay:Hide()
 			for funcName, func in pairs(AuraFrameFunctions) do
 				playerButton.Spec_AuraDisplay[funcName] = func
@@ -1587,7 +1885,9 @@ do
 			end)
 			
 			-- power
-			playerButton.Power = MyCreateFrame('StatusBar', playerButton, {'BOTTOMLEFT', playerButton.Spec, "BOTTOMRIGHT", 1, 1}, {'BOTTOMRIGHT', playerButton, "BOTTOMRIGHT", -1, 1})
+			playerButton.Power = CreateFrame('StatusBar', nil, playerButton)
+			playerButton.Power:SetPoint('BOTTOMLEFT', playerButton.Spec, "BOTTOMRIGHT", 1, 1)
+			playerButton.Power:SetPoint('BOTTOMRIGHT', playerButton, "BOTTOMRIGHT", -1, 1)
 			playerButton.Power:SetMinMaxValues(0, 1)
 
 			
@@ -1597,7 +1897,9 @@ do
 			playerButton.Power.Background:SetTexture("Interface/Buttons/WHITE8X8")
 			
 			-- health
-			playerButton.Health = MyCreateFrame('StatusBar', playerButton.Power, {'BOTTOMLEFT', playerButton.Power, "TOPLEFT", 0, 0}, {'TOPRIGHT', playerButton, "TOPRIGHT", -1, -1})
+			playerButton.Health = CreateFrame('StatusBar', nil, playerButton.Power)
+			playerButton.Health:SetPoint('BOTTOMLEFT', playerButton.Power, "TOPLEFT", 0, 0)
+			playerButton.Health:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT", -1, -1)
 			playerButton.Health:SetMinMaxValues(0, 1)
 			
 			--playerButton.Health.Background = playerButton.Health:CreateTexture(nil, 'BACKGROUND', nil, 2)
@@ -1606,35 +1908,50 @@ do
 			playerButton.Health.Background:SetTexture("Interface/Buttons/WHITE8X8")
 			
 			-- role
-			playerButton.Role = MyCreateFrame("Frame", playerButton.Health, {'TOPLEFT', playerButton.Health, 'TOPLEFT', 2, -2})
-			
-			playerButton.Role.Icon = playerButton.Role:CreateTexture(nil, 'OVERLAY')
-			playerButton.Role.Icon:SetAllPoints()		
-			playerButton.Role.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
+			playerButton.RoleIcon = playerButton.Health:CreateTexture(nil, 'OVERLAY')
+			playerButton.RoleIcon:SetPoint('TOPLEFT', playerButton.Health, 'TOPLEFT', 2, -2)	
+			playerButton.RoleIcon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
 
 			
 			--MyTarget, indicating the current target of the player
-			playerButton.MyTarget = MyCreateFrame('Frame', playerButton.Health, {"TOPLEFT", playerButton.Health, "TOPLEFT", -1, 1}, {"BOTTOMRIGHT", playerButton.Power, "BOTTOMRIGHT", 1, -1})
-			playerButton.MyTarget = SetBackdrop(playerButton.MyTarget)
+			playerButton.MyTarget = CreateFrame('Frame', nil, playerButton.Health)
+			playerButton.MyTarget:SetPoint("TOPLEFT", playerButton.Health, "TOPLEFT", -1, 1)
+			playerButton.MyTarget:SetPoint("BOTTOMRIGHT", playerButton.Power, "BOTTOMRIGHT", 1, -1)
+			playerButton.MyTarget:SetBackdrop({
+				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+				edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+				edgeSize = 1
+			})
 			playerButton.MyTarget:SetBackdropColor(0, 0, 0, 0)
 			playerButton.MyTarget:Hide()
 			
 			--MyFocus, indicating the current focus of the player
-			playerButton.MyFocus = MyCreateFrame('Frame', playerButton.Health, {"TOPLEFT", playerButton.Health, "TOPLEFT", -1, 1}, {"BOTTOMRIGHT", playerButton.Power, "BOTTOMRIGHT", 1, -1})
-			playerButton.MyFocus = SetBackdrop(playerButton.MyFocus)
+			playerButton.MyFocus = CreateFrame('Frame', nil, playerButton.Health)
+			playerButton.MyFocus:SetPoint("TOPLEFT", playerButton.Health, "TOPLEFT", -1, 1)
+			playerButton.MyFocus:SetPoint("BOTTOMRIGHT", playerButton.Power, "BOTTOMRIGHT", 1, -1)
+			playerButton.MyFocus:SetBackdrop({
+				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+				edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+				edgeSize = 1
+			})
 			playerButton.MyFocus:SetBackdropColor(0, 0, 0, 0)
 			playerButton.MyFocus:Hide()
 			
+			-- selection highlight
 			playerButton.SelectionHighlight = playerButton:CreateTexture(nil, 'HIGHLIGHT')
 			playerButton.SelectionHighlight:SetPoint("TOPLEFT", playerButton.MyTarget)
 			playerButton.SelectionHighlight:SetPoint("BOTTOMRIGHT", playerButton.MyTarget)
 			playerButton.SelectionHighlight:Hide()
 			
+			-- level
+			playerButton.Level = MyCreateFontString(playerButton.Health)
+			playerButton.Level:SetPoint("TOPLEFT", playerButton.RoleIcon, "TOPRIGHT", 2, 2)
+			playerButton.Level:SetJustifyH("LEFT")
+			
 			-- numerical target indicator
 			playerButton.NumericTargetindicator = MyCreateFontString(playerButton.Health)
-			playerButton.NumericTargetindicator:SetPoint('TOPRIGHT', playerButton.Health, "TOPRIGHT", -5, 0)
-			playerButton.NumericTargetindicator:SetPoint('BOTTOMRIGHT', playerButton.Health, "BOTTOMRIGHT", -5, 0)
-			playerButton.NumericTargetindicator:SetWidth(20)
+			playerButton.NumericTargetindicator:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT", -5, 0)
+			playerButton.NumericTargetindicator:SetPoint('BOTTOMRIGHT', playerButton, "BOTTOMRIGHT", -5, 0)
 			playerButton.NumericTargetindicator:SetJustifyH("RIGHT")
 			
 			-- symbolic target indicator
@@ -1642,12 +1959,14 @@ do
 
 			-- name
 			playerButton.Name = MyCreateFontString(playerButton.Health)
-			playerButton.Name:SetPoint('TOPLEFT', playerButton.Role, "TOPRIGHT", 5, 2)
+			playerButton.Name:SetPoint('TOPLEFT', playerButton.Level, "TOPRIGHT", 5, 2)
 			playerButton.Name:SetPoint('BOTTOMRIGHT', playerButton.NumericTargetindicator, "BOTTOMLEFT", 0, 0)
 			playerButton.Name:SetJustifyH("LEFT")
 			
 			-- trinket
-			playerButton.Trinket = MyCreateFrame("Frame", playerButton, {'TOPLEFT', playerButton, 'TOPRIGHT', 1, 0}, {'BOTTOMLEFT', playerButton, 'BOTTOMRIGHT', 1, 0})
+			playerButton.Trinket = CreateFrame("Frame", nil, playerButton)
+			playerButton.Trinket:SetPoint('TOPLEFT', playerButton, 'TOPRIGHT', 1, 0)
+			playerButton.Trinket:SetPoint('BOTTOMLEFT', playerButton, 'BOTTOMRIGHT', 1, 0)
 			
 			playerButton.Trinket.Icon = playerButton.Trinket:CreateTexture()
 			playerButton.Trinket.Icon:SetAllPoints()
@@ -1665,7 +1984,9 @@ do
 	
 			
 			-- RACIALS
-			playerButton.Racial = MyCreateFrame("Frame", playerButton, {'TOPLEFT', playerButton.Trinket, 'TOPRIGHT', 1, 0}, {'BOTTOMLEFT', playerButton.Trinket, 'BOTTOMRIGHT', 1, 0})
+			playerButton.Racial = CreateFrame("Frame", nil, playerButton)
+			playerButton.Racial:SetPoint('TOPLEFT', playerButton.Trinket, 'TOPRIGHT', 1, 0)
+			playerButton.Racial:SetPoint('BOTTOMLEFT', playerButton.Trinket, 'BOTTOMRIGHT', 1, 0)
 
 			playerButton.Racial.Icon = playerButton.Racial:CreateTexture()
 			playerButton.Racial.Icon:SetAllPoints()
@@ -1676,15 +1997,55 @@ do
 			playerButton.Racial.Cooldown = MyCreateCooldown(playerButton.Racial)		
 			
 			-- Diminishing Returns
+			playerButton.DRContainer = CreateFrame("Frame", nil, playerButton)
+			playerButton.DRContainer:SetPoint("TOPRIGHT", playerButton, "TOPLEFT", -1, 0)
+			playerButton.DRContainer:SetPoint("BOTTOMRIGHT", playerButton, "BOTTOMLEFT", -1, 0)
+			playerButton.DRContainer:SetBackdrop({
+				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+				edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+				edgeSize = 1
+			})
+			playerButton.DRContainer:SetBackdropColor(0, 0, 0, 0)
 			playerButton.DR = {}
-			
+			for funcName, func in pairs(DrContainerFrameFunctions) do
+				playerButton.DRContainer[funcName] = func
+			end
+			playerButton.DRContainer.DR = playerButton.DR
 			
 			-- Auras
-			playerButton.Auras = {}
-			playerButton.InactiveAuras = {}
-
+			playerButton.Debuffs = {}
+			playerButton.InactiveDebuffs = {}
 			
-			playerButton.ObjectiveAndRespawn = MyCreateFrame("Frame", playerButton)
+			playerButton.DebuffContainer = CreateFrame("Frame", nil, playerButton)
+			playerButton.DebuffContainer:SetPoint("TOPRIGHT", playerButton.DRContainer, "TOPLEFT", -1, 0)
+			playerButton.DebuffContainer:SetPoint("BOTTOMRIGHT", playerButton.DRContainer, "BOTTOMLEFT", -1, 0)
+			
+			playerButton.DebuffContainer.Active = playerButton.Debuffs
+			playerButton.DebuffContainer.IsDebuff = true
+			playerButton.DebuffContainer.Inactive = playerButton.InactiveDebuffs
+			for funcName, func in pairs(AuraContainerFrameFunctions) do
+				playerButton.DebuffContainer[funcName] = func
+			end
+		
+			
+			playerButton.Buffs = {}
+			playerButton.InactiveBuffs = {}
+			
+			playerButton.BuffContainer = CreateFrame("Frame", nil, playerButton)
+			playerButton.BuffContainer:SetPoint("TOPRIGHT", playerButton.DebuffContainer, "TOPLEFT", -1, 0)
+			playerButton.BuffContainer:SetPoint("BOTTOMRIGHT", playerButton.DebuffContainer, "BOTTOMLEFT", -1, 0)
+			
+			playerButton.BuffContainer.Active = playerButton.Buffs
+			playerButton.BuffContainer.IsDebuff = false
+			playerButton.BuffContainer.Inactive = playerButton.InactiveBuffs
+			for funcName, func in pairs(AuraContainerFrameFunctions) do
+				playerButton.BuffContainer[funcName] = func
+			end
+		
+			
+			
+			playerButton.ObjectiveAndRespawn = CreateFrame("Frame", nil, playerButton)
+			playerButton.ObjectiveAndRespawn:SetFrameLevel(playerButton:GetFrameLevel()+5)
 			
 			playerButton.ObjectiveAndRespawn.Icon = playerButton.ObjectiveAndRespawn:CreateTexture(nil, "BORDER")
 			playerButton.ObjectiveAndRespawn.Icon:SetAllPoints()
@@ -1718,7 +2079,14 @@ do
 			playerButton.unit = "player"
 			playerButton.TargetUnitID = "target"
 			PlayerButton = playerButton
+			playerButton:SetAttribute('unit', "player")
+			playerButton:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "player") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
+			playerButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
+			playerButton:RegisterUnitEvent("UNIT_AURA", "player")
 		end
+		
+		-- level
+		if playerButton.PlayerLevel then playerButton:SetLevel(playerButton.PlayerLevel) end --for testmode
 
 		playerButton.Spec_AuraDisplay.SpecHasReducedInterruptTime = Data.SpecIDsWithInterruptDurations[playerButton.PlayerSpecID] or false
 		playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
@@ -1729,7 +2097,7 @@ do
 		
 		playerButton.PlayerRoleNumber = specData.roleNumber
 		playerButton.PlayerRoleID = specData.roleID
-		playerButton.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(playerButton.PlayerRoleID))
+		playerButton.RoleIcon:SetTexCoord(GetTexCoordsForRoleSmallCircle(playerButton.PlayerRoleID))
 
 		
 		playerButton.Spec.Icon:SetTexture(specData.specIcon)
@@ -1745,7 +2113,6 @@ do
 		playerButton:SetBindings()
 		
 		playerButton:Show()
-		
 		
 		tinsert(self.PlayerSortingTable, playerButton)				
 		self.Players[playerButton.PlayerName] = playerButton
@@ -1847,7 +2214,8 @@ do
 				PlayerRace = LibRaces:GetRaceToken(race), --delifers are local independent token for relentless check
 				PlayerSpecName = specName,
 				PlayerSpecID = Data.Classes[classTag][specName].specID,
-				PlayerClassColor = RAID_CLASS_COLORS[classTag]
+				PlayerClassColor = RAID_CLASS_COLORS[classTag],
+				PlayerLevel = false
 			}
 			self.resort = true
 		end
@@ -1878,7 +2246,13 @@ do
 			playerButton.Status = 2
 			
 			playerButton.UnitIDs = {TargetedByEnemy = {}}
-			playerButton:UpdateRange(false)
+			if playerButton.PlayerIsEnemy then 
+				playerButton:UpdateRange(false)
+			else
+				playerButton:UpdateRange(true)
+			end
+			
+		
 			-- end set data for real enemies
 		end
 
@@ -1933,11 +2307,19 @@ do
 				
 				ShowRealmnames = true,
 				ConvertCyrillic = true,
+				LevelText_Enabled = false,
+				LevelText_OnlyShowIfNotMaxLevel = true,
+				LevelText_Fontsize = 18,
+				LevelText_Outline = "",
+				LevelText_Textcolor = {1, 1, 1, 1},
+				LevelText_EnableTextshadow = false,
+				LevelText_TextShadowcolor = {0, 0, 0, 1},
 				
 				RangeIndicator_Enabled = true,
 				RangeIndicator_Range = 28767,
 				RangeIndicator_Alpha = 0.55,
-				RangeIndicator_Frame = "All",
+				RangeIndicator_Everything = false,
+				RangeIndicator_Frames = {},
 					
 				LeftButtonType = "Target",
 				LeftButtonValue = "",
@@ -2007,6 +2389,8 @@ do
 					NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
 					
 					DrTracking_Enabled = true,
+					DrTracking_Container_Color = {0, 0, 1, 1},
+					DrTracking_Container_BorderThickness = 1,
 					DrTracking_Spacing = 2,
 					DrTracking_DisplayType = "Frame",
 					
@@ -2025,6 +2409,8 @@ do
 					Auras_Spacing = 2,
 					
 					Auras_Buffs_Enabled = true,
+					Auras_Buffs_Container_Color = {0, 1, 0, 1},
+					Auras_Buffs_Container_BorderThickness = 1,
 					Auras_Buffs_Fontsize = 12,
 					Auras_Buffs_Outline = "OUTLINE",
 					Auras_Buffs_Textcolor = {1, 1, 1, 1},
@@ -2038,11 +2424,16 @@ do
 					Auras_Buffs_Cooldown_EnableTextshadow = false,
 					Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
+					Auras_Buffs_Filtering_Enabled = true,
 					Auras_Buffs_OnlyShowMine = true,
 					Auras_Buffs_SpellIDFiltering_Enabled = false,
 					Auras_Buffs_SpellIDFiltering_Filterlist = {},
 					
 					Auras_Debuffs_Enabled = true,
+					Auras_Debuffs_Container_Color = {1, 0, 0, 1},
+					Auras_Debuffs_Container_BorderThickness = 1,
+					Auras_Debuffs_Coloring_Enabled = true,
+					Auras_Debuffs_DisplayType = "Frame",
 					Auras_Debuffs_Fontsize = 12,
 					Auras_Debuffs_Outline = "OUTLINE",
 					Auras_Debuffs_Textcolor = {1, 1, 1, 1},
@@ -2056,11 +2447,12 @@ do
 					Auras_Debuffs_Cooldown_EnableTextshadow = false,
 					Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
+					Auras_Debuffs_Filtering_Enabled = true,
 					Auras_Debuffs_OnlyShowMine = true,
 					Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
 					Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
 					Auras_Debuffs_SpellIDFiltering_Enabled = false,
-					Auras_Debuffs_SpellIDFiltering__Filterlist = {},
+					Auras_Debuffs_SpellIDFiltering_Filterlist = {},
 
 					ObjectiveAndRespawn_ObjectiveEnabled = true,
 					ObjectiveAndRespawn_Width = 36,
@@ -2167,6 +2559,8 @@ do
 					NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
 					
 					DrTracking_Enabled = true,
+					DrTracking_Container_Color = {0, 0, 1, 1},
+					DrTracking_Container_BorderThickness = 1,
 					DrTracking_Spacing = 2,
 					DrTracking_DisplayType = "Frame",
 					
@@ -2185,6 +2579,8 @@ do
 					Auras_Spacing = 2,
 					
 					Auras_Buffs_Enabled = true,
+					Auras_Buffs_Container_Color = {0, 1, 0, 1},
+					Auras_Buffs_Container_BorderThickness = 1,
 					Auras_Buffs_Fontsize = 12,
 					Auras_Buffs_Outline = "OUTLINE",
 					Auras_Buffs_Textcolor = {1, 1, 1, 1},
@@ -2198,11 +2594,16 @@ do
 					Auras_Buffs_Cooldown_EnableTextshadow = false,
 					Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
+					Auras_Buffs_Filtering_Enabled = true,
 					Auras_Buffs_OnlyShowMine = true,
 					Auras_Buffs_SpellIDFiltering_Enabled = false,
 					Auras_Buffs_SpellIDFiltering_Filterlist = {},
 					
 					Auras_Debuffs_Enabled = true,
+					Auras_Debuffs_Container_Color = {1, 0, 0, 1},
+					Auras_Debuffs_Container_BorderThickness = 1,
+					Auras_Debuffs_Coloring_Enabled = true,
+					Auras_Debuffs_DisplayType = "Frame",
 					Auras_Debuffs_Fontsize = 12,
 					Auras_Debuffs_Outline = "OUTLINE",
 					Auras_Debuffs_Textcolor = {1, 1, 1, 1},
@@ -2216,11 +2617,12 @@ do
 					Auras_Debuffs_Cooldown_EnableTextshadow = false,
 					Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
+					Auras_Debuffs_Filtering_Enabled = true,
 					Auras_Debuffs_OnlyShowMine = true,
 					Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
 					Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
 					Auras_Debuffs_SpellIDFiltering_Enabled = false,
-					Auras_Debuffs_SpellIDFiltering__Filterlist = {},
+					Auras_Debuffs_SpellIDFiltering_Filterlist = {},
 					
 					Trinket_Enabled = true,
 					Trinket_Width = 28,
@@ -2250,11 +2652,19 @@ do
 				
 				ShowRealmnames = true,
 				ConvertCyrillic = true,
+				LevelText_Enabled = false,
+				LevelText_OnlyShowIfNotMaxLevel = true,
+				LevelText_Fontsize = 18,
+				LevelText_Outline = "",
+				LevelText_Textcolor = {1, 1, 1, 1},
+				LevelText_EnableTextshadow = false,
+				LevelText_TextShadowcolor = {0, 0, 0, 1},
 				
 				RangeIndicator_Enabled = true,
 				RangeIndicator_Range = 28767,
 				RangeIndicator_Alpha = 0.55,
-				RangeIndicator_Frame = "All",
+				RangeIndicator_Everything = false,
+				RangeIndicator_Frames = {},
 			
 				LeftButtonType = "Target",
 				LeftButtonValue = "",
@@ -2324,6 +2734,8 @@ do
 					NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
 					
 					DrTracking_Enabled = true,
+					DrTracking_Container_Color = {0, 0, 1, 1},
+					DrTracking_Container_BorderThickness = 1,
 					DrTracking_Spacing = 2,
 					DrTracking_DisplayType = "Frame",
 					
@@ -2342,6 +2754,8 @@ do
 					Auras_Spacing = 2,
 					
 					Auras_Buffs_Enabled = true,
+					Auras_Buffs_Container_Color = {0, 1, 0, 1},
+					Auras_Buffs_Container_BorderThickness = 1,
 					Auras_Buffs_Fontsize = 12,
 					Auras_Buffs_Outline = "OUTLINE",
 					Auras_Buffs_Textcolor = {1, 1, 1, 1},
@@ -2355,11 +2769,16 @@ do
 					Auras_Buffs_Cooldown_EnableTextshadow = false,
 					Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
+					Auras_Buffs_Filtering_Enabled = true,
 					Auras_Buffs_OnlyShowMine = true,
 					Auras_Buffs_SpellIDFiltering_Enabled = false,
 					Auras_Buffs_SpellIDFiltering_Filterlist = {},
 					
 					Auras_Debuffs_Enabled = true,
+					Auras_Debuffs_Container_Color = {1, 0, 0, 1},
+					Auras_Debuffs_Container_BorderThickness = 1,
+					Auras_Debuffs_Coloring_Enabled = true,
+					Auras_Debuffs_DisplayType = "Frame",
 					Auras_Debuffs_Fontsize = 12,
 					Auras_Debuffs_Outline = "OUTLINE",
 					Auras_Debuffs_Textcolor = {1, 1, 1, 1},
@@ -2373,11 +2792,12 @@ do
 					Auras_Debuffs_Cooldown_EnableTextshadow = false,
 					Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
+					Auras_Debuffs_Filtering_Enabled = true,
 					Auras_Debuffs_OnlyShowMine = true,
 					Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
 					Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
 					Auras_Debuffs_SpellIDFiltering_Enabled = false,
-					Auras_Debuffs_SpellIDFiltering__Filterlist = {},
+					Auras_Debuffs_SpellIDFiltering_Filterlist = {},
 
 					ObjectiveAndRespawn_ObjectiveEnabled = true,
 					ObjectiveAndRespawn_Width = 36,
@@ -2484,6 +2904,8 @@ do
 					NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
 					
 					DrTracking_Enabled = true,
+					DrTracking_Container_Color = {0, 0, 1, 1},
+					DrTracking_Container_BorderThickness = 1,
 					DrTracking_Spacing = 2,
 					DrTracking_DisplayType = "Frame",
 					
@@ -2502,6 +2924,8 @@ do
 					Auras_Spacing = 2,
 					
 					Auras_Buffs_Enabled = true,
+					Auras_Buffs_Container_Color = {0, 1, 0, 1},
+					Auras_Buffs_Container_BorderThickness = 1,
 					Auras_Buffs_Fontsize = 12,
 					Auras_Buffs_Outline = "OUTLINE",
 					Auras_Buffs_Textcolor = {1, 1, 1, 1},
@@ -2515,11 +2939,16 @@ do
 					Auras_Buffs_Cooldown_EnableTextshadow = false,
 					Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
+					Auras_Buffs_Filtering_Enabled = true,
 					Auras_Buffs_OnlyShowMine = true,
 					Auras_Buffs_SpellIDFiltering_Enabled = false,
 					Auras_Buffs_SpellIDFiltering_Filterlist = {},
 					
 					Auras_Debuffs_Enabled = true,
+					Auras_Debuffs_Container_Color = {1, 0, 0, 1},
+					Auras_Debuffs_Container_BorderThickness = 1,
+					Auras_Debuffs_Coloring_Enabled = true,
+					Auras_Debuffs_DisplayType = "Frame",
 					Auras_Debuffs_Fontsize = 12,
 					Auras_Debuffs_Outline = "OUTLINE",
 					Auras_Debuffs_Textcolor = {1, 1, 1, 1},
@@ -2533,11 +2962,12 @@ do
 					Auras_Debuffs_Cooldown_EnableTextshadow = false,
 					Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
+					Auras_Debuffs_Filtering_Enabled = true,
 					Auras_Debuffs_OnlyShowMine = true,
 					Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
 					Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
 					Auras_Debuffs_SpellIDFiltering_Enabled = false,
-					Auras_Debuffs_SpellIDFiltering__Filterlist = {},
+					Auras_Debuffs_SpellIDFiltering_Filterlist = {},
 					
 					Trinket_Enabled = true,
 					Trinket_Width = 28,
@@ -2746,15 +3176,15 @@ end
 function CombatLogevents.SPELL_AURA_REFRESH(self, srcName, destName, spellID, spellName, auraType)
 	local playerButton = self.Enemies.Players[destName] or self.Allies.Players[destName]
 	if playerButton then
-		playerButton:AuraRemoved(spellID, auraType)
+		playerButton:AuraRemoved(spellID, srcName, auraType)
 		playerButton:AuraApplied(spellID, spellName, srcName, auraType)
 	end
 end
 
-function CombatLogevents.SPELL_AURA_REMOVED(self, _, destName, spellID, spellName, auraType)
+function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellID, spellName, auraType)
 	local playerButton = self.Enemies.Players[destName] or self.Allies.Players[destName]
 	if playerButton then
-		playerButton:AuraRemoved(spellID, auraType)
+		playerButton:AuraRemoved(spellID, srcName, auraType)
 		if Data.PvPTalentsReducingInterruptTime[spellName] then
 			playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
 		end
@@ -3086,7 +3516,7 @@ do
 				end
 				
 				if Data.BattlegroundspezificBuffs[CurrentMapID] then
-					BattlegroundBuff = Data.BattlegroundspezificBuffs[CurrentMapID][EnemyFaction]
+					BattlegroundBuff = Data.BattlegroundspezificBuffs[CurrentMapID]
 				end
 				
 				BattleGroundDebuffs = Data.BattlegroundspezificDebuffs[CurrentMapID]
@@ -3139,6 +3569,7 @@ do
 					 if name == PlayerDetails.PlayerName and faction == EnemyFaction then 
 						EnemyFaction = AllyFaction
 						AllyFaction = faction
+						
 						return
 					end
 					 
