@@ -1,14 +1,25 @@
+v3.0.1
+
+Fixed missing localization
 
 v3.0
 
-New Features: 
-- Added support for allies and 40 man BGs
-- Added selection highlight for player bars
+New Features:
 
+Added support for allies and 40 man BGs
+Added selection highlight for player bars
+Added more Options for aura display
+Added multiselect for range update frames,
+Added debufftype filter
+Added level test
+Added container colors for buffs/debuffs/DRs
+Added an option to set the objectives left to the target counter
+Fixed bug with re-applying debuffs
 Improvements:
-- Improved the detection of Adaptation for stealth players
-BugFixes:
-- Hide the border or DR icons if the user switched from frame to text mode
+The addon should now correctly display debuffs when they got refreshed
+
+Improved the detection of Adaptation for stealth players BugFixes:
+Hide the border or DR icons if the user switched from frame to text mode
 
 v2.6.3
 Fixed the error i intended to fix in 2.6.2 but i didn't upload the new file LOL. This time its fixed for real
@@ -21,7 +32,6 @@ v2.6.1
 -Deleted unnecessary message when an enemy got interrupted
 -Fixed an error with battleground specific debuffs
 -Disabled sliders for trinket and racial width when the main-toggle is disabled
-
 
 v2.6
 
