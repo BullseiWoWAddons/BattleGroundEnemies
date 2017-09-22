@@ -535,8 +535,8 @@ local function addEnemyAndAllySettings(self)
 					},
 					RangeIndicator_Frames = {
 						type = "multiselect",
-						name = L.RangeIndicator_Frame,
-						desc = L.RangeIndicator_Frame_Desc,
+						name = L.RangeIndicator_Frames,
+						desc = L.RangeIndicator_Frames_Desc,
 						hidden = function() return (not self.config.RangeIndicator_Enabled or self.config.RangeIndicator_Everything) end,
 						get = function(option, key)
 							return BattleGroundEnemies.db.profile[playerType].RangeIndicator_Frames[key]
