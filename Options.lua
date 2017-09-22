@@ -1371,6 +1371,7 @@ local function addEnemyAndAllySettings(self)
 											desc = SHOW_BUFFS,
 											order = 1
 										},
+										Fake = addVerticalSpacing(2),
 										Auras_Buffs_Container_Color = {
 											type = "color",
 											name = L.Container_Color,
@@ -1380,7 +1381,7 @@ local function addEnemyAndAllySettings(self)
 												UpdateButtons(option, color, nil, nil, "BuffContainer", nil, nil, "SetBackdropBorderColor", ...)
 											end,
 											hasAlpha = true,
-											order = 2
+											order = 3
 										},
 										Auras_Buffs_Container_BorderThickness = {
 											type = "range",
@@ -1391,7 +1392,7 @@ local function addEnemyAndAllySettings(self)
 											min = 1,
 											max = 6,
 											step = 1,
-											order = 3
+											order = 4
 										},
 										Auras_Buffs_StacktextSettings = {
 											type = "group",
@@ -1399,7 +1400,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.MyAuraSettings_Desc,
 											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
 											inline = true,
-											order = 4,
+											order = 5,
 											args = addNormalTextSettings(playerType, BGSize, "Auras_Buffs", "Auras_Buffs_Enabled", true, "Buffs", "InactiveBuffs", "Stacks")
 										},
 										Auras_Buffs_CooldownTextSettings = {
@@ -1408,7 +1409,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.TrinketSettings_Desc,
 											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
 											inline = false,
-											order = 5,
+											order = 6,
 											args = addCooldownTextsettings(playerType, BGSize, "Auras_Buffs", "Auras_Buffs_Enabled", "Buffs", "InactiveBuffs")
 										},
 										Auras_Buffs_FilteringSettings = {
@@ -1417,7 +1418,7 @@ local function addEnemyAndAllySettings(self)
 											desc = L.AurasFilteringSettings_Desc,
 											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
 											--inline = true,
-											order = 6,
+											order = 7,
 											args = {
 												Auras_Buffs_Filtering_Enabled = {
 													type = "toggle",
@@ -1495,6 +1496,7 @@ local function addEnemyAndAllySettings(self)
 											desc = SHOW_DEBUFFS,
 											order = 1
 										},
+										Fake = addVerticalSpacing(2),
 										Auras_Debuffs_Container_Color = {
 											type = "color",
 											name = L.Container_Color,
@@ -1504,7 +1506,7 @@ local function addEnemyAndAllySettings(self)
 												UpdateButtons(option, color, nil, nil, "DebuffContainer", nil, nil, "SetBackdropBorderColor", ...)
 											end,
 											hasAlpha = true,
-											order = 2
+											order = 3
 										},
 										Auras_Debuffs_Container_BorderThickness = {
 											type = "range",
@@ -1515,8 +1517,9 @@ local function addEnemyAndAllySettings(self)
 											min = 1,
 											max = 6,
 											step = 1,
-											order = 3
+											order = 4
 										},
+										Fake1 = addVerticalSpacing(5),
 										Auras_Debuffs_Coloring_Enabled = {
 											type = "toggle",
 											name = L.Auras_Debuffs_Coloring_Enabled,
@@ -1525,7 +1528,7 @@ local function addEnemyAndAllySettings(self)
 												UpdateButtons(option, value, "Debuffs", nil, nil, nil, nil, "ChangeDisplayType")
 												UpdateButtons(option, value, "InactiveDebuffs", nil, nil, nil, nil, "ChangeDisplayType")
 											end,
-											order = 4
+											order = 6
 										},
 										Auras_Debuffs_DisplayType = {
 											type = "select",
@@ -1536,7 +1539,7 @@ local function addEnemyAndAllySettings(self)
 												UpdateButtons(option, value, "InactiveDebuffs", nil, nil, nil, nil, "ChangeDisplayType")
 											end,
 											values = Data.DisplayType,
-											order = 5
+											order = 7
 										},
 										Auras_Debuffs_StacktextSettings = {
 											type = "group",
@@ -1544,7 +1547,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.MyAuraSettings_Desc,
 											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
 											inline = true,
-											order = 6,
+											order = 8,
 											args = addNormalTextSettings(playerType, BGSize, "Auras_Debuffs", "Auras_Debuffs_Enabled", true, "Debuffs", "InactiveDebuffs", "Stacks")
 										},
 										Auras_Debuffs_CooldownTextSettings = {
@@ -1553,7 +1556,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.TrinketSettings_Desc,
 											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
 											inline = false,
-											order = 7,
+											order = 9,
 											args = addCooldownTextsettings(playerType, BGSize, "Auras_Debuffs", "Auras_Debuffs_Enabled", "Debuffs", "InactiveDebuffs")
 										},
 										Auras_Debuffs_FilteringSettings = {
@@ -1561,7 +1564,7 @@ local function addEnemyAndAllySettings(self)
 											name = FILTER,
 											desc = L.AurasFilteringSettings_Desc,
 											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
-											order = 8,
+											order = 10,
 											args = {
 												Auras_Debuffs_Filtering_Enabled = {
 													type = "toggle",
