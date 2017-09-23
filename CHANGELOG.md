@@ -1,3 +1,8 @@
+v3.0.2
+
+Filtering fix,
+Fixed objective debuffs
+
 v3.0.1
 
 Fixed missing localization
