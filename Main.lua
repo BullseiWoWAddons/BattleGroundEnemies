@@ -1437,10 +1437,10 @@ do
 			end
 			if aurasEnabled then
 				if isDebuff then
-					if not Auras_Debuffs_Filtering_Enabled or ((not config.Auras_Debuffs_OnlyShowMine or isMine) and ((not config.Auras_Debuffs_DebuffTypeFiltering_Enabled or config.Auras_Debuffs_DebuffTypeFiltering_Filterlist[debuffType]) or (config.Auras_Debuffs_SpellIDFiltering_Enabled and config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID]))) then
+					if not config.Auras_Debuffs_Filtering_Enabled or ((not config.Auras_Debuffs_OnlyShowMine or isMine) and ((not config.Auras_Debuffs_DebuffTypeFiltering_Enabled or config.Auras_Debuffs_DebuffTypeFiltering_Filterlist[debuffType]) or (config.Auras_Debuffs_SpellIDFiltering_Enabled and config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID]))) then
 						self:DisplayDebuff(spellID, srcName, amount or count, actualDuration, endTime, debuffType)
 					end
-				elseif not Auras_Buffs_Filtering_Enabled or ((not config.Auras_Buffs_OnlyShowMine or isMine) and (not config.Auras_Buffs_SpellIDFiltering_Enabled or config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID])) then
+				elseif not config.Auras_Buffs_Filtering_Enabled or ((not config.Auras_Buffs_OnlyShowMine or isMine) and (not config.Auras_Buffs_SpellIDFiltering_Enabled or config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID])) then
 					self:DisplayBuff(spellID, srcName, amount or count, actualDuration, endTime)
 				end
 			end
@@ -1835,9 +1835,11 @@ do
 					playerButton[funcName] = func
 				end
 				RegisterUnitWatch(playerButton, true)
-				playerButton:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
-				playerButton:SetScript("OnHide", playerButton.UnregisterAllEvents)
+				
 			end
+			
+			playerButton:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
+			playerButton:SetScript("OnHide", playerButton.UnregisterAllEvents)
 					
 			-- events/scripts
 			playerButton:RegisterForClicks('AnyUp')
