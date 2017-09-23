@@ -950,9 +950,9 @@ do
 			BattleGroundEnemies.ArenaEnemyIDToPlayerButton[unitID] = self
 			
 			if self.PlayerIsEnemy then
-				self.UnitIDs.Arena = unitID
 				self:FetchAnotherUnitID()
 			end
+			self.UnitIDs.Arena = unitID
 		end
 		RequestCrowdControlSpell(unitID)
 	end
@@ -3124,21 +3124,21 @@ end
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 	--self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
+	
 	if unitEvent == "cleared" then --"unseen", "cleared" or "destroyed"
 		local playerButton = self.ArenaEnemyIDToPlayerButton[unitID]
 		if playerButton then
 			--BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", playerButton.DisplayedName, "ObjectiveLost")
-			self.ArenaEnemyIDToPlayerButton[unitID] = nil
-			self:UnregisterEvent("UNIT_AURA")
+			
+			self.ArenaEnemyIDToPlayerButton[playerButton.UnitIDs.Arena] = nil
+			playerButton.UnitIDs.Arena = false
+			playerButton:UnregisterEvent("UNIT_AURA")
 			
 			local objective = playerButton.ObjectiveAndRespawn
 			objective.Icon:SetTexture()
 			objective.Value = false
-			objective:UnregisterAllEvents()
 			objective:Hide()
-			
 			if playerButton.PlayerIsEnemy then -- then this button is an ally button
-				playerButton.UnitIDs.Arena = false
 				playerButton:FetchAnotherUnitID()
 			end
 		end
