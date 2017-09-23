@@ -268,7 +268,7 @@ function BattleGroundEnemies.Allies:GROUP_ROSTER_UPDATE()
 						self.UnitIDToAllyButton[unit] = allyButton
 						allyButton:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", unit) --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 						allyButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", unit) --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
-						allyButton:RegisterUnitEvent("UNIT_AURA", unit)
+						--allyButton:RegisterUnitEvent("UNIT_AURA", unit)
 					end
 				end
 			else
@@ -1339,21 +1339,24 @@ do
 	}
 
 	function buttonFunctions:AuraApplied(spellID, spellName, srcName, auraType, amount)
-		local isDebuff, func
+		local config = self.bgSizeConfig
+		
+		local isMine = srcName == PlayerDetails.PlayerName
+		local isDebuff, func, aurasEnabled
 		if auraType == "DEBUFF" then
 			isDebuff = true
 			func = UnitDebuff
+			aurasEnabled = config.Auras_Enabled and config.Auras_Debuffs_Enabled 
 		else
 			isDebuff = false
 			func = UnitBuff
+			aurasEnabled = config.Auras_Enabled and config.Auras_Buffs_Enabled 
 		end
-		local isMine = srcName == PlayerDetails.PlayerName
-		local config = self.bgSizeConfig
+		
 		local drCat = DRData:GetSpellCategory(spellID)
 		--BattleGroundEnemies:Debug(operation, spellID)
 		local showAurasOnSpecicon = config.Spec_AuraDisplay_Enabled
 		local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])
-		local aurasEnabled = config.Auras_Enabled
 		local relentlessCheck = drCat and config.Trinket_Enabled and not self.Trinket.HasTrinket and Data.cCduration[drCat] and Data.cCduration[drCat][spellID]
 		local isAdaptation = isDebuff and spellID == 195901
 		
@@ -1434,10 +1437,10 @@ do
 			end
 			if aurasEnabled then
 				if isDebuff then
-					if config.Auras_Debuffs_Enabled and not Auras_Debuffs_Filtering_Enabled or (((not config.Auras_Debuffs_OnlyShowMine or isMine) and (config.Auras_Debuffs_DebuffTypeFiltering_Enabled or config.Auras_Debuffs_DebuffTypeFiltering_Filterlist[debuffType])) or (config.Auras_Debuffs_SpellIDFiltering_Enabled and config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID])) then
+					if not Auras_Debuffs_Filtering_Enabled or ((not config.Auras_Debuffs_OnlyShowMine or isMine) and ((not config.Auras_Debuffs_DebuffTypeFiltering_Enabled or config.Auras_Debuffs_DebuffTypeFiltering_Filterlist[debuffType]) or (config.Auras_Debuffs_SpellIDFiltering_Enabled and config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID]))) then
 						self:DisplayDebuff(spellID, srcName, amount or count, actualDuration, endTime, debuffType)
 					end
-				elseif config.Auras_Buffs_Enabled and not Auras_Buffs_Filtering_Enabled or ((not config.Auras_Buffs_OnlyShowMine or isMine) or (config.Auras_Buffs_SpellIDFiltering_Enabled and config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID])) then
+				elseif not Auras_Buffs_Filtering_Enabled or ((not config.Auras_Buffs_OnlyShowMine or isMine) and (not config.Auras_Buffs_SpellIDFiltering_Enabled or config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID])) then
 					self:DisplayBuff(spellID, srcName, amount or count, actualDuration, endTime)
 				end
 			end
@@ -1606,7 +1609,7 @@ do
 	allyButtonFunctions.UNIT_HEALTH_FREQUENT = buttonFunctions.UpdateHealth
 	allyButtonFunctions.UNIT_POWER_FREQUENT = buttonFunctions.UpdatePower
 	
-	function allyButtonFunctions:UNIT_AURA()
+	-- function allyButtonFunctions:UNIT_AURA()
 		-- local unitID = self.unit
 		-- for i = 1, 40 do
 			-- local _spellID
@@ -1615,7 +1618,7 @@ do
 				-- break
 			-- end
 		-- end
-	end
+	-- end
 end
 
 -- functions for aura on spec icon
@@ -2082,7 +2085,7 @@ do
 			playerButton:SetAttribute('unit', "player")
 			playerButton:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "player") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 			playerButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
-			playerButton:RegisterUnitEvent("UNIT_AURA", "player")
+			--playerButton:RegisterUnitEvent("UNIT_AURA", "player")
 		end
 		
 		-- level
@@ -3124,6 +3127,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 		if playerButton then
 			--BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", playerButton.DisplayedName, "ObjectiveLost")
 			self.ArenaEnemyIDToPlayerButton[unitID] = nil
+			self:UnregisterEvent("UNIT_AURA")
 			
 			local objective = playerButton.ObjectiveAndRespawn
 			objective.Icon:SetTexture()
