@@ -1,3 +1,7 @@
+v3.0.4
+
+Testmode now respects when something is disabled when enabled testmode
+
 v3.0.3
 
 player count fix
