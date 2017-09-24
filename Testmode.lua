@@ -105,7 +105,7 @@ do
 			for name, enemyDetails in pairs(fakePlayers) do
 				playerType:SetupButtonForNewPlayer(enemyDetails)
 			end
-			playerType:Show()
+			self:BGSizeCheck(self.BGSize)
 			playerType:SortPlayers()
 			
 		end
