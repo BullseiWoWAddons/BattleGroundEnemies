@@ -1,3 +1,7 @@
+v3.0.3
+
+player count fix
+
 v3.0.2
 
 Filtering fix,
