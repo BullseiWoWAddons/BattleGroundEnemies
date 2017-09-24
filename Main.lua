@@ -1741,8 +1741,8 @@ do
 		local enemyFaction = EnemyFaction or (playerFaction == "Horde" and 1 or 0)
 
 		
-		local oldCount = self.PlayerCount.oldPlayerNumber
-		if not oldCount or oldCount ~= currentCount then
+		local oldCount = self.PlayerCount.oldPlayerNumber or 0
+		if oldCount ~= currentCount then
 			if IsRatedBG and self.bgSizeConfig.Notifications_Enabled then
 				if currentCount < oldCount then
 					RaidNotice_AddMessage(RaidWarningFrame, L[isEnemy and "EnemyLeft" or "AllyLeft"], ChatTypeInfo["RAID_WARNING"]) 
