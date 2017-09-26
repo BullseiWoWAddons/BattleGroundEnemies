@@ -105,9 +105,7 @@ do
 			for name, enemyDetails in pairs(fakePlayers) do
 				playerType:SetupButtonForNewPlayer(enemyDetails)
 			end
-			self:BGSizeCheck(self.BGSize)
 			playerType:SortPlayers()
-			
 		end
 	end
 
@@ -145,10 +143,10 @@ do
 				end 
 			end
 		end
-
 		self:FillData()
 		
 		self:Show()
+		self:BGSizeCheck(self.BGSize)
 
 		FakePlayersOnUpdateFrame:Show()
 	end
@@ -185,7 +183,7 @@ do
 						if health == 0 and holdsflag ~= playerButton then --don't let players die that are holding a flag at the moment
 							--BattleGroundEnemies:Debug("dead")
 							playerButton.Health:SetValue(0)
-							playerButton:UnitIsDead(27)
+							playerButton.ObjectiveAndRespawn:PlayerDied(27)
 						else
 							playerButton.Health:SetValue(health/100) --player still alive
 							
@@ -228,7 +226,7 @@ do
 								end
 							--racial simulation
 							elseif number == 3 and playerButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
-								playerButton:RacialUsed(randomRacials[mathrandom(1, #randomRacials)])
+								playerButton.Racial:RacialUsed(randomRacials[mathrandom(1, #randomRacials)])
 							elseif number == 4 then --player got an diminishing CC applied
 								--self:Debug("Nummber4")
 								local dRCategory = Data.RandomDrCategory[mathrandom(1, #Data.RandomDrCategory)]

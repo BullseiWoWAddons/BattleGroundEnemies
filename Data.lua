@@ -91,8 +91,8 @@ Data.Buttons = {
 }
 
 Data.ObjectiveAndRespawnPosition = {
-	Left = L.Left,
-	Right = L.Right,
+	Left = L.LEFT,
+	Right = L.RIGHT,
 	LeftToTargetCounter = L.LeftToTargetCounter
 }
 
@@ -127,14 +127,55 @@ do
 end
 
 
-Data.RangeIndicator_Frames = {
+Data.Frames = {
 	ObjectiveAndRespawn = L.ObjectiveAndRespawnSettings,
 	Racial = L.RacialSettings,
 	Trinket = L.TrinketSettings,
 	Power = L.HealthBarSettings.." "..L.AND.." "..L.PowerBarSettings,
-	Spec = L.SpecSettings
+	Spec = L.SpecSettings,
+	BuffContainer = L.BuffContainer,
+	DebuffContainer = L.DebuffContainer,
+	DRContainer = L.DRContainer,
+	NumericTargetindicator = L.NumericTargetindicator,
+	Button = L.Button
 }
 
+Data.RangeFrames = {
+	ObjectiveAndRespawn = L.ObjectiveAndRespawnSettings,
+	Racial = L.RacialSettings,
+	Trinket = L.TrinketSettings,
+	Power = L.HealthBarSettings.." "..L.AND.." "..L.PowerBarSettings,
+	Spec = L.SpecSettings,
+	BuffContainer = L.BuffContainer,
+	DebuffContainer = L.DebuffContainer,
+	DRContainer = L.DRContainer,
+}
+
+Data.AllPositions = {
+	TOPLEFT = L.TOPLEFT,
+	TOP = L.TOP,
+	TOPRIGHT = L.TOPRIGHT,
+	LEFT = L.LEFT,
+	CENTER = L.CENTER,
+	RIGHT = L.RIGHT,
+	BOTTOMLEFT = L.BOTTOMLEFT,
+	BOTTOM = L.BOTTOM,
+	BOTTOMRIGHT = L.BOTTOMRIGHT
+}
+
+Data.BasicPositions = {
+	LEFT = L.LEFT,
+	RIGHT = L.RIGHT
+}
+
+Data.HorizontalDirections = {
+	leftwards = L.Leftwards, 
+	rightwards = L.Rightwards
+}
+Data.VerticalDirections = {
+	upwards = L.Upwards, 
+	downwards = L.Downwards
+}
 
 
 
