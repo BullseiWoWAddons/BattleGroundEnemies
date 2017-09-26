@@ -25,5 +25,14 @@ Locales\zhTW.lua
 
 Data.lua
 Main.lua
+
+Objects\Auras.lua
+Objects\Buffs.lua
+Objects\Debuffs.lua
+Objects\DR.lua
+Objects\ObjectiveAndRespawn.lua
+Objects\Racial.lua
+Objects\Trinket.lua
+
 Testmode.lua
 Options.lua
