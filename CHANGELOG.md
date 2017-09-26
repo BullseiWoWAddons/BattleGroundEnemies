@@ -1,3 +1,8 @@
+v3.1
+
+Fixed some localization issues, fixed some error messages.
+Added more positioning options
+
 v3.0.4
 
 Testmode now respects when something is disabled when enabled testmode
