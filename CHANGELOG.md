@@ -1,3 +1,7 @@
+v3.1.1
+
+Include new files in toc file
+
 v3.1
 
 Fixed some localization issues, fixed some error messages.
