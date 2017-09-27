@@ -1,3 +1,9 @@
+v3.1.3
+
+Fixed some anchoring issue in 40 man BG
+Testmode should now correctly hide when active and entering a arena
+Fixed error message releated to objecties in 40 man BG
+
 v3.1.2
 
 Objective fix, objectives should now work properly again.
