@@ -716,7 +716,7 @@ do
 
 	function buttonFunctions:ArenaOpponentShown(unitID)
 		if self.bgSizeConfig.ObjectiveAndRespawn_ObjectiveEnabled then
-			self.Objective:ShowIcon()
+			self.ObjectiveAndRespawn:ShowIcon()
 		
 			self:RegisterUnitEvent("UNIT_AURA", unitID)
 			BattleGroundEnemies.ArenaEnemyIDToPlayerButton[unitID] = self
@@ -923,7 +923,7 @@ do
 				--local trinketFaktor * diminish = actualDuration/(Racefaktor * normalDuration) 
 				--trinketTimesDiminish = trinketFaktor * diminish
 				--trinketTimesDiminish = without relentless : 1, 0.5, 0.25, with relentless: 0.8, 0.4, 0.2
-				
+
 				local trinketTimesDiminish = actualDuration/(Racefaktor * relentlessCheck)
 				
 				if trinketTimesDiminish == 0.8 or trinketTimesDiminish == 0.4 or trinketTimesDiminish == 0.2 then --Relentless
@@ -2644,6 +2644,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			playerButton.UnitIDs.Arena = false
 			playerButton:UnregisterEvent("UNIT_AURA")
 			
+			playerButton.ObjectiveAndRespawn:Reset()
 			
 			if playerButton.PlayerIsEnemy then -- then this button is an ally button
 				playerButton:FetchAnotherUnitID()
