@@ -1,6 +1,6 @@
 v3.1.2
 
-Objective fix, objectives shoudl now work properly again.
+Objective fix, objectives should now work properly again.
 
 v3.1.1
 
