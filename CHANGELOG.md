@@ -1,3 +1,7 @@
+v3.1.2
+
+Objective fix, objectives shoudl now work properly again.
+
 v3.1.1
 
 Include new files in toc file
