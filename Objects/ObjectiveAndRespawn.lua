@@ -14,6 +14,7 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 	ObjectiveAndRespawn:SetScript("OnSizeChanged", function(self, width, height)
 		BattleGroundEnemies.CropImage(self.Icon, width, height)
 	end)
+	ObjectiveAndRespawn:Hide()
 	
 	ObjectiveAndRespawn.AuraText = BattleGroundEnemies.MyCreateFontString(ObjectiveAndRespawn)
 	ObjectiveAndRespawn.AuraText:SetAllPoints()

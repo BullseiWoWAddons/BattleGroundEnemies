@@ -1976,9 +1976,9 @@ do
 					DrTracking_GrowDirection = "leftwards",
 					DrTracking_Container_Color = {0, 0, 1, 1},
 					DrTracking_Container_BorderThickness = 1,
-					DrTracking_Container_BasicPoint = "LEFT",
-					DrTracking_Container_RelativeTo = "Racial",
-					DrTracking_Container_RelativePoint = "RIGHT",
+					DrTracking_Container_BasicPoint = "RIGHT",
+					DrTracking_Container_RelativeTo = "Button",
+					DrTracking_Container_RelativePoint = "Left",
 					DrTracking_Container_OffsetX = 1,
 					DrTracking_DisplayType = "Countdowntext",
 					
@@ -2076,7 +2076,7 @@ do
 					
 					Racial_Enabled = true,
 					Racial_BasicPoint = "LEFT",
-					Racial_RelativeTo = "Button",
+					Racial_RelativeTo = "Trinket",
 					Racial_RelativePoint = "RIGHT",
 					Racial_OffsetX = 1,
 					Racial_Width = 28,
@@ -2388,11 +2388,11 @@ do
 					
 					DrTracking_Enabled = true,
 					DrTracking_HorizontalSpacing = 1,
-					DrTracking_GrowDirection = "leftwards",
+					DrTracking_GrowDirection = "rightwards",
 					DrTracking_Container_Color = {0, 0, 1, 1},
 					DrTracking_Container_BorderThickness = 1,
 					DrTracking_Container_BasicPoint = "LEFT",
-					DrTracking_Container_RelativeTo = "Racial",
+					DrTracking_Container_RelativeTo = "Button",
 					DrTracking_Container_RelativePoint = "RIGHT",
 					DrTracking_Container_OffsetX = 1,
 					DrTracking_DisplayType = "Countdowntext",
@@ -2408,7 +2408,7 @@ do
 					DrTrackingFiltering_Filterlist = {},
 					
 					
-					Auras_Enabled = true,
+					Auras_Enabled = false,
 					
 					Auras_Buffs_Enabled = true,
 					Auras_Buffs_Size = 15,
@@ -2477,9 +2477,9 @@ do
 					Auras_Debuffs_SpellIDFiltering_Filterlist = {},
 					
 					Trinket_Enabled = true,
-					Trinket_BasicPoint = "LEFT",
+					Trinket_BasicPoint = "RIGHT",
 					Trinket_RelativeTo = "Button",
-					Trinket_RelativePoint = "RIGHT",
+					Trinket_RelativePoint = "LEFT",
 					Trinket_OffsetX = 1,
 					Trinket_Width = 28,
 					Trinket_ShowNumbers = true,
@@ -2490,9 +2490,9 @@ do
 					Trinket_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 					
 					Racial_Enabled = true,
-					Racial_BasicPoint = "LEFT",
-					Racial_RelativeTo = "Button",
-					Racial_RelativePoint = "RIGHT",
+					Racial_BasicPoint = "RIGHT",
+					Racial_RelativeTo = "Trinket",
+					Racial_RelativePoint = "LEFT",
 					Racial_OffsetX = 1,
 					Racial_Width = 28,
 					Racial_ShowNumbers = true,
@@ -3003,19 +3003,18 @@ do
 				if wmf and not wmf:IsShown() then
 					SetMapToCurrentZone()
 					local mapID = GetCurrentMapAreaID()
+					
 					--self:Debug(mapID)
-					if mapID == -1 or mapID == 0 then --if this values occur GetCurrentMapAreaID() doesn't return valid values yet.
+					if (mapID == -1 or mapID == 0) and not BrawlCheck then --if this values occur GetCurrentMapAreaID() doesn't return valid values yet.
 						return
 					end
 					CurrentMapID = mapID
 				end
 				
-				
-				
 				--self:Debug("test")
 				if BrawlCheck and not IsInBrawl() then
 					self:Hide() --stopp the OnUpdateScript
-					return --no valid zone
+					return
 				end
 				
 				
@@ -3106,6 +3105,7 @@ do
 			if zone == "arena" then
 				BrawlCheck = true
 			end
+			self:Show()
 			CurrentMapID = false
 			-- self:Debug("PLAYER_ENTERING_WORLD")
 			-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
@@ -3113,7 +3113,6 @@ do
 			-- self:Debug("GetCurrentMapAreaID", GetCurrentMapAreaID())
 			
 			self.PlayerIsAlive = true
-			self:Show()
 		else
 			self:ToggleArenaFrames()
 			BrawlCheck = false
