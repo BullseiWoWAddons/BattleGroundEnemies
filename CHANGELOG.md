@@ -1,3 +1,14 @@
+v3.1.5
+
+New features: 
+- Added tooltips for debuff and buff icons.
+- Added an option to disable the spec icon
+- Added an option to set the vertical position of the role icon
+
+Bugfix:
+Fixed a typo which prevented the rearrangement of player frames when a player changed specialization
+
+
 v3.1.3
 
 Fixed some anchoring issue in 40 man BG
