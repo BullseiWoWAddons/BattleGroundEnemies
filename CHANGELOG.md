@@ -1,3 +1,6 @@
+v3.1.6
+Made the new spelltooltips added in v3.1.5 optional (disabled by default)
+
 v3.1.5
 
 New features: 
