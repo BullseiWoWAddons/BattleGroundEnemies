@@ -31,8 +31,10 @@ function BattleGroundEnemies.Objects.Auras.NewAuraContainer(playerButton)
 		
 		
 		auraFrame:SetScript("OnEnter", function(self)
-			GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
-			GameTooltip:SetSpellByID(self.SpellID)
+			if playerButton.bgSizeConfig.Auras_ShowTooltips then
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
+				GameTooltip:SetSpellByID(self.SpellID)
+			end
 		end)
 		
 		auraFrame:SetScript("OnLeave", function(self)

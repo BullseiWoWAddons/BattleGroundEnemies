@@ -1706,6 +1706,11 @@ local function addEnemyAndAllySettings(self)
 									desc = L.Auras_Enabled_Desc,
 									order = 1
 								},
+								Auras_ShowTooltips = {
+									type = "toggle",
+									name = L.Auras_ShowTooltips,
+									order = 2
+								},
 								Auras_BuffsSettings = {
 									type = "group",
 									name = L.Buffs,

@@ -1813,6 +1813,7 @@ do
 					
 					
 					Auras_Enabled = true,
+					Auras_ShowTooltips = false,
 					
 					Auras_Buffs_Enabled = false,
 					Auras_Buffs_Size = 15,
@@ -2020,6 +2021,7 @@ do
 					
 					
 					Auras_Enabled = true,
+					Auras_ShowTooltips = false,
 					
 					Auras_Buffs_Enabled = true,
 					Auras_Buffs_Size = 15,
@@ -2229,6 +2231,7 @@ do
 					
 					
 					Auras_Enabled = false,
+					Auras_ShowTooltips = false,
 					
 					Auras_Buffs_Enabled = false,
 					Auras_Buffs_Size = 15,
@@ -2439,6 +2442,7 @@ do
 					
 					
 					Auras_Enabled = false,
+					Auras_ShowTooltips = false,
 					
 					Auras_Buffs_Enabled = true,
 					Auras_Buffs_Size = 15,
