@@ -28,6 +28,18 @@ function BattleGroundEnemies.Objects.Auras.NewAuraContainer(playerButton)
 	AuraContainer.NewAuraFrame = function(self)
 		local auraFrame = CreateFrame('Frame', nil, self)
 		auraFrame:SetFrameLevel(self:GetFrameLevel() + 5)
+		
+		
+		auraFrame:SetScript("OnEnter", function(self)
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
+			GameTooltip:SetSpellByID(self.SpellID)
+		end)
+		
+		auraFrame:SetScript("OnLeave", function(self)
+			if GameTooltip:IsOwned(self) then
+				GameTooltip:Hide()
+			end
+		end)
 			
 		auraFrame.Icon = auraFrame:CreateTexture(nil, "BACKGROUND")
 		auraFrame.Icon:SetAllPoints()

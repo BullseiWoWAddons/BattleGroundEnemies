@@ -546,7 +546,7 @@ do
 		self:SetRangeIncicatorFrame()
 		
 		--spec
-		self.Spec:SetWidth(conf.Spec_Width)
+		self.Spec:ApplySettings()
 		
 		-- auras on spec
 		self.Spec_AuraDisplay.Cooldown:ApplyCooldownSettings(conf.Spec_AuraDisplay_ShowNumbers, true, true, {0, 0, 0, 0.5})
@@ -562,11 +562,7 @@ do
 		self.Health.Background:SetVertexColor(unpack(conf.HealthBar_Background))
 		
 		-- role
-		if conf.RoleIcon_Enabled then 
-			self.RoleIcon:SetSize(conf.RoleIcon_Size, conf.RoleIcon_Size) 
-		else
-			self.RoleIcon:SetSize(0.01, 0.01)
-		end
+		self.Role:ApplySettings()
 		
 		-- level
 		self:DisplayLevel()
@@ -583,7 +579,7 @@ do
 		self.SelectionHighlight:SetColorTexture(unpack(BattleGroundEnemies.db.profile.Highlight_Color))
 		
 		-- numerical target indicator
-		self.NumericTargetindicator:SetShown(conf.NumericTargetindicator_Enabled and true or false) 
+		self.NumericTargetindicator:SetShown(conf.NumericTargetindicator_Enabled) 
 		
 		self.NumericTargetindicator:SetTextColor(unpack(conf.NumericTargetindicator_Textcolor))
 		self.NumericTargetindicator:ApplyFontStringSettings(conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline, conf.NumericTargetindicator_EnableTextshadow, conf.NumericTargetindicator_TextShadowcolor)
@@ -1320,6 +1316,18 @@ do
 			
 			-- spec
 			playerButton.Spec = CreateFrame("Frame", nil, playerButton) 
+			
+			playerButton.Spec.ApplySettings = function(self)
+				if playerButton.bgSizeConfig.Spec_Enabled then
+					self:Show()
+					self:SetWidth(playerButton.bgSizeConfig.Spec_Width)
+				else
+					--dont SetWidth before Hide() otherwise it won't work as aimed
+					self:Hide()
+					self:SetWidth(0.01)
+				end
+			end
+			
 			playerButton.Spec:SetPoint('TOPLEFT', playerButton, 'TOPLEFT', 0, 0)
 			playerButton.Spec:SetPoint('BOTTOMLEFT' , playerButton, 'BOTTOMLEFT', 0, 0)
 			
@@ -1373,9 +1381,23 @@ do
 			playerButton.Health.Background:SetTexture("Interface/Buttons/WHITE8X8")
 			
 			-- role
-			playerButton.RoleIcon = playerButton.Health:CreateTexture(nil, 'OVERLAY')
-			playerButton.RoleIcon:SetPoint('TOPLEFT', playerButton.Health, 'TOPLEFT', 2, -2)	
-			playerButton.RoleIcon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
+			playerButton.Role = CreateFrame("Frame", nil, playerButton.Health)
+			playerButton.Role:SetPoint("TOPLEFT")
+			playerButton.Role:SetPoint("BOTTOMLEFT")
+			playerButton.Role.Icon = playerButton.Role:CreateTexture(nil, 'OVERLAY')
+			playerButton.Role.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
+			
+			playerButton.Role.ApplySettings = function(self)
+				if playerButton.bgSizeConfig.RoleIcon_Enabled then 
+					self:SetWidth(playerButton.bgSizeConfig.RoleIcon_Size)
+					self.Icon:SetSize(playerButton.bgSizeConfig.RoleIcon_Size, playerButton.bgSizeConfig.RoleIcon_Size)
+					self.Icon:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -playerButton.bgSizeConfig.RoleIcon_VerticalPosition)
+					self:Show()
+				else
+					self:Hide()
+					self:SetSize(0.01, 0.01)
+				end
+			end
 
 			
 			--MyTarget, indicating the current target of the player
@@ -1410,7 +1432,7 @@ do
 			
 			-- level
 			playerButton.Level = BattleGroundEnemies.MyCreateFontString(playerButton.Health)
-			playerButton.Level:SetPoint("TOPLEFT", playerButton.RoleIcon, "TOPRIGHT", 2, 2)
+			playerButton.Level:SetPoint("TOPLEFT", playerButton.Role, "TOPRIGHT", 2, 2)
 			playerButton.Level:SetJustifyH("LEFT")
 			
 			-- numerical target indicator
@@ -1474,7 +1496,7 @@ do
 		
 		playerButton.PlayerRoleNumber = specData.roleNumber
 		playerButton.PlayerRoleID = specData.roleID
-		playerButton.RoleIcon:SetTexCoord(GetTexCoordsForRoleSmallCircle(playerButton.PlayerRoleID))
+		playerButton.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(playerButton.PlayerRoleID))
 
 		
 		playerButton.Spec.Icon:SetTexture(specData.specIcon)
@@ -1581,7 +1603,7 @@ do
 				playerButton.PlayerSpecName = specName
 				playerButton.PlayerSpecID = Data.Classes[classTag][specName].specID
 				playerButton.Spec_AuraDisplay.SpecHasReducedInterruptTime = Data.SpecIDsWithInterruptDurations[playerButton.PlayerSpecID] or false
-				playerButton.resort = true
+				self.resort = true
 			end
 			
 			playerButton.Status = 1 --1 means found, already existing
@@ -1736,6 +1758,7 @@ do
 
 					RoleIcon_Enabled = true,
 					RoleIcon_Size = 13,
+					RoleIcon_VerticalPosition = 2,
 					
 					PlayerCount_Enabled = true,
 					PlayerCount_Fontsize = 14,
@@ -1745,7 +1768,8 @@ do
 					PlayerCount_TextShadowcolor = {0, 0, 0, 1},
 					
 					Framescale = 1,
-
+					
+					Spec_Enabled = true,
 					Spec_Width = 36,
 					
 					Spec_AuraDisplay_Enabled = true,
@@ -1941,6 +1965,7 @@ do
 					
 					RoleIcon_Enabled = true,
 					RoleIcon_Size = 13,
+					RoleIcon_VerticalPosition = 2,
 					
 					PlayerCount_Enabled = true,
 					PlayerCount_Fontsize = 14,
@@ -1951,6 +1976,7 @@ do
 					
 					Framescale = 1,
 					
+					Spec_Enabled = true,
 					Spec_Width = 36,
 					
 					Spec_AuraDisplay_Enabled = true,
@@ -2148,6 +2174,7 @@ do
 					
 					RoleIcon_Enabled = true,
 					RoleIcon_Size = 13,
+					RoleIcon_VerticalPosition = 2,
 					
 					PlayerCount_Enabled = true,
 					PlayerCount_Fontsize = 14,
@@ -2158,6 +2185,7 @@ do
 					
 					Framescale = 1,
 					
+					Spec_Enabled = true,
 					Spec_Width = 36,
 					
 					Spec_AuraDisplay_Enabled = true,
@@ -2356,6 +2384,7 @@ do
 					
 					RoleIcon_Enabled = true,
 					RoleIcon_Size = 13,
+					RoleIcon_VerticalPosition = 2,
 					
 					PlayerCount_Enabled = true,
 					PlayerCount_Fontsize = 14,
@@ -2366,6 +2395,7 @@ do
 					
 					Framescale = 1,
 					
+					Spec_Enabled = true,
 					Spec_Width = 36,
 					
 					Spec_AuraDisplay_Enabled = true,

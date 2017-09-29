@@ -91,6 +91,7 @@ function BattleGroundEnemies.Objects.Debuffs.New(playerButton)
 			auraFrame:ApplyDebuffFrameSettings()
 		end
 		auraFrame.Identifier = identifier
+		auraFrame.SpellID = spellID
 		auraFrame.Type = debuffType
 		auraFrame.Icon:SetTexture(GetSpellTexture(spellID))
 		if amount > 1 then

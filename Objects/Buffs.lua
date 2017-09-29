@@ -50,6 +50,7 @@ function BattleGroundEnemies.Objects.Buffs.New(playerButton)
 		end
 		if not auraFrame then 		
 			auraFrame = self:NewAuraFrame()
+
 			auraFrame.ApplyBuffFrameSettings = function(self)
 				
 				self.Stacks:SetTextColor(unpack(conf.Auras_Buffs_Textcolor))
@@ -61,6 +62,7 @@ function BattleGroundEnemies.Objects.Buffs.New(playerButton)
 			auraFrame:ApplyBuffFrameSettings()
 		end
 		auraFrame.Identifier = identifier
+		auraFrame.SpellID = spellID
 		auraFrame.Type = debuffType
 		auraFrame.Icon:SetTexture(GetSpellTexture(spellID))
 		if amount > 1 then

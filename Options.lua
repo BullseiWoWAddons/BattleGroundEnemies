@@ -1258,17 +1258,15 @@ local function addEnemyAndAllySettings(self)
 									type = "group",
 									name = L.RoleIconSettings,
 									desc = L.RoleIconSettings_Desc,
-									--childGroups = "select",
-									--inline = true,
+									set = function(option, value)
+										UpdateButtons(option, value, nil, nil, nil, "Role", nil, nil, "ApplySettings")
+									end,
 									order = 3,
 									args = {
 										RoleIcon_Enabled = {
 											type = "toggle",
 											name = L.RoleIcon_Enabled,
 											desc = L.RoleIcon_Enabled_Desc,
-											set = function(option, value)
-												UpdateButtons(option, value, nil, nil, nil, "RoleIcon", nil, nil, "SetSize", value and self.config[BGSize].RoleIcon_Size or 0.01, value and self.config[BGSize].RoleIcon_Size or 0.01)
-											end,
 											width = "normal",
 											order = 1
 										},
@@ -1277,14 +1275,22 @@ local function addEnemyAndAllySettings(self)
 											name = L.Size,
 											desc = L.RoleIcon_Size_Desc,
 											disabled = function() return not self.config[BGSize].RoleIcon_Enabled end,
-											set = function(option, value)
-												UpdateButtons(option, value, nil, nil, nil, "RoleIcon", nil, nil, "SetSize", value, value)
-											end,
 											min = 2,
 											max = 20,
 											step = 1,
 											width = "normal",
 											order = 2
+										},
+										RoleIcon_VerticalPosition = {
+											type = "range",
+											name = L.VerticalPosition,
+											desc = L.RoleIcon_Size_Desc,
+											disabled = function() return not self.config[BGSize].RoleIcon_Enabled end,
+											min = 0,
+											max = 50,
+											step = 1,
+											width = "normal",
+											order = 3,
 										}
 									}
 								},
@@ -1529,32 +1535,43 @@ local function addEnemyAndAllySettings(self)
 							desc = L.SpecSettings_Desc,
 							order = 11,
 							args = {
+								Spec_Enabled = {
+									type = "toggle",
+									name = L.Spec_Enabled,
+									desc = L.Spec_Enabled_Desc,
+									set = function(option, value)
+										UpdateButtons(option, value, nil, nil, nil, "Spec", nil, nil, "ApplySettings")
+									end,
+									order = 1
+								},
 								Spec_Width = {
 									type = "range",
 									name = L.Width,
 									desc = L.Spec_Width_Desc,
+									disabled = function() return not self.config[BGSize].Spec_Enabled end,
 									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Spec", nil, nil, "SetWidth", value)
+										UpdateButtons(option, value, nil, nil, nil, "Spec", nil, nil, "ApplySettings")
 									end,
 									min = 1,
-									max = 50,
+									max = 40,
 									step = 1,
-									order = 1
+									order = 2
 								},
+								Fake = addVerticalSpacing(3),
 								Spec_AuraDisplay_Enabled = {
 									type = "toggle",
 									name = L.Spec_AuraDisplay_Enabled,
 									desc = L.Spec_AuraDisplay_Enabled_Desc,
-									order = 2,
+									order = 4,
 								},
-								Fake = addVerticalSpacing(3),
+								Fake1 = addVerticalSpacing(5),
 								Spec_AuraDisplay_CooldownTextSettings = {
 									type = "group",
 									name = L.Countdowntext,
 									--desc = L.TrinketSettings_Desc,
 									disabled = function() return not self.config[BGSize].Spec_AuraDisplay_Enabled end,
 									inline = true,
-									order = 4,
+									order = 6,
 									args = addCooldownTextsettings(playerType, BGSize, "Spec_AuraDisplay", "Spec_AuraDisplay_Enabled", nil, nil, nil, "Spec_AuraDisplay")
 								}
 							}
