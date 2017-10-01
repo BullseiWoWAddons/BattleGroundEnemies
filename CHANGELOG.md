@@ -1,3 +1,7 @@
+v3.1.7
+
+Bugfix: Fixed a bug with resetting/hiding icons/cooldowns when UIParent gets hidden for example by Fullscreen Worldmap or Alt-Y. This is fixed by no longer using UIParent as Parent for the Mainframe (We still use UIScale and everything works as before, just without resetting timers)
+
 v3.1.6
 Made the new spelltooltips added in v3.1.5 optional (disabled by default)
 
