@@ -2,6 +2,7 @@ local BattleGroundEnemies = BattleGroundEnemies
 local addonName, Data = ...
 BattleGroundEnemies.Objects.Debuffs = {}
 
+local DebuffTypeColor = DebuffTypeColor
 
 local function debuffFrameUpdateStatusBorder(debuffFrame)
 	local color = DebuffTypeColor[debuffFrame.Type or "none"]

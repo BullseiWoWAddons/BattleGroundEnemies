@@ -6,7 +6,7 @@ local LibRaces = LibStub("LibRaces-1.0")
 LSM:Register("font", "PT Sans Narrow Bold", [[Interface\AddOns\BattleGroundEnemies\Fonts\PT Sans Narrow Bold.ttf]])
 LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusBar")
 
-local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies", UIParent)
+local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies")
 
 
 --upvalues
@@ -70,7 +70,6 @@ local CurrentMapID --contains the map id of the current active battleground
 --BattleGroundEnemies.EnemyFaction 
 --BattleGroundEnemies.AllyFaction
 
-local DebuffTypeColor = DebuffTypeColor
 
 
 
@@ -103,6 +102,18 @@ BattleGroundEnemies.Allies:SetScript("OnEvent", function(self, event, ...) self[
 
 BattleGroundEnemies:RegisterEvent("PLAYER_LOGIN")
 BattleGroundEnemies:RegisterEvent("PLAYER_ENTERING_WORLD")
+BattleGroundEnemies:RegisterEvent("UI_SCALE_CHANGED")
+
+function BattleGroundEnemies:UI_SCALE_CHANGED()
+	self:SetScale(UIParent:GetScale())
+end
+
+UIParent:HookScript("OnShow", function() BattleGroundEnemies:SetAlpha(1) end)
+
+UIParent:HookScript("OnHide", function() BattleGroundEnemies:SetAlpha(0) end)
+
+
+BattleGroundEnemies:SetScale(UIParent:GetScale())
 
 
 BattleGroundEnemies:SetScript("OnShow", function(self) 
