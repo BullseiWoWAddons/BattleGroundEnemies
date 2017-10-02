@@ -546,6 +546,16 @@ do
 			self.Level:SetWidth(0.01)
 		end
 	end
+	
+	function buttonFunctions:SetSpecAndRole()
+		local specData = Data.Classes[self.PlayerClass][self.PlayerSpecName]
+		self.PlayerRoleNumber = specData.roleNumber
+		self.PlayerRoleID = specData.roleID
+		self.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(self.PlayerRoleID))
+		self.Spec.Icon:SetTexture(specData.specIcon)
+		self.PlayerSpecID = specData.specID
+		self.Spec_AuraDisplay.SpecHasReducedInterruptTime = Data.SpecIDsWithInterruptDurations[self.PlayerSpecID] or false
+	end
 
 	function buttonFunctions:ApplyButtonSettings()
 		self.bgSizeConfig = self:GetParent().bgSizeConfig
@@ -1495,22 +1505,13 @@ do
 			--playerButton:RegisterUnitEvent("UNIT_AURA", "player")
 		end
 		
+		playerButton:SetSpecAndRole()
+		
+		playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
+		
 		-- level
 		if playerButton.PlayerLevel then playerButton:SetLevel(playerButton.PlayerLevel) end --for testmode
 
-		playerButton.Spec_AuraDisplay.SpecHasReducedInterruptTime = Data.SpecIDsWithInterruptDurations[playerButton.PlayerSpecID] or false
-		playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
-		
-		
-		local specData = Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName]
-		
-		
-		playerButton.PlayerRoleNumber = specData.roleNumber
-		playerButton.PlayerRoleID = specData.roleID
-		playerButton.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(playerButton.PlayerRoleID))
-
-		
-		playerButton.Spec.Icon:SetTexture(specData.specIcon)
 		
 		local color = playerButton.PlayerClassColor
 		playerButton.Health:SetStatusBarColor(color.r,color.g,color.b)
@@ -1608,12 +1609,8 @@ do
 		local playerButton = self.Players[name]
 		if playerButton then	--already existing
 			if playerButton.PlayerSpecName ~= specName then--its possible to change specName in battleground
-				playerButton.PlayerRoleNumber = Data.Classes[classTag][specName].roleNumber
-				playerButton.PlayerRoleID = Data.Classes[classTag][specName].roleID
-				playerButton.Spec.Icon:SetTexture(Data.Classes[classTag][specName].specIcon)
 				playerButton.PlayerSpecName = specName
-				playerButton.PlayerSpecID = Data.Classes[classTag][specName].specID
-				playerButton.Spec_AuraDisplay.SpecHasReducedInterruptTime = Data.SpecIDsWithInterruptDurations[playerButton.PlayerSpecID] or false
+				playerButton:SetSpecAndRole()
 				self.resort = true
 			end
 			
@@ -1624,7 +1621,6 @@ do
 				PlayerName = name,
 				PlayerRace = LibRaces:GetRaceToken(race), --delifers are local independent token for relentless check
 				PlayerSpecName = specName,
-				PlayerSpecID = Data.Classes[classTag][specName].specID,
 				PlayerClassColor = RAID_CLASS_COLORS[classTag],
 				PlayerLevel = false
 			}

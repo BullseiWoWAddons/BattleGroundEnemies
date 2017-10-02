@@ -72,7 +72,6 @@ do
 				PlayerClass = classTag,
 				PlayerName = name,
 				PlayerSpecName = specName,
-				PlayerSpecID = randomSpec.specID,
 				PlayerClassColor = RAID_CLASS_COLORS[classTag],
 				PlayerLevel = mathrandom(PlayerLevel - 5, PlayerLevel)
 			}
