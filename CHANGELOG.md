@@ -1,3 +1,7 @@
+v3.1.8
+
+The role icon now properly updates when a player changes to another spec with a different role in a battleground
+
 v3.1.7
 
 Bugfix: Fixed a bug with resetting/hiding icons/cooldowns when UIParent gets hidden for example by Fullscreen Worldmap or Alt-Y. This is fixed by no longer using UIParent as Parent for the Mainframe (We still use UIScale and everything works as before, just without resetting timers)
