@@ -733,7 +733,7 @@ do
 
 	function buttonFunctions:ArenaOpponentShown(unitID)
 		if self.bgSizeConfig.ObjectiveAndRespawn_ObjectiveEnabled then
-			self.ObjectiveAndRespawn:ShowIcon()
+			self.ObjectiveAndRespawn:ShowObjective()
 		
 			self:RegisterUnitEvent("UNIT_AURA", unitID)
 			BattleGroundEnemies.ArenaEnemyIDToPlayerButton[unitID] = self
@@ -2772,7 +2772,7 @@ function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellID)
 						end
 					end
 				end
-			else
+			elseif playerButton.unit then -- its an ally, check if it has an unitID assigned
 				local _,_,_,_,_,_,_, notInterruptible = UnitChannelInfo(playerButton.unit)
 				if notInterruptible == false then --spell is interruptable
 					playerButton.Spec_AuraDisplay:GotInterrupted(spellID, defaultInterruptDuration)
@@ -3084,7 +3084,10 @@ do
 				
 				BattleGroundEnemies:ToggleArenaFrames()
 				
-				self.IsRatedBG = IsRatedBattleground()
+				C_Timer.After(5, function() --Delay this check, since its happening sometimes that this data is not ready yet
+					self.IsRatedBG = IsRatedBattleground()
+				end)
+				
 				--self:Debug("IsRatedBG", IsRatedBG)
 			end
 			

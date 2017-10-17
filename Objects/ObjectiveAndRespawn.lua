@@ -47,7 +47,6 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 		self.Icon:SetTexture()
 		self.AuraText:SetText("")
 		self.ActiveRespawnTimer = false
-		self.Cooldown:Clear()
 	end
 	
 	ObjectiveAndRespawn.ApplySettings = function(self)
@@ -75,7 +74,7 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 		end
 	end
 
-	ObjectiveAndRespawn.ShowIcon = function(self)
+	ObjectiveAndRespawn.ShowObjective = function(self)
 		if BattleGroundEnemies.BattlegroundBuff then
 			--BattleGroundEnemies:Debug("has buff")
 			self.Icon:SetTexture(GetSpellTexture(BattleGroundEnemies.BattlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]))
