@@ -1,3 +1,9 @@
+v3.1.9
+
+-Fixed an error message reported by stalker19921 from Curse.
+-Delayed the RBG check, this way the addon should show RBG stuff like respawn timers when its an RBG
+-Localization Updates
+
 v3.1.8
 
 The role icon now properly updates when a player changes to another spec with a different role in a battleground
