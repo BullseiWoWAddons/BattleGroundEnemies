@@ -954,7 +954,7 @@ do
 		end
 	end
 
-	function buttonFunctions:AuraRemoved(spellID, srcName, auraType)
+	function buttonFunctions:AuraRemoved(spellID, srcName)
 		srcName = srcName or ""
 		local config = self.bgSizeConfig
 		local drCat = DRData:GetSpellCategory(spellID)
@@ -2731,7 +2731,7 @@ end
 function CombatLogevents.SPELL_AURA_REFRESH(self, srcName, destName, spellID, spellName, auraType)
 	local playerButton = self.Enemies.Players[destName] or self.Allies.Players[destName]
 	if playerButton then
-		playerButton:AuraRemoved(spellID, srcName, auraType)
+		playerButton:AuraRemoved(spellID, srcName)
 		playerButton:AuraApplied(spellID, spellName, srcName, auraType)
 	end
 end
@@ -2739,12 +2739,14 @@ end
 function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellID, spellName, auraType)
 	local playerButton = self.Enemies.Players[destName] or self.Allies.Players[destName]
 	if playerButton then
-		playerButton:AuraRemoved(spellID, srcName, auraType)
+		playerButton:AuraRemoved(spellID, srcName)
 		if Data.PvPTalentsReducingInterruptTime[spellName] then
 			playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
 		end
 	end
 end
+
+--CombatLogevents.SPELL_DISPEL = CombatLogevents.SPELL_AURA_REMOVED
 
 function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellID)
 
@@ -2950,7 +2952,7 @@ BattleGroundEnemies.PLAYER_UNGHOST = BattleGroundEnemies.PlayerAlive --player is
 
 
 do
-	local BrawlCheck
+	local IsArena
 	
 	do
 		local RoleIcons = {
@@ -3046,14 +3048,14 @@ do
 					local mapID = GetCurrentMapAreaID()
 					
 					--self:Debug(mapID)
-					if (mapID == -1 or mapID == 0) and not BrawlCheck then --if this values occur GetCurrentMapAreaID() doesn't return valid values yet.
+					if (mapID == -1 or mapID == 0) and not IsArena then --if this values occur GetCurrentMapAreaID() doesn't return valid values yet.
 						return
 					end
 					CurrentMapID = mapID
 				end
 				
 				--self:Debug("test")
-				if BrawlCheck and not IsInBrawl() then
+				if IsArena and not IsInBrawl() then
 					self:Hide() --stopp the OnUpdateScript
 					return
 				end
@@ -3143,14 +3145,15 @@ do
 		if self.TestmodeActive then --disable testmode
 			self:DisableTestMode()
 		end
+		
+		CurrentMapID = false
 	
 		local _, zone = IsInInstance()
 		if zone == "pvp" or zone == "arena" then
 			if zone == "arena" then
-				BrawlCheck = true
+				IsArena = true
 			end
 			self:Show()
-			CurrentMapID = false
 			-- self:Debug("PLAYER_ENTERING_WORLD")
 			-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
 			-- self:Debug("C_PvP.IsInBrawl", C_PvP.IsInBrawl())
@@ -3159,7 +3162,7 @@ do
 			self.PlayerIsAlive = true
 		else
 			self:ToggleArenaFrames()
-			BrawlCheck = false
+			IsArena = false
 			self:Hide()
 		end
 	end
