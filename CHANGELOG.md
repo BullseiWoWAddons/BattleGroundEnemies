@@ -1,3 +1,10 @@
+v3.1.9.2
+
+-Fixed an error reported by Navuho (SetScale called in combat)
+-Fixed a bug reported by Marani (Own health won't update from the second game on)
+-Fixed a bug reported by Talason84891 (Objectives won't show up sometimes - i found out that it was fine if one person picked up a second flag/orb/minecart)
+-Fixed an nil error reported by Tempus_Eteri 
+
 v3.1.9.1
 
 -Fixed arenaframe bug reported by sunlighthell
