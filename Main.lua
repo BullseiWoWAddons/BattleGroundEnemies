@@ -105,7 +105,11 @@ BattleGroundEnemies:RegisterEvent("PLAYER_ENTERING_WORLD")
 BattleGroundEnemies:RegisterEvent("UI_SCALE_CHANGED")
 
 function BattleGroundEnemies:UI_SCALE_CHANGED()
-	self:SetScale(UIParent:GetScale())
+	if not InCombatLockdown() then 
+		self:SetScale(UIParent:GetScale())
+	else
+		self:UI_SCALE_CHANGED()
+	end
 end
 
 UIParent:HookScript("OnShow", function() BattleGroundEnemies:SetAlpha(1) end)
@@ -247,12 +251,12 @@ function BattleGroundEnemies.Allies:GROUP_ROSTER_UPDATE()
 			local allyName, _, _, _, _, classTag = GetRaidRosterInfo(i)
 			if allyName and classTag then
 			
+				local allyButton = self.Players[allyName]
+			
 				if allyName ~= PlayerDetails.PlayerName then
 				
 					local unit = "raid"..i --it happens that numGroupMembers is higher than the value of the maximal players for that battleground, for example 15 in a 10 man bg, thats why we wipe AllyUnitIDToAllyDetails
 					local targetUnitID = unit.."target"
-					
-					local allyButton = self.Players[allyName]
 					
 					if allyButton and allyButton.unit ~= unit then -- ally has a new unitID now
 						
@@ -281,7 +285,27 @@ function BattleGroundEnemies.Allies:GROUP_ROSTER_UPDATE()
 						allyButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", unit) --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 						--allyButton:RegisterUnitEvent("UNIT_AURA", unit)
 					end
+					
+				else -- its the player
+					if allyButton and not allyButton:IsEventRegistered("UNIT_HEALTH_FREQUENT") then
+						
+						if not InCombatLockdown() then
+							allyButton:SetAttribute('unit', "player")
+						else
+							C_Timer.After(1, self.GROUP_ROSTER_UPDATE)
+						end
+					
+						allyButton.unit = "player"
+						allyButton.TargetUnitID = "target"
+						
+						allyButton:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "player") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
+						allyButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
+						--allyButton:RegisterUnitEvent("UNIT_AURA", "player")
+						
+						PlayerButton = allyButton
+					end					
 				end
+				
 			else
 				C_Timer.After(1, self.GROUP_ROSTER_UPDATE) --recheck in 1 second
 			end
@@ -1495,15 +1519,6 @@ do
 			playerButton[detail] = value
 		end
 		
-		if playerButton.PlayerName == PlayerDetails.PlayerName then
-			playerButton.unit = "player"
-			playerButton.TargetUnitID = "target"
-			PlayerButton = playerButton
-			playerButton:SetAttribute('unit', "player")
-			playerButton:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "player") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
-			playerButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
-			--playerButton:RegisterUnitEvent("UNIT_AURA", "player")
-		end
 		
 		playerButton:SetSpecAndRole()
 		
@@ -2681,7 +2696,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 		if playerButton then
 			--BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", playerButton.DisplayedName, "ObjectiveLost")
 			
-			self.ArenaEnemyIDToPlayerButton[playerButton.UnitIDs.Arena] = nil
+			self.ArenaEnemyIDToPlayerButton[unitID] = nil
 			playerButton.UnitIDs.Arena = false
 			playerButton:UnregisterEvent("UNIT_AURA")
 			

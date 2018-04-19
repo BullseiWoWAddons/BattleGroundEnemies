@@ -21,6 +21,7 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 	ObjectiveAndRespawn.AuraText:SetJustifyH("CENTER")
 	
 	ObjectiveAndRespawn.Cooldown = BattleGroundEnemies.MyCreateCooldown(ObjectiveAndRespawn)	
+	ObjectiveAndRespawn.Cooldown:Hide()
 	
 
 	ObjectiveAndRespawn.Cooldown:SetScript("OnHide", function() 
@@ -28,13 +29,11 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 	end)
 	ObjectiveAndRespawn:SetScript("OnHide", function(self) 
 		--BattleGroundEnemies:Debug("ObjectiveAndRespawn hidden")
-		self:Hide()
 		self:SetWidth(0.01)
 	end)
 	
 	ObjectiveAndRespawn:SetScript("OnShow", function(self) 
 		--BattleGroundEnemies:Debug("ObjectiveAndRespawn shown")
-		self:Show()
 		self:SetWidth(playerButton.bgSizeConfig.ObjectiveAndRespawn_Width)
 	end)
 	
@@ -76,7 +75,7 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 
 	ObjectiveAndRespawn.ShowObjective = function(self)
 		if BattleGroundEnemies.BattlegroundBuff then
-			--BattleGroundEnemies:Debug("has buff")
+			--BattleGroundEnemies:Debug(self:GetParent().PlayerName, "has buff")
 			self.Icon:SetTexture(GetSpellTexture(BattleGroundEnemies.BattlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]))
 			self:Show()
 		end
