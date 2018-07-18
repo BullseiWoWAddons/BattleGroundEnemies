@@ -612,10 +612,11 @@ do
 		self.Role:ApplySettings()
 		
 		-- level
-		self:DisplayLevel()
 		
 		self.Level:ApplyFontStringSettings(self.config.LevelText_Fontsize, self.config.LevelText_Outline, self.config.LevelText_EnableTextshadow, self.config.LevelText_TextShadowcolor)
-
+		self:DisplayLevel()
+		
+	
 		--MyTarget, indicating the current target of the player
 		self.MyTarget:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyTarget_Color))
 		
