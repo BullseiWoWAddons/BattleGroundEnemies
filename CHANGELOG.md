@@ -1,3 +1,7 @@
+v3.1.9.3
+
+-Update for BFA
+
 v3.1.9.2
 
 -Fixed an error reported by Navuho (SetScale called in combat)
