@@ -21,7 +21,9 @@ local random = math.random
 local tinsert = table.insert
 local tremove = table.remove
 
+
 local C_PvP = C_PvP
+local FindAuraByName = AuraUtil.FindAuraByName
 local GetArenaCrowdControlInfo = C_PvP.GetArenaCrowdControlInfo
 local RequestCrowdControlSpell = C_PvP.RequestCrowdControlSpell
 local IsInBrawl = C_PvP.IsInBrawl
@@ -29,7 +31,7 @@ local CreateFrame = CreateFrame
 local GetBattlefieldArenaFaction = GetBattlefieldArenaFaction
 local GetBattlefieldScore = GetBattlefieldScore
 local GetBattlefieldTeamInfo = GetBattlefieldTeamInfo
-local GetCurrentMapAreaID = GetCurrentMapAreaID
+local GetBestMapForUnit = C_Map.GetBestMapForUnit
 local GetNumBattlefieldScores = GetNumBattlefieldScores
 local GetNumGroupMembers = GetNumGroupMembers
 local GetRaidRosterInfo = GetRaidRosterInfo
@@ -850,14 +852,14 @@ do
 		local config = self.bgSizeConfig
 		
 		local isMine = srcName == PlayerDetails.PlayerName
-		local isDebuff, func, aurasEnabled
+		local isDebuff, filter, aurasEnabled
 		if auraType == "DEBUFF" then
 			isDebuff = true
-			func = UnitDebuff
+			filter = "HARMFUL"
 			aurasEnabled = config.Auras_Enabled and config.Auras_Debuffs_Enabled 
 		else
 			isDebuff = false
-			func = UnitBuff
+			filter = "HELPFUL"
 			aurasEnabled = config.Auras_Enabled and config.Auras_Buffs_Enabled 
 		end
 		
@@ -906,18 +908,18 @@ do
 				if UAspellIDs[spellID] then --more expensier way since we need to iterate through all debuffs
 					for i = 1, 40 do
 						local _spellID
-						_, _, _, count, debuffType , actualDuration, endTime, _, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, i, "PLAYER")
+						_, _, count, debuffType , actualDuration, endTime, _, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, i, "PLAYER")
 						if spellID == _spellID then
 							break
 						end
 					end
 				else
-					_, _, _, count, debuffType , actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = func(activeUnitID, spellName, nil, "PLAYER")
+					_, _, count, debuffType , actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = FindAuraByName(spellName, activeUnitID, "PLAYER|" .. filter)
 				end
 			else
 				for i = 1, 40 do
 					local _spellID, unitCaster
-					_, _, _, count, debuffType , actualDuration, endTime, unitCaster, _, _, _spellID, _, _, _, _, _, _, _, _ = func(activeUnitID, i)
+					_, _, count, debuffType , actualDuration, endTime, unitCaster, _, _, _spellID, _, _, _, _, _, _, _, _ = UnitDebuff(activeUnitID, i)
 					if spellID == _spellID and unitCaster then
 						local uName, realm = UnitName(unitCaster)
 						if realm then
@@ -1017,7 +1019,7 @@ do
 		--BattleGroundEnemies:Debug("Läüft")
 		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
 		for i = 1, #battleGroundDebuffs do
-			local name, _, _, count, _, _, _, _, _, _, spellID, _, _, _, _, _, value2, value3, value4 = UnitDebuff(unitID, battleGroundDebuffs[i])
+			local name, _, count, _, _, _, _, _, _, spellID, _, _, _, _, _, value2, value3, value4 = FindAuraByName(battleGroundDebuffs[i], unitID, 'HARMFUL')
 			--values for orb debuff:
 			--BattleGroundEnemies:Debug(value0, value1, value2, value3, value4, value5)
 			-- value2 = Reduces healing received by value2
@@ -1045,7 +1047,7 @@ do
 		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
 		local name, count, _
 		for i = 1, #battleGroundDebuffs do
-			name, _, _, count = UnitDebuff(unitID, battleGroundDebuffs[i])
+			name, _, count = FindAuraByName(battleGroundDebuffs[i], unitID, 'HARMFUL')
 			--values for orb debuff:
 			--BattleGroundEnemies:Debug(value0, value1, value2, value3, value4, value5)
 			-- value2 = Reduces healing received by value2
@@ -2818,7 +2820,8 @@ function CombatLogevents.UNIT_DIED(self, _, destName, _, _, _)
 end
 
 
-function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType)
+function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
+	local timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType = CombatLogGetCurrentEventInfo()
 	if CombatLogevents[subevent] then return CombatLogevents[subevent](self, srcName, destName, spellID, spellName, auraType) end
 end
 
@@ -2991,7 +2994,7 @@ do
 					if self.db.profile.DisableArenaFrames then
 						if CurrentMapID then
 							if not fakeParent then
-								for i = 1, 4 do
+								for i = 1, 5 do
 									local arenaFrame = _G["ArenaEnemyFrame"..i]
 									usersParent[i] = arenaFrame:GetParent() 
 									arenaFrame:SetParent(fakeFrame)
@@ -3003,7 +3006,7 @@ do
 								fakeFrame:Hide()
 							end
 						elseif fakeParent then
-							for i = 1, 4 do
+							for i = 1, 5 do
 								local arenaFrame = _G["ArenaEnemyFrame"..i]
 								arenaFrame:SetParent(usersParent[i])
 								local arenaPetFrame = _G["ArenaEnemyFrame"..i.."PetFrame"]
@@ -3012,7 +3015,7 @@ do
 							fakeParent = false
 						end
 					elseif fakeParent then
-						for i = 1, 4 do
+						for i = 1, 5 do
 							local arenaFrame = _G["ArenaEnemyFrame"..i]
 							arenaFrame:SetParent(usersParent[i])
 							local arenaPetFrame = _G["ArenaEnemyFrame"..i.."PetFrame"]
@@ -3059,8 +3062,8 @@ do
 			if not CurrentMapID then
 				local wmf = WorldMapFrame
 				if wmf and not wmf:IsShown() then
-					SetMapToCurrentZone()
-					local mapID = GetCurrentMapAreaID()
+				--	SetMapToCurrentZone() apparently removed in 8.0
+					local mapID = C_Map.GetBestMapForUnit('player')
 					
 					--self:Debug(mapID)
 					if (mapID == -1 or mapID == 0) and not IsArena then --if this values occur GetCurrentMapAreaID() doesn't return valid values yet.

@@ -41,7 +41,7 @@ function BattleGroundEnemies.Objects.Racial.New(playerButton)
 		if not config.Racial_Enabled then return end
 		local insi = playerButton.Trinket
 		
-		if Data.RacialSpellIDtoCooldownTrigger[spellID] and not insi.HasTrinket == 4 and insi.Cooldown:GetCooldownDuration() < 30000 then
+		if Data.RacialSpellIDtoCooldownTrigger[spellID] and not insi.HasTrinket == 4 and insi.Cooldown:GetCooldownDuration() < Data.RacialSpellIDtoCooldownTrigger[spellID] * 1000 then
 			insi.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldownTrigger[spellID])
 		end
 		

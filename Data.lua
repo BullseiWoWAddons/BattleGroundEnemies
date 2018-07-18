@@ -3,7 +3,7 @@ local addonName, Data = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
 local DRData = LibStub("DRData-1.0")
 
-local GetClassInfoByID = GetClassInfoByID
+local GetClassInfo = GetClassInfo
 local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
 local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
 local GetSpellInfo = GetSpellInfo
@@ -412,23 +412,23 @@ end
 		
 
 Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = faction(0 for hode, 1 for alliance) value spellID of the flag, minecart
-	[443] = {						-- Warsong Gulch
+	[92] = {						-- Warsong Gulch, used to be mapID 443 before BFA
 		[0] = 156621, 					-- Alliance Flag
 		[1] = 156618 					-- Horde Flag	
 	}, 
-	[482] = {						-- Eye of the Storm
+	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
 		[1] = 34976						-- Netherstorm Flag
 	},	
-	[813] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm)
+	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
 		[1] = 34976						-- Netherstorm Flag
 	},
-	[626] = {						-- Twin Peaks
+	[206] = {						-- Twin Peaks, used to be mapID 626 before BFA
 		[0] = 156621, 					-- Alliance Flag
 		[1] = 156618 					-- Horde Flag
 	}, 
-	[935] = {						-- Deepwind Gorge
+	[519] = {						-- Deepwind Gorge, used to be mapID 935 before BFA
 		[0] = 140876,					-- Alliance Mine Cart
 		[1] = 141210					-- Horde Mine Cart
 	}
@@ -449,27 +449,27 @@ local SpellidToSpellname = {
 }
 		
 Data.BattlegroundspezificDebuffs = { --key = mapID, value = table with key = number and value = debuff name
-	[443] = {						-- Warsong Gulch
+	[92] = {						-- Warsong Gulch, used to be mapID 443 before BFA
 		SpellidToSpellname[46392],		-- Focused Assault
 		SpellidToSpellname[46393]		-- Brutal Assault								
 	},
-	[482] = {						-- Eye of the Storm
+	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
 		SpellidToSpellname[46392],		-- Focused Assault
 		SpellidToSpellname[46393]		-- Brutal Assault							
 	},
-	[813] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm)
+	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA 
 		SpellidToSpellname[46392],		-- Focused Assault
 		SpellidToSpellname[46393]		-- Brutal Assault							
 	},
-	[626] = {						-- Twin Peaks
+	[206] = {						-- Twin Peaks, used to be mapID 626 before BFA 
 		SpellidToSpellname[46392],		-- Focused Assault
 		SpellidToSpellname[46393]		-- Brutal Assault					
 	}, 
-	[935] = {						-- Deepwind Gorge
+	[519] = {						-- Deepwind Gorge, used to be mapID 935 before BFA 
 		SpellidToSpellname[46392],		-- Focused Assault
 		SpellidToSpellname[46393]		-- Brutal Assault					
 	},	
-	[856] = {						-- Temple of Kotmogu
+	[417] = {						-- Temple of Kotmogu, used to be mapID 856 before BFA
 		SpellidToSpellname[121164], 	-- Orb of Power, Blue
 		SpellidToSpellname[121175], 	-- Orb of Power, Purple
 		SpellidToSpellname[121177], 	-- Orb of Power, Orange
@@ -496,7 +496,7 @@ Data.RacialSpellIDtoCooldown = {
 	 [7744] = 120,	--Will of the Forsaken, Undead Racial, 30 sec cooldown trigger on trinket
 	[20594] = 120,	--Stoneform, Dwarf Racial
 	[58984] = 120,	--Shadowmeld, Night Elf Racial
-	[59752] = 120,  --Every Man for Himself, Human Racial, 30 sec cooldown trigger on trinket
+	[59752] = 180,  --Every Man for Himself, Human Racial, 90 sec cooldown trigger on trinket
 	[28730] = 90,	--Arcane Torrent, Blood Elf Racial, Mage and Warlock, 
 	[50613] = 90,	--Arcane Torrent, Blood Elf Racial, Death Knight, 
    [202719] = 90,	--Arcane Torrent, Blood Elf Racial, Demon Hunter, 
@@ -512,7 +512,7 @@ Data.RacialSpellIDtoCooldown = {
 	[20572]	= 120,	--Blood Fury, Orc Racial, Warrior, Hunter, Rogue, Death Knight
 	[33697] = 120,	--Blood Fury, Orc Racial, Shaman, Monk
 	[20577] = 120, 	--Cannibalize, Undead Racial
-	[68992]	= 120,	--Darkflight, Worgen Racia
+	[68992]	= 120,	--Darkflight, Worgen Racial
 	[59545] = 180,	--Gift of the Naaru, Draenei Racial, Death Knight
 	[59543] = 180,	--Gift of the Naaru, Draenei Racial, Hunter
 	[59548] = 180,	--Gift of the Naaru, Draenei Racial, Mage
@@ -556,7 +556,7 @@ Data.TrinketTriggerSpellIDtoCooldown = {
 
 Data.RacialSpellIDtoCooldownTrigger = {
 	 [7744] = 30, 	--Will of the Forsaken, Undead Racial, 30 sec cooldown trigger on trinket
-	[59752] = 30  	--Every Man for Himself, Human Racial, 30 sec cooldown trigger on trinket
+	[59752] = 90  	--Every Man for Himself, Human Racial, 30 sec cooldown trigger on trinket
 }
 
 
@@ -674,7 +674,7 @@ do
 	
 	
 	for classID = 1, MAX_CLASSES do --example classes[EnglishClass][SpecName].
-		local _, classTag = GetClassInfoByID(classID)
+		local _, classTag = GetClassInfo(classID)
 		Data.Classes[classTag] = {}
 		for i = 1, GetNumSpecializationsForClassID(classID) do
 			
