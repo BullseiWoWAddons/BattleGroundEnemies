@@ -1067,7 +1067,7 @@ do
 	
 	function buttonFunctions:UNIT_AURA(unitID)
 		if BattleGroundEnemies.BattleGroundDebuffs then
-			if CurrentMapID == 856 then --856 is kotmogu
+			if CurrentMapID == 417 then --417 is kotmogu
 				self:Kotmoguorbs(unitID)
 			else
 				self:NotKotmogu(unitID)
