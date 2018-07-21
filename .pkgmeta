@@ -14,7 +14,7 @@ externals:
 	Libs/LibSharedMedia-3.0: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
 	Libs/UTF8: https://repos.wowace.com/wow/utf8/trunk
 
-enable-nolib-creation: no
+enable-nolib-creation: yes
 
 ignore:
 	- Changelog.txt
