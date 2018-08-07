@@ -1,3 +1,7 @@
+v3.1.9.4
+
+-Forgot to update the new mapID in one code line. This was affecting debuff display in Temple of Kotmogu. 
+
 v3.1.9.3
 
 -Update for BFA
