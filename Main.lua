@@ -23,7 +23,6 @@ local tremove = table.remove
 
 
 local C_PvP = C_PvP
-local FindAuraByName = AuraUtil.FindAuraByName
 local GetArenaCrowdControlInfo = C_PvP.GetArenaCrowdControlInfo
 local RequestCrowdControlSpell = C_PvP.RequestCrowdControlSpell
 local IsInBrawl = C_PvP.IsInBrawl
@@ -848,6 +847,19 @@ do
 		[233498] = true,
 		[233499] = true,	
 	}
+	
+	local function FindAuraBySpellID(unitID, spellID, filter)
+		
+		if not unitID or not spellID then return end
+
+		for i = 1, 40 do
+			local name, _, count, debuffType, actualDuration, endTime, _, _, _, id, _, _, _, _, _, value2, value3, value4 = UnitAura(unitID, i, filter)
+			if not id then return end -- no more auras
+
+			if spellID == id then
+				return name, _, count, debuffType, actualDuration, endTime, _, _, _, id, _, _, _, _, _, value2, value3, value4
+			end
+		end
 
 	function buttonFunctions:AuraApplied(spellID, spellName, srcName, auraType, amount)
 		local config = self.bgSizeConfig
@@ -915,7 +927,7 @@ do
 						end
 					end
 				else
-					_, _, count, debuffType , actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = FindAuraByName(spellName, activeUnitID, "PLAYER|" .. filter)
+					_, _, count, debuffType , actualDuration, endTime, _, _, _, _, _, _, _, _, _, _, _, _ = FindAuraBySpellID(activeUnitID, spellID, "PLAYER|" .. filter)
 				end
 			else
 				for i = 1, 40 do
@@ -1021,7 +1033,7 @@ do
 		--BattleGroundEnemies:Debug("Läüft")
 		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
 		for i = 1, #battleGroundDebuffs do
-			local name, _, count, _, _, _, _, _, _, spellID, _, _, _, _, _, value2, value3, value4 = FindAuraByName(battleGroundDebuffs[i], unitID, 'HARMFUL')
+			local name, _, count, _, _, _, _, _, _, spellID, _, _, _, _, _, value2, value3, value4 = FindAuraBySpellID(unitID, battleGroundDebuffs[i], 'HARMFUL')
 			--values for orb debuff:
 			--BattleGroundEnemies:Debug(value0, value1, value2, value3, value4, value5)
 			-- value2 = Reduces healing received by value2
@@ -1049,7 +1061,7 @@ do
 		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
 		local name, count, _
 		for i = 1, #battleGroundDebuffs do
-			name, _, count = FindAuraByName(battleGroundDebuffs[i], unitID, 'HARMFUL')
+			name, _, count = FindAuraBySpellID(unitID, battleGroundDebuffs[i], 'HARMFUL')
 			--values for orb debuff:
 			--BattleGroundEnemies:Debug(value0, value1, value2, value3, value4, value5)
 			-- value2 = Reduces healing received by value2
