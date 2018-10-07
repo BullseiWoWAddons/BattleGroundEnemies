@@ -959,7 +959,8 @@ do
 
 				local Racefaktor = 1
 				if drCat == "stun" and self.PlayerRace == "Orc" then
-					Racefaktor = 0.8	--Hardiness
+					--Racefaktor = 0.8	--Hardiness, but since september 5th hotfix hardiness no longer stacks with relentless
+					return 
 				end
 
 				
