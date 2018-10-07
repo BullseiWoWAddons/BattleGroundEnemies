@@ -418,7 +418,7 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 	}, 
 	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
-		[1] = 34976						-- Netherstorm Flag
+		[1] = 34976					-- Netherstorm Flag
 	},	
 	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
@@ -434,46 +434,33 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 	}
 }
 
-local SpellidToSpellname = {
-	[156618] = (GetSpellInfo(156618)), 			-- Horde Flag
-	[156621] = (GetSpellInfo(156621)), 			-- Alliance Flag
-	[34976]  = (GetSpellInfo(34976)), 			-- Netherstorm Flag
-	[141210] = (GetSpellInfo(141210)), 			-- Horde Mine Cart
-	[140876] = (GetSpellInfo(140876)), 			-- Alliance Mine Cart
-	[46392]  = (GetSpellInfo(46392)), 			-- Focused Assault
-	[46393]  = (GetSpellInfo(46393)), 			-- Brutal Assault
-	[121164] = (GetSpellInfo(121164)), 			-- Orb of Power, Blue
-	[121175] = (GetSpellInfo(121175)), 			-- Orb of Power, Purple
-	[121177] = (GetSpellInfo(121177)), 			-- Orb of Power, Orange
-	[121176] = (GetSpellInfo(121176)) 			-- Orb of Power, Green
-}
 		
 Data.BattlegroundspezificDebuffs = { --key = mapID, value = table with key = number and value = debuff name
 	[92] = {						-- Warsong Gulch, used to be mapID 443 before BFA
-		SpellidToSpellname[46392],		-- Focused Assault
-		SpellidToSpellname[46393]		-- Brutal Assault								
+		46392,						-- Focused Assault
+		46393						-- Brutal Assault								
 	},
 	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
-		SpellidToSpellname[46392],		-- Focused Assault
-		SpellidToSpellname[46393]		-- Brutal Assault							
+		46392,						-- Focused Assault
+		46393						-- Brutal Assault							
 	},
 	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA 
-		SpellidToSpellname[46392],		-- Focused Assault
-		SpellidToSpellname[46393]		-- Brutal Assault							
+		46392,						-- Focused Assault
+		46393						-- Brutal Assault							
 	},
 	[206] = {						-- Twin Peaks, used to be mapID 626 before BFA 
-		SpellidToSpellname[46392],		-- Focused Assault
-		SpellidToSpellname[46393]		-- Brutal Assault					
+		46392,						-- Focused Assault
+		46393						-- Brutal Assault					
 	}, 
 	[519] = {						-- Deepwind Gorge, used to be mapID 935 before BFA 
-		SpellidToSpellname[46392],		-- Focused Assault
-		SpellidToSpellname[46393]		-- Brutal Assault					
+		46392,						-- Focused Assault
+		46393						-- Brutal Assault					
 	},	
 	[417] = {						-- Temple of Kotmogu, used to be mapID 856 before BFA
-		SpellidToSpellname[121164], 	-- Orb of Power, Blue
-		SpellidToSpellname[121175], 	-- Orb of Power, Purple
-		SpellidToSpellname[121177], 	-- Orb of Power, Orange
-		SpellidToSpellname[121176] 		-- Orb of Power, Green
+		121164, 					-- Orb of Power, Blue
+		121175, 					-- Orb of Power, Purple
+		121177, 					-- Orb of Power, Orange
+		121176 						-- Orb of Power, Green
 	} 
 }
 		
