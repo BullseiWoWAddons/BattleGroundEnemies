@@ -2843,7 +2843,7 @@ do
 		end
 		
 		if playerButton then --ally targets an existing enemy
-			if playerButton.PlayerIsEnemy then
+			if playerButton.PlayerIsEnemy and PlayerButton then
 				playerButton.UnitIDs.TargetedByEnemy[PlayerButton] = true
 				playerButton:UpdateTargetIndicators()
 				playerButton.UnitIDs.Target = "target"
