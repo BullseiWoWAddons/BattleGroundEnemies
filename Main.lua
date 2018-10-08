@@ -860,6 +860,7 @@ do
 				return name, _, count, debuffType, actualDuration, endTime, _, _, _, id, _, _, _, _, _, value2, value3, value4
 			end
 		end
+	end
 
 	function buttonFunctions:AuraApplied(spellID, spellName, srcName, auraType, amount)
 		local config = self.bgSizeConfig
