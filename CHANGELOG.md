@@ -1,8 +1,21 @@
-v3.1.9.5
+v3.1.9.7
 
 -Toc update for 8.1
 -removed default interrupt duration for some specs, which existed in Legion, but no longer does in BFA
 -some Localization updates
+
+
+v3.1.9.6: Update Main.lua
+
+-Added missing 'end'
+
+
+v3.1.9.5
+ 
+-Fixed a rar error reported by melcom
+-The addon now doesn't check for relentless anymore for stun on orcs
+-Hopefully fixed the lags/DCs some users where reporting by switching from Blizzards recursive AuraUtil.FindAuraByName to a simple for loop
+
 
 v3.1.9.4
 
