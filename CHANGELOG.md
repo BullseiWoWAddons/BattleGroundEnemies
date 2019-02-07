@@ -1,3 +1,9 @@
+v3.1.9.5
+
+-Toc update for 8.1
+-removed default interrupt duration for some specs, which existed in Legion, but no longer does in BFA
+-some Localization updates
+
 v3.1.9.4
 
 -Forgot to update the new mapID in one code line. This was affecting debuff display in Temple of Kotmogu. 

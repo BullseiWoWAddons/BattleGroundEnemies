@@ -579,7 +579,6 @@ do
 		self.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(self.PlayerRoleID))
 		self.Spec.Icon:SetTexture(specData.specIcon)
 		self.PlayerSpecID = specData.specID
-		self.Spec_AuraDisplay.SpecHasReducedInterruptTime = Data.SpecIDsWithInterruptDurations[self.PlayerSpecID] or false
 	end
 
 	function buttonFunctions:ApplyButtonSettings()
@@ -1176,11 +1175,8 @@ function AuraFrameFunctions:ActiveAuraRemoved()
 end
 
 function AuraFrameFunctions:GotInterrupted(spellID, interruptDuration)
-	if self.SpecHasReducedInterruptTime then
-		interruptDuration = interruptDuration * 0.7
-	end
 	if self.HasAdditionalReducedInterruptTime then
-		interruptDuration = interruptDuration * 0.3
+		interruptDuration = interruptDuration * (1 - self.HasAdditionalReducedInterruptTime)
 	end
 	self:NewAura(spellID, nil, interruptDuration, GetTime() + interruptDuration, 4)
 end		
@@ -2748,7 +2744,7 @@ function CombatLogevents.SPELL_AURA_APPLIED(self, srcName, destName, spellID, sp
 	if playerButton then
 		playerButton:AuraApplied(spellID, spellName, srcName, auraType)
 		if Data.PvPTalentsReducingInterruptTime[spellName] then
-			playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = true
+			playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = Data.PvPTalentsReducingInterruptTime[spellName]
 		end
 	end
 end

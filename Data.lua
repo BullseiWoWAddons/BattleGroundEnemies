@@ -206,20 +206,12 @@ Data.Interruptdurations = {
 	-- Data.SpellPriorities[spellID] = 4
 -- end
 
-Data.SpecIDsWithInterruptDurations = { --Specs that have a 30% reduced interrupt duration
-	[258] = true, 	-- [Priest] Shadow
-	[264] = true, 	-- [Shaman] Restoration
-	[265] = true, 	-- [Warlock] Affliction
-	[266] = true, 	-- [Warlock] Demonology
-	[267] = true 	-- [Warlock] Destruction
-}
 
 -- pvp talents that reduce lockouts by 70%
 Data.PvPTalentsReducingInterruptTime = { 
-	[GetSpellInfo(221404)] = true, --  [Mage] Burning Determination
-	[GetSpellInfo(221677)] = true, --  [Shaman] Calming Waters
-	[GetSpellInfo(221660)] = true, --  [Priest] Holy Concentration
-	[GetSpellInfo(221703)] = true, --  [Warlock] Casting Circle
+	[GetSpellInfo(221404)] = 0.7, --  [Mage] Burning Determination, 70% reduction
+	[GetSpellInfo(221677)] = 0.5, --  [Shaman] Calming Waters, 50% reduction
+	[GetSpellInfo(221660)] = 0.7, --  [Priest] Holy Concentration, 70% reduction
 }
 
 Data.RandomDrCategory = {} --key = number, value = categorieName, used for Testmode
