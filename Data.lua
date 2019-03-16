@@ -404,7 +404,7 @@ end
 		
 
 Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = faction(0 for hode, 1 for alliance) value spellID of the flag, minecart
-	[92] = {						-- Warsong Gulch, used to be mapID 443 before BFA
+	[1339] = {						-- Warsong Gulch, used to be mapID 443 before BFA
 		[0] = 156621, 					-- Alliance Flag
 		[1] = 156618 					-- Horde Flag	
 	}, 
@@ -428,7 +428,7 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 
 		
 Data.BattlegroundspezificDebuffs = { --key = mapID, value = table with key = number and value = debuff name
-	[92] = {						-- Warsong Gulch, used to be mapID 443 before BFA
+	[1339] = {						-- Warsong Gulch, used to be mapID 443 before BFA
 		46392,						-- Focused Assault
 		46393						-- Brutal Assault								
 	},
