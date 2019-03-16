@@ -1,3 +1,8 @@
+v3.1.9.8
+
+- Changed mapID from Warsong Gulch to corresponding new ID for 8.1.5 rework
+
+
 v3.1.9.7
 
 -Toc update for 8.1
