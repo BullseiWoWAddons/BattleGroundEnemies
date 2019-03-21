@@ -109,7 +109,7 @@ function BattleGroundEnemies:UI_SCALE_CHANGED()
 	if not InCombatLockdown() then 
 		self:SetScale(UIParent:GetScale())
 	else
-		self:UI_SCALE_CHANGED()
+		C_Timer.After(1, self.UI_SCALE_CHANGED)
 	end
 end
 
