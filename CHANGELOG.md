@@ -1,3 +1,7 @@
+v3.1.9.9
+
+- preventing too many function calls when changing UI scale in combat
+
 v3.1.9.8
 
 - Changed mapID from Warsong Gulch to corresponding new ID for 8.1.5 rework
