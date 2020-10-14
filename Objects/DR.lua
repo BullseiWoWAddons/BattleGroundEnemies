@@ -20,7 +20,7 @@ end
 function BattleGroundEnemies.Objects.DR.New(playerButton)
 
 
-	local DRContainer = CreateFrame("Frame", nil, playerButton)
+	local DRContainer = CreateFrame("Frame", nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
 	DRContainer:SetPoint("TOPRIGHT", playerButton, "TOPLEFT", -1, 0)
 	DRContainer:SetPoint("BOTTOMRIGHT", playerButton, "BOTTOMLEFT", -1, 0)
 	DRContainer:SetBackdrop({
@@ -65,7 +65,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		local drFrame = self.DR[drCat]
 		if not drFrame then  --create a new frame for this categorie
 			
-			drFrame = CreateFrame("Frame", nil, self)
+			drFrame = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
 			
 			drFrame.Container = self
 			

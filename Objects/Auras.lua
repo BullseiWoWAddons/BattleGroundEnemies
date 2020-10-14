@@ -26,7 +26,7 @@ function BattleGroundEnemies.Objects.Auras.NewAuraContainer(playerButton)
 	--AuraContainer:SetSize(50,50)
 	
 	AuraContainer.NewAuraFrame = function(self)
-		local auraFrame = CreateFrame('Frame', nil, self)
+		local auraFrame = CreateFrame('Frame', nil, self, BackdropTemplateMixin and "BackdropTemplate")
 		auraFrame:SetFrameLevel(self:GetFrameLevel() + 5)
 		
 		
