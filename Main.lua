@@ -779,7 +779,7 @@ do
 			if self.bgSizeConfig.SymbolicTargetindicator_Enabled then
 				local indicator = self.TargetIndicators[i]
 				if not indicator then
-					indicator = CreateFrame("frame", nil, self.Health, BackdropTemplateMixin and "BackdropTemplate")
+					indicator = CreateFrame("frame",nil,self.Health)
 					indicator:SetSize(8,10)
 					indicator:SetPoint("TOP",floor(i/2)*(i%2==0 and -10 or 10), 0) --1: 0, 0 2: -10, 0 3: 10, 0 4: -20, 0 > i = even > left, uneven > right 
 					indicator:SetBackdrop({
@@ -1459,7 +1459,7 @@ do
 
 			
 			--MyTarget, indicating the current target of the player
-			playerButton.MyTarget = CreateFrame('Frame', nil, playerButton.Health, BackdropTemplateMixin and "BackdropTemplate")
+			playerButton.MyTarget = CreateFrame('Frame', nil, playerButton.Health)
 			playerButton.MyTarget:SetPoint("TOPLEFT", playerButton.Health, "TOPLEFT", -1, 1)
 			playerButton.MyTarget:SetPoint("BOTTOMRIGHT", playerButton.Power, "BOTTOMRIGHT", 1, -1)
 			playerButton.MyTarget:SetBackdrop({
@@ -1471,7 +1471,7 @@ do
 			playerButton.MyTarget:Hide()
 			
 			--MyFocus, indicating the current focus of the player
-			playerButton.MyFocus = CreateFrame('Frame', nil, playerButton.Health, BackdropTemplateMixin and "BackdropTemplate")
+			playerButton.MyFocus = CreateFrame('Frame', nil, playerButton.Health)
 			playerButton.MyFocus:SetPoint("TOPLEFT", playerButton.Health, "TOPLEFT", -1, 1)
 			playerButton.MyFocus:SetPoint("BOTTOMRIGHT", playerButton.Power, "BOTTOMRIGHT", 1, -1)
 			playerButton.MyFocus:SetBackdrop({
