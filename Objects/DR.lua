@@ -23,11 +23,6 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 	local DRContainer = CreateFrame("Frame", nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
 	DRContainer:SetPoint("TOPRIGHT", playerButton, "TOPLEFT", -1, 0)
 	DRContainer:SetPoint("BOTTOMRIGHT", playerButton, "BOTTOMLEFT", -1, 0)
-	DRContainer:SetBackdrop({
-		bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-		edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-		edgeSize = 1
-	})
 	DRContainer:SetBackdropColor(0, 0, 0, 0)
 	DRContainer.DR = {}
 
@@ -103,11 +98,6 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			
 			drFrame:SetWidth(playerButton.bgSizeConfig.BarHeight - playerButton.bgSizeConfig.DrTracking_Container_BorderThickness * 2)
 
-			drFrame:SetBackdrop({
-				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-				edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-				edgeSize = 1
-			})
 			drFrame:SetBackdropColor(0, 0, 0, 0)
 			drFrame:SetBackdropBorderColor(0, 0, 0, 0)
 
@@ -187,11 +177,6 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 	end
 
 	DRContainer.ApplyBackdrop = function(self, borderThickness)
-		self:SetBackdrop({
-			bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-			edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-			edgeSize = borderThickness
-		})
 		self:SetBackdropColor(0, 0, 0, 0)
 		self:SetBackdropBorderColor(unpack(playerButton.bgSizeConfig.DrTracking_Container_Color))
 		self:SetWidthOfAuraFrames(playerButton.bgSizeConfig.BarHeight)
