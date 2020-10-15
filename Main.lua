@@ -193,7 +193,7 @@ end
 
 BattleGroundEnemies.Enemies:SetScript("OnShow", function(self) 
 	if not BattleGroundEnemies.TestmodeActive then
-		self:RegisterEvent("UNIT_HEALTH_FREQUENT") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
+		self:RegisterEvent("UNIT_HEALTH") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 		if self.bgSizeConfig.PowerBar_Enabled then self:RegisterEvent("UNIT_POWER_FREQUENT") end --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 		self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 		self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
@@ -282,13 +282,13 @@ function BattleGroundEnemies.Allies:GROUP_ROSTER_UPDATE()
 						
 						allyButton.TargetUnitID = targetUnitID
 						self.UnitIDToAllyButton[unit] = allyButton
-						allyButton:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", unit) --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
+						allyButton:RegisterUnitEvent("UNIT_HEALTH", unit) --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 						allyButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", unit) --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 						--allyButton:RegisterUnitEvent("UNIT_AURA", unit)
 					end
 					
 				else -- its the player
-					if allyButton and not allyButton:IsEventRegistered("UNIT_HEALTH_FREQUENT") then
+					if allyButton and not allyButton:IsEventRegistered("UNIT_HEALTH") then
 						
 						if not InCombatLockdown() then
 							allyButton:SetAttribute('unit', "player")
@@ -299,7 +299,7 @@ function BattleGroundEnemies.Allies:GROUP_ROSTER_UPDATE()
 						allyButton.unit = "player"
 						allyButton.TargetUnitID = "target"
 						
-						allyButton:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "player") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
+						allyButton:RegisterUnitEvent("UNIT_HEALTH", "player") --fires when health of player, target, focus, nameplateX, arenaX, raidX updates
 						allyButton:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
 						--allyButton:RegisterUnitEvent("UNIT_AURA", "player")
 						
@@ -1125,7 +1125,7 @@ do
 		self:UpdateTargetIndicators()
 	end
 	
-	allyButtonFunctions.UNIT_HEALTH_FREQUENT = buttonFunctions.UpdateHealth
+	allyButtonFunctions.UNIT_HEALTH = buttonFunctions.UpdateHealth
 	allyButtonFunctions.UNIT_POWER_FREQUENT = buttonFunctions.UpdatePower
 	
 	-- function allyButtonFunctions:UNIT_AURA()
@@ -2635,7 +2635,7 @@ function BattleGroundEnemies.Enemies:NAME_PLATE_UNIT_REMOVED(unitID)
 	end
 end	
 
-function BattleGroundEnemies.Enemies:UNIT_HEALTH_FREQUENT(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
+function BattleGroundEnemies.Enemies:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
 	local enemyButton = self:GetPlayerbuttonByUnitID(unitID)
 	if enemyButton then --unit is a shown enemy
 		enemyButton:UpdateHealth(unitID)
@@ -2654,8 +2654,8 @@ end
 
 --Notes about UnitIDs
 --priority of unitIDs:
---1. Arena, detected by UNIT_HEALTH_FREQUENT (health upate), ARENA_OPPONENT_UPDATE (this units exist, don't exist anymore), we need to check for UnitExists() since there is a small time frame after the objective isn't on that target anymore where UnitExists returns false for that unitID
---2. nameplates, detected by UNIT_HEALTH_FREQUENT, NAME_PLATE_UNIT_ADDED, NAME_PLATE_UNIT_REMOVED
+--1. Arena, detected by UNIT_HEALTH (health upate), ARENA_OPPONENT_UPDATE (this units exist, don't exist anymore), we need to check for UnitExists() since there is a small time frame after the objective isn't on that target anymore where UnitExists returns false for that unitID
+--2. nameplates, detected by UNIT_HEALTH, NAME_PLATE_UNIT_ADDED, NAME_PLATE_UNIT_REMOVED
 --3. player's target
 --4. player's focus
 --5. ally targets, UNIT_TARGET fires if the target changes, we need to check for UnitExists() since there is a small time frame after an ally lost that enemy where UnitExists returns false for that unitID
