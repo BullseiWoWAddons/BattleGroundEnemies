@@ -15,7 +15,5 @@ externals:
 	Libs/UTF8: https://repos.wowace.com/wow/utf8/trunk
 	Libs/DRData-1.0: url: git://github.com/vendethiel/DRData-1.0.git
 
-enable-nolib-creation: yes
-
 ignore:
 	- Changelog.txt
