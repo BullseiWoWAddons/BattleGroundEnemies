@@ -1,3 +1,6 @@
+v9.0.7
+please packager upload the new release
+
 v3.1.9.9
 
 - preventing too many function calls when changing UI scale in combat
