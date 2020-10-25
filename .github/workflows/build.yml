@@ -25,12 +25,6 @@ jobs:
           # you can specify how much of the commit history you want to fetch,
           # which is useful for controlling the length of the automated changelog
           fetch-depth: 50       
-          
-      
-      - name: Run luacheck
-        uses: BigWigsMods/actions/luacheck@master
-        with:
-          args: -q
     
 
       # Runs a set of commands using the runners shell
