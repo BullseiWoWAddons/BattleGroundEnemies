@@ -94,7 +94,7 @@ globals = {
 	"AlertFrame",
 	"Ambiguate",
 	"BasicMessageDialog",
-	"BattleGroundEnemies"
+	"BattleGroundEnemies",
 	"BNGetFriendIndex",
 	"BNIsSelf",
 	"BNSendWhisper",
