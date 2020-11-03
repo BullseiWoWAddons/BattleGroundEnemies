@@ -3142,7 +3142,7 @@ do
 			local numScores = GetNumBattlefieldScores()
 			for i = 1, numScores do
 				local name,_,_,_,_,faction,race, _, classTag,_,_,_,_,_,_,specName = GetBattlefieldScore(i)
-				self:Debug("player", "name:", name, "faction:", faction, "race:", race, "classTag:", classTag, "specName:" specName)
+				self:Debug("player", "name:", name, "faction:", faction, "race:", race, "classTag:", classTag, "specName:", specName)
 				--name = name-realm, faction = 0 or 1, race = localized race e.g. "Mensch",classTag = e.g. "PALADIN", spec = localized specname e.g. "holy"
 				--locale dependent are: race, specName
 				
