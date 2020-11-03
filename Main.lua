@@ -2683,7 +2683,7 @@ end
 do
 	local TimeSinceLastOnUpdate = 0
 	local UpdatePeroid = 2 --update every second
-	function RequestTicker(self, elapsed) --OnUpdate runs if the frame RequestFrame is shown
+	local function RequestTicker(self, elapsed) --OnUpdate runs if the frame RequestFrame is shown
 		TimeSinceLastOnUpdate = TimeSinceLastOnUpdate + elapsed
 		if TimeSinceLastOnUpdate > UpdatePeroid then
 			RequestBattlefieldScoreData()
