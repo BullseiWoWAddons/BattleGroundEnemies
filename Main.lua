@@ -2677,7 +2677,7 @@ function BattleGroundEnemies:ProfileChanged()
 end
 
 function BattleGroundEnemies:Debug(...)
-	if self.db.profile.Debug then print("BGE:", ...) end
+	if self.db and self.db.profile.Debug then print("BGE:", ...) end
 end
 
 do
