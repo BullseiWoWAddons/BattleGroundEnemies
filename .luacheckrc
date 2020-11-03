@@ -94,16 +94,7 @@ globals = {
 	"AlertFrame",
 	"Ambiguate",
 	"BasicMessageDialog",
-	"BigWigs",
-	"BigWigs3DB",
-	"BigWigsAnchor",
-	"BigWigsAPI",
-	"BigWigsEmphasizeAnchor",
-	"BigWigsIconDB",
-	"BigWigsLoader",
-	"BigWigsOptions",
-	"BigWigsStatsDB",
-	"BigWigsKrosusFirstBeamWasLeft", -- Legion/Nighthold/Krosus.lua
+	"BattleGroundEnemies"
 	"BNGetFriendIndex",
 	"BNIsSelf",
 	"BNSendWhisper",
