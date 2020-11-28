@@ -182,11 +182,6 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 	end
 
 	DRContainer.ApplyBackdrop = function(self, borderThickness)
-		self:SetBackdrop({
-			bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-			edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-			edgeSize = borderThickness
-		})
 		self:SetBackdropColor(0, 0, 0, 0)
 		self:SetBackdropBorderColor(unpack(playerButton.bgSizeConfig.DrTracking_Container_Color))
 		self:SetWidthOfAuraFrames(playerButton.bgSizeConfig.BarHeight)
