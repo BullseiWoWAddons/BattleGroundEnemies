@@ -13,6 +13,7 @@ local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies")
 local _G = _G
 local pairs = pairs
 local print = print
+local time = time
 local type = type
 local unpack = unpack
 local gsub = gsub
@@ -86,6 +87,46 @@ BattleGroundEnemies.Objects = {}
 
 
 local RequestFrame = CreateFrame("Frame", nil, BattleGroundEnemies)
+
+-- local DebugFrame = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+-- DebugFrame:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+-- 	edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+-- 	tile = true, tileSize = 16, edgeSize = 16,
+-- 	insets = {left = 1, right = 1, top = 1, bottom = 1}}
+-- )
+-- DebugFrame:SetBackdropColor(0,0,0,1)
+-- DebugFrame:SetWidth(650)
+-- DebugFrame:SetHeight(500)
+-- DebugFrame:SetPoint("CENTER", UIParent, "CENTER")
+-- DebugFrame:Hide()
+-- DebugFrame:SetFrameStrata("DIALOG")
+
+-- local scrollArea = CreateFrame("ScrollFrame", "BCMCopyScroll", DebugFrame, "UIPanelScrollFrameTemplate")
+-- scrollArea:SetPoint("TOPLEFT", DebugFrame, "TOPLEFT", 8, -5)
+-- scrollArea:SetPoint("BOTTOMRIGHT", DebugFrame, "BOTTOMRIGHT", -30, 5)
+
+-- local editBox = CreateFrame("EditBox", nil, DebugFrame)
+-- editBox:SetMultiLine(true)
+-- editBox:SetMaxLetters(99999)
+-- editBox:EnableMouse(true)
+-- editBox:SetAutoFocus(false)
+-- editBox:SetFontObject(ChatFontNormal)
+-- editBox:SetWidth(620)
+-- editBox:SetHeight(495)
+-- editBox:SetScript("OnEscapePressed", function(f) f:GetParent():GetParent():Hide() f:SetText("") end)
+
+-- scrollArea:SetScrollChild(editBox)
+
+-- local close = CreateFrame("Button", "BCMCloseButton", DebugFrame, "UIPanelCloseButton")
+-- close:SetPoint("TOPRIGHT", DebugFrame, "TOPRIGHT", 0, 25)
+
+-- local font = DebugFrame:CreateFontString(nil, nil, "GameFontNormal")
+-- font:Hide()
+
+-- DebugFrame.box = editBox
+-- DebugFrame.font = font
+
+-- BattleGroundEnemies.DebugFrame = DebugFrame
 
 
 
@@ -2691,8 +2732,28 @@ function BattleGroundEnemies:ProfileChanged()
 	self.Allies:ApplyAllSettings()
 end
 
+BattleGroundEnemies.DebugText = BattleGroundEnemies.DebugText or ""
 function BattleGroundEnemies:Debug(...)
-	if self.db and self.db.profile.Debug then print("BGE:", ...) end
+	if self.db and self.db.profile.Debug then 
+		print("BGE:", ...) 
+
+		-- disabled for now, its just way too cpu intense and makes the game crash, but would be nice to have
+		-- local args = {...}
+		-- local text = ""
+		-- for i = 1, #args do
+		-- 	text = text.. " ".. tostring(args[i])			
+		-- end
+
+		-- local timestampFormat = "[%I:%M:%S] " --timestamp format
+		-- local stamp = BetterDate(timestampFormat, time())
+
+		-- DebugFrame.font:SetFormattedText(stamp.."%s\n", text) -- Set a line break
+		-- local cleanLine = DebugFrame.font:GetText() or ""
+		-- self.DebugText = self.DebugText.. cleanLine
+		-- print("DebugText:", self.DebugText)
+
+		-- DebugFrame.box:SetText(self.DebugText)
+	end
 end
 
 do
@@ -3146,7 +3207,14 @@ do
 			
 			
 			if InCombatLockdown() then return end
-			
+
+			-- Tab 1: All Players, Tab 2: only Alliance, Tab 3: only Horde
+			if PVPMatchResults:IsVisible() then 
+				if PVPMatchResults.selectedTab ~= 1 then
+					return 
+				end
+			end
+
 			
 		
 			
