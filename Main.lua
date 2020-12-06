@@ -3099,7 +3099,7 @@ do
 				
 				
 				local MyBgFaction = GetBattlefieldArenaFaction()  -- returns the playered faction 0 for horde, 1 for alliance
-				--print("MyBgFaction:", MyBgFaction)
+				self:Debug("MyBgFaction:", MyBgFaction)
 				if MyBgFaction == 0 then -- i am Horde
 					self.EnemyFaction = 1 --Enemy is Alliance
 					self.AllyFaction = 0
@@ -3133,6 +3133,9 @@ do
 			
 			local _, _, _, _, numEnemies = GetBattlefieldTeamInfo(self.EnemyFaction)
 			local _, _, _, _, numAllies = GetBattlefieldTeamInfo(self.AllyFaction)
+
+			self:Debug("numEnemies:", numEnemies)
+			self:Debug("numAllies:", numAllies)
 			
 			self:BGSizeCheck(numEnemies)
 			
@@ -3155,6 +3158,8 @@ do
 			self.Allies.resort = false
 			
 			local numScores = GetNumBattlefieldScores()
+			self:Debug("numScores:", numScores)
+
 			for i = 1, numScores do
 				local name,_,_,_,_,faction,race, _, classTag,_,_,_,_,_,_,specName = GetBattlefieldScore(i)
 				self:Debug("player", "name:", name, "faction:", faction, "race:", race, "classTag:", classTag, "specName:", specName)
