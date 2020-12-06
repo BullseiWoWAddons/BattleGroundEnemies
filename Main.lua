@@ -46,6 +46,7 @@ local PlaySound = PlaySound
 local PowerBarColor = PowerBarColor --table
 local RaidNotice_AddMessage = RaidNotice_AddMessage
 local RequestBattlefieldScoreData = RequestBattlefieldScoreData
+local SetBattlefieldScoreFaction = SetBattlefieldScoreFaction
 local SetMapToCurrentZone = SetMapToCurrentZone
 local UnitDebuff = UnitDebuff
 local UnitExists = UnitExists
@@ -2632,6 +2633,9 @@ do
 	-- DefaultSettings.profile.Enemies = {[15] = DefaultSettings.profile, [40] = DefaultSettings.profile}
 	-- DefaultSettings.profile.Allies = {[15] = DefaultSettings.profile, [40] = DefaultSettings.profile}
 	
+
+
+
 	local function CreateMainFrame(playerType)
 		local self = BattleGroundEnemies[playerType]
 		self.Players = {} --index = name, value = button(table), contains enemyButtons
@@ -2658,6 +2662,16 @@ do
 		self.PlayerCount:SetAllPoints()
 		self.PlayerCount:SetJustifyH("LEFT")
 	end
+	
+	local function PVPMatchScoreboard_OnHide()
+		if PVPMatchScoreboard.selectedTab ~= 1 then
+			-- user was looking at another tab than all players
+			SetBattlefieldScoreFaction() -- request a UPDATE_BATTLEFIELD_SCORE
+		end
+
+	end
+
+
 
 	
 	function BattleGroundEnemies:PLAYER_LOGIN()
@@ -2673,6 +2687,8 @@ do
 		CreateMainFrame("Enemies")
 		
 		self:SetupOptions()
+
+		PVPMatchScoreboard:HookScript("OnHide", PVPMatchScoreboard_OnHide)
 		
 		--DBObjectLib:ResetProfile(noChildren, noCallbacks)
 		
@@ -2735,7 +2751,7 @@ end
 BattleGroundEnemies.DebugText = BattleGroundEnemies.DebugText or ""
 function BattleGroundEnemies:Debug(...)
 	if self.db and self.db.profile.Debug then 
-		print("BGE:", ...) 
+		print("BGE DEBUG:", ...) 
 
 		-- disabled for now, its just way too cpu intense and makes the game crash, but would be nice to have
 		-- local args = {...}
@@ -2754,6 +2770,12 @@ function BattleGroundEnemies:Debug(...)
 
 		-- DebugFrame.box:SetText(self.DebugText)
 	end
+end
+
+function BattleGroundEnemies:Information(...)
+	
+	print("BGE:", ...) 
+
 end
 
 do
@@ -3127,6 +3149,8 @@ do
 			end
 		end
 
+		local wrongSelectedTab = 0
+
 		function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
 			-- self:Debug(GetCurrentMapAreaID())
@@ -3191,7 +3215,6 @@ do
 				--self:Debug("IsRatedBG", IsRatedBG)
 			end
 			
-			
 			local _, _, _, _, numEnemies = GetBattlefieldTeamInfo(self.EnemyFaction)
 			local _, _, _, _, numAllies = GetBattlefieldTeamInfo(self.AllyFaction)
 
@@ -3207,18 +3230,7 @@ do
 			
 			
 			if InCombatLockdown() then return end
-
-			-- Tab 1: All Players, Tab 2: only Alliance, Tab 3: only Horde
-			if PVPMatchResults:IsVisible() then 
-				if PVPMatchResults.selectedTab ~= 1 then
-					return 
-				end
-			end
-
-			
-		
-			
-			
+	
 			
 			wipe(self.Enemies.NewPlayerDetails) --use a local table to not create an unnecessary new button if another player left
 			wipe(self.Allies.NewPlayerDetails) --use a local table to not create an unnecessary new button if another player left
@@ -3228,6 +3240,9 @@ do
 			local numScores = GetNumBattlefieldScores()
 			self:Debug("numScores:", numScores)
 
+
+			local foundAllies = 0
+			local foundEnemies = 0
 			for i = 1, numScores do
 				local name,_,_,_,_,faction,race, _, classTag,_,_,_,_,_,_,specName = GetBattlefieldScore(i)
 				self:Debug("player", "name:", name, "faction:", faction, "race:", race, "classTag:", classTag, "specName:", specName)
@@ -3242,12 +3257,31 @@ do
 						
 						return
 					end
-					 
-					self[faction == self.EnemyFaction and "Enemies" or "Allies"]:CreateOrUpdatePlayer(name, race, classTag, specName)
+					if faction == self.EnemyFaction then
+						self.Enemies:CreateOrUpdatePlayer(name, race, classTag, specName)
+						foundEnemies = foundEnemies + 1
+					else
+						self.Allies:CreateOrUpdatePlayer(name, race, classTag, specName)
+						foundAllies = foundAllies + 1
+					end
 				end
 			end
-			self.Enemies:DeleteAndCreateNewPlayers()
-			self.Allies:DeleteAndCreateNewPlayers()
+		
+			if foundEnemies == 0 then
+				if numEnemies ~= 0 then
+					self:Debug("Missing Enemies, probably the ally tab is selected")
+				end
+			else
+				self.Enemies:DeleteAndCreateNewPlayers()
+			end
+
+			if foundAllies == 0 then
+				if numAllies ~= 0 then
+					self:Debug("Missing Allies, probably the enemy tab is selected")
+				end
+			else
+				self.Allies:DeleteAndCreateNewPlayers()
+			end
 			
 		end--functions end
 	end-- do-end block end for locals of the function UPDATE_BATTLEFIELD_SCORE
