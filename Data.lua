@@ -410,7 +410,7 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 	}, 
 	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
-		[1] = 34976					-- Netherstorm Flag
+		[1] = 34976						-- Netherstorm Flag
 	},	
 	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
@@ -420,9 +420,9 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 		[0] = 156621, 					-- Alliance Flag
 		[1] = 156618 					-- Horde Flag
 	}, 
-	[519] = {						-- Deepwind Gorge, used to be mapID 935 before BFA
-		[0] = 140876,					-- Alliance Mine Cart
-		[1] = 141210					-- Horde Mine Cart
+	[519] = {						-- Deepwind Gorge, used to be mapID 935 before BFA, got updated to a Arathi Basin style BG in patch 8.3.0
+		[0] = 156621, 					-- Alliance Flag
+		[1] = 156618 					-- Horde Flag	
 	}
 }
 
