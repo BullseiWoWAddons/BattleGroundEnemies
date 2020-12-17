@@ -257,13 +257,17 @@ Data.cCduration = {	-- this is basically data from DRData-1 with durations, used
 		[ 28272] = 8, -- Polymorph (pig)
 		[ 28271] = 8, -- Polymorph (turtle)
 		[ 61305] = 8, -- Polymorph (black cat)
+		[277792] = 8, -- Polymorph (Bumblebee)
+		[277787] = 8, -- Polymorph (Direhorn)
 		[ 61721] = 8, -- Polymorph (rabbit)
 		[ 61780] = 8, -- Polymorph (turkey)
 		[126819] = 8, -- Polymorph (procupine)
 		[161353] = 8, -- Polymorph (bear cub)
 		[161354] = 8, -- Polymorph (monkey)
+		[321395] = 8, -- Polymorph (Mawrat)
 		[161355] = 8, -- Polymorph (penguin)
 		[161372] = 8, -- Polymorph (peacock)
+		[126819] = 8, -- Polymorph (Porcupine)
 		[ 82691] = 8, -- Ring of Frost
 		-- Monk
 		[115078] = 4, -- Paralysis
@@ -296,7 +300,7 @@ Data.cCduration = {	-- this is basically data from DRData-1 with durations, used
 		-- Paladin
 		[ 31935] = 3, -- Avenger's Shield
 		-- Priest
-		[ 15487] = 5, -- Silence
+		[ 15487] = 4, -- Silence
 		-- Rogue
 		[  1330] = 3, -- Garrote
 		-- Blood Elf
@@ -314,9 +318,6 @@ Data.cCduration = {	-- this is basically data from DRData-1 with durations, used
 	disorient = {
 		-- Druid
 		[ 33786] = 6, -- Cyclone
-		[209753] = 6, -- Cyclone (Balance)
-		-- Hunter
-		[186387] = 4, -- Bursting Shot
 		-- Mage
 		[ 31661] = 3, -- Dragon's Breath
 		-- Paladin
@@ -335,26 +336,26 @@ Data.cCduration = {	-- this is basically data from DRData-1 with durations, used
 	--[[ STUNS ]]--
 	stun = {
 		-- Death Knight
-		[108194] = 5, -- Asphyxiate (talent for unholy)
+		[108194] = 4, -- Asphyxiate (talent for unholy)
 		[221562] = 5, -- Asphyxiate (baseline for blood)
 		[207171] = 4, -- Winter is Coming (Remorseless winter stun)
 		-- Demon Hunter
-		[179057] = 5, -- Chaos Nova
+		[179057] = 2, -- Chaos Nova
 		[200166] = 3, -- Metamorphosis
-		[205630] = 6, -- Illidan's Grasp, primary effect
-		[211881] = 2, -- Fel Eruption
+		[205630] = 3, -- Illidan's Grasp, primary effect
+		[211881] = 4, -- Fel Eruption
 		-- Druid
-		[  5211] = 5, -- Mighty Bash
+		[  5211] = 4, -- Mighty Bash
 		[163505] = 4, -- Rake (Stun from Prowl)
 		-- Monk
 		[120086] = 4, -- Fists of Fury (with Heavy-Handed Strikes, pvp talent)
 		[232055] = 3, -- Fists of Fury (new ID in 7.1)
-		[119381] = 5, -- Leg Sweep
+		[119381] = 3, -- Leg Sweep
 		-- Paladin
 		[   853] = 6, -- Hammer of Justice
 		-- Priest
-		[200200] = 5, -- Holy word: Chastise
-		[226943] = 2, -- Mind Bomb
+		[200200] = 4, -- Holy word: Chastise
+		[226943] = 6, -- Mind Bomb
 		-- Rogue
 		[  1833] = 4, -- Cheap Shot
 	--	[   408] = true, -- Kidney Shot, variable duration
@@ -365,9 +366,9 @@ Data.cCduration = {	-- this is basically data from DRData-1 with durations, used
 		[204399] = 2, -- Earthfury (pvp talent)
 		-- Warlock
 		[ 89766] = 4, -- Axe Toss (Felguard)
-		[ 30283] = 4, -- Shadowfury
+		[ 30283] = 3, -- Shadowfury
 		-- Warrior
-		[132168] = 3, -- Shockwave
+		[132168] = 2, -- Shockwave
 		[132169] = 4, -- Storm Bolt
 		-- Tauren
 		[ 20549] = 2 -- War Stomp
