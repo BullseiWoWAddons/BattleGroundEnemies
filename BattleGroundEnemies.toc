@@ -24,6 +24,7 @@ Locales\zhCN.lua
 Locales\zhTW.lua
 
 Data.lua
+Defaults.lua
 Main.lua
 
 Objects\Auras.lua
