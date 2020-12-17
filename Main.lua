@@ -3088,6 +3088,18 @@ do
 			local usersPetParent = {}
 			local fakeParent
 			local fakeFrame = CreateFrame("frame")
+
+			local function restoreUsersParent() 
+				for i = 1, 5 do
+					local arenaFrame = _G["ArenaEnemyFrame"..i]
+					arenaFrame:SetParent(usersParent[i])
+					local arenaPetFrame = _G["ArenaEnemyFrame"..i.."PetFrame"]
+					arenaPetFrame:SetParent(usersPetParent[i])
+				end
+				fakeParent = false
+			end
+
+
 		
 			function BattleGroundEnemies:ToggleArenaFrames()
 				if not self then self = BattleGroundEnemies end
@@ -3108,22 +3120,10 @@ do
 								fakeFrame:Hide()
 							end
 						elseif fakeParent then
-							for i = 1, 5 do
-								local arenaFrame = _G["ArenaEnemyFrame"..i]
-								arenaFrame:SetParent(usersParent[i])
-								local arenaPetFrame = _G["ArenaEnemyFrame"..i.."PetFrame"]
-								arenaPetFrame:SetParent(usersPetParent[i])
-							end
-							fakeParent = false
+							restoreUsersParent()
 						end
 					elseif fakeParent then
-						for i = 1, 5 do
-							local arenaFrame = _G["ArenaEnemyFrame"..i]
-							arenaFrame:SetParent(usersParent[i])
-							local arenaPetFrame = _G["ArenaEnemyFrame"..i.."PetFrame"]
-							arenaPetFrame:SetParent(usersPetParent[i])
-						end
-						fakeParent = false
+						restoreUsersParent()
 					end
 				else
 					C_Timer.After(0.1, self.ToggleArenaFrames)
