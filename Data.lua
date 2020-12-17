@@ -1,7 +1,7 @@
 local addonName, Data = ...
 
 local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
-local DRData = LibStub("DRData-1.0")
+local DRList = LibStub("DRList-1.0")
 
 local GetClassInfo = GetClassInfo
 local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
@@ -219,7 +219,7 @@ Data.DrCategoryToSpell = {} --key = categorieName, value = table with key = numb
 Data.SpellPriorities = {}
 
 local i = 1
-for categorieName, localizedCategoryName in pairs(DRData.categoryNames) do
+for categorieName, localizedCategoryName in pairs(DRList:GetCategories()) do
 	Data.RandomDrCategory[i] = categorieName
 	Data.DrCategoryToSpell[categorieName] = {}
 	i = i + 1
@@ -236,14 +236,15 @@ do
 		taunt = 1
 	}
 
-	for spellID, categorieName in pairs(DRData.spells) do
+
+	for spellID, categorieName in pairs(DRList.spells) do
 		tinsert(Data.DrCategoryToSpell[categorieName], spellID)
 		Data.SpellPriorities[spellID] = drCategoryToPriority[categorieName]
 	end
 end
 
 		
-Data.cCduration = {	-- this is basically data from DRData-1 with durations, used for Relentless check
+Data.cCduration = {	-- this is basically data from DRList-1 with durations, used for Relentless check
 	--[[ INCAPACITATES ]]--
 	incapacitate = {
 		-- Druid

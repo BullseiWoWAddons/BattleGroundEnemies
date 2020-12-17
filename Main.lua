@@ -1,7 +1,7 @@
 local addonName, Data = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
 local LSM = LibStub("LibSharedMedia-3.0")
-local DRData = LibStub("DRData-1.0")
+local DRList = LibStub("DRList-1.0")
 local LibRaces = LibStub("LibRaces-1.0")
 LSM:Register("font", "PT Sans Narrow Bold", [[Interface\AddOns\BattleGroundEnemies\Fonts\PT Sans Narrow Bold.ttf]])
 LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusBar")
@@ -927,7 +927,7 @@ do
 			aurasEnabled = config.Auras_Enabled and config.Auras_Buffs_Enabled 
 		end
 		
-		local drCat = DRData:GetSpellCategory(spellID)
+		local drCat = DRList:GetCategoryBySpellID(spellID)
 		--BattleGroundEnemies:Debug(operation, spellID)
 		local showAurasOnSpecicon = config.Spec_AuraDisplay_Enabled
 		local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])
@@ -1048,7 +1048,7 @@ do
 	function buttonFunctions:AuraRemoved(spellID, srcName)
 		srcName = srcName or ""
 		local config = self.bgSizeConfig
-		local drCat = DRData:GetSpellCategory(spellID)
+		local drCat = DRList:GetCategoryBySpellID(spellID)
 		--BattleGroundEnemies:Debug(operation, spellID)
 		local showAurasOnSpecicon = config.Spec_AuraDisplay_Enabled
 		local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])

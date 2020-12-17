@@ -10,6 +10,6 @@
 	<Include file="Libs\LibSharedMedia-3.0\lib.xml"/>
 	<Include file="Libs\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
 	<Include file="Libs\AceLocale-3.0\AceLocale-3.0.xml"/>
-	<Include file="Libs\DRData-1.0\DRData-1.0.xml"/>
+	<Include file="Libs\DRList-1.0\DRList-1.0.xml"/>
 	<Include file="Libs\LibPlayerSpells-1.0\lib.xml"/>
 </Ui>

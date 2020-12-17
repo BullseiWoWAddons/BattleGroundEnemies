@@ -13,4 +13,4 @@ externals:
     Libs/LibRaces-1.0: https://repos.curseforge.com/wow/libraces-1-0
     Libs/LibSharedMedia-3.0: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
     Libs/UTF8: https://repos.wowace.com/wow/utf8/trunk
-    Libs/DRData-1.0: https://github.com/vendethiel/DRData-1.0.git
+    Libs/DRList-1.0: https://github.com/vendethiel/DRList-1.0.git

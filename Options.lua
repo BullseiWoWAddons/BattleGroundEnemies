@@ -6,7 +6,6 @@ local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
-local DRData = LibStub("DRData-1.0")
 
 local function copy(obj)
 	if type(obj) ~= 'table' then return obj end
