@@ -419,10 +419,6 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 	[206] = {						-- Twin Peaks, used to be mapID 626 before BFA
 		[0] = 156621, 					-- Alliance Flag
 		[1] = 156618 					-- Horde Flag
-	}, 
-	[519] = {						-- Deepwind Gorge, used to be mapID 935 before BFA, got updated to a Arathi Basin style BG in patch 8.3.0
-		[0] = 156621, 					-- Alliance Flag
-		[1] = 156618 					-- Horde Flag	
 	}
 }
 
@@ -441,10 +437,6 @@ Data.BattlegroundspezificDebuffs = { --key = mapID, value = table with key = num
 		46393						-- Brutal Assault							
 	},
 	[206] = {						-- Twin Peaks, used to be mapID 626 before BFA 
-		46392,						-- Focused Assault
-		46393						-- Brutal Assault					
-	}, 
-	[519] = {						-- Deepwind Gorge, used to be mapID 935 before BFA 
 		46392,						-- Focused Assault
 		46393						-- Brutal Assault					
 	},	
