@@ -2334,15 +2334,13 @@ do
 			self:Debug("numEnemies:", numEnemies)
 			self:Debug("numAllies:", numAllies)
 			
-			self:BGSizeCheck(numEnemies)
-			
 			self.Enemies:UpdatePlayerCount(numEnemies)
 			self.Allies:UpdatePlayerCount(numAllies)
 			
 			
-			
-			
 			if InCombatLockdown() then return end
+
+			self:BGSizeCheck(numEnemies)
 	
 			
 			wipe(self.Enemies.NewPlayerDetails) --use a local table to not create an unnecessary new button if another player left
