@@ -617,10 +617,7 @@ Data.defaultSettings = {
                 ObjectiveAndRespawn_RelativeTo = "NumericTargetindicator",
                 ObjectiveAndRespawn_RelativePoint = "LEFT",
                 ObjectiveAndRespawn_OffsetX = -2,
-                
-                ObjectiveAndRespawn_Width = 36,
-                ObjectiveAndRespawn_Position = "LEFT",
-                
+                                
                 ObjectiveAndRespawn_RespawnEnabled = true,
                 
                 ObjectiveAndRespawn_Fontsize = 17,
