@@ -149,35 +149,19 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		local anchor = self
 		local totalWidth = 0
 		self:Show()
-		if growLeft then
-			for categorie, drFrame in pairs(self.DRFrames) do
-				if drFrame:IsShown() then
-					drFrame:ClearAllPoints()
-					if totalWidth == 0 then
-						drFrame:SetPoint("TOPRIGHT", anchor, "TOPRIGHT", -borderThickness, -borderThickness)
-						drFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -borderThickness, borderThickness)
-					else
-						drFrame:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -spacing, 0)
-						drFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMLEFT", -spacing, 0)
-					end
-					anchor = drFrame
-					totalWidth = totalWidth + spacing + barHeight - 2 * borderThickness
+		
+		for categorie, drFrame in pairs(self.DRFrames) do
+			if drFrame:IsShown() then
+				drFrame:ClearAllPoints()
+				if totalWidth == 0 then
+					drFrame:SetPoint(growLeft and "TOPRIGHT" or "TOPLEFT", anchor, growLeft and "TOPRIGHT" or "TOPLEFT", growLeft and -borderThickness or borderThickness, -borderThickness)
+					drFrame:SetPoint(growLeft and "BOTTOMRIGHT" or "BOTTOMLEFT", anchor, growLeft and "BOTTOMRIGHT" or "BOTTOMLEFT", growLeft and -borderThickness or borderThickness, borderThickness)
+				else
+					drFrame:SetPoint(growLeft and "TOPRIGHT" or "TOPLEFT", anchor, growLeft and "TOPLEFT" or "TOPRIGHT", growLeft and -spacing or spacing, 0)
+					drFrame:SetPoint(growLeft and "BOTTOMRIGHT" or "BOTTOMLEFT", anchor, growLeft and "BOTTOMLEFT" or "BOTTOMRIGHT", growLeft and -spacing or spacing, 0)
 				end
-			end
-		else
-			for categorie, drFrame in pairs(self.DRFrames) do
-				if drFrame:IsShown() then
-					drFrame:ClearAllPoints()
-					if totalWidth == 0 then
-						drFrame:SetPoint("TOPLEFT", anchor, "TOPLEFT", borderThickness, -borderThickness)
-						drFrame:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", borderThickness, borderThickness)
-					else
-						drFrame:SetPoint("TOPLEFT", anchor, "TOPRIGHT", spacing, 0)
-						drFrame:SetPoint("BOTTOMLEFT", anchor, "BOTTOMRIGHT", spacing, 0)
-					end
-					anchor = drFrame
-					totalWidth = totalWidth + spacing + barHeight - 2 * borderThickness
-				end
+				anchor = drFrame
+				totalWidth = totalWidth + spacing + barHeight - 2 * borderThickness
 			end
 		end
 		if totalWidth == 0 then
