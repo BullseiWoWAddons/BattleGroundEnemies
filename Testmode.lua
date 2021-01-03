@@ -186,7 +186,7 @@ do
 						else
 							playerButton.Health:SetValue(health/100) --player still alive
 							
-							if number == 1 and not hasFlag and settings.ObjectiveAndRespawn_ObjectiveEnabled then --this guy has a objective now
+							if BattleGroundEnemies.BGSize == 15 and number == 1 and not hasFlag and settings.ObjectiveAndRespawn_ObjectiveEnabled then --this guy has a objective now
 							
 					
 								-- hide old flag carrier

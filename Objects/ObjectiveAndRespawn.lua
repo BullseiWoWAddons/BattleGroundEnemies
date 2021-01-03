@@ -24,17 +24,20 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 	ObjectiveAndRespawn.Cooldown:Hide()
 	
 
-	ObjectiveAndRespawn.Cooldown:SetScript("OnHide", function() 
-		ObjectiveAndRespawn:Reset()
-	end)
+	-- ObjectiveAndRespawn.Cooldown:SetScript("OnHide", function() 
+	-- 	ObjectiveAndRespawn:Reset()
+	-- end)
+	-- ObjectiveAndRespawn.Cooldown:SetScript("OnCooldownDone", function() 
+	-- 	ObjectiveAndRespawn:Reset()
+	-- end)
 	ObjectiveAndRespawn:SetScript("OnHide", function(self) 
-		--BattleGroundEnemies:Debug("ObjectiveAndRespawn hidden")
-		self:SetWidth(0.01)
+		BattleGroundEnemies:Debug("ObjectiveAndRespawn hidden")
+		self:SetAlpha(0)
 	end)
 	
 	ObjectiveAndRespawn:SetScript("OnShow", function(self) 
-		--BattleGroundEnemies:Debug("ObjectiveAndRespawn shown")
-		self:SetWidth(playerButton.bgSizeConfig.ObjectiveAndRespawn_Width)
+		BattleGroundEnemies:Debug("ObjectiveAndRespawn shown")
+		self:SetAlpha(1)
 	end)
 	
 	ObjectiveAndRespawn.SetPosition = function(self)
@@ -86,7 +89,7 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 		
 	ObjectiveAndRespawn.PlayerDied = function(self)	
 		--dead
-		if (BattleGroundEnemies.IsRatedBG or BattleGroundEnemies.TestmodeActive) and playerButton.bgSizeConfig.ObjectiveAndRespawn_RespawnEnabled  then
+		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.TestmodeActive and BattleGroundEnemies.BGSize == 15)) and playerButton.bgSizeConfig.ObjectiveAndRespawn_RespawnEnabled  then
 		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
 				self:Show()

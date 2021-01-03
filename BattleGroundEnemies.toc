@@ -27,9 +27,7 @@ Data.lua
 Defaults.lua
 Main.lua
 
-Objects\Auras.lua
-Objects\Buffs.lua
-Objects\Debuffs.lua
+Objects\Auracontainer.lua
 Objects\DR.lua
 Objects\ObjectiveAndRespawn.lua
 Objects\Racial.lua

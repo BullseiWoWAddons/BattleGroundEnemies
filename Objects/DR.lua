@@ -29,20 +29,20 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		edgeSize = 1
 	})
 	DRContainer:SetBackdropColor(0, 0, 0, 0)
-	DRContainer.DR = {}
+	DRContainer.DRFrames = {}
 
 	DRContainer.ApplySettings = function(self)
 		self:ApplyBackdrop(playerButton.bgSizeConfig.DrTracking_Container_BorderThickness)
 		self:SetPosition()
 		
-		for drCategory, drFrame in pairs(self.DR) do
+		for drCategory, drFrame in pairs(self.DRFrames) do
 			drFrame:ApplyDrFrameSettings()
 			drFrame:ChangeDisplayType()
 		end	
 	end
 	
 	DRContainer.Reset = function(self)
-		for drCategory, drFrame in pairs(self.DR) do
+		for drCategory, drFrame in pairs(self.DRFrames) do
 			drFrame.Cooldown:Clear()
 		end	
 	end
@@ -54,7 +54,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 
 	DRContainer.SetWidthOfAuraFrames = function(self, height)
 		local borderThickness = playerButton.bgSizeConfig.DrTracking_Container_BorderThickness
-		for drCategorie, drFrame in pairs(self.DR) do
+		for drCategorie, drFrame in pairs(self.DRFrames) do
 			drFrame:SetWidth(height - borderThickness * 2)
 		end
 	end
@@ -62,7 +62,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 
 
 	DRContainer.DisplayDR = function(self, drCat, spellID, additionalDuration)
-		local drFrame = self.DR[drCat]
+		local drFrame = self.DRFrames[drCat]
 		if not drFrame then  --create a new frame for this categorie
 			
 			drFrame = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
@@ -115,6 +115,12 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 				drFrame.status = 0
 				self:DrPositioning() --self = DRContainer
 			end)
+			-- drFrame.Cooldown:SetScript("OnCooldownDone", function()
+			-- 	print("OnCooldownDone")
+			-- 	drFrame:Hide()
+			-- 	drFrame.status = 0
+			-- 	self:DrPositioning() --self = DRContainer
+			-- end)
 			
 			drFrame.status = 0
 			
@@ -123,7 +129,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			
 			drFrame:Hide()
 			
-			self.DR[drCat] = drFrame
+			self.DRFrames[drCat] = drFrame
 		end						
 		
 		if not drFrame:IsShown() then
@@ -144,8 +150,9 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		local totalWidth = 0
 		self:Show()
 		if growLeft then
-			for categorie, drFrame in pairs(self.DR) do
+			for categorie, drFrame in pairs(self.DRFrames) do
 				if drFrame:IsShown() then
+					drFrame:ClearAllPoints()
 					if totalWidth == 0 then
 						drFrame:SetPoint("TOPRIGHT", anchor, "TOPRIGHT", -borderThickness, -borderThickness)
 						drFrame:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -borderThickness, borderThickness)
@@ -158,8 +165,9 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 				end
 			end
 		else
-			for categorie, drFrame in pairs(self.DR) do
+			for categorie, drFrame in pairs(self.DRFrames) do
 				if drFrame:IsShown() then
+					drFrame:ClearAllPoints()
 					if totalWidth == 0 then
 						drFrame:SetPoint("TOPLEFT", anchor, "TOPLEFT", borderThickness, -borderThickness)
 						drFrame:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", borderThickness, borderThickness)

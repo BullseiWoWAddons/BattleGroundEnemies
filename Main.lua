@@ -607,7 +607,7 @@ do
 			self.Level:SetWidth(0)
 			self.Level:SetText(self.PlayerLevel)
 		else
-			self.Level:SetWidth(0.01)
+			self.Level:SetWidth(0.01) --we do that because the name is anhored right to the level and with this method the name moves more towards the edge
 		end
 	end
 	
@@ -932,8 +932,8 @@ do
 			actualDuration = Data.cCdurationBySpellID[spellID] or random(10, 15)
 			amount = random(1, 20)
 			debuffType = Data.RandomDebuffType[random(1, #Data.RandomDebuffType)]
-			if drCat and self.DRContainer.DR[drCat] then
-				actualDuration = actualDuration/2^self.DRContainer.DR[drCat].status
+			if drCat and self.DRContainer.DRFrames[drCat] then
+				actualDuration = actualDuration/2^self.DRContainer.DRFrames[drCat].status
 			end
 			endTime = GetTime() + actualDuration
 			
@@ -995,7 +995,7 @@ do
 			end
 			if drTrackingEnabled then
 				self.DRContainer:DisplayDR(drCat, spellID, actualDuration)
-				self.DRContainer.DR[drCat]:IncreaseDRState()
+				self.DRContainer.DRFrames[drCat]:IncreaseDRState()
 			end
 			if aurasEnabled then
 				if isDebuff then
@@ -1046,7 +1046,7 @@ do
 			
 		if drTrackingEnabled then
 			self.DRContainer:DisplayDR(drCat, spellID, 0)
-			local drFrame = self.DRContainer.DR[drCat]
+			local drFrame = self.DRContainer.DRFrames[drCat]
 			if drFrame.status == 0 then -- we didn't get the applied, so we set the color and increase the dr state
 				--BattleGroundEnemies:Debug("DR Problem")
 				drFrame:IncreaseDRState()
@@ -1421,7 +1421,7 @@ do
 				else
 					--dont SetWidth before Hide() otherwise it won't work as aimed
 					self:Hide()
-					self:SetWidth(0.01)
+					self:SetWidth(0.01) --we do that because the level is anchored right to this and the name is anhored right to the level
 				end
 			end
 			
@@ -1450,9 +1450,13 @@ do
 			playerButton.Spec_AuraDisplay.Cooldown = BattleGroundEnemies.MyCreateCooldown(playerButton.Spec_AuraDisplay)
 			
 			playerButton.Spec_AuraDisplay.Cooldown:SetScript("OnHide", function(self) 
-				--self:Debug("ObjectiveAndRespawn.Cooldown hidden")
+				self:Debug("ObjectiveAndRespawn.Cooldown hidden")
 				self:GetParent():ActiveAuraRemoved()
 			end)
+			-- playerButton.Spec_AuraDisplay.Cooldown:SetScript("OnCooldownDone", function(self) 
+			-- 	--self:Debug("ObjectiveAndRespawn.Cooldown hidden")
+			-- 	self:GetParent():ActiveAuraRemoved()
+			-- end)
 			
 			-- power
 			playerButton.Power = CreateFrame('StatusBar', nil, playerButton)
@@ -1561,8 +1565,8 @@ do
 			playerButton.DRContainer = BattleGroundEnemies.Objects.DR.New(playerButton)
 			
 			-- Auras
-			playerButton.BuffContainer = BattleGroundEnemies.Objects.Buffs.New(playerButton)
-			playerButton.DebuffContainer = BattleGroundEnemies.Objects.Debuffs.New(playerButton)
+			playerButton.BuffContainer = BattleGroundEnemies.Objects.AuraContainer.New(playerButton, "buff")
+			playerButton.DebuffContainer = BattleGroundEnemies.Objects.AuraContainer.New(playerButton, "debuff")
 			
 			playerButton:ApplyButtonSettings()
 		end
@@ -2122,6 +2126,9 @@ end
 function BattleGroundEnemies:ARENA_CROWD_CONTROL_SPELL_UPDATE(unitID, spellID)
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if playerButton  then
+		if not Data.TriggerSpellIDToTrinketnumber[spellID] and spellID ~= 0 then
+			print("ARENA_CROWD_CONTROL_SPELL_UPDATE spellID not found:", spellID)
+		end
 		playerButton.Trinket:TrinketCheck(spellID, false)
 	end
 	--if spellID ~= 72757 then --cogwheel (30 sec cooldown trigger by racial)
