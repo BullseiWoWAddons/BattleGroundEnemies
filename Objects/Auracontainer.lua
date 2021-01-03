@@ -61,14 +61,14 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 		--self:ApplyBackdrop(conf.Auras_Buffs_Container_BorderThickness)
 
 		for identifier, auraFrame in pairs(self.Active) do
-            auraFrame:ApplyAuraFrameSettings(buffFrame)
+            auraFrame:ApplyAuraFrameSettings()
             if type == "debuff" then
                 auraFrame:ChangeDisplayType()
             end
 		end
 	
 		for identifier, auraFrame in pairs(self.Inactive) do
-            auraFrame:ApplyAuraFrameSettings(buffFrame)
+            auraFrame:ApplyAuraFrameSettings()
             if type == "debuff" then
                 auraFrame:ChangeDisplayType()
             end 
@@ -108,7 +108,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 			end
 		end
         if not auraFrame then
-            local auraFrame = CreateFrame('Frame', nil, self, BackdropTemplateMixin and "BackdropTemplate")
+            auraFrame = CreateFrame('Frame', nil, self, BackdropTemplateMixin and "BackdropTemplate")
             auraFrame:SetFrameLevel(self:GetFrameLevel() + 5)
             
             
