@@ -1450,7 +1450,7 @@ do
 			playerButton.Spec_AuraDisplay.Cooldown = BattleGroundEnemies.MyCreateCooldown(playerButton.Spec_AuraDisplay)
 			
 			playerButton.Spec_AuraDisplay.Cooldown:SetScript("OnHide", function(self) 
-				self:Debug("ObjectiveAndRespawn.Cooldown hidden")
+				BattleGroundEnemies:Debug("ObjectiveAndRespawn.Cooldown hidden")
 				self:GetParent():ActiveAuraRemoved()
 			end)
 			-- playerButton.Spec_AuraDisplay.Cooldown:SetScript("OnCooldownDone", function(self) 
