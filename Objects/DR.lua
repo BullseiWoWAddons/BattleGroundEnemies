@@ -150,15 +150,25 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		local totalWidth = 0
 		self:Show()
 		
+		if growLeft then 
+			point = "RIGHT"
+			relativePoint = "LEFT"
+			offsetX = -borderThickness
+		else
+			point = "LEFT"
+			relativePoint = "RIGHT"
+			offsetX = borderThickness
+		end
+	
 		for categorie, drFrame in pairs(self.DRFrames) do
 			if drFrame:IsShown() then
 				drFrame:ClearAllPoints()
 				if totalWidth == 0 then
-					drFrame:SetPoint(growLeft and "TOPRIGHT" or "TOPLEFT", anchor, growLeft and "TOPRIGHT" or "TOPLEFT", growLeft and -borderThickness or borderThickness, -borderThickness)
-					drFrame:SetPoint(growLeft and "BOTTOMRIGHT" or "BOTTOMLEFT", anchor, growLeft and "BOTTOMRIGHT" or "BOTTOMLEFT", growLeft and -borderThickness or borderThickness, borderThickness)
+					drFrame:SetPoint("TOP"..point, anchor, "TOP"..relativePoint, offsetX, -borderThickness)
+					drFrame:SetPoint("BOTTOM"..point, anchor, "BOTTOM"..relativePoint, offsetX, borderThickness)
 				else
-					drFrame:SetPoint(growLeft and "TOPRIGHT" or "TOPLEFT", anchor, growLeft and "TOPLEFT" or "TOPRIGHT", growLeft and -spacing or spacing, 0)
-					drFrame:SetPoint(growLeft and "BOTTOMRIGHT" or "BOTTOMLEFT", anchor, growLeft and "BOTTOMLEFT" or "BOTTOMRIGHT", growLeft and -spacing or spacing, 0)
+					drFrame:SetPoint("TOP"..point, anchor, "TOP"..relativePoint, growLeft and -spacing or spacing, 0)
+					drFrame:SetPoint("BOTTOM"..point, anchor, "BOTTOM"..relativePoint, growLeft and -spacing or spacing, 0)
 				end
 				anchor = drFrame
 				totalWidth = totalWidth + spacing + barHeight - 2 * borderThickness
