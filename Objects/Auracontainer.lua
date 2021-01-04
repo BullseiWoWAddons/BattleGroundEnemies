@@ -234,102 +234,54 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 		local lastFrameInRow
 		local width = 0
 		local height = 0
+		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRow, relativePointNewRow
+
 		if growLeft then
-			if growUp then
-				for Identifier, auraFrame in pairs(self.Active) do
-					auraFrame:ClearAllPoints()
-					if framesInRow <= framesPerRow then
-						if count == 0 then
-							auraFrame:SetPoint("BOTTOMRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
-							firstFrameInRow = auraFrame
-						else
-							auraFrame:SetPoint("RIGHT", previousFrame, "LEFT", -horizontalSpacing, 0)
-						end
-						framesInRow = framesInRow + 1
-						width = width + iconSize + horizontalSpacing
-					else
-						auraFrame:SetPoint("BOTTOM", firstFrameInRow, "TOP", 0, verticalSpacing)
-						framesInRow = 1
-						firstFrameInRow = auraFrame
-						lastFrameInRow = previousFrame
-						height = height + iconSize + verticalSpacing
-					end
-					previousFrame = auraFrame
-					count = count + 1
-				end
-			else
-				for Identifier, auraFrame in pairs(self.Active) do
-					auraFrame:ClearAllPoints()
-					if framesInRow < framesPerRow then
-						if framesInRow == 0 then
-							if count == 0 then
-								auraFrame:SetPoint("TOPRIGHT", previousFrame, "TOPRIGHT", 0, 0)
-								firstFrameInRow = auraFrame
-							end
-						else
-							auraFrame:SetPoint("RIGHT", previousFrame, "LEFT", -horizontalSpacing, 0)
-						end
-						framesInRow = framesInRow + 1
-					else
-						auraFrame:SetPoint("TOP", firstFrameInRow, "BOTTOM", 0, -verticalSpacing)
-						framesInRow = 1
-						firstFrameInRow = auraFrame
-                        lastFrameInRow = previousFrame
-                        height = height + iconSize + verticalSpacing
-					end
-					previousFrame = auraFrame
-					count = count + 1
-				end
-			end
+			pointX = "RIGHT"
+			relativePointX = "LEFT"
+			offsetX = -horizontalSpacing
 		else
-			if growUp then
-				for Identifier, auraFrame in pairs(self.Active) do
-					auraFrame:ClearAllPoints()
-					if framesInRow < framesPerRow then
-						if framesInRow == 0 then
-							if count == 0 then
-								auraFrame:SetPoint("BOTTOMLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
-								firstFrameInRow = auraFrame
-							end
-						else
-							auraFrame:SetPoint("LEFT", previousFrame, "RIGHT", horizontalSpacing, 0)
-						end
-						framesInRow = framesInRow + 1
-					else
-						auraFrame:SetPoint("BOTTOM", firstFrameInRow, "TOP", 0, verticalSpacing)
-						framesInRow = 1
-						firstFrameInRow = auraFrame
-                        lastFrameInRow = previousFrame
-                        height = height + iconSize + verticalSpacing
-					end
-					previousFrame = auraFrame
-					count = count + 1
-				end
-			else
-				for Identifier, auraFrame in pairs(self.Active) do
-					auraFrame:ClearAllPoints()
-					if framesInRow < framesPerRow then
-						if framesInRow == 0 then
-							if count == 0 then
-								auraFrame:SetPoint("TOPLEFT", previousFrame, "TOPLEFT", 0, 0)
-								firstFrameInRow = auraFrame
-							end
-						else
-							auraFrame:SetPoint("LEFT", previousFrame, "RIGHT", horizontalSpacing, 0)
-						end
-						framesInRow = framesInRow + 1
-					else
-						auraFrame:SetPoint("TOP", firstFrameInRow, "BOTTOM", 0, -verticalSpacing)
-						framesInRow = 1
-						firstFrameInRow = auraFrame
-                        lastFrameInRow = previousFrame
-                        height = height + iconSize + verticalSpacing
-					end
-					previousFrame = auraFrame
-					count = count + 1
-				end
-			end
+			pointX = "LEFT"
+			relativePointX = "RIGHT"
+			offsetX = horizontalSpacing
 		end
+
+		if growUp then
+			pointY = "BOTTOM"
+			relativePointY = "BOTTOM"
+			pointNewRow = "BOTTOM"
+			relativePointNewRow = "TOP"
+			offsetY = verticalSpacing
+		else
+			pointY = "TOP"
+			relativePointY = "TOP"
+			pointNewRow = "TOP"
+			relativePointNewRow = "BOTTOM"
+			offsetY = -verticalSpacing
+		end
+
+		for Identifier, auraFrame in pairs(self.Active) do
+			auraFrame:ClearAllPoints()
+			if framesInRow < framesPerRow then
+				if count == 0 then
+					auraFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..relativePointX, 0, 0)
+					firstFrameInRow = auraFrame
+				else
+					auraFrame:SetPoint(pointX, previousFrame, relativePointX, offsetX, 0)
+				end
+				framesInRow = framesInRow + 1
+				width = width + iconSize + horizontalSpacing
+			else
+				auraFrame:SetPoint(pointNewRow, firstFrameInRow, relativePointNewRow, 0, offsetY)
+				framesInRow = 1
+				firstFrameInRow = auraFrame
+				lastFrameInRow = previousFrame
+				height = height + iconSize + verticalSpacing
+			end
+			previousFrame = auraFrame
+			count = count + 1
+		end
+		
 		if width == 0 then 
 			self:Hide()
 		else
