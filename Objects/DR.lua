@@ -148,6 +148,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		local barHeight = config.BarHeight
 		local anchor = self
 		local totalWidth = 0
+		local point, relativePoint, offsetX
 		self:Show()
 		
 		if growLeft then 
