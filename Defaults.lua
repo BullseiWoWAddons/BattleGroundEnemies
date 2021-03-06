@@ -74,8 +74,8 @@ Data.defaultSettings = {
                 RoleIcon_VerticalPosition = 2,
 
                 CovenantIcon_Enabled = true,
-                CovenantIcon_Size = 13,
-                CovenantIcon_VerticalPosition = 2,
+                CovenantIcon_Size = 20,
+                CovenantIcon_VerticalPosition = 3,
                 
                 PlayerCount_Enabled = true,
                 PlayerCount_Fontsize = 14,
@@ -285,8 +285,8 @@ Data.defaultSettings = {
                 RoleIcon_VerticalPosition = 2,
 
                 CovenantIcon_Enabled = true,
-                CovenantIcon_Size = 13,
-                CovenantIcon_VerticalPosition = 2,
+                CovenantIcon_Size = 20,
+                CovenantIcon_VerticalPosition = 3,
                 
                 PlayerCount_Enabled = true,
                 PlayerCount_Fontsize = 14,
@@ -499,8 +499,8 @@ Data.defaultSettings = {
                 RoleIcon_VerticalPosition = 2,
 
                 CovenantIcon_Enabled = true,
-                CovenantIcon_Size = 13,
-                CovenantIcon_VerticalPosition = 2,
+                CovenantIcon_Size = 20,
+                CovenantIcon_VerticalPosition = 3,
                 
                 PlayerCount_Enabled = true,
                 PlayerCount_Fontsize = 14,
@@ -711,8 +711,8 @@ Data.defaultSettings = {
                 RoleIcon_VerticalPosition = 2,
 
                 CovenantIcon_Enabled = true,
-                CovenantIcon_Size = 13,
-                CovenantIcon_VerticalPosition = 2,
+                CovenantIcon_Size = 20,
+                CovenantIcon_VerticalPosition = 3,
                 
                 PlayerCount_Enabled = true,
                 PlayerCount_Fontsize = 14,

@@ -7,12 +7,10 @@ function BattleGroundEnemies.Objects.Trinket.New(playerButton)
 	local Trinket = CreateFrame("Frame", nil, playerButton)
 
 	Trinket:HookScript("OnEnter", function(self)
-		if BattleGroundEnemies.db.profile.ShowTooltips then
-			if self.SpellID then
-				GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
-				GameTooltip:SetHyperlink(GetSpellLink(self.SpellID))
-				GameTooltip:Show()
-			end
+		if self.SpellID then
+			BattleGroundEnemies:ShowTooltip(self, function() 
+				GameTooltip:SetSpellByID(self.SpellID)
+			end)
 		end
 	end)
 	

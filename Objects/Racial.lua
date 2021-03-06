@@ -7,12 +7,10 @@ function BattleGroundEnemies.Objects.Racial.New(playerButton)
 	local Racial = CreateFrame("Frame", nil, playerButton)
 
 	Racial:HookScript("OnEnter", function(self)
-		if BattleGroundEnemies.db.profile.ShowTooltips then
-			if self.SpellID then
-				GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
-				GameTooltip:SetHyperlink(GetSpellLink(self.SpellID))
-				GameTooltip:Show()
-			end
+		if self.SpellID then
+			BattleGroundEnemies:ShowTooltip(self, function() 
+				GameTooltip:SetSpellByID(self.SpellID)
+			end)
 		end
 	end)
 	

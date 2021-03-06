@@ -87,6 +87,14 @@ BattleGroundEnemies:SetScript("OnEvent", function(self, event, ...)
 end)
 BattleGroundEnemies:Hide()
 
+function BattleGroundEnemies:ShowTooltip(owner, func)
+	if self.db.profile.ShowTooltips then
+		GameTooltip:SetOwner(owner, "ANCHOR_RIGHT", 0, 0)
+		func()
+		GameTooltip:Show()
+	end
+end
+
 
 
 BattleGroundEnemies.Objects = {}
@@ -1434,11 +1442,9 @@ do
 			end)
 
 			playerButton.Spec:HookScript("OnEnter", function(self)
-				if BattleGroundEnemies.db.profile.ShowTooltips then				
-					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
+				BattleGroundEnemies:ShowTooltip(self, function() 
 					GameTooltip:SetText(playerButton.PlayerSpecName)
-					GameTooltip:Show()
-				end
+				end)
 			end)
 			
 			playerButton.Spec:HookScript("OnLeave", function(self)
@@ -1453,11 +1459,9 @@ do
 			
 			playerButton.Spec_AuraDisplay = CreateFrame("Frame", nil, playerButton.Spec)
 			playerButton.Spec_AuraDisplay:HookScript("OnEnter", function(self)
-				if BattleGroundEnemies.db.profile.ShowTooltips then
-					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
-					GameTooltip:SetHyperlink(GetSpellLink(self.DisplayedAura.spellID))
-					GameTooltip:Show()
-				end
+				BattleGroundEnemies:ShowTooltip(self, function() 
+					GameTooltip:SetSpellByID(self.DisplayedAura.spellID)
+				end)
 			end)
 			
 			playerButton.Spec_AuraDisplay:HookScript("OnLeave", function(self)
@@ -1586,11 +1590,9 @@ do
 			playerButton.Covenant = CreateFrame("Frame", nil, playerButton.Health)
 
 			playerButton.Covenant:HookScript("OnEnter", function(self)
-				if BattleGroundEnemies.db.profile.ShowTooltips then
-					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
+				BattleGroundEnemies:ShowTooltip(self, function() 
 					GameTooltip:SetText(C_Covenants.GetCovenantData(self.covenantID).name)
-					GameTooltip:Show()
-				end
+				end)
 			end)
 			
 			playerButton.Covenant:HookScript("OnLeave", function(self)
@@ -1604,7 +1606,6 @@ do
 			playerButton.Covenant:SetWidth(0.001)
 			playerButton.Covenant.covenantID = false
 			playerButton.Covenant.Icon = playerButton.Covenant:CreateTexture(nil, 'OVERLAY')
-			playerButton.Covenant.Icon:SetAllPoints()	
 
 			playerButton.Covenant.DisplayCovenant = function(self, covenantID)
 				self.covenantID = covenantID

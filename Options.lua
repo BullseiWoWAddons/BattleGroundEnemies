@@ -1274,7 +1274,7 @@ local function addEnemyAndAllySettings(self)
 											desc = L.RoleIcon_Size_Desc,
 											disabled = function() return not self.config[BGSize].RoleIcon_Enabled end,
 											min = 2,
-											max = 20,
+											max = 40,
 											step = 1,
 											width = "normal",
 											order = 2
@@ -1282,7 +1282,6 @@ local function addEnemyAndAllySettings(self)
 										RoleIcon_VerticalPosition = {
 											type = "range",
 											name = L.VerticalPosition,
-											desc = L.RoleIcon_Size_Desc,
 											disabled = function() return not self.config[BGSize].RoleIcon_Enabled end,
 											min = 0,
 											max = 50,
@@ -1314,11 +1313,21 @@ local function addEnemyAndAllySettings(self)
 											desc = L.CovenantIcon_Size_Desc,
 											disabled = function() return not self.config[BGSize].CovenantIcon_Enabled end,
 											min = 2,
-											max = 100,
+											max = 40,
 											step = 1,
 											width = "normal",
 											order = 2
 										},
+										CovenantIcon_VerticalPosition = {
+											type = "range",
+											name = L.VerticalPosition,
+											disabled = function() return not self.config[BGSize].CovenantIcon_Enabled end,
+											min = 0,
+											max = 50,
+											step = 1,
+											width = "normal",
+											order = 3,
+										}
 									}
 								},
 								TargetIndicator = {
@@ -2272,6 +2281,7 @@ function BattleGroundEnemies:SetupOptions()
 						hasAlpha = true,
 						order = 9
 					},
+					Fake1 = addVerticalSpacing(10),
 					ShowTooltips = {
 						type = "toggle",
 						name = L.ShowTooltips,
@@ -2279,7 +2289,7 @@ function BattleGroundEnemies:SetupOptions()
 						set = function(option, value) 
 							setOption(option, value)
 						end,
-						order = 10
+						order = 11
 					}
 				}
 			},

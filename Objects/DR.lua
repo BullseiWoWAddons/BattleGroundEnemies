@@ -63,11 +63,9 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			drFrame = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
 
 			drFrame:HookScript("OnEnter", function(self)
-				if BattleGroundEnemies.db.profile.ShowTooltips then
-					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
-					GameTooltip:SetHyperlink(GetSpellLink(self.SpellID))
-					GameTooltip:Show()
-				end
+				BattleGroundEnemies:ShowTooltip(self, function() 
+					GameTooltip:SetSpellByID(self.SpellID)
+				end)
 			end)
 			
 			drFrame:HookScript("OnLeave", function(self)
