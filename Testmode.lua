@@ -102,7 +102,9 @@ do
 			BattleGroundEnemies:FillFakePlayerData(damagerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "DAMAGER")
 			
 			for name, enemyDetails in pairs(fakePlayers) do
-				playerType:SetupButtonForNewPlayer(enemyDetails)
+				local playerButton = playerType:SetupButtonForNewPlayer(enemyDetails)
+				playerButton.Covenant:DisplayCovenant(mathrandom(1, #Data.CovenantIcons))  
+
 			end
 			playerType:SortPlayers()
 		end

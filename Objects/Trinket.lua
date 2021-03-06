@@ -6,6 +6,22 @@ function BattleGroundEnemies.Objects.Trinket.New(playerButton)
 				-- trinket
 	local Trinket = CreateFrame("Frame", nil, playerButton)
 
+	Trinket:HookScript("OnEnter", function(self)
+		if BattleGroundEnemies.db.profile.ShowTooltips then
+			if self.SpellID then
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
+				GameTooltip:SetHyperlink(GetSpellLink(self.SpellID))
+				GameTooltip:Show()
+			end
+		end
+	end)
+	
+	Trinket:HookScript("OnLeave", function(self)
+		if GameTooltip:IsOwned(self) then
+			GameTooltip:Hide()
+		end
+	end)
+
 	
 	Trinket.Icon = Trinket:CreateTexture()
 	Trinket.Icon:SetAllPoints()
@@ -42,6 +58,7 @@ function BattleGroundEnemies.Objects.Trinket.New(playerButton)
 	end
 	
 	Trinket.DisplayTrinket = function(self, spellID, cooldown)
+		self.SpellID = spellID
 		self.HasTrinket = Data.TriggerSpellIDToTrinketnumber[spellID]
 		self.Icon:SetTexture(Data.TriggerSpellIDToDisplayFileId[spellID])
 		if cooldown then
@@ -51,6 +68,7 @@ function BattleGroundEnemies.Objects.Trinket.New(playerButton)
 	
 	Trinket.Reset = function(self)
 		self.HasTrinket = nil
+		self.SpellID = false
 		self.Icon:SetTexture(nil)
 		self.Cooldown:Clear()	--reset Trinket Cooldown
 	end

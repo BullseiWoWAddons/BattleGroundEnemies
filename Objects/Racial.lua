@@ -6,6 +6,22 @@ function BattleGroundEnemies.Objects.Racial.New(playerButton)
 				-- trinket
 	local Racial = CreateFrame("Frame", nil, playerButton)
 
+	Racial:HookScript("OnEnter", function(self)
+		if BattleGroundEnemies.db.profile.ShowTooltips then
+			if self.SpellID then
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
+				GameTooltip:SetHyperlink(GetSpellLink(self.SpellID))
+				GameTooltip:Show()
+			end
+		end
+	end)
+	
+	Racial:HookScript("OnLeave", function(self)
+		if GameTooltip:IsOwned(self) then
+			GameTooltip:Hide()
+		end
+	end)
+
 	
 	Racial.Icon = Racial:CreateTexture()
 	Racial.Icon:SetAllPoints()
@@ -47,12 +63,14 @@ function BattleGroundEnemies.Objects.Racial.New(playerButton)
 		
 		if config.RacialFiltering_Enabled and not config.RacialFiltering_Filterlist[spellID] then return end
 		
+		self.SpellID = spellID
 		self.Icon:SetTexture(Data.TriggerSpellIDToDisplayFileId[spellID])
 		self.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID])
 	end
 	
 	Racial.Reset = function(self)
 		self.Icon:SetTexture(nil)
+		self.SpellID = false
 		self.Cooldown:Clear()	--reset Racial Cooldown
 	end
 

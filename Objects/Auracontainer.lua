@@ -58,7 +58,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
     AuraContainer.ApplySettings = function(self)
 		local conf = playerButton.bgSizeConfig
 		
-		--self:ApplyBackdrop(conf.Auras_Buffs_Container_BorderThickness)
+		--self:UpdateBackdrop(conf.Auras_Buffs_Container_BorderThickness)
 
 		for identifier, auraFrame in pairs(self.Active) do
             auraFrame:ApplyAuraFrameSettings()
@@ -95,7 +95,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
         end
     end
 	
-	AuraContainer.DisplayAura = function (self, spellID, srcName, amount, duration, endTime, debuffType)
+	AuraContainer.DisplayAura = function (self, spellID, srcName, amount, duration, expirationTime, debuffType)
 		local identifier = spellID..srcName
 		local conf = playerButton.bgSizeConfig
 		
@@ -113,8 +113,8 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
             
             
             auraFrame:SetScript("OnEnter", function(self)
-                if playerButton.bgSizeConfig.Auras_ShowTooltips then
-                    GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
+				if BattleGroundEnemies.db.profile.ShowTooltips then
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
                     GameTooltip:SetSpellByID(self.SpellID)
                 end
             end)
@@ -216,8 +216,8 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
         end
        
 
-		auraFrame.Cooldown:SetCooldown(endTime - duration, duration)
-		--BattleGroundEnemies:Debug("SetCooldown", endTime - duration, duration)
+		auraFrame.Cooldown:SetCooldown(expirationTime - duration, duration)
+		--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
 		auraFrame:Show()
 		self.Active[identifier] = auraFrame
 		self:AuraPositioning()
@@ -264,7 +264,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 			auraFrame:ClearAllPoints()
 			if framesInRow < framesPerRow then
 				if count == 0 then
-					auraFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..relativePointX, 0, 0)
+					auraFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..pointX, 0, 0)
 					firstFrameInRow = auraFrame
 				else
 					auraFrame:SetPoint(pointX, previousFrame, relativePointX, offsetX, 0)

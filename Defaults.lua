@@ -13,6 +13,7 @@ Data.defaultSettings = {
         MyTarget_Color = {1, 1, 1, 1},
         MyFocus_Color = {0, 0.988235294117647, 0.729411764705882, 1},
         Highlight_Color = {1, 1, 0.5, 1},
+        ShowTooltips = true,
     
         Enemies = {
             Enabled = true,
@@ -71,6 +72,10 @@ Data.defaultSettings = {
                 RoleIcon_Enabled = true,
                 RoleIcon_Size = 13,
                 RoleIcon_VerticalPosition = 2,
+
+                CovenantIcon_Enabled = true,
+                CovenantIcon_Size = 13,
+                CovenantIcon_VerticalPosition = 2,
                 
                 PlayerCount_Enabled = true,
                 PlayerCount_Fontsize = 14,
@@ -125,7 +130,6 @@ Data.defaultSettings = {
                 
                 
                 Auras_Enabled = true,
-                Auras_ShowTooltips = false,
                 
                 Auras_Buffs_Enabled = false,
                 Auras_Buffs_Size = 15,
@@ -279,6 +283,10 @@ Data.defaultSettings = {
                 RoleIcon_Enabled = true,
                 RoleIcon_Size = 13,
                 RoleIcon_VerticalPosition = 2,
+
+                CovenantIcon_Enabled = true,
+                CovenantIcon_Size = 13,
+                CovenantIcon_VerticalPosition = 2,
                 
                 PlayerCount_Enabled = true,
                 PlayerCount_Fontsize = 14,
@@ -489,6 +497,10 @@ Data.defaultSettings = {
                 RoleIcon_Enabled = true,
                 RoleIcon_Size = 13,
                 RoleIcon_VerticalPosition = 2,
+
+                CovenantIcon_Enabled = true,
+                CovenantIcon_Size = 13,
+                CovenantIcon_VerticalPosition = 2,
                 
                 PlayerCount_Enabled = true,
                 PlayerCount_Fontsize = 14,
@@ -697,6 +709,10 @@ Data.defaultSettings = {
                 RoleIcon_Enabled = true,
                 RoleIcon_Size = 13,
                 RoleIcon_VerticalPosition = 2,
+
+                CovenantIcon_Enabled = true,
+                CovenantIcon_Size = 13,
+                CovenantIcon_VerticalPosition = 2,
                 
                 PlayerCount_Enabled = true,
                 PlayerCount_Fontsize = 14,

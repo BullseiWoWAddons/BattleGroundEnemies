@@ -23,16 +23,11 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 	local DRContainer = CreateFrame("Frame", nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
 	DRContainer:SetPoint("TOPRIGHT", playerButton, "TOPLEFT", -1, 0)
 	DRContainer:SetPoint("BOTTOMRIGHT", playerButton, "BOTTOMLEFT", -1, 0)
-	DRContainer:SetBackdrop({
-		bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-		edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-		edgeSize = 1
-	})
 	DRContainer:SetBackdropColor(0, 0, 0, 0)
 	DRContainer.DRFrames = {}
 
 	DRContainer.ApplySettings = function(self)
-		self:ApplyBackdrop(playerButton.bgSizeConfig.DrTracking_Container_BorderThickness)
+		self:UpdateBackdrop(playerButton.bgSizeConfig.DrTracking_Container_BorderThickness)
 		self:SetPosition()
 		
 		for drCategory, drFrame in pairs(self.DRFrames) do
@@ -66,6 +61,19 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		if not drFrame then  --create a new frame for this categorie
 			
 			drFrame = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
+
+			drFrame:HookScript("OnEnter", function(self)
+				if BattleGroundEnemies.db.profile.ShowTooltips then
+					GameTooltip:SetHyperlink(GetSpellLink(self.SpellID))
+					GameTooltip:Show()
+				end
+			end)
+			
+			drFrame:HookScript("OnLeave", function(self)
+				if GameTooltip:IsOwned(self) then
+					GameTooltip:Hide()
+				end
+			end)
 			
 			drFrame.Container = self
 			
@@ -103,6 +111,12 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			
 			drFrame:SetWidth(playerButton.bgSizeConfig.BarHeight - playerButton.bgSizeConfig.DrTracking_Container_BorderThickness * 2)
 
+			drFrame:SetBackdrop({
+                bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+                edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+                edgeSize = 1
+            })
+
 			drFrame:SetBackdropColor(0, 0, 0, 0)
 			drFrame:SetBackdropBorderColor(0, 0, 0, 0)
 
@@ -112,6 +126,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			drFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(drFrame)
 			drFrame.Cooldown:SetScript("OnHide", function()
 				drFrame:Hide()
+				drFrame.SpellID = false
 				drFrame.status = 0
 				self:DrPositioning() --self = DRContainer
 			end)
@@ -136,6 +151,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			drFrame:Show()
 			self:DrPositioning()
 		end
+		drFrame.SpellID = spellID
 		drFrame.Icon:SetTexture(GetSpellTexture(spellID))
 		drFrame.Cooldown:SetCooldown(GetTime(), DRList:GetResetTime(drCat) + additionalDuration)
 	end
@@ -165,8 +181,8 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			if drFrame:IsShown() then
 				drFrame:ClearAllPoints()
 				if totalWidth == 0 then
-					drFrame:SetPoint("TOP"..point, anchor, "TOP"..relativePoint, offsetX, -borderThickness)
-					drFrame:SetPoint("BOTTOM"..point, anchor, "BOTTOM"..relativePoint, offsetX, borderThickness)
+					drFrame:SetPoint("TOP"..point, anchor, "TOP"..point, offsetX, -borderThickness)
+					drFrame:SetPoint("BOTTOM"..point, anchor, "BOTTOM"..point, offsetX, borderThickness)
 				else
 					drFrame:SetPoint("TOP"..point, anchor, "TOP"..relativePoint, growLeft and -spacing or spacing, 0)
 					drFrame:SetPoint("BOTTOM"..point, anchor, "BOTTOM"..relativePoint, growLeft and -spacing or spacing, 0)
@@ -184,7 +200,13 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		end
 	end
 
-	DRContainer.ApplyBackdrop = function(self, borderThickness)
+	DRContainer.UpdateBackdrop = function(self, borderThickness)
+		self:SetBackdrop(nil)
+		self:SetBackdrop({
+			bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+			edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+			edgeSize = borderThickness
+		})
 		self:SetBackdropColor(0, 0, 0, 0)
 		self:SetBackdropBorderColor(unpack(playerButton.bgSizeConfig.DrTracking_Container_Color))
 		self:SetWidthOfAuraFrames(playerButton.bgSizeConfig.BarHeight)

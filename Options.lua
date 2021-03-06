@@ -150,7 +150,6 @@ local function ApplySettingsToButton(playerButton, fixedsubtableBeforeLoop, loop
 	end
 end
 
-
 local function UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
 	setOption(option, value)	
 	
@@ -247,7 +246,7 @@ local function applyMainfont(playerButton, value)
 		buffFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline)
 		buffFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline)
 	end
-	for drCat, drFrame in pairs(playerButton.DRContainer.DR) do
+	for drCat, drFrame in pairs(playerButton.DRContainer.DRFrames) do
 		drFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline)
 	end
 	playerButton.Level:SetFont(LSM:Fetch("font", value), playerButton.config.LevelText_Fontsize, playerButton.config.LevelText_Outline)
@@ -1293,6 +1292,35 @@ local function addEnemyAndAllySettings(self)
 										}
 									}
 								},
+								CovenantIconSettings = {
+									type = "group",
+									name = L.CovenantIconSettings,
+									desc = L.CovenantIconSettings_Desc,
+									set = function(option, value)
+										UpdateButtons(option, value, nil, nil, nil, "Covenant", nil, nil, "ApplySettings")
+									end,
+									order = 4,
+									args = {
+										CovenantIcon_Enabled = {
+											type = "toggle",
+											name = L.CovenantIcon_Enabled,
+											desc = L.CovenantIcon_Enabled_Desc,
+											width = "normal",
+											order = 1
+										},
+										CovenantIcon_Size = {
+											type = "range",
+											name = L.Size,
+											desc = L.CovenantIcon_Size_Desc,
+											disabled = function() return not self.config[BGSize].CovenantIcon_Enabled end,
+											min = 2,
+											max = 100,
+											step = 1,
+											width = "normal",
+											order = 2
+										},
+									}
+								},
 								TargetIndicator = {
 									type = "group",
 									name = L.TargetIndicator,
@@ -1621,7 +1649,7 @@ local function addEnemyAndAllySettings(self)
 									type = "range",
 									name = L.BorderThickness,
 									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "DRContainer", nil, nil, "ApplyBackdrop", value)
+										UpdateButtons(option, value, nil, nil, nil, "DRContainer", nil, nil, "UpdateBackdrop", value)
 									end,
 									min = 1,
 									max = 6,
@@ -1634,7 +1662,7 @@ local function addEnemyAndAllySettings(self)
 									desc = L.DrTracking_DisplayType_Desc,
 									disabled = function() return not self.config[BGSize].DrTracking_Enabled end,
 									set = function(option, value)
-										UpdateButtons(option, value, "DRContainer", "DR", nil, nil, nil, nil, "ChangeDisplayType")
+										UpdateButtons(option, value, "DRContainer", "DRFrames", nil, nil, nil, nil, "ChangeDisplayType")
 									end,
 									values = Data.DisplayType,
 									order = 6
@@ -1656,7 +1684,7 @@ local function addEnemyAndAllySettings(self)
 									--desc = L.TrinketSettings_Desc,
 									disabled = function() return not self.config[BGSize].DrTracking_Enabled end,
 									order = 8,
-									args = addCooldownTextsettings(playerType, BGSize, "DrTracking", "DrTracking_Enabled", "DRContainer", "DR")
+									args = addCooldownTextsettings(playerType, BGSize, "DrTracking", "DrTracking_Enabled", "DRContainer", "DRFrames")
 								},
 								Fake1 = addVerticalSpacing(6),
 								DrTrackingFilteringSettings = {
@@ -2243,6 +2271,15 @@ function BattleGroundEnemies:SetupOptions()
 						end,
 						hasAlpha = true,
 						order = 9
+					},
+					ShowTooltips = {
+						type = "toggle",
+						name = L.ShowTooltips,
+						desc = L.ShowTooltips_Desc,
+						set = function(option, value) 
+							setOption(option, value)
+						end,
+						order = 10
 					}
 				}
 			},
