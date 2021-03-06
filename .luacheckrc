@@ -122,6 +122,7 @@ globals = {
 	"C_RaidLocks",
 	"C_Scenario",
 	"C_Spell",
+	"C_Covenants",
 	"C_Timer",
 	"C_UIWidgetManager",
 	"DebuffTypeColor",
