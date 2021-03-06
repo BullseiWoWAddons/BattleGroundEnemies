@@ -26,7 +26,8 @@ local random = math.random
 local tinsert = table.insert
 local tremove = table.remove
 
-
+local AuraUtil = AuraUtil
+local C_Covenants = C_Covenants
 local C_PvP = C_PvP
 local GetArenaCrowdControlInfo = C_PvP.GetArenaCrowdControlInfo
 local RequestCrowdControlSpell = C_PvP.RequestCrowdControlSpell
