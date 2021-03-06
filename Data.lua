@@ -459,13 +459,97 @@ Data.TriggerSpellIDToTrinketnumber = {--key = which first row honor talent, valu
 	[195901] = 3, 	-- 3: Adaptation, 1 min. CD, detected by Aura 195901
 	[214027] = 3, 	-- 3: Adaptation, 1 min. CD, detected by Aura 195901, for the Arena_cooldownupdate
 	[336135] = 3, 	-- 3: Adaptation, 1 min. CD, Shadowlands Update
+	[336139] = 3,   -- 3: Adapted, 1 min. CD, Shadowlands Update
 	[196029] = 4, 	-- 4: Relentless, passive, no CD
 	[336128] = 4 	-- 4: Relentless, passive, no CD, Shadowlands Update
 }
 		
 	
 local TrinketTriggerSpellIDtoDisplayspellID = {
-	[195901] = 214027 --Adapted, should display as Adaptation
+	[195901] = 214027,	--Adapted, should display as Adaptation
+	[336139] = 214027 	--Adapted, should display as Adaptation, Shadowlands
+}
+
+
+
+--see for covenant colors SharedXML/SharedColorConstants.lua
+
+Data.CovenantIcons = {
+	[1] = GetSpellTexture(324739), --Kyrian
+	[2] = GetSpellTexture(300728), --Ventyr
+	[3] = GetSpellTexture(310143), --Night Fae
+	[4] = GetSpellTexture(324631), --Necrolord
+}
+
+
+--C_Covenants.GetCovenantData()
+Data.CovenantSpells = {
+	--Kyrian
+	[324739] = 1,--Summon Steward 				All Classes
+
+	[312202] = 1,--Shackle the Unworthy 		Death Knight
+	[306830] = 1,--Elysian Decree 				Demon Hunter
+	[326434] = 1,--Kindred Spirits 				Druid
+	[308491] = 1,--Resonating Arrow 			Hunter
+	[307443] = 1,--Radiant Spark 				Mage
+	[310454] = 1,--Weapons of Order 			Monk
+	[304971] = 1,--Divine Toll 					Paladin
+	[325013] = 1,--Boon of the Ascended 		Priest
+	[323547] = 1,--Echoing Reprimand 			Rogue
+	[324386] = 1,--Vesper Totem 				Shaman
+	[312321] = 1,--Scouring Tithe 				Warrior
+	[307865] = 1,--Spear of Bastion 			Warlock
+
+
+	--Ventyr
+	[300728] = 2, --Door of Shadows 			All Classes
+
+	[311648] = 2,--Swarming Mist 				Death Knight
+	[317009] = 2,--Sinful Brand  				Demon Hunter
+	[323546] = 2,--Ravenous Frenzy				Druid
+	[324149] = 2,--Flayed Shot 					Hunter
+	[314793] = 2,--Mirrors of Torment 			Mage
+	[326860] = 2,--Fallen Order 				Monk
+	[316958] = 2,--Ashen Hallow 				Paladin
+	[323673] = 2,--Mindgames 					Priest
+	[323654] = 2,--Flagellation 				Rogue
+	[320674] = 2,--Chain Harvest 				Shaman
+	[321792] = 2,--Impending Catastrophe  		Warrior
+	[317349] = 2,--Condemn 						Warlock
+
+
+	--Night Fae
+	[310143] = 3, --Soulshape 					All Classes
+
+	[324128] = 3,--Death's Due 					Death Knight
+	[323639] = 3,--The Hunt (ability)  			Demon Hunter
+	[323764] = 3,--Convoke the Spirits 			Druid
+	[328231] = 3,--Wild Spirits 				Hunter
+	[314791] = 3,--Shifting Power 				Mage
+	[327104] = 3,--Faeline Stomp				Monk
+	[328278] = 3,--Blessing of the Seasons 		Paladin
+	[327661] = 3,--Fae Guardians 				Priest
+	[328305] = 3,--Sepsis 						Rogue
+	[328923] = 3,--Fae Transfusion				Shaman
+	[325640] = 3,--Soul Rot						Warrior
+	[325886] = 3,--Ancient Aftershock 			Warlock
+
+
+	--Necrolord
+	[324631] = 4, --Fleshcraft					All Classes
+
+	[315443] = 4,--Abomination Limb				Death Knight
+	[329554] = 4,--Fodder to the Flame  		Demon Hunter
+	[325727] = 4,--Adaptive Swarm 				Druid
+	[325028] = 4,--Death Chakram 				Hunter
+	[324220] = 4,--Deathborne 					Mage
+	[325216] = 4,--Bonedust Brew 				Monk
+	[328204] = 4,--Vanquisher's Hammer 			Paladin
+	[324724] = 4,--Unholy Nova 					Priest
+	[328547] = 4,--Serrated Bone Spike 			Rogue
+	[326059] = 4,--Primordial Wave 				Shaman
+	[325289] = 4,--Decimating Bolt  			Warrior
+	[324143] = 4,--Conqueror's Banner 			Warlock
 }
 
 Data.RacialSpellIDtoCooldown = {
