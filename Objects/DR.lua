@@ -64,6 +64,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 
 			drFrame:HookScript("OnEnter", function(self)
 				if BattleGroundEnemies.db.profile.ShowTooltips then
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
 					GameTooltip:SetHyperlink(GetSpellLink(self.SpellID))
 					GameTooltip:Show()
 				end
