@@ -232,6 +232,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 		local firstFrameInRow
 		local lastFrameInRow
 		local width = 0
+		local widestRow = 0
 		local height = 0
 		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRow, relativePointNewRow
 
@@ -270,7 +271,11 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 				end
 				framesInRow = framesInRow + 1
 				width = width + iconSize + horizontalSpacing
+				if width > widestRow then
+					widestRow = width
+				end
 			else
+				width = 0
 				auraFrame:SetPoint(pointNewRow, firstFrameInRow, relativePointNewRow, 0, offsetY)
 				framesInRow = 1
 				firstFrameInRow = auraFrame
@@ -281,10 +286,10 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 			count = count + 1
 		end
 		
-		if width == 0 then 
+		if widestRow == 0 then 
 			self:Hide()
 		else
-			self:SetWidth(width - horizontalSpacing)
+			self:SetWidth(widestRow - horizontalSpacing)
 			self:SetHeight(height + iconSize)
 		end
 	end
