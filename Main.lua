@@ -97,6 +97,20 @@ function BattleGroundEnemies:ShowTooltip(owner, func)
 	end
 end
 
+function BattleGroundEnemies:ShowAuraTooltip(unitID, spellID, filter)
+	if unitID then
+		local index = FindAuraBySpellID(unitID, spellID, "HARMFUL")
+		if index then 
+			return GameTooltip:SetUnitAura(unitID, index, "HARMFUL")
+		end
+	else
+		GameTooltip:SetSpellByID(spellID)
+	end
+end
+
+
+
+
 
 
 BattleGroundEnemies.Objects = {}
@@ -409,6 +423,21 @@ BattleGroundEnemies.SetBasicPosition = function(frame, basicPoint, relativeTo, r
 	frame:SetPoint('BOTTOM'..basicPoint, relativeTo, 'BOTTOM'..relativePoint, space, 0)
 end
 
+
+local function FindAuraBySpellID(unitID, spellID, filter)
+	if not unitID or not spellID then return end
+
+	for i = 1, 40 do
+		local name, _, amount, debuffType, duration, expirationTime, _, _, _, id, _, _, _, _, _, value2, value3, value4 = UnitAura(unitID, i, filter)
+		if not id then return end -- no more auras
+
+		if spellID == id then
+			return i, name, _, amount, debuffType, duration, expirationTime, _, _, _, id, _, _, _, _, _, value2, value3, value4
+		end
+	end
+end
+
+
 local function EnableShadowColor(fontString, enableShadow, shadowColor)
 	if shadowColor then fontString:SetShadowColor(unpack(shadowColor)) end
 	if enableShadow then 
@@ -547,17 +576,12 @@ do
 	
 	function enemyButtonFunctions:FetchAnotherUnitID()
 		local unitIDs = self.UnitIDs
-		
-		if unitIDs.Arena then
-			unitIDs.Active = unitIDs.Arena
+
+		unitIDs.Active = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
+		if unitIDs.Active then
 			self:RegisterForOnUpdate()
 		else
-			unitIDs.Active = unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
-			if unitIDs.Active then
-				self:RegisterForOnUpdate()
-			else
-				self:FetchAnAllyUnitID()
-			end
+			self:FetchAnAllyUnitID()
 		end
 	end
 	
@@ -921,20 +945,6 @@ do
 		[233498] = true,
 		[233499] = true,	
 	}
-	
-	local function FindAuraBySpellID(unitID, spellID, filter)
-		
-		if not unitID or not spellID then return end
-
-		for i = 1, 40 do
-			local name, _, amount, debuffType, duration, expirationTime, _, _, _, id, _, _, _, _, _, value2, value3, value4 = UnitAura(unitID, i, filter)
-			if not id then return end -- no more auras
-
-			if spellID == id then
-				return name, _, amount, debuffType, duration, expirationTime, _, _, _, id, _, _, _, _, _, value2, value3, value4
-			end
-		end
-	end
 
 	function buttonFunctions:AuraApplied(spellID, spellName, srcName, auraType, amount)
 		--BattleGroundEnemies.Counter.AuraApplied = (BattleGroundEnemies.Counter.AuraApplied or 0) + 1
@@ -964,7 +974,7 @@ do
 		if not (showAurasOnSpecicon or drTrackingEnabled or aurasEnabled or relentlessCheck) then return end
 		
 
-		local amount, _
+		local amount, index, _
 		
 		if BattleGroundEnemies.TestmodeActive then
 			duration = Data.cCdurationBySpellID[spellID] or random(10, 15)
@@ -980,24 +990,18 @@ do
 
 				local unitIDs = self.UnitIDs
 				local activeUnitID 
+
+				-- it seems to be possible to get Buffs from nameplates now :))))
 				-- we can't get Buffs from nameplates(we only use nameplates for enemies) > find another unitID for that enemy if auraType is a buff and the active unitID is a nameplate
 				if self.PlayerIsEnemy then
-					if isDebuff then
-						activeUnitID = unitIDs.Active
-					else
-						if unitIDs.Active ~= unitIDs.Nameplate then
-							activeUnitID = unitIDs.Active
-						else
-							activeUnitID = unitIDs.Target or unitIDs.Focus or unitIDs.Ally
-						end
-					end
+					activeUnitID = unitIDs.Active
 				else
 					activeUnitID = self.unit
 				end
 				
 				if not activeUnitID then return end
 				if isMine then
-					_, _, amount, debuffType , duration, expirationTime, _, _, _, _, _, _, _, _, _, _, _, _ = FindAuraBySpellID(activeUnitID, spellID, "PLAYER|" .. filter)
+					index, _, _, amount, debuffType , duration, expirationTime, _, _, _, _, _, _, _, _, _, _, _, _ = FindAuraBySpellID(activeUnitID, spellID, "PLAYER|" .. filter)
 				else
 					for i = 1, 40 do
 						local _spellID, unitCaster
@@ -1092,7 +1096,7 @@ do
 		--BattleGroundEnemies:Debug("Läüft")
 		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
 		for i = 1, #battleGroundDebuffs do
-			local name, _, amount, _, _, _, _, _, _, spellID, _, _, _, _, _, value2, value3, value4 = FindAuraBySpellID(unitID, battleGroundDebuffs[i], 'HARMFUL')
+			local index, name, _, amount, _, _, _, _, _, _, spellID, _, _, _, _, _, value2, value3, value4 = FindAuraBySpellID(unitID, battleGroundDebuffs[i], 'HARMFUL')
 			--values for orb debuff:
 			--BattleGroundEnemies:Debug(value0, value1, value2, value3, value4, value5)
 			-- value2 = Reduces healing received by value2
@@ -1118,9 +1122,9 @@ do
 	function buttonFunctions:NotKotmogu(unitID)
 		local objective = self.ObjectiveAndRespawn
 		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
-		local name, amount, _
+		local name, amount, index, _
 		for i = 1, #battleGroundDebuffs do
-			name, _, amount = FindAuraBySpellID(unitID, battleGroundDebuffs[i], 'HARMFUL')
+			index, name, _, amount = FindAuraBySpellID(unitID, battleGroundDebuffs[i], 'HARMFUL')
 			--values for orb debuff:
 			--BattleGroundEnemies:Debug(value0, value1, value2, value3, value4, value5)
 			-- value2 = Reduces healing received by value2
@@ -1396,6 +1400,8 @@ do
 				playerButton:DeleteActiveUnitID()
 			end
 
+			playerButton.unit = nil
+
 
 		else --no recycleable buttons remaining => create a new one
 			playerButton = CreateFrame('Button', nil, self, 'SecureUnitButtonTemplate')
@@ -1497,14 +1503,8 @@ do
 			playerButton.Spec_AuraDisplay = CreateFrame("Frame", nil, playerButton.Spec)
 			playerButton.Spec_AuraDisplay:HookScript("OnEnter", function(self)
 				BattleGroundEnemies:ShowTooltip(self, function()
-					if self.PlayerIsEnemy then
-						if playerButton.UnitIDs.Active then
-							return SetUnitAura(playerButton.UnitIDs.Active, self:GetID(), filter)
-						end
-					elseif playerButton.unit then
-						return SetUnitAura(playerButton.unit, self:GetID(), filter)
-					end
-					GameTooltip:SetSpellByID(self.DisplayedAura.spellID)
+					local unitID = playerButton.unit or playerButton.UnitIDs and playerButton.UnitIDs.Active
+					BattleGroundEnemies:ShowAuraTooltip(unitID, self.DisplayedAura.spellID, "HARMFUL")
 				end)
 			end)
 			
@@ -1711,7 +1711,6 @@ do
 
 			playerButton.Covenant.Reset = function(self)
 				self.covenantID = false
-				self:SetWidth(0.001)
 				self:Hide()
 			end
 
