@@ -1214,7 +1214,7 @@ local function addEnemyAndAllySettings(self)
 											name = L.BarTexture,
 											desc = L.HealthBar_Texture_Desc,
 											set = function(option, value)
-												UpdateButtons(option, value, nil, nil, nil, "Health", nil, nil, "SetStatusBarTexture", LSM:Fetch("statusbar", value))
+												UpdateButtons(option, value, nil, nil, nil, "healthBar", nil, nil, "SetStatusBarTexture", LSM:Fetch("statusbar", value))
 											end,
 											dialogControl = 'LSM30_Statusbar',
 											values = AceGUIWidgetLSMlists.statusbar,
@@ -1228,7 +1228,7 @@ local function addEnemyAndAllySettings(self)
 											desc = L.HealthBar_Background_Desc,
 											set = function(option, ...)
 												local color = {...} 
-												UpdateButtons(option, color, nil, nil, nil, "Health", "Background", nil, "SetVertexColor", ...)
+												UpdateButtons(option, color, nil, nil, nil, "healthBar", "Background", nil, "SetVertexColor", ...)
 											end,
 											hasAlpha = true,
 											width = "normal",
@@ -2269,17 +2269,6 @@ function BattleGroundEnemies:SetupOptions()
 						end,
 						hasAlpha = true,
 						order = 8
-					},
-					Highlight_Color = {
-						type = "color",
-						name = L.Highlight_Color,
-						desc = L.Highlight_Color_Desc,
-						set = function(option, ...)
-							local color = {...} 
-							ApplySettingToEnemiesAndAllies(option, color, nil, nil, "SelectionHighlight", nil, nil, "SetColorTexture", ...)
-						end,
-						hasAlpha = true,
-						order = 9
 					},
 					Fake1 = addVerticalSpacing(10),
 					ShowTooltips = {

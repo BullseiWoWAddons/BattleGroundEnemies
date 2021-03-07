@@ -183,10 +183,10 @@ do
 						local health = mathrandom(0, 100)
 						if health == 0 and holdsflag ~= playerButton then --don't let players die that are holding a flag at the moment
 							--BattleGroundEnemies:Debug("dead")
-							playerButton.Health:SetValue(0)
+							playerButton.healthBar:SetValue(0)
 							playerButton.ObjectiveAndRespawn:PlayerDied(27)
 						else
-							playerButton.Health:SetValue(health/100) --player still alive
+							playerButton.healthBar:SetValue(health/100) --player still alive
 							
 							if BattleGroundEnemies.BGSize == 15 and number == 1 and not hasFlag and settings.ObjectiveAndRespawn_ObjectiveEnabled then --this guy has a objective now
 							
