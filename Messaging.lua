@@ -110,7 +110,6 @@ end
 
 local grouped = nil
 function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
-    print("GROUP_ROSTER_UPDATE")
     local groupType = (IsInGroup(2) and 3) or (IsInRaid() and 2) or (IsInGroup() and 1) -- LE_PARTY_CATEGORY_INSTANCE = 2
     if (not grouped and groupType) or (grouped and groupType and grouped ~= groupType) then
         grouped = groupType
@@ -130,7 +129,6 @@ local outdatedTimer = nil
 
 
 function BattleGroundEnemies:VersionCheck(prefix, version, sender)
-    print("VersionCheck", prefix, version, sender)
     if prefix == "Q" then
         if responseTimer then responseTimer:Cancel() end
         responseTimer = CTimerNewTicker(3, function() 
@@ -158,7 +156,6 @@ end
 
 
 function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sender)
-    print("CHAT_MSG_ADDON", addonPrefix, message, channel, sender)
 	if channel ~= "RAID" and channel ~= "PARTY" and channel ~= "INSTANCE_CHAT" and addonPrefix == AddonPrefix then return end
 	
     local msgPrefix, msg = strsplit("^", message)
