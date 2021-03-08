@@ -2310,7 +2310,7 @@ function BattleGroundEnemies:SetupOptions()
 	AceConfigDialog:AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
 end
 
-SLASH_BattleGroundEnemies1, SLASH_BattleGroundEnemies2, SLASH_BattleGroundEnemies3 = "/BattleGroundEnemies", "/bge", "/BattleGroundEnemies"
+SLASH_BattleGroundEnemies1, SLASH_BattleGroundEnemies2 = "/BattleGroundEnemies", "/bge"
 SlashCmdList["BattleGroundEnemies"] = function(msg)
 	AceConfigDialog:Open("BattleGroundEnemies")
 end

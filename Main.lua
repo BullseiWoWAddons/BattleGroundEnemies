@@ -2119,7 +2119,7 @@ function BattleGroundEnemies:Debug(...)
 end
 
 function BattleGroundEnemies:Information(...)
-	print("BGE:", ...) 
+	print("|cff0099ffBattleGroundEnemies:|r", ...) 
 end
 
 

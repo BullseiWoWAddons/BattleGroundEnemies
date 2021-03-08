@@ -26,6 +26,8 @@ Locales\zhTW.lua
 Data.lua
 Defaults.lua
 Main.lua
+Messaging.lua
+
 
 Objects\Auracontainer.lua
 Objects\DR.lua
