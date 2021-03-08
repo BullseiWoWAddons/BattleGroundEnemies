@@ -97,6 +97,19 @@ function BattleGroundEnemies:ShowTooltip(owner, func)
 	end
 end
 
+local function FindAuraBySpellID(unitID, spellID, filter)
+	if not unitID or not spellID then return end
+
+	for i = 1, 40 do
+		local name, _, amount, debuffType, duration, expirationTime, _, _, _, id, _, _, _, _, _, value2, value3, value4 = UnitAura(unitID, i, filter)
+		if not id then return end -- no more auras
+
+		if spellID == id then
+			return i, name, _, amount, debuffType, duration, expirationTime, _, _, _, id, _, _, _, _, _, value2, value3, value4
+		end
+	end
+end
+
 function BattleGroundEnemies:ShowAuraTooltip(unitID, spellID, filter)
 	if unitID then
 		local index = FindAuraBySpellID(unitID, spellID, "HARMFUL")
@@ -423,19 +436,6 @@ BattleGroundEnemies.SetBasicPosition = function(frame, basicPoint, relativeTo, r
 	frame:SetPoint('BOTTOM'..basicPoint, relativeTo, 'BOTTOM'..relativePoint, space, 0)
 end
 
-
-local function FindAuraBySpellID(unitID, spellID, filter)
-	if not unitID or not spellID then return end
-
-	for i = 1, 40 do
-		local name, _, amount, debuffType, duration, expirationTime, _, _, _, id, _, _, _, _, _, value2, value3, value4 = UnitAura(unitID, i, filter)
-		if not id then return end -- no more auras
-
-		if spellID == id then
-			return i, name, _, amount, debuffType, duration, expirationTime, _, _, _, id, _, _, _, _, _, value2, value3, value4
-		end
-	end
-end
 
 
 local function EnableShadowColor(fontString, enableShadow, shadowColor)
