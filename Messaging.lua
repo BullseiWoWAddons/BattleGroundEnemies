@@ -12,6 +12,7 @@ local AddonPrefix = "BGE"
 local versionQueryString, versionResponseString = "Q^%s", "V^%s"
 local versions = {} --
 local highestVersion = BGE_VERSION
+local groupMembers = {}
 
 versionQueryString = versionQueryString:format(BGE_VERSION)
 versionResponseString = versionResponseString:format(BGE_VERSION)
@@ -21,8 +22,10 @@ BattleGroundEnemies:RegisterEvent("GROUP_ROSTER_UPDATE")
 
 C_ChatInfo.RegisterAddonMessagePrefix(AddonPrefix)
 
-
-
+--[[ 
+LE_PARTY_CATEGORY_HOME will query information about your "real" group -- the group you were in on your Home realm, before entering any instance/battleground.
+LE_PARTY_CATEGORY_INSTANCE will query information about your "fake" group -- the group created by the instance/battleground matching mechanism.
+ ]]
 
 SLASH_BattleGroundEnemiesVersion1 = "/bgev"
 SLASH_BattleGroundEnemiesVersion2 = "/BGEV"
@@ -30,12 +33,12 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 	if not IsInGroup() then
         BattleGroundEnemies:Information("You are using Version", BGE_VERSION)
 		return
+    elseif #groupMembers == 0 then --Scan again, the user probably reloaded the UI so GROUP_ROSTER_UPDATE didnt fire
+        BattleGroundEnemies:GROUP_ROSTER_UPDATE() 
 	end
 
 	local function coloredNameVersion(name, version)
-		if not version then
-			version = ""
-        else
+		if version ~= "" then
 			version = ("|cFFCCCCCC(%s%s)|r"):format(version, "") 
 		end
 
@@ -43,31 +46,6 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 		local tbl = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class] or RAID_CLASS_COLORS[class] or GRAY_FONT_COLOR
 		return ("|cFF%02x%02x%02x%s|r%s"):format(tbl.r*255, tbl.g*255, tbl.b*255, name, version)
 	end
-
-    local groupMembers = {}
-
-    
-
-    local unitIDPrefix
-    if IsInRaid() then
-        unitIDPrefix = "raid"
-    else
-        groupMembers[1] = UnitName("player") --the player does not get a party unitID but he gets assigned a raid unitID
-        unitIDPrefix = "party"
-    end
-
-
-
-    for i = 1, GetNumGroupMembers() do -- the player itself only shows up here when he is in a raid
-        local name, realm = UnitName(unitIDPrefix..i)
-       
-        if name then
-            if realm then 
-                name = name.."-"..realm
-            end
-            groupMembers[#groupMembers + 1] = name
-        end
-    end
 
 
     local results = {
@@ -93,7 +71,7 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
                 results.current[#results.current+1] = coloredNameVersion(name, versions[name])  
             end
         else
-            results.none[#results.none+1] = coloredNameVersion(name, versions[name])        
+            results.none[#results.none+1] = coloredNameVersion(name, "")        
         end
     end
 
@@ -110,13 +88,36 @@ end
 
 local grouped = nil
 function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
-    local groupType = (IsInGroup(2) and 3) or (IsInRaid() and 2) or (IsInGroup() and 1) -- LE_PARTY_CATEGORY_INSTANCE = 2
+    local groupType = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and 3) or (IsInRaid() and 2) or (IsInGroup() and 1)
     if (not grouped and groupType) or (grouped and groupType and grouped ~= groupType) then
         grouped = groupType
         SendAddonMessage(AddonPrefix, versionQueryString, groupType == 3 and "INSTANCE_CHAT" or "RAID")
     elseif grouped and not groupType then
         grouped = nil
         versions = {}
+    end
+
+    groupMembers = {}
+
+    local unitIDPrefix
+    if IsInRaid() then
+        unitIDPrefix = "raid"
+    else
+        groupMembers[1] = UnitName("player") --the player does not get a party unitID but he gets assigned a raid unitID
+        unitIDPrefix = "party"
+    end
+
+
+
+    for i = 1, GetNumGroupMembers() do -- the player itself only shows up here when he is in a raid
+        local name, realm = UnitName(unitIDPrefix..i)
+       
+        if name then
+            if realm then 
+                name = name.."-"..realm
+            end
+            groupMembers[#groupMembers + 1] = name
+        end
     end
 end
 
@@ -156,7 +157,7 @@ end
 
 
 function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sender)
-	if channel ~= "RAID" and channel ~= "PARTY" and channel ~= "INSTANCE_CHAT" and addonPrefix == AddonPrefix then return end
+	if channel ~= "RAID" and channel ~= "PARTY" and channel ~= "INSTANCE_CHAT" or addonPrefix ~= AddonPrefix then return end
 	
     local msgPrefix, msg = strsplit("^", message)
     sender = Ambiguate(sender, "none")
