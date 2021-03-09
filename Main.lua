@@ -352,77 +352,68 @@ function BattleGroundEnemies.Allies:GROUP_ROSTER_UPDATE()
 	
 	wipe(self.UnitIDToAllyButton)
 	
-	local numGroupMembers = GetNumGroupMembers()
-	if numGroupMembers > 0 then
-		for i = 1, numGroupMembers do
+
+	for i = 1, GetNumGroupMembers() do
+		
+		local allyName, _, _, _, _, classTag = GetRaidRosterInfo(i)
+		if allyName and classTag then
+		
+			local allyButton = self.Players[allyName]
+		
+			if allyName ~= PlayerDetails.PlayerName then
 			
-			local allyName, _, _, _, _, classTag = GetRaidRosterInfo(i)
-			if allyName and classTag then
-			
-				local allyButton = self.Players[allyName]
-			
-				if allyName ~= PlayerDetails.PlayerName then
+				local unit = "raid"..i --it happens that numGroupMembers is higher than the value of the maximal players for that battleground, for example 15 in a 10 man bg, thats why we wipe AllyUnitIDToAllyDetails
+				local targetUnitID = unit.."target"
 				
-					local unit = "raid"..i --it happens that numGroupMembers is higher than the value of the maximal players for that battleground, for example 15 in a 10 man bg, thats why we wipe AllyUnitIDToAllyDetails
-					local targetUnitID = unit.."target"
+				if allyButton and allyButton.unit ~= unit then -- ally has a new unitID now
 					
-					if allyButton and allyButton.unit ~= unit then -- ally has a new unitID now
-						
-						local targetEnemyButton = allyButton.Target
-						if targetEnemyButton then
-							--self:Debug("player", allyName, "has a new unit and targeted something")
-							if targetEnemyButton.UnitIDs.Active == allyButton.TargetUnitID then
-								targetEnemyButton.UnitIDs.Active = targetUnitID
-							end
-							if targetEnemyButton.UnitIDs.Ally == allyButton.TargetUnitID then
-								targetEnemyButton.UnitIDs.Ally = targetUnitID
-							end
+					local targetEnemyButton = allyButton.Target
+					if targetEnemyButton then
+						--self:Debug("player", allyName, "has a new unit and targeted something")
+						if targetEnemyButton.UnitIDs.Active == allyButton.TargetUnitID then
+							targetEnemyButton.UnitIDs.Active = targetUnitID
 						end
-						
-						allyButton:SetLevel(UnitLevel(unit))
-						allyButton.unit = unit
-						if not InCombatLockdown() then
-							allyButton:SetAttribute('unit', unit)
-						else
-							C_Timer.After(1, self.GROUP_ROSTER_UPDATE)
+						if targetEnemyButton.UnitIDs.Ally == allyButton.TargetUnitID then
+							targetEnemyButton.UnitIDs.Ally = targetUnitID
 						end
-						
-						allyButton.TargetUnitID = targetUnitID
-						self.UnitIDToAllyButton[unit] = allyButton
-						allyButton:RegisterUnitEvent("UNIT_AURA", unit)
 					end
 					
-				else -- its the player
-					if allyButton then
-						
-						if not InCombatLockdown() then
-							allyButton:SetAttribute('unit', "player")
-						else
-							C_Timer.After(1, self.GROUP_ROSTER_UPDATE)
-						end
+					allyButton:SetLevel(UnitLevel(unit))
+					allyButton.unit = unit
+					if not InCombatLockdown() then
+						allyButton:SetAttribute('unit', unit)
+					else
+						C_Timer.After(1, self.GROUP_ROSTER_UPDATE)
+					end
 					
-						allyButton.unit = "player"
-						allyButton.TargetUnitID = "target"
-						allyButton:RegisterUnitEvent("UNIT_AURA", "player")
-						
-						PlayerButton = allyButton
-					end					
+					allyButton.TargetUnitID = targetUnitID
+					self.UnitIDToAllyButton[unit] = allyButton
+					allyButton:RegisterUnitEvent("UNIT_AURA", unit)
 				end
 				
-			else
-				C_Timer.After(1, self.GROUP_ROSTER_UPDATE) --recheck in 1 second
+			else -- its the player
+				if allyButton then
+					
+					if not InCombatLockdown() then
+						allyButton:SetAttribute('unit', "player")
+					else
+						C_Timer.After(1, self.GROUP_ROSTER_UPDATE)
+					end
+				
+					allyButton.unit = "player"
+					allyButton.TargetUnitID = "target"
+					allyButton:RegisterUnitEvent("UNIT_AURA", "player")
+					
+					PlayerButton = allyButton
+				end					
 			end
+			
+		else
+			C_Timer.After(1, self.GROUP_ROSTER_UPDATE) --recheck in 1 second
 		end
 	end
 end
 
-function BattleGroundEnemies.Allies:GetAllybuttonByUnitID(unitID)
-	local uName, realm = UnitName(unitID)
-	if realm then
-		uName = uName.."-"..realm
-	end
-	return self.Players[uName]
-end
 
 BattleGroundEnemies.SetBasicPosition = function(frame, basicPoint, relativeTo, relativePoint, space)
 	frame:ClearAllPoints()
