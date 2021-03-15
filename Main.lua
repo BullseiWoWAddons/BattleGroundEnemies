@@ -2667,7 +2667,7 @@ do
 
 		self:UpdateGroupMemberButton(self.groupMembers[name])
 	
-		if isGroupLeader then
+		if isLeader then
 			self.groupLeader = name
 		end
 	end

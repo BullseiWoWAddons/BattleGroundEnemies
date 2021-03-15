@@ -98,7 +98,7 @@ local wasInGroup = nil
 function BattleGroundEnemies:SendMessagesOnGroupUpdate()
     local iWantToDoTargetcalling = self.db.profile.targetCallingVolunteer
     local groupType = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and 3) or (IsInRaid() and 2) or (IsInGroup() and 1)
-    if (not grouped and groupType) or (grouped and groupType and grouped ~= groupType) then
+    if (not wasInGroup and groupType) or (wasInGroup and groupType and wasInGroup ~= groupType) then
         wasInGroup = groupType
         SendAddonMessage(AddonPrefix, versionQueryString, groupType == 3 and "INSTANCE_CHAT" or "RAID")
         SendAddonMessage(AddonPrefix, targetCallVolunteerString:format(iWantToDoTargetcalling and "y" or "n"), groupType == 3 and "INSTANCE_CHAT" or "RAID")
@@ -154,7 +154,7 @@ function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sende
     if msgPrefix == "TD" then
         -- msg contains the GUID of the targetcaller selected by the grupleader
         --check if sender is raid leader
-        if sender == groupleader then
+        if sender == self.groupLeader then
             self:Information(msg == UnitGUID("player") and YOU or msg, L.TargetCallerUpdated)
             BattleGroundEnemies.TargetCaller = self.Allies.GuidToGroupMember[msg]
         end

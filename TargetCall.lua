@@ -2,6 +2,13 @@ local addonName, Data = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
 local LSM = LibStub("LibSharedMedia-3.0")
 
+local CloseDropDownMenus = CloseDropDownMenus
+local UIDropDownMenu_AddButton = UIDropDownMenu_AddButton
+local UIDropDownMenu_Initialize = UIDropDownMenu_Initialize
+local UIDropDownMenu_SetText = UIDropDownMenu_SetText
+local UIDropDownMenu_SetWidth = UIDropDownMenu_SetWidth
+
+
 BattleGroundEnemies.TargetCalllingVolunteers = {}
 BattleGroundEnemies.TargetCaller = {}
 

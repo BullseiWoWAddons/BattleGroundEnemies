@@ -7,8 +7,17 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-local SOUND
-local soundList = nil
+
+local raidIcons = {
+	RAID_TARGET_1,
+	RAID_TARGET_2,
+	RAID_TARGET_3,
+	RAID_TARGET_4,
+	RAID_TARGET_5,
+	RAID_TARGET_6,
+	RAID_TARGET_7,
+	RAID_TARGET_8,
+}
 
 local CTimerNewTicker = C_Timer.NewTicker
 
@@ -1871,10 +1880,9 @@ function BattleGroundEnemies:SetupOptions()
 										name = L.secondary,
 										desc = L.secondaryDesc,
 										order = 4,
-										values = icons,
+										values = raidIcons,
 										width = "full",
 										itemControl = "DDI-RaidIcon",
-										disabled = disabled,
 									}
 								}
 							}
@@ -1911,9 +1919,6 @@ function BattleGroundEnemies:SetupOptions()
 		}
 	}
 
-	
-	SOUND = LSM.MediaType and LSM.MediaType.SOUND or "sound"
-	soundList = LSM:List(SOUND)
 
 	AceConfigRegistry:RegisterOptionsTable("BattleGroundEnemies", self.options)
 		
