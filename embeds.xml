@@ -2,6 +2,7 @@
 	<Script file="Libs\LibStub\LibStub.lua"/>
 	<Script file="Libs\LibRaces-1.0\LibRaces-1.0.lua"/>
 	<Script file="Libs\UTF8\utf8.lua"/>
+	<Script file="Libs\LibDDI-1.0\lib.xml"/>
 	<Include file="Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
 	<Include file="Libs\AceGUI-3.0\AceGUI-3.0.xml"/>
 	<Include file="Libs\AceConfig-3.0\AceConfig-3.0.xml"/>
