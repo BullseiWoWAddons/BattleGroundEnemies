@@ -60,19 +60,10 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 			self.AuraText:SetTextColor(unpack(conf.ObjectiveAndRespawn_Textcolor))
 			self.AuraText:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline, conf.ObjectiveAndRespawn_EnableTextshadow, conf.ObjectiveAndRespawn_TextShadowcolor)
 			
-			self.Cooldown:ApplyCooldownSettings(conf.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})
-			self.Cooldown.Text:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Cooldown_Fontsize, conf.ObjectiveAndRespawn_Cooldown_Outline, conf.ObjectiveAndRespawn_Cooldown_EnableTextshadow, conf.ObjectiveAndRespawn_Cooldown_TextShadowcolor)
+			self.Cooldown:ApplyCooldownSettings(BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})
+			self.Cooldown.Text:ApplyFontStringSettings(BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_Cooldown_Fontsize, BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_Cooldown_Outline, BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_Cooldown_EnableTextshadow, BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_Cooldown_TextShadowcolor)
 			
 			self:SetPosition()
-		
-		
-			self:SetWidth(conf.ObjectiveAndRespawn_Width)			
-			
-			self.AuraText:SetTextColor(unpack(conf.ObjectiveAndRespawn_Textcolor))
-			self.AuraText:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline, conf.ObjectiveAndRespawn_EnableTextshadow, conf.ObjectiveAndRespawn_TextShadowcolor)
-			
-			self.Cooldown:ApplyCooldownSettings(conf.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})
-			self.Cooldown.Text:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Cooldown_Fontsize, conf.ObjectiveAndRespawn_Cooldown_Outline, conf.ObjectiveAndRespawn_Cooldown_EnableTextshadow, conf.ObjectiveAndRespawn_Cooldown_TextShadowcolor)
 		end
 	end
 

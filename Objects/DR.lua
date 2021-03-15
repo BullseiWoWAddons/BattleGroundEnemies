@@ -29,6 +29,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 	DRContainer.ApplySettings = function(self)
 		self:UpdateBackdrop(playerButton.bgSizeConfig.DrTracking_Container_BorderThickness)
 		self:SetPosition()
+		self:DrPositioning()
 		
 		for drCategory, drFrame in pairs(self.DRFrames) do
 			drFrame:ApplyDrFrameSettings()
