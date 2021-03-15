@@ -7,6 +7,12 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
+local SOUND
+local soundList = nil
+
+local CTimerNewTicker = C_Timer.NewTicker
+
+
 local function copy(obj)
 	if type(obj) ~= 'table' then return obj end
 	local res = {}
@@ -61,40 +67,9 @@ addStaticPopupBGTypeConfigImport("Allies", "Enemies", "40")
 
 
 
-
-local function OptionsType(option)
-
-	local playerType, IsGeneralsetting
-	if option[1] == "EnemySettings" then
-		playerType = "Enemies"
-	elseif option[1] == "AllySettings" then
-		playerType = "Allies"
-	end
-	
-	if playerType and option[2] == "GeneralSettings" then
-		IsGeneralsetting = true
-	end
-	
-	
-	return playerType, IsGeneralsetting
-end
-
-local function Optionslocation(option)
-	local playerType, IsGeneralsetting = OptionsType(option)
-	local location = BattleGroundEnemies.db.profile
-	
-	if playerType then
-		location = location[playerType]
-		if not IsGeneralsetting then
-			location = location[option[2]] -- its an BGSize option
-		end
-	end
-	return location
-end
-
-local function getOption(option)
-	local location = Optionslocation(option)
+local function getOption(location, option)
 	local value = location[option[#option]]
+
 	if type(value) == "table" then
 		--BattleGroundEnemies:Debug("is table")
 		return unpack(value)
@@ -103,97 +78,31 @@ local function getOption(option)
 	end
 end
 
-local function setOption(option, value)
-	-- local setting = BattleGroundEnemies.db
-	-- for i = 1, #option do
-		-- setting = setting[option[i]]
-	-- end
-	-- setting = value
-	--BattleGroundEnemies:Debug(option.arg, value, option[0], option[1], option[2], option[3], option[4])
-	local location = Optionslocation(option)
-	--BattleGroundEnemies:Debug(type(value), value)
-	-- BattleGroundEnemies:Debug(key, value)
-	-- BattleGroundEnemies:Debug(unpack(value))
-	location[option[#option]] = value
+local timer = nil
+local function setOption(location, option, ...)
+
+
 	
+
+	local value
+	if option.type == "color" then
+		value = {...}   -- local r, g, b, alpha = ...
+	else
+		value = ...
+	end
+
+	location[option[#option]] = value
+
+	if timer then timer:Cancel() end -- use a timer to apply changes after 0.2 second, this prevents the UI from getting laggy when the user uses a slider option
+	timer = CTimerNewTicker(0.2, function() 
+		BattleGroundEnemies.Enemies:ApplyAllSettings()
+		BattleGroundEnemies.Allies:ApplyAllSettings()
+		timer = nil
+	end, 1)
+
 	--BattleGroundEnemies.db.profile[key] = value
 end
 
-local function CallInDeepness(obj, fixedsubtable, subtablename, subsubtablename, func, ...)
-	--print(obj, fixedsubtable, subtablename, subsubtablename, func, ...)
-	if fixedsubtable then obj = obj[fixedsubtable] end
-	if subtablename then 
-		obj = obj[subtablename] 
-		if subsubtablename then 
-			obj = obj[subsubtablename] 
-		end
-	end
-	
-	--BattleGroundEnemies:Debug(func, ...)
-	--print(obj, func, ...)
-	obj[func](obj, ...)
-end
-
-local function ApplySettingsToButton(playerButton, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-	local object = fixedsubtableBeforeLoop and playerButton[fixedsubtableBeforeLoop] or playerButton
-	if loopInButton1 then
-		for k, obj in pairs(object[loopInButton1]) do
-			CallInDeepness(obj, fixedsubtable, subtablename, subsubtablename, func, ...)
-		end
-		if loopInButton2 then
-			for k, obj in pairs(object[loopInButton2]) do
-				CallInDeepness(obj, fixedsubtable, subtablename, subsubtablename, func, ...)
-			end
-		end
-	else
-		CallInDeepness(object, fixedsubtable, subtablename, subsubtablename, func, ...)
-	end
-end
-
-local function UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-	setOption(option, value)	
-	
-	local playerType, IsGeneralsetting = OptionsType(option)
-	
-	--BattleGroundEnemies:Debug("IsEnemyOrAlly:", IsEnemyOrAlly, "playerType:", playerType)
-	
-	if playerType and not IsGeneralsetting and BattleGroundEnemies.BGSize ~= tonumber(option[2]) then return end
-	
-	
-	for name, playerButton in pairs(BattleGroundEnemies[playerType].Players) do
-		ApplySettingsToButton(playerButton, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-	end
-	for i = 1, #BattleGroundEnemies[playerType].InactivePlayerButtons do
-		local playerButton = BattleGroundEnemies[playerType].InactivePlayerButtons[i]
-		ApplySettingsToButton(playerButton, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-	end
-end
-
-
-local function ApplySetting(option, value, LoopOverButtons, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-	setOption(option, value)
-	
-	if LoopOverButtons then
-		UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-	else
-		local playerType = option[1] == "EnemySettings" and "Enemies" or "Allies"
-		--BattleGroundEnemies:Debug(playerType, fixedsubtable, subtablename, func, ...)
-		CallInDeepness(BattleGroundEnemies[playerType], fixedsubtable, subtablename, subsubtablename, func, ...)
-	end
-end
-
-local function ApplySettingToEnemiesAndAllies(option, value, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-	setOption(option, value)	
-	for number, playerType in pairs({BattleGroundEnemies.Allies, BattleGroundEnemies.Enemies}) do
-		for name, playerButton in pairs(playerType.Players) do
-			ApplySettingsToButton(playerButton, nil, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-		end
-		for i = 1, #playerType.InactivePlayerButtons do
-			local playerButton = playerType.InactivePlayerButtons[i]
-			ApplySettingsToButton(playerButton, nil, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, func, ...)
-		end
-	end
-end
 
 local function addVerticalSpacing(order)
 	local verticalSpacing = {
@@ -217,42 +126,7 @@ local function addHorizontalSpacing(order)
 end
 
 
-
-local function applyMainfont(playerButton, value)
-	local conf = playerButton.bgSizeConfig
-	playerButton.Name:SetFont(LSM:Fetch("font", value), conf.Name_Fontsize, conf.Name_Outline)
-	playerButton.NumericTargetindicator:SetFont(LSM:Fetch("font", value), conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline)
-	playerButton.ObjectiveAndRespawn.AuraText:SetFont(LSM:Fetch("font", value), conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline)
-	playerButton.Trinket.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Trinket_Cooldown_Fontsize, conf.Trinket_Cooldown_Outline)
-	playerButton.Racial.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Racial_Cooldown_Fontsize, conf.Racial_Cooldown_Outline)
-
-	for identifier, debuffFrame in pairs(playerButton.DebuffContainer.Active) do
-		local conf = playerButton.bgSizeConfig
-		debuffFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Debuffs_Fontsize, conf.Auras_Debuffs_Outline)
-		debuffFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline)
-	end
-	for identifier, debuffFrame in pairs(playerButton.DebuffContainer.Inactive) do
-		local conf = playerButton.bgSizeConfig
-		debuffFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Debuffs_Fontsize, conf.Auras_Debuffs_Outline)
-		debuffFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline)
-	end
-	for identifier, buffFrame in pairs(playerButton.BuffContainer.Active) do
-		local conf = playerButton.bgSizeConfig
-		buffFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline)
-		buffFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline)
-	end
-	for identifier, buffFrame in pairs(playerButton.BuffContainer.Inactive) do
-		local conf = playerButton.bgSizeConfig
-		buffFrame.Stacks:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline)
-		buffFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline)
-	end
-	for drCat, drFrame in pairs(playerButton.DRContainer.DRFrames) do
-		drFrame.Cooldown.Text:SetFont(LSM:Fetch("font", value), conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline)
-	end
-	playerButton.Level:SetFont(LSM:Fetch("font", value), playerButton.config.LevelText_Fontsize, playerButton.config.LevelText_Outline)
-end
-
-local function addIconPositionSettings(playerType, BGSize, optionname, maindisable, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename)
+local function addIconPositionSettings(location, optionname)
 	local size = optionname.."_Size"
 	local horizontalDirection = optionname.."_HorizontalGrowDirection"
 	local horizontalSpacing	= optionname.."_HorizontalSpacing"
@@ -260,21 +134,10 @@ local function addIconPositionSettings(playerType, BGSize, optionname, maindisab
 	local verticalSpacing =	optionname.."_VerticalSpacing"
 	local iconsPerRow = optionname.."_IconsPerRow"
 	
-	--print(relativeTo)
 	local options = {
 		[size] = {
 			type = "range",
 			name = L.Size,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetIconSize", value)
-			end,
 			min = 0,
 			max = 40,
 			step = 1,
@@ -283,16 +146,6 @@ local function addIconPositionSettings(playerType, BGSize, optionname, maindisab
 		[iconsPerRow] = {
 			type = "range",
 			name = L.IconsPerRow,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable]
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "AuraPositioning")
-			end,
 			min = 4,
 			max = 30,
 			step = 1,
@@ -302,16 +155,6 @@ local function addIconPositionSettings(playerType, BGSize, optionname, maindisab
 		[horizontalDirection] = {
 			type = "select",
 			name = L.HorizontalGrowdirection,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "AuraPositioning")
-			end,
 			width = "normal",
 			values = Data.HorizontalDirections,
 			order = 4
@@ -319,16 +162,6 @@ local function addIconPositionSettings(playerType, BGSize, optionname, maindisab
 		[horizontalSpacing] = {
 			type = "range",
 			name = L.HorizontalSpacing,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "AuraPositioning")
-			end,
 			min = 0,
 			max = 20,
 			step = 1,
@@ -338,16 +171,6 @@ local function addIconPositionSettings(playerType, BGSize, optionname, maindisab
 		[verticalDirection] = {
 			type = "select",
 			name = L.VerticalGrowdirection,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "AuraPositioning")
-			end,
 			width = "half",
 			values = Data.VerticalDirections,
 			order = 7
@@ -355,16 +178,6 @@ local function addIconPositionSettings(playerType, BGSize, optionname, maindisab
 		[verticalSpacing] = {
 			type = "range",
 			name = L.VerticalSpacing,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "AuraPositioning")
-			end,
 			min = 0,
 			max = 20,
 			step = 1,
@@ -376,28 +189,17 @@ end
 
 
 -- all positions, corners, middle, left etc.
-local function addContainerPositionSettings(playerType, BGSize, optionname, maindisable, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename)
+local function addContainerPositionSettings(location, optionname)
 	local point = optionname.."_Point"
 	local relativeTo = optionname.."_RelativeTo"
 	local relativePoint = optionname.."_RelativePoint"
 	local ofsx = optionname.."_OffsetX"
 	local ofsy = optionname.."_OffsetY"
 	
-	--print(relativeTo)
 	local options = {
 		[point] = {
 			type = "select",
 			name = L.Point,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetContainerPosition")
-			end,
 			width = "normal",
 			values = Data.AllPositions,
 			order = 1
@@ -406,18 +208,6 @@ local function addContainerPositionSettings(playerType, BGSize, optionname, main
 			type = "select",
 			name = L.AttachToObject,
 			desc = L.AttachToObject_Desc,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				
-				if fixedsubtable == value then PlaySound(8959) RaidNotice_AddMessage(RaidWarningFrame, L.CantAnchorToItself, ChatTypeInfo["RAID_WARNING"]) return end 
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetContainerPosition")
-			end,
 			values = Data.Frames,
 			order = 2
 		},
@@ -425,16 +215,6 @@ local function addContainerPositionSettings(playerType, BGSize, optionname, main
 		[relativePoint] = {
 			type = "select",
 			name = L.PointAtObject,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetContainerPosition")
-			end,
 			width = "half",
 			values = Data.AllPositions,
 			order = 4
@@ -442,16 +222,6 @@ local function addContainerPositionSettings(playerType, BGSize, optionname, main
 		[ofsx] = {
 			type = "range",
 			name = L.OffsetX,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetContainerPosition")
-			end,
 			min = -20,
 			max = 20,
 			step = 1,
@@ -460,16 +230,6 @@ local function addContainerPositionSettings(playerType, BGSize, optionname, main
 		[ofsy] = {
 			type = "range",
 			name = L.OffsetY,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable]
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetContainerPosition")
-			end,
 			min = -20,
 			max = 20,
 			step = 1,
@@ -480,28 +240,17 @@ local function addContainerPositionSettings(playerType, BGSize, optionname, main
 end
 
 -- sets 2 points, user can choose left and right, 1 point at TOP..setting, and another point BOTTOM..setting is set
-local function addBasicPositionSettings(playerType, BGSize, optionname, maindisable, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename)
+local function addBasicPositionSettings(location, optionname)
 	local point = optionname.."_BasicPoint"
 	local relativeTo = optionname.."_RelativeTo"
 	local relativePoint = optionname.."_RelativePoint"
 	local ofsx = optionname.."_OffsetX"
 	local ofsy = optionname.."_OffsetY"
 	
-	--print(relativeTo)
 	local options = {
 		[point] = {
 			type = "select",
 			name = L.Side,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetPosition")
-			end,
 			width = "normal",
 			values = Data.BasicPositions,
 			order = 1
@@ -510,19 +259,6 @@ local function addBasicPositionSettings(playerType, BGSize, optionname, maindisa
 			type = "select",
 			name = L.AttachToObject,
 			desc = L.AttachToObject_Desc,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				--print(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetPosition", conf[point], value, conf[relativePoint], conf[ofsx], conf[ofsy])
-				
-				if BGSize then conf = conf[BGSize] end
-				if fixedsubtable == value then PlaySound(8959) RaidNotice_AddMessage(RaidWarningFrame, L.CantAnchorToItself, ChatTypeInfo["RAID_WARNING"]) return end 
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetPosition")
-			end,
 			values = Data.Frames,
 			order = 2
 		},
@@ -530,16 +266,6 @@ local function addBasicPositionSettings(playerType, BGSize, optionname, maindisa
 		[relativePoint] = {
 			type = "select",
 			name = L.SideAtObject,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetPosition")
-			end,
 			width = "half",
 			values = Data.BasicPositions,
 			order = 4
@@ -547,16 +273,6 @@ local function addBasicPositionSettings(playerType, BGSize, optionname, maindisa
 		[ofsx] = {
 			type = "range",
 			name = L.OffsetX,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetPosition")
-			end,
 			min = -20,
 			max = 20,
 			step = 1,
@@ -566,7 +282,7 @@ local function addBasicPositionSettings(playerType, BGSize, optionname, maindisa
 	return options
 end
 
-local function addNormalTextSettings(playerType, BGSize, optionname, maindisable, LoopOverButtons, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename)
+local function addNormalTextSettings(location, optionname)
 	local fontsize = optionname.."_Fontsize"
 	local textcolor = optionname.."_Textcolor"
 	local outline = optionname.."_Outline"
@@ -578,16 +294,6 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			type = "range",
 			name = L.Fontsize,
 			desc = L[fontsize.."_Desc"],
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				ApplySetting(option, value, LoopOverButtons, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, conf[outline])
-			end,
 			min = 1,
 			max = 40,
 			step = 1,
@@ -598,16 +304,6 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			type = "select",
 			name = L.Font_Outline,
 			desc = L.Font_Outline_Desc,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				ApplySetting(option, value, LoopOverButtons, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), conf[fontsize], value)
-			end,
 			values = Data.FontOutlines,
 			order = 2
 		},
@@ -616,15 +312,6 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			type = "color",
 			name = L.Fontcolor,
 			desc = L[textcolor.."_Desc"],
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, ...)
-				local color = {...}
-				ApplySetting(option, color, LoopOverButtons, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetTextColor", ...)
-			end,
 			hasAlpha = true,
 			width = "half",
 			order = 4
@@ -633,14 +320,6 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			type = "toggle",
 			name = L.FontShadow_Enabled,
 			desc = L.FontShadow_Enabled_Desc,
-			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] 
-			end,
-			set = function(option, value)
-				ApplySetting(option, value, LoopOverButtons, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "EnableShadowColor", value)
-			end,
 			order = 5
 		},
 		[textShadowcolor] = {
@@ -648,13 +327,7 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 			name = L.FontShadowColor,
 			desc = L.FontShadowColor_Desc,
 			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType]
-				if BGSize then conf = conf[BGSize] end
-				return maindisable and not conf[maindisable] or not conf[enableTextShadow]
-			end,
-			set = function(option, ...)
-				local color = {...}
-				ApplySetting(option, color, LoopOverButtons, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename, "SetShadowColor", ...)
+				return not location[enableTextShadow]
 			end,
 			hasAlpha = true,
 			order = 6
@@ -664,23 +337,18 @@ local function addNormalTextSettings(playerType, BGSize, optionname, maindisable
 end
 
 
-local function addCooldownTextsettings(playerType, BGSize, optionname, maindisable, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, subtablename, subsubtablename)
+local function addCooldownTextsettings(location, optionname)
 	local showNumbers = optionname.."_ShowNumbers"
 	local fontsize = optionname.."_Cooldown_Fontsize"
 	local outline = optionname.."_Cooldown_Outline"
 	local enableTextShadow = optionname.."_Cooldown_EnableTextshadow"
 	local textShadowcolor = optionname.."_Cooldown_TextShadowcolor"	
-	
-	local mainconfig = BattleGroundEnemies.db.profile
 
 	local options = {
 		[showNumbers] = {
 			type = "toggle",
 			name = L.ShowNumbers,
 			desc = L[showNumbers.."_Desc"],
-			set = function(option, value)
-				UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", subsubtablename, "SetHideCountdownNumbers", not value)
-			end,
 			order = 1
 		},
 		asdfasdf = {
@@ -688,8 +356,7 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 			name = "",
 			desc = "",
 			disabled = function() 
-				local conf = BattleGroundEnemies.db.profile[playerType][BGSize]
-				return maindisable and not conf[maindisable] or not conf[showNumbers]
+				return not location[showNumbers]
 			end, 
 			inline = true,
 			order = 2,
@@ -698,10 +365,6 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 					type = "range",
 					name = L.Fontsize,
 					desc = L.Cooldown_Fontsize_Desc,
-					set = function(option, value)
-						local conf = BattleGroundEnemies.db.profile[playerType][BGSize]
-						UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), value, conf[outline])
-					end,
 					min = 6,
 					max = 40,
 					step = 1,
@@ -712,10 +375,6 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 					type = "select",
 					name = L.Font_Outline,
 					desc = L.Font_Outline_Desc,
-					set = function(option, value)
-						local conf = BattleGroundEnemies.db.profile[playerType][BGSize]
-						UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "SetFont", LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), conf[fontsize], value)
-					end,
 					values = Data.FontOutlines,
 					order = 4
 				},
@@ -724,10 +383,6 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 					type = "toggle",
 					name = L.FontShadow_Enabled,
 					desc = L.FontShadow_Enabled_Desc,
-					set = function(option, value)
-						local conf = BattleGroundEnemies.db.profile[playerType][BGSize]
-						UpdateButtons(option, value, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", value, conf[textShadowcolor])
-					end,
 					order = 6
 				},
 				[textShadowcolor] = {
@@ -735,14 +390,8 @@ local function addCooldownTextsettings(playerType, BGSize, optionname, maindisab
 					name = L.FontShadowColor,
 					desc = L.FontShadowColor_Desc,
 					disabled = function()
-						local conf = BattleGroundEnemies.db.profile[playerType][BGSize]
-						return maindisable and not conf[maindisable] or not conf[showNumbers] or not conf[enableTextShadow] 
+						return not location[enableTextShadow] 
 					end, 
-					set = function(option, ...)
-						local color = {...}
-						local conf = BattleGroundEnemies.db.profile[playerType][BGSize]
-						UpdateButtons(option, color, fixedsubtableBeforeLoop, loopInButton1, loopInButton2, fixedsubtable, "Cooldown", "Text", "EnableShadowColor", conf[enableTextShadow], color)
-					end,
 					hasAlpha = true,
 					order = 7
 				}
@@ -756,19 +405,18 @@ local function addEnemyAndAllySettings(self)
 	local playerType = self.PlayerType
 	local oppositePlayerType = playerType == "Enemies" and "Allies" or "Enemies"
 	local settings = {}
+	local location = BattleGroundEnemies.db.profile[playerType]
+
 	
 	settings.GeneralSettings = {
 		type = "group",
 		name = GENERAL,
 		desc = L["GeneralSettings"..playerType],
 		get =  function(option)
-			local value = option.arg and self.config[option.arg] or self.config[option[#option]]
-			if type(value) == "table" then
-				--BattleGroundEnemies:Debug("is table")
-				return unpack(value)
-			else
-				return value
-			end
+			return getOption(location, option)
+		end,
+		set = function(option, ...) 
+			return setOption(location, option, ...)
 		end,
 		--childGroups = "tab",
 		order = 1,
@@ -777,10 +425,6 @@ local function addEnemyAndAllySettings(self)
 				type = "toggle",
 				name = ENABLE,
 				desc = "test",
-				set = function(option, value) 
-					setOption(option, value)
-					self:CheckIfShouldShow()
-				end,
 				order = 1
 			},
 			Fake = addHorizontalSpacing(2),
@@ -807,20 +451,17 @@ local function addEnemyAndAllySettings(self)
 						type = "toggle",
 						name = L.RangeIndicator_Enabled,
 						desc = L.RangeIndicator_Enabled_Desc,
-						set = function(option, value) 
-							UpdateButtons(option, value, nil, nil, nil, "RangeIndicator_Frame", nil, nil, "SetAlpha", value and self.config.RangeIndicator_Alpha or 1)
-						end,
 						order = 1
 					},
 					RangeIndicator_Range = {
 						type = "select",
 						name = L.RangeIndicator_Range,
 						desc = L.RangeIndicator_Range_Desc,
-						disabled = function() return not self.config.RangeIndicator_Enabled end,
-						get = function() return Data[playerType.."ItemIDToRange"][self.config.RangeIndicator_Range] end,
+						disabled = function() return not location.RangeIndicator_Enabled end,
+						get = function() return Data[playerType.."ItemIDToRange"][location.RangeIndicator_Range] end,
 						set = function(option, value)
 							value = Data[playerType.."RangeToItemID"][value]
-							setOption(option, value)
+							return setOption(location, option, value)
 						end,
 						values = Data[playerType.."RangeToRange"],
 						width = "half",
@@ -830,7 +471,7 @@ local function addEnemyAndAllySettings(self)
 						type = "range",
 						name = L.RangeIndicator_Alpha,
 						desc = L.RangeIndicator_Alpha_Desc,
-						disabled = function() return not self.config.RangeIndicator_Enabled end,
+						disabled = function() return not location.RangeIndicator_Enabled end,
 						min = 0,
 						max = 1,
 						step = 0.05,
@@ -840,30 +481,19 @@ local function addEnemyAndAllySettings(self)
 					RangeIndicator_Everything = {
 						type = "toggle",
 						name = L.RangeIndicator_Everything,
-						disabled = function() return not self.config.RangeIndicator_Enabled end,
-						set = function(option, value)
-							UpdateButtons(option, value, nil, nil, nil, nil, nil, nil, "SetRangeIncicatorFrame")
-						end,
+						disabled = function() return not location.RangeIndicator_Enabled end,
 						order = 6
 					},
 					RangeIndicator_Frames = {
 						type = "multiselect",
 						name = L.RangeIndicator_Frames,
 						desc = L.RangeIndicator_Frames_Desc,
-						hidden = function() return (not self.config.RangeIndicator_Enabled or self.config.RangeIndicator_Everything) end,
+						hidden = function() return (not location.RangeIndicator_Enabled or location.RangeIndicator_Everything) end,
 						get = function(option, key)
-							return BattleGroundEnemies.db.profile[playerType].RangeIndicator_Frames[key]
+							return location.RangeIndicator_Frames[key]
 						end,
 						set = function(option, key, state) 
-							BattleGroundEnemies.db.profile[playerType].RangeIndicator_Frames[key] = state
-						
-							for name, playerButton in pairs(BattleGroundEnemies[playerType].Players) do
-								ApplySettingsToButton(playerButton, nil, nil, nil, nil, nil, nil, "SetRangeIncicatorFrame")
-							end
-							for i = 1, #BattleGroundEnemies[playerType].InactivePlayerButtons do
-								local playerButton = BattleGroundEnemies[playerType].InactivePlayerButtons[i]
-								ApplySettingsToButton(playerButton, nil, nil, nil, nil, nil, nil, "SetRangeIncicatorFrame")
-							end
+							location.RangeIndicator_Frames[key] = state
 						end,
 						width = "double",
 						values = Data.RangeFrames,
@@ -881,9 +511,6 @@ local function addEnemyAndAllySettings(self)
 						type = "toggle",
 						name = L.ConvertCyrillic,
 						desc = L.ConvertCyrillic_Desc,
-						set = function(option, value)
-							UpdateButtons(option, value, nil, nil, nil, nil, nil, nil, "SetName")
-						end,
 						width = "normal",
 						order = 1
 					},
@@ -891,9 +518,6 @@ local function addEnemyAndAllySettings(self)
 						type = "toggle",
 						name = L.ShowRealmnames,
 						desc = L.ShowRealmnames_Desc,
-						set = function(option, value)
-							UpdateButtons(option, value, nil, nil, nil, nil, nil, nil, "SetName")
-						end,
 						width = "normal",
 						order = 2
 					},
@@ -907,28 +531,22 @@ local function addEnemyAndAllySettings(self)
 							LevelText_Enabled = {
 								type = "toggle",
 								name = L.LevelText_Enabled,
-								set = function(option, value)
-									UpdateButtons(option, value, nil, nil, nil, nil, nil, nil, "DisplayLevel")
-								end,
 								order = 1
 							},
 							LevelText_OnlyShowIfNotMaxLevel = {
 								type = "toggle",
 								name = L.LevelText_OnlyShowIfNotMaxLevel,
-								disabled = function() return not self.config.LevelText_Enabled end,
-								set = function(option, value)
-									UpdateButtons(option, value, nil, nil, nil, nil, nil, nil, "DisplayLevel")
-								end,
+								disabled = function() return not location.LevelText_Enabled end,
 								order = 2
 							},
 							LevelTextTextSettings = {
 								type = "group",
 								name = "",
 								--desc = L.TrinketSettings_Desc,
-								disabled = function() return not self.config.LevelText_Enabled end,
+								disabled = function() return not location.LevelText_Enabled end,
 								inline = true,
 								order = 3,
-								args = addNormalTextSettings(playerType, nil, "LevelText", "LevelText_Enabled", true, false, false, false, "Level")
+								args = addNormalTextSettings(location, "LevelText")
 							}
 						}
 					}
@@ -939,59 +557,79 @@ local function addEnemyAndAllySettings(self)
 				name = KEY_BINDINGS,
 				desc = L.KeybindSettings_Desc..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
-				set = function(option, value) 
-					UpdateButtons(option, value, nil, nil, nil, nil, nil, nil, "SetBindings")
-				end,
 				--childGroups = "tab",
 				order = 9,
 				args = {
-					LeftButtonType = {
-						type = "select",
+					LeftButton = {
+						type = "group",
 						name = KEY_BUTTON1,
-						values = Data.Buttons,
-						order = 1
+						order = 1,
+						args = {
+							LeftButtonType = {
+								type = "select",
+								name = KEY_BUTTON1,
+								values = Data.Buttons,
+								order = 1
+							},
+							LeftButtonValue = {
+								type = "input",
+								name = ENTER_MACRO_LABEL,
+								desc = L.CustomMacro_Desc,
+								disabled = function() return location.LeftButtonType == "Target" or location.LeftButtonType == "Focus" end,
+								multiline = true,
+								width = 'double',
+								order = 2
+							},
+
+						}
 					},
-					LeftButtonValue = {
-						type = "input",
-						name = ENTER_MACRO_LABEL,
-						desc = L.CustomMacro_Desc,
-						disabled = function() return self.config.LeftButtonType == "Target" or self.config.LeftButtonType == "Focus" end,
-						multiline = true,
-						width = 'double',
-						order = 2
-					},
-					Fake = addVerticalSpacing(3),
-					RightButtonType = {
-						type = "select",
+					RightButton = {
+						type = "group",
 						name = KEY_BUTTON2,
-						values = Data.Buttons,
-						order = 4
+						order = 2,
+						args = {
+							RightButtonType = {
+								type = "select",
+								name = KEY_BUTTON2,
+								values = Data.Buttons,
+								order = 1
+							},
+							RightButtonValue = {
+								type = "input",
+								name = ENTER_MACRO_LABEL,
+								desc = L.CustomMacro_Desc,
+								disabled = function() return location.RightButtonType == "Target" or location.RightButtonType == "Focus" end,
+								multiline = true,
+								width = 'double',
+								order = 2
+							},
+
+						}
 					},
-					RightButtonValue = {
-						type = "input",
-						name = ENTER_MACRO_LABEL,
-						desc = L.CustomMacro_Desc,
-						disabled = function() return self.config.RightButtonType == "Target" or self.config.RightButtonType == "Focus" end,
-						multiline = true,
-						width = 'double',
-						order = 5
-					},
-					Fake1 = addVerticalSpacing(6),
-					MiddleButtonType = {
-						type = "select",
+					MiddleButton = {
+						type = "group",
 						name = KEY_BUTTON3,
-						values = Data.Buttons,
-						order = 7
-					},
-					MiddleButtonValue = {
-						type = "input",
-						name = ENTER_MACRO_LABEL,
-						desc = L.CustomMacro_Desc,
-						disabled = function() return self.config.MiddleButtonType == "Target" or self.config.MiddleButtonType == "Focus" end,
-						multiline = true,
-						width = 'double',
-						order = 8
+						order = 3,
+						args = {
+
+							MiddleButtonType = {
+								type = "select",
+								name = KEY_BUTTON3,
+								values = Data.Buttons,
+								order = 1
+							},
+							MiddleButtonValue = {
+								type = "input",
+								name = ENTER_MACRO_LABEL,
+								desc = L.CustomMacro_Desc,
+								disabled = function() return location.MiddleButtonType == "Target" or location.MiddleButtonType == "Focus" end,
+								multiline = true,
+								width = 'double',
+								order = 2
+							}
+						}
 					}
+				
 				}
 			}
 		}
@@ -999,21 +637,24 @@ local function addEnemyAndAllySettings(self)
 	
 
 	for k, BGSize in pairs({"15", "40"}) do
+		local location = BattleGroundEnemies.db.profile[playerType][BGSize]
 		settings[BGSize] = {
 			type = "group", 
 			name = L["BGSize_"..BGSize],
 			desc = L["BGSize_"..BGSize.."_Desc"]:format(L[playerType]),
 			disabled = function() return not self.config.Enabled end,
+			get =  function(option)
+				return getOption(location, option)
+			end,
+			set = function(option, ...)
+				return setOption(location, option, ...)
+			end,
 			order = k + 1, 
 			args = {
 				Enabled = {
 					type = "toggle",
 					name = ENABLE,
 					desc = "test",
-					set = function(option, value) 
-						setOption(option, value)
-						self:CheckIfShouldShow()
-					end,
 					order = 1
 				},
 				Fake = addHorizontalSpacing(2),
@@ -1031,7 +672,7 @@ local function addEnemyAndAllySettings(self)
 					type = "group",
 					name = L.MainFrameSettings,
 					desc = L.MainFrameSettings_Desc:format(L[playerType == "Enemies" and "enemies" or "allies"]),
-					disabled = function() return not self.config[BGSize].Enabled end,
+					disabled = function() return not location.Enabled end,
 					--childGroups = "tab",
 					order = 4,
 					args = {
@@ -1040,11 +681,6 @@ local function addEnemyAndAllySettings(self)
 							name = L.Framescale,
 							desc = L.Framescale_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
-							set = function(option, value)
-								setOption(option, value)
-								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
-								self:SetScale(value)
-							end,
 							min = 0.3,
 							max = 2,
 							step = 0.05,
@@ -1060,22 +696,16 @@ local function addEnemyAndAllySettings(self)
 									type = "toggle",
 									name = L.PlayerCount_Enabled,
 									desc = L.PlayerCount_Enabled_Desc,
-									set = function(option, value)
-										setOption(option, value)
-										if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
-									
-										self.PlayerCount:SetShown(value)
-									end,
 									order = 1
 								},
 								PlayerCountTextSettings = {
 									type = "group",
 									name = "",
 									--desc = L.TrinketSettings_Desc,
-									disabled = function() return not self.config[BGSize].PlayerCount_Enabled end,
+									disabled = function() return not location.PlayerCount_Enabled end,
 									inline = true,
 									order = 2,
-									args = addNormalTextSettings(playerType, BGSize, "PlayerCount", "PlayerCount_Enabled", false, false, false, false, "PlayerCount")
+									args = addNormalTextSettings(location, "PlayerCount")
 								}
 							}
 						}
@@ -1085,7 +715,7 @@ local function addEnemyAndAllySettings(self)
 					type = "group",
 					name = L.BarSettings,
 					desc = L.BarSettings_Desc,
-					disabled = function() return not self.config[BGSize].Enabled end,
+					disabled = function() return not location.Enabled end,
 					--childGroups = "tab",
 					order = 5,
 					args = {
@@ -1094,10 +724,6 @@ local function addEnemyAndAllySettings(self)
 							name = L.Width,
 							desc = L.BarWidth_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
-							set = function(option, value)
-								if BattleGroundEnemies.BGSize and BattleGroundEnemies.BGSize == tonumber(BGSize) then self:SetWidth(value) end
-								UpdateButtons(option, value, nil, nil, nil, nil, nil, nil, "SetWidth", value)
-							end,
 							min = 1,
 							max = 400,
 							step = 1,
@@ -1108,9 +734,6 @@ local function addEnemyAndAllySettings(self)
 							name = L.Height,
 							desc = L.BarHeight_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
-							set = function(option, value) 
-								UpdateButtons(option, value, nil, nil, nil, nil, nil, nil, "SetHeight", value)
-							end,
 							min = 1,
 							max = 40,
 							step = 1,
@@ -1121,13 +744,6 @@ local function addEnemyAndAllySettings(self)
 							name = L.VerticalGrowdirection,
 							desc = L.VerticalGrowdirection_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
-							set = function(option, value) 
-								setOption(option, value)
-								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
-								
-								self:ButtonPositioning()
-								self:SetPlayerCountJustifyV(value)
-							end,
 							values = Data.VerticalDirections,
 							order = 3
 						},
@@ -1136,12 +752,6 @@ local function addEnemyAndAllySettings(self)
 							name = L.VerticalSpacing,
 							desc = L.VerticalSpacing..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
-							set = function(option, value) 
-								setOption(option, value)
-								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
-								
-								self:ButtonPositioning()
-							end,
 							min = 0,
 							max = 20,
 							step = 1,
@@ -1152,12 +762,6 @@ local function addEnemyAndAllySettings(self)
 							name = L.Columns,
 							desc = L.Columns_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
-							set = function(option, value) 
-								setOption(option, value)
-								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
-								
-								self:ButtonPositioning()
-							end,
 							min = 1,
 							max = 4,
 							step = 1,
@@ -1167,15 +771,8 @@ local function addEnemyAndAllySettings(self)
 							type = "select",
 							name = L.VerticalGrowdirection,
 							desc = L.VerticalGrowdirection_Desc..L.NotAvailableInCombat,
-							hidden = function() return not self.config[BGSize].Enabled or self.config[BGSize].BarColumns < 2 end,
+							hidden = function() return location.BarColumns < 2 end,
 							disabled = InCombatLockdown,
-							set = function(option, value) 
-								setOption(option, value)
-								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
-								
-								self:ButtonPositioning()
-								self:SetPlayerCountJustifyV(value)
-							end,
 							values = Data.HorizontalDirections,
 							order = 6
 						},
@@ -1183,14 +780,8 @@ local function addEnemyAndAllySettings(self)
 							type = "range",
 							name = L.HorizontalSpacing,
 							desc = L.HorizontalSpacing..L.NotAvailableInCombat,
-							hidden = function() return not self.config[BGSize].Enabled or self.config[BGSize].BarColumns < 2 end,
+							hidden = function() return location.BarColumns < 2 end,
 							disabled = InCombatLockdown,
-							set = function(option, value) 
-								setOption(option, value)
-								if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
-								
-								self:ButtonPositioning()
-							end,
 							min = 0,
 							max = 400,
 							step = 1,
@@ -1213,9 +804,6 @@ local function addEnemyAndAllySettings(self)
 											type = "select",
 											name = L.BarTexture,
 											desc = L.HealthBar_Texture_Desc,
-											set = function(option, value)
-												UpdateButtons(option, value, nil, nil, nil, "healthBar", nil, nil, "SetStatusBarTexture", LSM:Fetch("statusbar", value))
-											end,
 											dialogControl = 'LSM30_Statusbar',
 											values = AceGUIWidgetLSMlists.statusbar,
 											width = "normal",
@@ -1226,10 +814,6 @@ local function addEnemyAndAllySettings(self)
 											type = "color",
 											name = L.BarBackground,
 											desc = L.HealthBar_Background_Desc,
-											set = function(option, ...)
-												local color = {...} 
-												UpdateButtons(option, color, nil, nil, nil, "healthBar", "Background", nil, "SetVertexColor", ...)
-											end,
 											hasAlpha = true,
 											width = "normal",
 											order = 3
@@ -1248,7 +832,7 @@ local function addEnemyAndAllySettings(self)
 											--desc = L.TrinketSettings_Desc,
 											inline = true,
 											order = 1,
-											args = addNormalTextSettings(playerType, BGSize, "Name", false, true, false, false, false, "Name")
+											args = addNormalTextSettings(location, "Name")
 										},
 									}
 								},
@@ -1256,9 +840,6 @@ local function addEnemyAndAllySettings(self)
 									type = "group",
 									name = L.RoleIconSettings,
 									desc = L.RoleIconSettings_Desc,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Role", nil, nil, "ApplySettings")
-									end,
 									order = 3,
 									args = {
 										RoleIcon_Enabled = {
@@ -1272,7 +853,7 @@ local function addEnemyAndAllySettings(self)
 											type = "range",
 											name = L.Size,
 											desc = L.RoleIcon_Size_Desc,
-											disabled = function() return not self.config[BGSize].RoleIcon_Enabled end,
+											disabled = function() return not location.RoleIcon_Enabled end,
 											min = 2,
 											max = 40,
 											step = 1,
@@ -1282,7 +863,7 @@ local function addEnemyAndAllySettings(self)
 										RoleIcon_VerticalPosition = {
 											type = "range",
 											name = L.VerticalPosition,
-											disabled = function() return not self.config[BGSize].RoleIcon_Enabled end,
+											disabled = function() return not location.RoleIcon_Enabled end,
 											min = 0,
 											max = 50,
 											step = 1,
@@ -1295,9 +876,6 @@ local function addEnemyAndAllySettings(self)
 									type = "group",
 									name = L.CovenantIconSettings,
 									desc = L.CovenantIconSettings_Desc,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Covenant", nil, nil, "ApplySettings")
-									end,
 									order = 4,
 									args = {
 										CovenantIcon_Enabled = {
@@ -1311,7 +889,7 @@ local function addEnemyAndAllySettings(self)
 											type = "range",
 											name = L.Size,
 											desc = L.CovenantIcon_Size_Desc,
-											disabled = function() return not self.config[BGSize].CovenantIcon_Enabled end,
+											disabled = function() return not location.CovenantIcon_Enabled end,
 											min = 2,
 											max = 40,
 											step = 1,
@@ -1321,7 +899,7 @@ local function addEnemyAndAllySettings(self)
 										CovenantIcon_VerticalPosition = {
 											type = "range",
 											name = L.VerticalPosition,
-											disabled = function() return not self.config[BGSize].CovenantIcon_Enabled end,
+											disabled = function() return not location.CovenantIcon_Enabled end,
 											min = 0,
 											max = 50,
 											step = 1,
@@ -1342,9 +920,6 @@ local function addEnemyAndAllySettings(self)
 											type = "toggle",
 											name = L.NumericTargetindicator,
 											desc = L.NumericTargetindicator_Enabled_Desc:format(L[playerType == "Enemies" and "enemies" or "allies"]),
-											set = function(option, value)
-												UpdateButtons(option, value, nil, nil, nil, "NumericTargetindicator", nil, nil, "SetShown", value)
-											end,
 											width = "full",
 											order = 1
 										},
@@ -1352,19 +927,16 @@ local function addEnemyAndAllySettings(self)
 											type = "group",
 											name = "",
 											--desc = L.TrinketSettings_Desc,
-											disabled = function() return not self.config[BGSize].NumericTargetindicator_Enabled end,
+											disabled = function() return not location.NumericTargetindicator_Enabled end,
 											inline = true,
 											order = 2,
-											args = addNormalTextSettings(playerType, BGSize, "NumericTargetindicator", "NumericTargetindicator_Enabled", true, false, false, false, "NumericTargetindicator")
+											args = addNormalTextSettings(location, "NumericTargetindicator")
 										},
 										Fake2 = addVerticalSpacing(3),
 										SymbolicTargetindicator_Enabled = {
 											type = "toggle",
 											name = L.SymbolicTargetindicator_Enabled,
 											desc = L.SymbolicTargetindicator_Enabled_Desc:format(L[playerType == "Enemies" and "enemy" or "ally"]),
-											set = function(option, value)
-												UpdateButtons(option, value, nil, "TargetIndicators", nil, nil, nil, nil, "SetShown", value)
-											end,
 											width = "full",
 											order = 4
 										}
@@ -1382,27 +954,13 @@ local function addEnemyAndAllySettings(self)
 									type = "toggle",
 									name = L.PowerBar_Enabled,
 									desc = L.PowerBar_Enabled_Desc,
-									set = function(option, value)
-										if value then
-											if self:IsShown() and not self.TestmodeActive then
-												self:RegisterEvent("UNIT_POWER_FREQUENT")
-											end
-											UpdateButtons(option, value, nil, nil, nil, "Power", nil, nil, "SetHeight", self.config[BGSize].PowerBar_Height)
-										else
-											self:UnregisterEvent("UNIT_POWER_FREQUENT")
-											UpdateButtons(option, value, nil, nil, nil, "Power", nil, nil, "SetHeight", 0.01)
-										end
-									end,
 									order = 1
 								},
 								PowerBar_Height = {
 									type = "range",
 									name = L.Height,
 									desc = L.PowerBar_Height_Desc,
-									disabled = function() return not self.config[BGSize].PowerBar_Enabled end,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Power", nil, nil, "SetHeight", value)
-									end,
+									disabled = function() return not location.PowerBar_Enabled end,
 									min = 1,
 									max = 10,
 									step = 1,
@@ -1413,10 +971,7 @@ local function addEnemyAndAllySettings(self)
 									type = "select",
 									name = L.BarTexture,
 									desc = L.PowerBar_Texture_Desc,
-									disabled = function() return not self.config[BGSize].PowerBar_Enabled end,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Power", nil, nil, "SetStatusBarTexture", LSM:Fetch("statusbar", value))
-									end,
+									disabled = function() return not location.PowerBar_Enabled end,
 									dialogControl = 'LSM30_Statusbar',
 									values = AceGUIWidgetLSMlists.statusbar,
 									width = "normal",
@@ -1427,11 +982,7 @@ local function addEnemyAndAllySettings(self)
 									type = "color",
 									name = L.BarBackground,
 									desc = L.PowerBar_Background_Desc,
-									disabled = function() return not self.config[BGSize].PowerBar_Enabled end,
-									set = function(option, ...)
-										local color = {...} 
-										UpdateButtons(option, color, nil, nil, nil, "Power", "Background", nil, "SetVertexColor", ...)
-									end,
+									disabled = function() return not location.PowerBar_Enabled end,
 									hasAlpha = true,
 									width = "normal",
 									order = 5
@@ -1448,25 +999,20 @@ local function addEnemyAndAllySettings(self)
 									type = "toggle",
 									name = L.Trinket_Enabled,
 									desc = L.Trinket_Enabled_Desc,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Trinket", nil, nil, "Enable")
-									end,
 									order = 1
 								},
 								TrinketPositioning = {
 									type = "group",
 									name = L.Position,
-									args = addBasicPositionSettings(playerType, BGSize, "Trinket", "Trinket_Enabled", nil, nil, nil, "Trinket"),
-									order = 2
+									disabled = function() return not location.Trinket_Enabled end,
+									order = 2,
+									args = addBasicPositionSettings(location, "Trinket")
 								},
 								Trinket_Width = {
 									type = "range",
 									name = L.Width,
 									desc = L.Trinket_Width_Desc,
-									disabled = function() return not self.config[BGSize].Trinket_Enabled end,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Trinket", nil, nil, "Enable")
-									end,
+									disabled = function() return not location.Trinket_Enabled end,
 									min = 1,
 									max = 40,
 									step = 1,
@@ -1476,10 +1022,9 @@ local function addEnemyAndAllySettings(self)
 									type = "group",
 									name = L.Countdowntext,
 									--desc = L.TrinketSettings_Desc,
-									disabled = function() return not self.config[BGSize].Trinket_Enabled end,
-									inline = true,
+									disabled = function() return not location.Trinket_Enabled end,
 									order = 4,
-									args = addCooldownTextsettings(playerType, BGSize, "Trinket", "Trinket_Enabled", nil, nil, nil, "Trinket")
+									args = addCooldownTextsettings(location, "Trinket")
 								}
 							}
 						},
@@ -1493,25 +1038,20 @@ local function addEnemyAndAllySettings(self)
 									type = "toggle",
 									name = L.Racial_Enabled,
 									desc = L.Racial_Enabled_Desc,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Racial", nil, nil, "Enable")
-									end,
 									order = 1
 								},
 								RacialPositioning = {
 									type = "group",
 									name = L.Position,
-									args = addBasicPositionSettings(playerType, BGSize, "Racial", "Racial_Enabled", nil, nil, nil, "Racial"),
-									order = 2
+									disabled = function() return not location.Racial_Enabled end,
+									order = 2,
+									args = addBasicPositionSettings(location, "Racial")
 								},
 								Racial_Width = {
 									type = "range",
 									name = L.Width,
 									desc = L.Racial_Width_Desc,
-									disabled = function() return not self.config[BGSize].Racial_Enabled end,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Racial", nil, nil, "Enable")
-									end,
+									disabled = function() return not location.Racial_Enabled end,
 									min = 1,
 									max = 40,
 									step = 1,
@@ -1521,16 +1061,15 @@ local function addEnemyAndAllySettings(self)
 									type = "group",
 									name = L.Countdowntext,
 									--desc = L.TrinketSettings_Desc,
-									disabled = function() return not self.config[BGSize].Racial_Enabled end,
-									inline = true,
+									disabled = function() return not location.Racial_Enabled end,
 									order = 4,
-									args = addCooldownTextsettings(playerType, BGSize, "Racial", "Racial_Enabled", nil, nil, nil, "Racial")
+									args = addCooldownTextsettings(location, "Racial")
 								},
 								RacialFilteringSettings = {
 									type = "group",
 									name = FILTER,
 									desc = L.RacialFilteringSettings_Desc,
-									disabled = function() return not self.config[BGSize].Racial_Enabled end,
+									disabled = function() return not location.Racial_Enabled end,
 									--inline = true,
 									order = 5,
 									args = {
@@ -1538,7 +1077,6 @@ local function addEnemyAndAllySettings(self)
 											type = "toggle",
 											name = L.Filtering_Enabled,
 											desc = L.RacialFiltering_Enabled_Desc,
-											disabled = function() return not self.config[BGSize].Racial_Enabled end,
 											width = 'normal',
 											order = 1
 										},
@@ -1547,15 +1085,15 @@ local function addEnemyAndAllySettings(self)
 											type = "multiselect",
 											name = L.Filtering_Filterlist,
 											desc = L.RacialFiltering_Filterlist_Desc,
-											disabled = function() return not self.config[BGSize].RacialFiltering_Enabled or not self.config[BGSize].Racial_Enabled end,
+											disabled = function() return not location.RacialFiltering_Enabled or not location.Racial_Enabled end,
 											get = function(option, key)
 												for spellID in pairs(Data.RacialNameToSpellIDs[key]) do
-													return self.config[BGSize].RacialFiltering_Filterlist[spellID]
+													return location.RacialFiltering_Filterlist[spellID]
 												end
 											end,
 											set = function(option, key, state) -- value = spellname
 												for spellID in pairs(Data.RacialNameToSpellIDs[key]) do
-													self.config[BGSize].RacialFiltering_Filterlist[spellID] = state or nil
+													location.RacialFiltering_Filterlist[spellID] = state or nil
 												end
 											end,
 											values = Data.Racialnames,
@@ -1575,19 +1113,13 @@ local function addEnemyAndAllySettings(self)
 									type = "toggle",
 									name = L.Spec_Enabled,
 									desc = L.Spec_Enabled_Desc,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Spec", nil, nil, "ApplySettings")
-									end,
 									order = 1
 								},
 								Spec_Width = {
 									type = "range",
 									name = L.Width,
 									desc = L.Spec_Width_Desc,
-									disabled = function() return not self.config[BGSize].Spec_Enabled end,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "Spec", nil, nil, "ApplySettings")
-									end,
+									disabled = function() return not location.Spec_Enabled end,
 									min = 1,
 									max = 40,
 									step = 1,
@@ -1605,10 +1137,10 @@ local function addEnemyAndAllySettings(self)
 									type = "group",
 									name = L.Countdowntext,
 									--desc = L.TrinketSettings_Desc,
-									disabled = function() return not self.config[BGSize].Spec_AuraDisplay_Enabled end,
+									disabled = function() return not location.Spec_AuraDisplay_Enabled end,
 									inline = true,
 									order = 6,
-									args = addCooldownTextsettings(playerType, BGSize, "Spec_AuraDisplay", "Spec_AuraDisplay_Enabled", nil, nil, nil, "Spec_AuraDisplay")
+									args = addCooldownTextsettings(location, "Spec_AuraDisplay")
 								}
 							}
 						},
@@ -1627,17 +1159,15 @@ local function addEnemyAndAllySettings(self)
 								DrTracking_Container_PositioningSettings = {
 									type = "group",
 									name = L.Position,
-									args = addBasicPositionSettings(playerType, BGSize, "DrTracking_Container", "DrTracking_Enabled", nil, nil, nil, "DRContainer"),
-									order = 2
+									disabled = function() return not location.DrTracking_Enabled end,
+									order = 2,
+									args = addBasicPositionSettings(location, "DrTracking_Container")
 								},
 								DrTracking_HorizontalSpacing = {
 									type = "range",
 									name = L.DrTracking_Spacing,
 									desc = L.DrTracking_Spacing_Desc,
-									disabled = function() return not self.config[BGSize].DrTracking_Enabled end,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "DRContainer", nil, nil, "DrPositioning")
-									end,
+									disabled = function() return not location.DrTracking_Enabled end,
 									min = 0,
 									max = 10,
 									step = 1,
@@ -1647,32 +1177,24 @@ local function addEnemyAndAllySettings(self)
 									type = "color",
 									name = L.Container_Color,
 									desc = L.DrTracking_Container_Color_Desc,
-									set = function(option, ...)
-										local color = {...} 
-										UpdateButtons(option, color, nil, nil, nil, "DRContainer", nil, nil, "SetBackdropBorderColor", ...)
-									end,
+									disabled = function() return not location.DrTracking_Enabled end,
 									hasAlpha = true,
 									order = 4
 								},
 								DrTracking_Container_BorderThickness = {
 									type = "range",
 									name = L.BorderThickness,
-									set = function(option, value)
-										UpdateButtons(option, value, nil, nil, nil, "DRContainer", nil, nil, "UpdateBackdrop", value)
-									end,
 									min = 1,
 									max = 6,
 									step = 1,
+									disabled = function() return not location.DrTracking_Enabled end,
 									order = 5
 								},
 								DrTracking_DisplayType = {
 									type = "select",
 									name = L.DisplayType,
 									desc = L.DrTracking_DisplayType_Desc,
-									disabled = function() return not self.config[BGSize].DrTracking_Enabled end,
-									set = function(option, value)
-										UpdateButtons(option, value, "DRContainer", "DRFrames", nil, nil, nil, nil, "ChangeDisplayType")
-									end,
+									disabled = function() return not location.DrTracking_Enabled end,
 									values = Data.DisplayType,
 									order = 6
 								},
@@ -1680,10 +1202,7 @@ local function addEnemyAndAllySettings(self)
 									type = "select",
 									name = L.VerticalGrowdirection,
 									desc = L.VerticalGrowdirection_Desc,
-									disabled = function() return not self.config[BGSize].DrTracking_Enabled end,
-									set = function(option, value) 
-										UpdateButtons(option, value, nil, nil, nil, "DRContainer", nil, nil, "DrPositioning")
-									end,
+									disabled = function() return not location.DrTracking_Enabled end,
 									values = Data.HorizontalDirections,
 									order = 7
 								},
@@ -1691,16 +1210,16 @@ local function addEnemyAndAllySettings(self)
 									type = "group",
 									name = L.Countdowntext,
 									--desc = L.TrinketSettings_Desc,
-									disabled = function() return not self.config[BGSize].DrTracking_Enabled end,
+									disabled = function() return not location.DrTracking_Enabled end,
 									order = 8,
-									args = addCooldownTextsettings(playerType, BGSize, "DrTracking", "DrTracking_Enabled", "DRContainer", "DRFrames")
+									args = addCooldownTextsettings(location, "DrTracking")
 								},
 								Fake1 = addVerticalSpacing(6),
 								DrTrackingFilteringSettings = {
 									type = "group",
 									name = FILTER,
 									--desc = L.DrTrackingFilteringSettings_Desc,
-									disabled = function() return not self.config[BGSize].DrTracking_Enabled end,
+									disabled = function() return not location.DrTracking_Enabled end,
 									--inline = true,
 									order = 9,
 									args = {
@@ -1708,7 +1227,6 @@ local function addEnemyAndAllySettings(self)
 											type = "toggle",
 											name = L.Filtering_Enabled,
 											desc = L.DrTrackingFiltering_Enabled_Desc,
-											disabled = function() return not self.config[BGSize].DrTracking_Enabled end,
 											width = 'normal',
 											order = 1
 										},
@@ -1716,12 +1234,12 @@ local function addEnemyAndAllySettings(self)
 											type = "multiselect",
 											name = L.Filtering_Filterlist,
 											desc = L.DrTrackingFiltering_Filterlist_Desc,
-											disabled = function() return not (self.config[BGSize].DrTrackingFiltering_Enabled and self.config[BGSize].DrTracking_Enabled) end,
+											disabled = function() return not location.DrTrackingFiltering_Enabled end,
 											get = function(option, key)
-												return self.config[BGSize].DrTrackingFiltering_Filterlist[key]
+												return location.DrTrackingFiltering_Filterlist[key]
 											end,
 											set = function(option, key, state) -- key = category name
-												self.config[BGSize].DrTrackingFiltering_Filterlist[key] = state or nil
+												location.DrTrackingFiltering_Filterlist[key] = state or nil
 											end,
 											values = Data.DrCategorys,
 											order = 2
@@ -1742,16 +1260,11 @@ local function addEnemyAndAllySettings(self)
 									desc = L.Auras_Enabled_Desc,
 									order = 1
 								},
-								Auras_ShowTooltips = {
-									type = "toggle",
-									name = L.Auras_ShowTooltips,
-									order = 2
-								},
 								Auras_BuffsSettings = {
 									type = "group",
 									name = L.Buffs,
-									disabled = function() return not self.config[BGSize].Auras_Enabled end,
-									order = 3,
+									disabled = function() return not location.Auras_Enabled end,
+									order = 2,
 									args = {
 										Auras_Buffs_Enabled = {
 											type = "toggle",
@@ -1762,44 +1275,43 @@ local function addEnemyAndAllySettings(self)
 										Auras_Buffs_Container_IconSettings = {
 											type = "group",
 											name = L.BuffIcon,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
+											disabled = function() return not location.Auras_Buffs_Enabled end,
 											order = 2,
-											args = addIconPositionSettings(playerType, BGSize, "Auras_Buffs", "Auras_Buffs_Enabled", nil, nil, nil, "BuffContainer"),
+											args = addIconPositionSettings(location, "Auras_Buffs"),
 										},
 										Auras_Buffs_Container_PositioningSettings = {
 											type = "group",
 											name = L.ContainerPosition,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
-											args = addContainerPositionSettings(playerType, BGSize, "Auras_Buffs_Container", "Auras_Buffs_Enabled", nil, nil, nil, "BuffContainer"),
+											disabled = function() return not location.Auras_Buffs_Enabled end,
+											args = addContainerPositionSettings(location, "Auras_Buffs_Container"),
 											order = 3
 										},
 										Auras_Buffs_StacktextSettings = {
 											type = "group",
 											name = L.AurasStacktextSettings,
 											--desc = L.MyAuraSettings_Desc,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
+											disabled = function() return not location.Auras_Buffs_Enabled end,
 											order = 4,
-											args = addNormalTextSettings(playerType, BGSize, "Auras_Buffs", "Auras_Buffs_Enabled", true, "BuffContainer", "Active", "Inactive", "Stacks")
+											args = addNormalTextSettings(location, "Auras_Buffs")
 										},
 										Auras_Buffs_CooldownTextSettings = {
 											type = "group",
 											name = L.Countdowntext,
 											--desc = L.TrinketSettings_Desc,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
+											disabled = function() return not location.Auras_Buffs_Enabled end,
 											order = 5,
-											args = addCooldownTextsettings(playerType, BGSize, "Auras_Buffs", "Auras_Buffs_Enabled", "BuffContainer", "Active", "Inactive")
+											args = addCooldownTextsettings(location, "Auras_Buffs")
 										},
 										Auras_Buffs_FilteringSettings = {
 											type = "group",
 											name = FILTER,
 											desc = L.AurasFilteringSettings_Desc,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
+											disabled = function() return not location.Auras_Buffs_Enabled end,
 											order = 6,
 											args = {
 												Auras_Buffs_Filtering_Enabled = {
 													type = "toggle",
 													name = L.Filtering_Enabled,
-													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled) end,
 													width = 'normal',
 													order = 1
 												},
@@ -1808,14 +1320,14 @@ local function addEnemyAndAllySettings(self)
 													type = "toggle",
 													name = L.OnlyShowMine,
 													desc = L.OnlyShowMine_Desc:format(L.Buffs),
-													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled and conf.Auras_Buffs_Filtering_Enabled) end,
+													disabled = function() return not location.Auras_Buffs_Filtering_Enabled end,
 													order = 3,
 												},
 												Fake1 = addVerticalSpacing(4),
 												Auras_Buffs_SpellIDFiltering_Enabled = {
 													type = "toggle",
 													name = L.SpellID_Filtering,
-													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled and conf.Auras_Buffs_Filtering_Enabled) end,
+													disabled = function() return not location.Auras_Buffs_Filtering_Enabled end,
 													order = 5
 												},
 												Fake2 = addVerticalSpacing(6),
@@ -1823,13 +1335,13 @@ local function addEnemyAndAllySettings(self)
 													type = "input",
 													name = L.AurasFiltering_AddSpellID,
 													desc = L.AurasFiltering_AddSpellID_Desc,
-													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled and conf.Auras_Buffs_Filtering_Enabled and conf.Auras_Buffs_SpellIDFiltering_Enabled) end,
+													hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_SpellIDFiltering_Enabled) end,
 													get = function() return "" end,
 													set = function(option, value, state)
 														local spellIDs = {strsplit(",", value)}
 														for i = 1, #spellIDs do
 															local spellID = tonumber(spellIDs[i])
-															self.config[BGSize].Auras_Buffs_SpellIDFiltering_Filterlist[spellID] = true
+															location.Auras_Buffs_SpellIDFiltering_Filterlist[spellID] = true
 														end
 													end,
 													width = 'double',
@@ -1840,16 +1352,16 @@ local function addEnemyAndAllySettings(self)
 													type = "multiselect",
 													name = L.Filtering_Filterlist,
 													desc = L.AurasFiltering_Filterlist_Desc:format(L.buff),
-													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Buffs_Enabled and conf.Auras_Buffs_Filtering_Enabled and conf.Auras_Buffs_SpellIDFiltering_Enabled) end,
+													hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_SpellIDFiltering_Enabled) end,
 													get = function()
 														return true --to make it checked
 													end,
 													set = function(option, value) 
-														self.config[BGSize].Auras_Buffs_SpellIDFiltering_Filterlist[value] = nil
+														location.Auras_Buffs_SpellIDFiltering_Filterlist[value] = nil
 													end,
 													values = function()
 														local valueTable = {}
-														for spellID in pairs(self.config[BGSize].Auras_Buffs_SpellIDFiltering_Filterlist) do
+														for spellID in pairs(location.Auras_Buffs_SpellIDFiltering_Filterlist) do
 															valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
 														end
 														return valueTable
@@ -1863,7 +1375,7 @@ local function addEnemyAndAllySettings(self)
 								Auras_DebuffsSettings = {
 									type = "group",
 									name = L.Debuffs,
-									disabled = function() return not self.config[BGSize].Auras_Enabled end,
+									disabled = function() return not location.Auras_Enabled end,
 									order = 4,
 									args = {
 										Auras_Debuffs_Enabled = {
@@ -1877,64 +1389,56 @@ local function addEnemyAndAllySettings(self)
 											type = "toggle",
 											name = L.Auras_Debuffs_Coloring_Enabled,
 											desc = L.Auras_Debuffs_Coloring_Enabled_Desc,
-											set = function(option, value)
-												UpdateButtons(option, value, "DebuffContainer", "Active", nil, nil, nil, nil, "ChangeDisplayType")
-												UpdateButtons(option, value, "DebuffContainer", "Inactive", nil, nil, nil, nil, "ChangeDisplayType")
-											end,
+											disabled = function() return not location.Auras_Debuffs_Enabled end,
 											order = 3
 										},
 										Auras_Debuffs_DisplayType = {
 											type = "select",
 											name = L.DisplayType,
-											disabled = function() return not self.config[BGSize].Auras_Debuffs_Coloring_Enabled end,
-											set = function(option, value)
-												UpdateButtons(option, value, "DebuffContainer", "Active", nil, nil, nil, nil, "ChangeDisplayType")
-												UpdateButtons(option, value, "DebuffContainer", "Inactive", nil, nil, nil, nil, "ChangeDisplayType")
-											end,
+											disabled = function() return not location.Auras_Debuffs_Coloring_Enabled end,
 											values = Data.DisplayType,
 											order = 4
 										},
 										Auras_Debuffs_Container_IconSettings = {
 											type = "group",
 											name = L.DebuffIcon,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
+											disabled = function() return not (location.Auras_Debuffs_Enabled) end,
 											order = 5,
-											args = addIconPositionSettings(playerType, BGSize, "Auras_Debuffs", "Auras_Debuffs_Enabled", nil, nil, nil, "DebuffContainer"),
+											args = addIconPositionSettings(location, "Auras_Debuffs"),
 										},
 										Auras_Debuffs_Container_PositioningSettings = {
 											type = "group",
 											name = L.ContainerPosition,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
-											args = addContainerPositionSettings(playerType, BGSize, "Auras_Debuffs_Container", "Auras_Debuffs_Enabled", nil, nil, nil, "DebuffContainer"),
+											disabled = function() return not location.Auras_Debuffs_Enabled end,
+											args = addContainerPositionSettings(location, "Auras_Debuffs_Container"),
 											order = 6
 										},
 										Auras_Debuffs_StacktextSettings = {
 											type = "group",
 											name = L.AurasStacktextSettings,
 											--desc = L.MyAuraSettings_Desc,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
+											disabled = function() return not location.Auras_Debuffs_Enabled end,
 											order = 7,
-											args = addNormalTextSettings(playerType, BGSize, "Auras_Debuffs", "Auras_Debuffs_Enabled", true, "DebuffContainer", "Active", "Inactive", "Stacks")
+											args = addNormalTextSettings(location, "Auras_Debuffs")
 										},
 										Auras_Debuffs_CooldownTextSettings = {
 											type = "group",
 											name = L.Countdowntext,
 											--desc = L.TrinketSettings_Desc,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
+											disabled = function() return not location.Auras_Debuffs_Enabled end,
 											order = 8,
-											args = addCooldownTextsettings(playerType, BGSize, "Auras_Debuffs", "Auras_Debuffs_Enabled", "DebuffContainer", "Active", "Inactive")
+											args = addCooldownTextsettings(location, "Auras_Debuffs")
 										},
 										Auras_Debuffs_FilteringSettings = {
 											type = "group",
 											name = FILTER,
 											desc = L.AurasFilteringSettings_Desc,
-											disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
+											disabled = function() return not location.Auras_Debuffs_Enabled end,
 											order = 9,
 											args = {
 												Auras_Debuffs_Filtering_Enabled = {
 													type = "toggle",
 													name = L.Filtering_Enabled,
-													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled) end,
 													width = 'normal',
 													order = 1
 												},
@@ -1943,7 +1447,7 @@ local function addEnemyAndAllySettings(self)
 													type = "toggle",
 													name = L.OnlyShowMine,
 													desc = L.OnlyShowMine_Desc:format(L.Debuffs),
-													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled) end,
+													disabled = function() return not location.Auras_Debuffs_Filtering_Enabled end,
 													order = 3,
 												},
 												Fake1 = addVerticalSpacing(4),
@@ -1951,7 +1455,7 @@ local function addEnemyAndAllySettings(self)
 													type = "toggle",
 													name = L.DebuffType_Filtering,
 													desc = L.DebuffType_Filtering_Desc,
-													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled) end,
+													disabled = function() return not location.Auras_Debuffs_Filtering_Enabled end,
 													width = 'normal',
 													order = 5
 												},
@@ -1959,12 +1463,12 @@ local function addEnemyAndAllySettings(self)
 													type = "multiselect",
 													name = "",
 													desc = "",
-													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled and conf.Auras_Debuffs_DebuffTypeFiltering_Enabled) end,
+													hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_DebuffTypeFiltering_Enabled) end,
 													get = function(option, key)
-														return self.config[BGSize].Auras_Debuffs_DebuffTypeFiltering_Filterlist[key]
+														return location.Auras_Debuffs_DebuffTypeFiltering_Filterlist[key]
 													end,
 													set = function(option, key, state) -- value = spellname
-														self.config[BGSize].Auras_Debuffs_DebuffTypeFiltering_Filterlist[key] = state
+														location.Auras_Debuffs_DebuffTypeFiltering_Filterlist[key] = state
 													end,
 													width = 'normal',
 													values = Data.DebuffTypes,
@@ -1973,20 +1477,20 @@ local function addEnemyAndAllySettings(self)
 												Auras_Debuffs_SpellIDFiltering_Enabled = {
 													type = "toggle",
 													name = L.SpellID_Filtering,
-													disabled = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled) end,
+													disabled = function() return not (location.Auras_Debuffs_Filtering_Enabled) end,
 													order = 7
 												},
 												Auras_Debuffs_SpellIDFiltering__AddSpellID = {
 													type = "input",
 													name = L.AurasFiltering_AddSpellID,
 													desc = L.AurasFiltering_AddSpellID_Desc,
-													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled and conf.Auras_Debuffs_SpellIDFiltering_Enabled) end,
+													hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_SpellIDFiltering_Enabled) end,
 													get = function() return "" end,
 													set = function(option, value, state)
 														local spellIDs = {strsplit(",", value)}
 														for i = 1, #spellIDs do
 															local spellID = tonumber(spellIDs[i])
-															self.config[BGSize].Auras_Debuffs_SpellIDFiltering_Filterlist[spellID] = true
+															location.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID] = true
 														end
 													end,
 													width = 'double',
@@ -1997,16 +1501,16 @@ local function addEnemyAndAllySettings(self)
 													type = "multiselect",
 													name = L.Filtering_Filterlist,
 													desc = L.AurasFiltering_Filterlist_Desc:format(L.debuff),
-													hidden = function() local conf = self.config[BGSize] return not (conf.Auras_Enabled and conf.Auras_Debuffs_Enabled and conf.Auras_Debuffs_Filtering_Enabled and conf.Auras_Debuffs_SpellIDFiltering_Enabled) end,
+													hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_SpellIDFiltering_Enabled) end,
 													get = function()
 														return true --to make it checked
 													end,
 													set = function(option, value) 
-														self.config[BGSize].Auras_Debuffs_SpellIDFiltering_Filterlist[value] = nil
+														location.Auras_Debuffs_SpellIDFiltering_Filterlist[value] = nil
 													end,
 													values = function()
 														local valueTable = {}
-														for spellID in pairs(self.config[BGSize].Auras_Debuffs_SpellIDFiltering_Filterlist) do
+														for spellID in pairs(location.Auras_Debuffs_SpellIDFiltering_Filterlist) do
 															valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
 														end
 														return valueTable
@@ -2036,45 +1540,20 @@ local function addEnemyAndAllySettings(self)
 				type = "toggle",
 				name = L.ObjectiveAndRespawn_ObjectiveEnabled,
 				desc = L.ObjectiveAndRespawn_ObjectiveEnabled_Desc,
-				set = function(option, value)
-					setOption(option, value)
-					if BattleGroundEnemies.BGSize ~= tonumber(BGSize) then return end
-				
-					for playerName, playerButton in pairs(self.Players) do
-						if value then
-							if playerButton.ObjectiveAndRespawn.Icon:GetTexture() then
-								playerButton.ObjectiveAndRespawn:Show()
-							end
-						else
-							playerButton.ObjectiveAndRespawn:Hide()
-						end
-					end
-					for playerName, playerButton in pairs(self.InactivePlayerButtons) do
-						if value then
-							if playerButton.ObjectiveAndRespawn.Icon:GetTexture() then
-								playerButton.ObjectiveAndRespawn:Show()
-							end
-						else
-							playerButton.ObjectiveAndRespawn:Hide()
-						end
-					end
-				end,
 				order = 1
 			},
 			ObjectiveAndRespawnPositioning = {
 				type = "group",
 				name = L.Position,
-				args = addBasicPositionSettings(playerType, BGSize, "ObjectiveAndRespawn", "ObjectiveAndRespawn_ObjectiveEnabled", nil, nil, nil, "ObjectiveAndRespawn"),
-				order = 2
+				disabled = function() return not location["15"].ObjectiveAndRespawn_ObjectiveEnabled end,
+				order = 2,
+				args = addBasicPositionSettings(location["15"], "ObjectiveAndRespawn")
 			},
 			ObjectiveAndRespawn_Width = {
 				type = "range",
 				name = L.Width,
 				desc = L.ObjectiveAndRespawn_Width_Desc,
-				disabled = function() return not self.config[BGSize].ObjectiveAndRespawn_ObjectiveEnabled end,
-				set = function(option, value)
-					UpdateButtons(option, value, nil, nil, nil, "ObjectiveAndRespawn", nil, nil, "SetWidth", value)
-				end,
+				disabled = function() return not location["15"].ObjectiveAndRespawn_ObjectiveEnabled end,
 				min = 1,
 				max = 50,
 				step = 1,
@@ -2084,63 +1563,13 @@ local function addEnemyAndAllySettings(self)
 				type = "group",
 				name = "",
 				--desc = L.TrinketSettings_Desc,
-				disabled = function() return not self.config[BGSize].ObjectiveAndRespawn_ObjectiveEnabled end,
+				disabled = function() return not location["15"].ObjectiveAndRespawn_ObjectiveEnabled end,
 				inline = true,
 				order = 4,
-				args = addNormalTextSettings(playerType, BGSize, "ObjectiveAndRespawn", "ObjectiveAndRespawn_ObjectiveEnabled", true, false, false, false, "ObjectiveAndRespawn", "AuraText")
+				args = addNormalTextSettings(location["15"], "ObjectiveAndRespawn")
 			}
 		}
-	}
-	settings["15"].args.BarSettings.args.RBGSpecificSettings = {
-		type = "group",
-		name = L.RBGSpecificSettings,
-		desc = L.RBGSpecificSettings_Desc,
-		--inline = true,
-		order = 14,
-		args = {
-			Notifications_Enabled = {
-				type = "toggle",
-				name = L.Notifications_Enabled,
-				desc = L["Notifications_"..playerType.."_Enabled_Desc"],
-				--inline = true,
-				order = 1
-			},
-			-- PositiveSound = {
-				-- type = "select",
-				-- name = L.PositiveSound,
-				-- desc = L.PositiveSound_Desc,
-				-- disabled = function() return not self.config[BGSize].Notifications_Enabled end,
-				-- dialogControl = 'LSM30_Sound',
-				-- values = AceGUIWidgetLSMlists.sound,
-				-- order = 2
-			-- },
-			-- NegativeSound = {
-				-- type = "select",
-				-- name = L.NegativeSound,
-				-- desc = L.NegativeSound_Desc,
-				-- disabled = function() return not self.config[BGSize].Notifications_Enabled end,
-				-- dialogControl = 'LSM30_Sound',
-				-- values = AceGUIWidgetLSMlists.sound,
-				-- order = 3
-			-- },
-			ObjectiveAndRespawn_RespawnEnabled = {
-				type = "toggle",
-				name = L.ObjectiveAndRespawn_RespawnEnabled,
-				desc = L.ObjectiveAndRespawn_RespawnEnabled_Desc,
-				order = 4
-			},
-			ObjectiveAndRespawnCooldownTextSettings = {
-				type = "group",
-				name = L.Countdowntext,
-				--desc = L.TrinketSettings_Desc,
-				disabled = function() return not self.config[BGSize].ObjectiveAndRespawn_RespawnEnabled end,
-				inline = true,
-				order = 5,
-				args = addCooldownTextsettings(playerType, BGSize, "ObjectiveAndRespawn", "ObjectiveAndRespawn_RespawnEnabled", nil, nil, nil, "ObjectiveAndRespawn")
-			}
-		}
-	}
-	
+	}	
 	
 	return settings
 end
@@ -2151,12 +1580,17 @@ end
 
 
 function BattleGroundEnemies:SetupOptions()
+	local location = self.db.profile
 	self.options = {
 		type = "group",
 		name = "BattleGroundEnemies " .. GetAddOnMetadata(addonName, "Version"),
 		childGroups = "tab",
-		get = getOption,
-		set = setOption,
+		get = function(option)
+			return getOption(location, option)
+		end,
+		set = function(option, ...)
+			return setOption(location, option, ...)
+		end,
 		args = {
 			TestmodeSettings = {
 				type = "group",
@@ -2214,7 +1648,7 @@ function BattleGroundEnemies:SetupOptions()
 						name = L.DisableArenaFrames,
 						desc = L.DisableArenaFrames_Desc,
 						set = function(option, value) 
-							setOption(option, value)
+							setOption(location, option, value)
 							self:ToggleArenaFrames()
 						end,
 						order = 3
@@ -2223,27 +1657,6 @@ function BattleGroundEnemies:SetupOptions()
 						type = "select",
 						name = L.Font,
 						desc = L.Font_Desc,
-						set = function(option, value)
-							local conf
-							BattleGroundEnemies.Enemies.bgSizeConfig = BattleGroundEnemies.Enemies.config[tostring(BattleGroundEnemies.BGSize)]
-							conf = BattleGroundEnemies.Enemies.bgSizeConfig
-							BattleGroundEnemies.Enemies.PlayerCount:SetFont(LSM:Fetch("font", value), conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline)
-
-							
-							BattleGroundEnemies.Allies.bgSizeConfig = BattleGroundEnemies.Allies.config[tostring(BattleGroundEnemies.BGSize)]
-							conf = BattleGroundEnemies.Allies.bgSizeConfig
-							BattleGroundEnemies.Allies.PlayerCount:SetFont(LSM:Fetch("font", value), conf.NumericTargetindicator_Fontsize, conf.NumericTargetindicator_Outline)
-
-							for number, playerType in pairs({BattleGroundEnemies.Allies, BattleGroundEnemies.Enemies}) do
-								for playerName, playerButton in pairs (playerType.Players) do
-									applyMainfont(playerButton, value)
-								end
-								for playerName, playerButton in pairs (playerType.InactivePlayerButtons) do
-									applyMainfont(playerButton, value)
-								end
-							end
-							setOption(option, value)
-						end,
 						dialogControl = "LSM30_Font",
 						values = AceGUIWidgetLSMlists.font,
 						order = 4
@@ -2252,10 +1665,6 @@ function BattleGroundEnemies:SetupOptions()
 						type = "color",
 						name = L.MyTarget_Color,
 						desc = L.MyTarget_Color_Desc,
-						set = function(option, ...)
-							local color = {...} 
-							ApplySettingToEnemiesAndAllies(option, color, nil, nil, "MyTarget", nil, nil, "SetBackdropBorderColor", ...)
-						end,
 						hasAlpha = true,
 						order = 7
 					},
@@ -2263,10 +1672,6 @@ function BattleGroundEnemies:SetupOptions()
 						type = "color",
 						name = L.MyFocus_Color,
 						desc = L.MyFocus_Color_Desc,
-						set = function(option, ...)
-							local color = {...} 
-							ApplySettingToEnemiesAndAllies(option, color, nil, nil, "MyFocus", nil, nil, "SetBackdropBorderColor", ...)
-						end,
 						hasAlpha = true,
 						order = 8
 					},
@@ -2275,10 +1680,216 @@ function BattleGroundEnemies:SetupOptions()
 						type = "toggle",
 						name = L.ShowTooltips,
 						desc = L.ShowTooltips_Desc,
-						set = function(option, value) 
-							setOption(option, value)
-						end,
 						order = 11
+					}
+				}
+			},
+			RBGSettings = {
+				type = "group",
+				name = L.RBGSpecificSettings,
+				desc = L.RBGSpecificSettings_Desc,
+				--inline = true,
+				order = 14,
+				get = function(option)
+					return getOption(location.RBG, option)
+				end,
+				set = function(option, ...)
+					return setOption(location.RBG, option, ...)
+				end,
+				args = {
+					Notifications = {
+						type = "group",
+						name = COMMUNITIES_NOTIFICATION_SETTINGS,
+						desc = L.Notifications_Desc,
+						order = 1,
+						args = {
+							Notifications_Enabled = {
+								type = "toggle",
+								name = L.Notifications_Enabled,
+								desc = L["Notifications_Enemies_Enabled_Desc"],
+								--inline = true,
+								order = 1
+							},
+							EnemiesTargetingMe = {
+								type = "group",
+								name = "Player alert when enemy is targeting me",
+								desc = L.Notifications_Desc,
+								order = 1,
+								args = {
+									MeAmount = {
+										type = "range",
+										name = "how many players are targeting me",
+										min = 0,
+										max = 40,
+										step = 1,
+										order = 1
+										
+									},
+									onyou = {
+										type = "select",
+										name = "SOUNDSELECTION",
+										order = 2,
+										values = AceGUIWidgetLSMlists.sound,
+										width = "full",
+										dialogControl = "LSM30_Sound"
+									}
+									
+								}
+								
+								
+
+							},
+							EnemiesTargetingGroupMembers = {
+								type = "group",
+								name = "Player alert when enemies are targeting an ally",
+								desc = L.Notifications_Desc,
+								order = 1,
+								args = {
+									MeAmount = {
+										type = "range",
+										name = "How many players are targeting an ally",
+										min = 0,
+										max = 40,
+										step = 1,
+										order = 1
+										
+									},
+									onEnemies = {
+										type = "select",
+										name = "SOUNDSELECTION",
+										order = 2,
+										values = AceGUIWidgetLSMlists.sound,
+										width = "full",
+										dialogControl = "LSM30_Sound"
+									}
+								}
+								
+
+							}
+							
+						}
+					},
+					-- PositiveSound = {
+						-- type = "select",
+						-- name = L.PositiveSound,
+						-- desc = L.PositiveSound_Desc,
+						-- disabled = function() return not self.config[BGSize].Notifications_Enabled end,
+						-- dialogControl = 'LSM30_Sound',
+						-- values = AceGUIWidgetLSMlists.sound,
+						-- order = 2
+					-- },
+					-- NegativeSound = {
+						-- type = "select",
+						-- name = L.NegativeSound,
+						-- desc = L.NegativeSound_Desc,
+						-- disabled = function() return not self.config[BGSize].Notifications_Enabled end,
+						-- dialogControl = 'LSM30_Sound',
+						-- values = AceGUIWidgetLSMlists.sound,
+						-- order = 3
+					-- },
+
+					
+					ObjectiveAndRespawn = {
+						type = "group",
+						name = L.ObjectiveAndRespawn_RespawnEnabled,
+						order = 4,
+						args = {
+							ObjectiveAndRespawn_RespawnEnabled = {
+								type = "toggle",
+								name = ENABLE,
+								desc = L.ObjectiveAndRespawn_RespawnEnabled_Desc,
+								order = 1
+							},
+							ObjectiveAndRespawnCooldownTextSettings = {
+								type = "group",
+								name = L.Countdowntext,
+								--desc = L.TrinketSettings_Desc,
+								disabled = function() return not location.RBG.ObjectiveAndRespawn_RespawnEnabled end,
+								order = 5,
+								args = addCooldownTextsettings(location.RBG, "ObjectiveAndRespawn")
+							}
+						}
+					},
+					TargetCallingSettings = {
+						type = "group",
+						name = L.TargetCalling,
+						order = 6,
+						args = {
+							TargetCallingVolunteer = {
+								type = "toggle",
+								name = L.TargetCallingVolunteer,
+								desc = L.TargetCallingVolunteer_Desc,
+								order = 1
+							},
+							TargetCallingShowIcon = {
+								type = "toggle",
+								name = L.TargetCallingShowIcon,
+								desc = L.TargetCallingShowIcon_Desc,
+								order = 2
+							},
+							Notifications_Enabled = {
+								type = "toggle",
+								name = L.Notifications_Enabled,
+								desc = L["Notifications_Enemies_Enabled_Desc"],
+								--inline = true,
+								order = 1
+							},
+							EnemiesTargetingMe = {
+								type = "group",
+								name = "Player alert when enemy is targeting me",
+								desc = L.Notifications_Desc,
+								order = 1,
+								args = {
+									MyFocus_Color = {
+										type = "color",
+										name = L.MyFocus_Color,
+										desc = L.MyFocus_Color_Desc,
+										hasAlpha = true,
+										order = 8
+									},
+									onyou = {
+										type = "select",
+										name = "SOUNDSELECTION",
+										order = 2,
+										values = AceGUIWidgetLSMlists.sound,
+										width = "full",
+										dialogControl = "LSM30_Sound"
+									}
+									
+								}
+								
+								
+
+							},
+							TargetCalling_Highlight = {
+								type = "group",
+								name = "highlight",
+								order = 3,
+								args = {
+									Icon = {
+										type = "select",
+										name = L.secondary,
+										desc = L.secondaryDesc,
+										order = 4,
+										values = icons,
+										width = "full",
+										itemControl = "DDI-RaidIcon",
+										disabled = disabled,
+									}
+								}
+							}
+							-- Sounds = {
+							-- 	type = "group",
+							-- 	name = SOUNDS,
+							-- 	order = 2,
+							-- 	args = {
+		
+							-- 		
+							-- 	}
+		
+							-- }
+						}
+						
 					}
 				}
 			},
@@ -2296,18 +1907,23 @@ function BattleGroundEnemies:SetupOptions()
 				order = 5,
 				args = addEnemyAndAllySettings(self.Allies)
 			}
+
 		}
 	}
+
+	
+	SOUND = LSM.MediaType and LSM.MediaType.SOUND or "sound"
+	soundList = LSM:List(SOUND)
+
 	AceConfigRegistry:RegisterOptionsTable("BattleGroundEnemies", self.options)
 		
-	AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 709, 532)
 	
-	--profiles
+	
+	--add profile tab to the options 
 	self.options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	self.options.args.profiles.order = -1
 	self.options.args.profiles.disabled = InCombatLockdown
 	
-	AceConfigDialog:AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
 end
 
 SLASH_BattleGroundEnemies1, SLASH_BattleGroundEnemies2 = "/BattleGroundEnemies", "/bge"
