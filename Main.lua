@@ -3,6 +3,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRList = LibStub("DRList-1.0")
 local LibRaces = LibStub("LibRaces-1.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 LSM:Register("font", "PT Sans Narrow Bold", [[Interface\AddOns\BattleGroundEnemies\Fonts\PT Sans Narrow Bold.ttf]])
 LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusBar")
 
@@ -46,7 +47,9 @@ local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
 local InCombatLockdown = InCombatLockdown
+local isInGroup =  IsInGroup
 local IsInInstance = IsInInstance
+local IsInRaid = IsInRaid
 local IsItemInRange = IsItemInRange
 local IsRatedBattleground = C_PvP.IsRatedBattleground
 local PlaySound = PlaySound
@@ -95,6 +98,13 @@ function BattleGroundEnemies:ShowTooltip(owner, func)
 		func()
 		GameTooltip:Show()
 	end
+end
+
+function BattleGroundEnemies:GetColoredName(playerDetails)
+	local name = playerDetails.PlayerName
+	local classTag = playerDetails.PlayerClass
+	local tbl = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[classTag] or RAID_CLASS_COLORS[classTag] or GRAY_FONT_COLOR
+	return ("|cFF%02x%02x%02x%s|r"):format(tbl.r*255, tbl.g*255, tbl.b*255, name)
 end
 
 local function FindAuraBySpellID(unitID, spellID, filter)
@@ -178,10 +188,11 @@ end)
 
 BattleGroundEnemies.Allies = CreateFrame("Frame", nil, BattleGroundEnemies) --index = name, value = table
 --BattleGroundEnemies.Allies.Counter = {}
+BattleGroundEnemies.Allies.groupMembers = {}
+BattleGroundEnemies.Allies.GuidToGroupMember = {}
 
 
 BattleGroundEnemies.Allies:Hide()
-BattleGroundEnemies.Allies.UnitIDToAllyButton = {} --index = unitID ("raid"..i) of raidmember, value = Allytable of that group member
 BattleGroundEnemies.Allies:SetScript("OnEvent", function(self, event, ...)
 	--self.Counter[event] = (self.Counter[event] or 0) + 1
 
@@ -193,6 +204,8 @@ end)
 
 BattleGroundEnemies:RegisterEvent("PLAYER_LOGIN")
 BattleGroundEnemies:RegisterEvent("PLAYER_ENTERING_WORLD")
+BattleGroundEnemies:RegisterEvent("GROUP_ROSTER_UPDATE")
+BattleGroundEnemies:RegisterEvent("PARTY_LEADER_CHANGED")
 BattleGroundEnemies:RegisterEvent("UI_SCALE_CHANGED")
 
 function BattleGroundEnemies:UI_SCALE_CHANGED()
@@ -231,9 +244,8 @@ BattleGroundEnemies:SetScript("OnShow", function(self)
 		self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
 		self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
 
-		--if self.bgSizeConfig.PowerBar_Enabled then 
-			self:RegisterEvent("UNIT_POWER_FREQUENT") 
-		--end
+		self:RegisterEvent("UNIT_POWER_FREQUENT") 
+
 		
 		RequestFrame:Show()
 		self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")--stopping the onupdate script should do it but other addons make "UPDATE_BATTLEFIELD_SCORE" trigger aswell
@@ -335,7 +347,6 @@ end
 BattleGroundEnemies.Allies:SetScript("OnShow", function(self) 
 	if not BattleGroundEnemies.TestmodeActive then
 		self:SetScript("OnUpdate", self.RealPlayersOnUpdate)
-		self:RegisterEvent("GROUP_ROSTER_UPDATE")
 	else
 		self:SetScript("OnUpdate", nil)
 	end
@@ -345,74 +356,7 @@ BattleGroundEnemies.Allies:SetScript("OnHide", BattleGroundEnemies.Allies.Unregi
 
 
 -- if lets say raid1 leaves all remaining players get shifted up, so raid2 is the new raid1, raid 3 gets raid2 etc.
-function BattleGroundEnemies.Allies:GROUP_ROSTER_UPDATE()
-	
-	if not self then self = BattleGroundEnemies.Allies end -- for the C_Timer.After call
-	if InCombatLockdown() then C_Timer.After(1, self.GROUP_ROSTER_UPDATE) end--recheck in 1 second end
-	
-	wipe(self.UnitIDToAllyButton)
-	
 
-	for i = 1, GetNumGroupMembers() do
-		
-		local allyName, _, _, _, _, classTag = GetRaidRosterInfo(i)
-		if allyName and classTag then
-		
-			local allyButton = self.Players[allyName]
-		
-			if allyName ~= PlayerDetails.PlayerName then
-			
-				local unit = "raid"..i --it happens that numGroupMembers is higher than the value of the maximal players for that battleground, for example 15 in a 10 man bg, thats why we wipe AllyUnitIDToAllyDetails
-				local targetUnitID = unit.."target"
-				
-				if allyButton and allyButton.unit ~= unit then -- ally has a new unitID now
-					
-					local targetEnemyButton = allyButton.Target
-					if targetEnemyButton then
-						--self:Debug("player", allyName, "has a new unit and targeted something")
-						if targetEnemyButton.UnitIDs.Active == allyButton.TargetUnitID then
-							targetEnemyButton.UnitIDs.Active = targetUnitID
-						end
-						if targetEnemyButton.UnitIDs.Ally == allyButton.TargetUnitID then
-							targetEnemyButton.UnitIDs.Ally = targetUnitID
-						end
-					end
-					
-					allyButton:SetLevel(UnitLevel(unit))
-					allyButton.unit = unit
-					if not InCombatLockdown() then
-						allyButton:SetAttribute('unit', unit)
-					else
-						C_Timer.After(1, self.GROUP_ROSTER_UPDATE)
-					end
-					
-					allyButton.TargetUnitID = targetUnitID
-					self.UnitIDToAllyButton[unit] = allyButton
-					allyButton:RegisterUnitEvent("UNIT_AURA", unit)
-				end
-				
-			else -- its the player
-				if allyButton then
-					
-					if not InCombatLockdown() then
-						allyButton:SetAttribute('unit', "player")
-					else
-						C_Timer.After(1, self.GROUP_ROSTER_UPDATE)
-					end
-				
-					allyButton.unit = "player"
-					allyButton.TargetUnitID = "target"
-					allyButton:RegisterUnitEvent("UNIT_AURA", "player")
-					
-					PlayerButton = allyButton
-				end					
-			end
-			
-		else
-			C_Timer.After(1, self.GROUP_ROSTER_UPDATE) --recheck in 1 second
-		end
-	end
-end
 
 
 BattleGroundEnemies.SetBasicPosition = function(frame, basicPoint, relativeTo, relativePoint, space)
@@ -658,6 +602,7 @@ do
 	end
 
 	function buttonFunctions:ApplyButtonSettings()
+		self.config = self:GetParent().config
 		self.bgSizeConfig = self:GetParent().bgSizeConfig
 		local conf = self.bgSizeConfig
 		
@@ -691,6 +636,7 @@ do
 		-- level
 		
 		self.Level:ApplyFontStringSettings(self.config.LevelText_Fontsize, self.config.LevelText_Outline, self.config.LevelText_EnableTextshadow, self.config.LevelText_TextShadowcolor)
+		self.Level:SetTextColor(unpack(self.config.LevelText_Textcolor))
 		self:DisplayLevel()
 		
 	
@@ -897,6 +843,7 @@ do
 	end
 
 	function buttonFunctions:UpdatePower(unitID, powerToken)
+		if not self.bgSizeConfig.PowerBar_Enabled then return end
 		--BattleGroundEnemies.Counter.UpdatePower = (BattleGroundEnemies.Counter.UpdateRange or 0) + 1
 
 		if powerToken then
@@ -926,7 +873,7 @@ do
 	function buttonFunctions:UpdateAll(unitID)
 		self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID))
 		self:UpdateHealth(unitID)
-		if self.config.PowerBar_Enabled then self:UpdatePower(unitID) end
+		if self.bgSizeConfig.PowerBar_Enabled then self:UpdatePower(unitID) end
 	end
 		
 	local UAspellIDs = {
@@ -1313,7 +1260,7 @@ do
 			playerButton:ApplyButtonSettings()
 		end
 		
-
+		self:UpdatePlayerCount()
 		self:CheckIfShouldShow()
 	end
 	
@@ -1335,7 +1282,7 @@ do
 		
 		local oldCount = self.PlayerCount.oldPlayerNumber or 0
 		if oldCount ~= currentCount then
-			if BattleGroundEnemies.IsRatedBG and self.bgSizeConfig.Notifications_Enabled then
+			if BattleGroundEnemies.IsRatedBG and self.config.RBG.Notifications_Enabled then
 				if currentCount < oldCount then
 					RaidNotice_AddMessage(RaidWarningFrame, L[isEnemy and "EnemyLeft" or "AllyLeft"], ChatTypeInfo["RAID_WARNING"]) 
 					PlaySound(isEnemy and 124 or 8959) --LEVELUPSOUND
@@ -1344,11 +1291,17 @@ do
 					PlaySound(isEnemy and 8959 or 124) --RaidWarning
 				end
 			end
-			if self.bgSizeConfig.PlayerCount_Enabled then
-				self.PlayerCount:SetText(format(isEnemy == (enemyFaction == 0) and PLAYER_COUNT_HORDE or PLAYER_COUNT_ALLIANCE, currentCount))
-			end
+			
+
 			self.PlayerCount.oldPlayerNumber = currentCount
 		end
+		if self.bgSizeConfig.PlayerCount_Enabled then
+			self.PlayerCount:Show()
+			self.PlayerCount:SetText(format(isEnemy == (enemyFaction == 0) and PLAYER_COUNT_HORDE or PLAYER_COUNT_ALLIANCE, currentCount))
+		else
+			self.PlayerCount:Hide()
+		end
+
 	end
 	
 	function MainFrameFunctions:GetPlayerbuttonByUnitID(unitID)
@@ -1960,7 +1913,7 @@ do
 		end
 		
 		if self.PlayerType == "Allies" then
-			self:GROUP_ROSTER_UPDATE()
+			BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 		end
 	end
 
@@ -2026,7 +1979,14 @@ do
 
 	
 	function BattleGroundEnemies:PLAYER_LOGIN()
-		PlayerDetails.PlayerName = UnitName("player")
+		PlayerDetails = {
+			PlayerName = UnitName("player"),
+			PlayerClass = select(2, UnitClass("player")),
+			IsGroupLeader = UnitIsGroupLeader("player"),
+			unitID = "player",
+			GUID = UnitGUID("player")
+		}
+		
 		
 		self.db = LibStub("AceDB-3.0"):New("BattleGroundEnemiesDB", Data.defaultSettings, true)
 
@@ -2039,9 +1999,16 @@ do
 		
 		self:SetupOptions()
 
+		AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 709, 532)
+		AceConfigDialog:AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
+
 		PVPMatchScoreboard:HookScript("OnHide", PVPMatchScoreboard_OnHide)
 		
 		--DBObjectLib:ResetProfile(noChildren, noCallbacks)
+
+		if IsInGroup() and #self.Allies.groupMembers == 0 then
+			self:GROUP_ROSTER_UPDATE()  --Scan again, the user probably reloaded the UI so GROUP_ROSTER_UPDATE didnt fire
+		end
 	
 		
 		self:UnregisterEvent("PLAYER_LOGIN")
@@ -2082,6 +2049,7 @@ end
 
 
 function BattleGroundEnemies:ProfileChanged()
+	self:SetupOptions()
 	self.Enemies:ApplyAllSettings()
 	self.Allies:ApplyAllSettings()
 end
@@ -2551,8 +2519,6 @@ do
 			end
 		end
 
-		local wrongSelectedTab = 0
-
 		function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
 			-- self:Debug(GetCurrentMapAreaID())
@@ -2686,11 +2652,136 @@ do
 			
 		end--functions end
 	end-- do-end block end for locals of the function UPDATE_BATTLEFIELD_SCORE
+
+
+	function BattleGroundEnemies.Allies:AddGroupMember(name, isLeader, classTag, unitID, GUID)
+		self.groupMembers[name] = {
+			PlayerName = name,
+			isGroupLeader = isLeader,
+			PlayerClass = classTag, --0 = normal member, 1 = assistant, 2 = group leader
+			unitID = unitID,
+			GUID = GUID
+		}
+
+		self.GuidToGroupMember[GUID] = self.groupMembers[name]
+
+		self:UpdateGroupMemberButton(self.groupMembers[name])
+	
+		if isGroupLeader then
+			self.groupLeader = name
+		end
+	end
+
+	function BattleGroundEnemies.Allies:UpdateGroupMemberButton(groupMember)
+		local allyButton = self.Players[groupMember.PlayerName]
+	
+		if groupMember.PlayerName ~= PlayerDetails.PlayerName then
+		
+			local unit = groupMember.unitID --it happens that numGroupMembers is higher than the value of the maximal players for that battleground, for example 15 in a 10 man bg, thats why we wipe AllyUnitIDToAllyDetails
+			
+			if allyButton and allyButton.unit ~= unit then -- ally has a new unitID now
+
+				local targetUnitID = unit.."target"
+				
+				local targetEnemyButton = allyButton.Target
+				if targetEnemyButton then
+					
+					--self:Debug("player", groupMember.PlayerName, "has a new unit and targeted something")
+					if targetEnemyButton.UnitIDs.Active == allyButton.TargetUnitID then
+						targetEnemyButton.UnitIDs.Active = targetUnitID
+					end
+					if targetEnemyButton.UnitIDs.Ally == allyButton.TargetUnitID then
+						targetEnemyButton.UnitIDs.Ally = targetUnitID
+					end
+				end
+				
+				allyButton:SetLevel(UnitLevel(unit))
+				allyButton.unit = unit
+				if not InCombatLockdown() then
+					allyButton:SetAttribute('unit', unit)
+				else
+					C_Timer.After(1, BattleGroundEnemies.GROUP_ROSTER_UPDATE)
+				end
+				
+				allyButton.TargetUnitID = targetUnitID
+				allyButton:RegisterUnitEvent("UNIT_AURA", unit)
+			end
+			
+		else -- its the player
+			if allyButton then
+				
+				if not InCombatLockdown() then
+					allyButton:SetAttribute('unit', "player")
+				else
+					C_Timer.After(1, BattleGroundEnemies.GROUP_ROSTER_UPDATE)
+				end
+			
+				allyButton.unit = "player"
+				allyButton.TargetUnitID = "target"
+				allyButton:RegisterUnitEvent("UNIT_AURA", "player")
+				
+				PlayerButton = allyButton
+			end					
+		end
+	end
+
+	
+
+	function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
+
+		self:SendMessagesOnGroupUpdate()
+
+		if not self then self = BattleGroundEnemies end -- for the C_Timer.After call
+
+
+	
+		wipe(self.Allies.groupMembers)
+		wipe(self.Allies.GuidToGroupMember)
+		self.Allies.groupLeader = nil
+
+		if not IsInGroup() then return end  --IsInGroup returns true when user is in a Raid and In a 5 man group
+				
+		-- GetRaidRosterInfo also works when in a party (not raid) but i am not 100% sure how the party unitID maps to the index in GetRaidRosterInfo()
+
+		if IsInRaid() then 
+			for i = 1, GetNumGroupMembers() do -- the player itself only shows up here when he is in a raid		
+				local name, rank, subgroup, level, localizedClass, classTag, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(i)
+				
+				if name and rank and classTag then 
+					self.Allies:AddGroupMember(name, rank == 2, classTag, "raid"..i, UnitGUID("raid"..i))
+				end
+			end
+		else
+			-- we are in a party, 5 man group
+			local unitIDPrefix = "party"
+			
+			for i = 1, GetNumGroupMembers() do
+
+				local unitID = unitIDPrefix..i
+				local name, realm = UnitName(unitID)
+				if name then
+					if realm then 
+						name = name.."-"..realm
+					end
+		
+					self.Allies:AddGroupMember(name, UnitIsGroupLeader(unitID), select(2, UnitClass(unitID)), unitID, UnitGUID(unitID))
+				end
+			end
+
+
+			self.Allies:AddGroupMember(PlayerDetails.PlayerName, UnitIsGroupLeader("player"), PlayerDetails.PlayerClass, "player", PlayerDetails.GUID)
+		end
+	end
+
+	BattleGroundEnemies.PARTY_LEADER_CHANGED = BattleGroundEnemies.GROUP_ROSTER_UPDATE
+
 	
 	function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 		if self.TestmodeActive then --disable testmode
 			self:DisableTestMode()
 		end
+
+		
 		
 		CurrentMapID = false
 	

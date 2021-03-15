@@ -10,17 +10,30 @@ BattleGroundEnemies.Objects.DR = {}
 local BGE_VERSION = "9.0.2.8"
 local AddonPrefix = "BGE"
 local versionQueryString, versionResponseString = "Q^%s", "V^%s"
-local versions = {} --
+local targetCallVolunteerString = "TV^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
+local targetCallDecisionString = "TD^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
+
 local highestVersion = BGE_VERSION
-local groupMembers = {}
+local versions = {}
 
 versionQueryString = versionQueryString:format(BGE_VERSION)
 versionResponseString = versionResponseString:format(BGE_VERSION)
 
 BattleGroundEnemies:RegisterEvent("CHAT_MSG_ADDON")
-BattleGroundEnemies:RegisterEvent("GROUP_ROSTER_UPDATE")
 
 C_ChatInfo.RegisterAddonMessagePrefix(AddonPrefix)
+
+
+
+--[[
+    targetcallilng, thoughts:
+    The group leader can decice who the target caller will be
+
+    people can choose if they want to be a target caller via the interface, this message will be sent to the other players, SendAddonMessage
+    then all the other people can see who would volunteer for target calling,
+        the group leader can then choose who should be the target caller, his decission will be sent to everyone SendAddonMessage
+            then all the clients can display the target calelrs target on the unitframe
+]]
 
 --[[ 
 LE_PARTY_CATEGORY_HOME will query information about your "real" group -- the group you were in on your Home realm, before entering any instance/battleground.
@@ -31,20 +44,16 @@ SLASH_BattleGroundEnemiesVersion1 = "/bgev"
 SLASH_BattleGroundEnemiesVersion2 = "/BGEV"
 SlashCmdList.BattleGroundEnemiesVersion = function()
 	if not IsInGroup() then
-        BattleGroundEnemies:Information("You are using Version", BGE_VERSION)
+        BattleGroundEnemies:Information(L.MyVersion, BGE_VERSION)
 		return
-    elseif #groupMembers == 0 then --Scan again, the user probably reloaded the UI so GROUP_ROSTER_UPDATE didnt fire
-        BattleGroundEnemies:GROUP_ROSTER_UPDATE() 
 	end
 
-	local function coloredNameVersion(name, version)
+	local function coloredNameVersion(playerDetails, version)
+        local coloredName = BattleGroundEnemies.GetColoredName(playerDetails)
 		if version ~= "" then
 			version = ("|cFFCCCCCC(%s%s)|r"):format(version, "") 
 		end
-
-		local _, class = UnitClass(name)
-		local tbl = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class] or RAID_CLASS_COLORS[class] or GRAY_FONT_COLOR
-		return ("|cFF%02x%02x%02x%s|r%s"):format(tbl.r*255, tbl.g*255, tbl.b*255, name, version)
+		return (coloredName..version)
 	end
 
 
@@ -60,18 +69,17 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
     }
 
 
-    --loop through all of the groupMembers to find out which one of them send us their addon version
-    for i = 1, #groupMembers do
-        local name = groupMembers[i]
+    --loop through all of the BattleGroundEnemies.Allies.groupMembers to find out which one of them send us their addon version
+    for name, details in pairs(BattleGroundEnemies.Allies.groupMembers) do
   
         if versions[name] then
             if versions[name] < highestVersion then
-                results.old[#results.old+1] = coloredNameVersion(name, versions[name])
+                results.old[#results.old+1] = coloredNameVersion(details, versions[name])
             else
-                results.current[#results.current+1] = coloredNameVersion(name, versions[name])  
+                results.current[#results.current+1] = coloredNameVersion(details, versions[name])  
             end
         else
-            results.none[#results.none+1] = coloredNameVersion(name, "")        
+            results.none[#results.none+1] = coloredNameVersion(details, "")        
         end
     end
 
@@ -83,51 +91,22 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 end
 
 
-
-
-
-local grouped = nil
-function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
-    local groupType = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and 3) or (IsInRaid() and 2) or (IsInGroup() and 1)
-    if (not grouped and groupType) or (grouped and groupType and grouped ~= groupType) then
-        grouped = groupType
-        SendAddonMessage(AddonPrefix, versionQueryString, groupType == 3 and "INSTANCE_CHAT" or "RAID")
-    elseif grouped and not groupType then
-        grouped = nil
-        versions = {}
-    end
-
-    groupMembers = {}
-
-    local unitIDPrefix
-    if IsInRaid() then
-        unitIDPrefix = "raid"
-    else
-        groupMembers[1] = UnitName("player") --the player does not get a party unitID but he gets assigned a raid unitID
-        unitIDPrefix = "party"
-    end
-
-
-
-    for i = 1, GetNumGroupMembers() do -- the player itself only shows up here when he is in a raid
-        local name, realm = UnitName(unitIDPrefix..i)
-       
-        if name then
-            if realm then 
-                name = name.."-"..realm
-            end
-            groupMembers[#groupMembers + 1] = name
-        end
-    end
-end
-
-
-
-
-
 local responseTimer = nil
 local outdatedTimer = nil
 
+local wasInGroup = nil
+function BattleGroundEnemies:SendMessagesOnGroupUpdate()
+    local iWantToDoTargetcalling = self.db.profile.targetCallingVolunteer
+    local groupType = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and 3) or (IsInRaid() and 2) or (IsInGroup() and 1)
+    if (not grouped and groupType) or (grouped and groupType and grouped ~= groupType) then
+        wasInGroup = groupType
+        SendAddonMessage(AddonPrefix, versionQueryString, groupType == 3 and "INSTANCE_CHAT" or "RAID")
+        SendAddonMessage(AddonPrefix, targetCallVolunteerString:format(iWantToDoTargetcalling and "y" or "n"), groupType == 3 and "INSTANCE_CHAT" or "RAID")
+    elseif wasInGroup and not groupType then
+        wasInGroup = nil
+        versions = {}
+    end
+end
 
 function BattleGroundEnemies:VersionCheck(prefix, version, sender)
     if prefix == "Q" then
@@ -147,7 +126,7 @@ function BattleGroundEnemies:VersionCheck(prefix, version, sender)
             if version > BGE_VERSION then
                 if outdatedTimer then outdatedTimer:Cancel() end
                 outdatedTimer = CTimerNewTicker(3, function() 
-                    BattleGroundEnemies:Information("A newer version is available.")
+                    BattleGroundEnemies:Information(L.NewVersionAvailable)
                     outdatedTimer = nil
                 end, 1)
             end
@@ -156,7 +135,12 @@ function BattleGroundEnemies:VersionCheck(prefix, version, sender)
 end
 
 
-function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sender)
+function BattleGroundEnemies:SetTargetCallingVolunteer(sender, message)
+    BattleGroundEnemies.TargetCalllingVolunteers[sender] = message == "y" and true or false
+end
+
+
+function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sender)  --the sender always contains the realm of the player, even when from same realm
 	if channel ~= "RAID" and channel ~= "PARTY" and channel ~= "INSTANCE_CHAT" or addonPrefix ~= AddonPrefix then return end
 	
     local msgPrefix, msg = strsplit("^", message)
@@ -164,7 +148,20 @@ function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sende
     if msgPrefix == "V" or msgPrefix == "Q" then
         self:VersionCheck(msgPrefix, msg, sender)
     end
+    if msgPrefix == "TV" then
+        self:SetTargetCallingVolunteer(sender, msg)
+    end
+    if msgPrefix == "TD" then
+        -- msg contains the GUID of the targetcaller selected by the grupleader
+        --check if sender is raid leader
+        if sender == groupleader then
+            self:Information(msg == UnitGUID("player") and YOU or msg, L.TargetCallerUpdated)
+            BattleGroundEnemies.TargetCaller = self.Allies.GuidToGroupMember[msg]
+        end
+    end
 end
+
+
 
 
 --/run test = {"9.0.7.5", "9.2.7.5", "9.2.7.4"}; table.sort(test); for i =1, #test do print(test[i])end
