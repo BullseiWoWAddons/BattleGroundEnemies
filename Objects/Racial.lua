@@ -1,5 +1,7 @@
 local BattleGroundEnemies = BattleGroundEnemies
 local addonName, Data = ...
+local GetTime = GetTime
+
 BattleGroundEnemies.Objects.Racial = {}
 
 function BattleGroundEnemies.Objects.Racial.New(playerButton)

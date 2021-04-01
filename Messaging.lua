@@ -1,6 +1,6 @@
 local addonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
-local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
+local L = Data.L
 
 
 local CTimerNewTicker = C_Timer.NewTicker
@@ -10,8 +10,10 @@ BattleGroundEnemies.Objects.DR = {}
 local BGE_VERSION = "9.0.2.8"
 local AddonPrefix = "BGE"
 local versionQueryString, versionResponseString = "Q^%s", "V^%s"
-local targetCallVolunteerString = "TV^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
-local targetCallDecisionString = "TD^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
+local targetCallVolunteerQueryString = "TVQ^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
+local targetCallVolunteerResponseString = "TVR^%s"
+local targetCallCallerQueryString = "TCQ" -- wil be send to all the viewers to show if you are volunteering vor target calling
+local targetCallCallerResponseString = "TCV^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
 
 local highestVersion = BGE_VERSION
 local versions = {}
@@ -49,7 +51,7 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 	end
 
 	local function coloredNameVersion(playerDetails, version)
-        local coloredName = BattleGroundEnemies.GetColoredName(playerDetails)
+        local coloredName = BattleGroundEnemies:GetColoredName(playerDetails)
 		if version ~= "" then
 			version = ("|cFFCCCCCC(%s%s)|r"):format(version, "") 
 		end
@@ -90,32 +92,70 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
     end
 end
 
+local timers = {}
+--[[ 
+  we use timers to broadcast information, we do this because it may happen that 
+many players request the same information in a shortm time due to
+ ingame events like GROUP_ROSTER_UPDATE, this way we only send out the information 
+once when requested in a 3 second time frame, every new request resets the timer
+ ]]
 
-local responseTimer = nil
-local outdatedTimer = nil
+
+function BattleGroundEnemies:QueryVersions(channel)
+    SendAddonMessage(AddonPrefix, versionQueryString, channel)
+end
+
+function BattleGroundEnemies:QueryTargetCallVolunteers(channel)
+    SendAddonMessage(AddonPrefix, targetCallVolunteerQueryString:format(iWantToDoTargetcalling and "y" or "n"), channel)
+end
+
+function BattleGroundEnemies:QueryTargetCallCaller(channel)
+    SendAddonMessage(AddonPrefix, targetCallCallerQueryString, channel)
+end
+
+
+--broadcast teh target caller to everyone
+function BattleGroundEnemies:BroadcastTargetCaller()
+    if self.Allies.TargetCaller then
+        if timers.BroadcastTargetCaller then timers.BroadcastTargetCaller:Cancel() end
+        timers.BroadcastTargetCaller = CTimerNewTicker(3, function() 
+            if IsInGroup() then
+                SendAddonMessage(AddonPrefix, targetCallVolunteerResponseString:format(self.Allies.TargetCaller.GUID), IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
+            end
+            timers.BroadcastTargetCaller = nil
+        end, 1)
+    end
+end
+
+
+
 
 local wasInGroup = nil
-function BattleGroundEnemies:SendMessagesOnGroupUpdate()
-    local iWantToDoTargetcalling = self.db.profile.targetCallingVolunteer
+function BattleGroundEnemies:RequestEverythingFromGroupmembers()
+    
     local groupType = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and 3) or (IsInRaid() and 2) or (IsInGroup() and 1)
     if (not wasInGroup and groupType) or (wasInGroup and groupType and wasInGroup ~= groupType) then
         wasInGroup = groupType
-        SendAddonMessage(AddonPrefix, versionQueryString, groupType == 3 and "INSTANCE_CHAT" or "RAID")
-        SendAddonMessage(AddonPrefix, targetCallVolunteerString:format(iWantToDoTargetcalling and "y" or "n"), groupType == 3 and "INSTANCE_CHAT" or "RAID")
+        local iWantToDoTargetcalling = self.db.profile.targetCallingVolunteer
+        local channel = groupType == 3 and "INSTANCE_CHAT" or "RAID"
+        self:QueryTargetCallCaller(channel)
+        self:QueryTargetCallVolunteers(channel)
+        self:QueryVersions(channel)
+
     elseif wasInGroup and not groupType then
         wasInGroup = nil
         versions = {}
     end
 end
 
-function BattleGroundEnemies:VersionCheck(prefix, version, sender)
+function BattleGroundEnemies:UpdateVersions(sender, prefix, version)
     if prefix == "Q" then
-        if responseTimer then responseTimer:Cancel() end
-        responseTimer = CTimerNewTicker(3, function() 
+        if timers.VersionCheck then timers.VersionCheck:Cancel() end
+        timers.VersionCheck = CTimerNewTicker(3, function() 
             if IsInGroup() then
                 SendAddonMessage(AddonPrefix, versionResponseString, IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- LE_PARTY_CATEGORY_INSTANCE = 2
             end
-            responseTimer = nil
+            timers.VersionCheck = nil
         end, 1)
     end
     if prefix == "V" or prefix == "Q" then -- V = version response, Q = version query
@@ -124,10 +164,10 @@ function BattleGroundEnemies:VersionCheck(prefix, version, sender)
             if version > highestVersion then highestVersion = version end
 
             if version > BGE_VERSION then
-                if outdatedTimer then outdatedTimer:Cancel() end
-                outdatedTimer = CTimerNewTicker(3, function() 
+                if timers.outdatedTimer then timers.outdatedTimer:Cancel() end
+                timers.outdatedTimer = CTimerNewTicker(3, function() 
                     BattleGroundEnemies:Information(L.NewVersionAvailable)
-                    outdatedTimer = nil
+                    timers.outdatedTimer = nil
                 end, 1)
             end
         end
@@ -135,10 +175,30 @@ function BattleGroundEnemies:VersionCheck(prefix, version, sender)
 end
 
 
-function BattleGroundEnemies:SetTargetCallingVolunteer(sender, message)
+function BattleGroundEnemies:UpdateTargetCallingVolunteers(sender, prefix, message)
+    if prefix == "TVQ" then
+        if timers.targetCallingVolunteering then timers.targetCallingVolunteering:Cancel() end
+        timers.targetCallingVolunteering = CTimerNewTicker(3, function() 
+            SendAddonMessage(AddonPrefix, targetCallVolunteerResponseString:format(self.db.profile.targetCallingVolunteer and "y" or "n"), IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
+            timers.targetCallingVolunteering = nil
+        end, 1)
+    end
     BattleGroundEnemies.TargetCalllingVolunteers[sender] = message == "y" and true or false
 end
 
+function BattleGroundEnemies:UpdateTargetCallingCallers(prefix, sender, message)
+    if prefix == "TCQ" then
+        -- when we query the taret caller we only save the Targetcaller when its send by the group leader
+
+        if self.PlayerDetails.isGroupLeader then
+            self:BroadcastTargetCaller()
+        end
+    end
+    if sender == self.Allies.groupLeader then
+        self:Information(message == UnitGUID("player") and YOU or message, L.TargetCallerUpdated)
+        BattleGroundEnemies.Allies.TargetCaller = self.Allies.GuidToGroupMember[msg]
+    end
+end
 
 function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sender)  --the sender always contains the realm of the player, even when from same realm
 	if channel ~= "RAID" and channel ~= "PARTY" and channel ~= "INSTANCE_CHAT" or addonPrefix ~= AddonPrefix then return end
@@ -146,18 +206,16 @@ function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sende
     local msgPrefix, msg = strsplit("^", message)
     sender = Ambiguate(sender, "none")
     if msgPrefix == "V" or msgPrefix == "Q" then
-        self:VersionCheck(msgPrefix, msg, sender)
+        self:UpdateVersions(sender, msgPrefix, msg)
     end
-    if msgPrefix == "TV" then
-        self:SetTargetCallingVolunteer(sender, msg)
+    if msgPrefix == "TVQ" or msgPrefix == "TVR" then
+        self:UpdateTargetCallingVolunteers(sender, msgPrefix, msg)
     end
-    if msgPrefix == "TD" then
+    if msgPrefix == "TCQ" or msgPrefix == "TCR" then
+        self:UpdateTargetCallingCallers(sender, msgPrefix, msg)
         -- msg contains the GUID of the targetcaller selected by the grupleader
         --check if sender is raid leader
-        if sender == self.groupLeader then
-            self:Information(msg == UnitGUID("player") and YOU or msg, L.TargetCallerUpdated)
-            BattleGroundEnemies.TargetCaller = self.Allies.GuidToGroupMember[msg]
-        end
+       
     end
 end
 

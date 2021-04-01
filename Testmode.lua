@@ -1,7 +1,7 @@
 local addonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 
-local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
+local L = Data.L
 local LibRaces = LibStub("LibRaces-1.0")
 local LibPlayerSpells = LibStub("LibPlayerSpells-1.0")
 

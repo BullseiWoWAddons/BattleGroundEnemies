@@ -1,5 +1,7 @@
 local BattleGroundEnemies = BattleGroundEnemies
 local addonName, Data = ...
+local GetTime = GetTime
+
 BattleGroundEnemies.Objects.Trinket = {}
 
 function BattleGroundEnemies.Objects.Trinket.New(playerButton)

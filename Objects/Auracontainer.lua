@@ -4,12 +4,12 @@ local DebuffTypeColor = DebuffTypeColor
 BattleGroundEnemies.Objects.AuraContainer = {}
 
 local function debuffFrameUpdateStatusBorder(debuffFrame)
-	local color = DebuffTypeColor[debuffFrame.Type or "none"]
+	local color = DebuffTypeColor[debuffFrame.DebuffType or "none"]
 	debuffFrame:SetBackdropBorderColor(color.r, color.g, color.b)
 end
 
 local function debuffFrameUpdateStatusText(debuffFrame)
-	local color = DebuffTypeColor[debuffFrame.Type or "none"]
+	local color = DebuffTypeColor[debuffFrame.DebuffType or "none"]
 	debuffFrame.Cooldown.Text:SetTextColor(color.r, color.g, color.b)
 end
 
@@ -39,16 +39,6 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 		self:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY)
 	end
 	
-	AuraContainer.SetIconSize = function(self, size)	
-		for identifier, auraFrame in pairs(self.Active) do
-			auraFrame:SetSize(size, size)
-		end
-		for identifier, auraFrame in pairs(self.Inactive) do
-			auraFrame:SetSize(size, size)
-		end
-		self:AuraPositioning()
-	end
-	
 	AuraContainer.Reset = function(self)
 		for identifier, auraFrame in pairs(self.Active) do
 			auraFrame.Cooldown:Clear()
@@ -62,14 +52,14 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 
 		for identifier, auraFrame in pairs(self.Active) do
             auraFrame:ApplyAuraFrameSettings()
-            if type == "debuff" then
+            if self.type == "debuff" then
                 auraFrame:ChangeDisplayType()
             end
 		end
 	
 		for identifier, auraFrame in pairs(self.Inactive) do
             auraFrame:ApplyAuraFrameSettings()
-            if type == "debuff" then
+            if self.type == "debuff" then
                 auraFrame:ChangeDisplayType()
             end 
 		end
@@ -113,8 +103,9 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
             
             
             auraFrame:SetScript("OnEnter", function(self)
-				BattleGroundEnemies:ShowTooltip(self, function() 
-					GameTooltip:SetSpellByID(self.SpellID)
+				BattleGroundEnemies:ShowTooltip(self, function()
+					local unitID = playerButton.unit or playerButton.UnitIDs and playerButton.UnitIDs.Active
+					BattleGroundEnemies:ShowAuraTooltip(unitID, auraFrame.SpellID, auraFrame.Type == "debuff" and "HARMFUL" or "HELPFUL")
 				end)
             end)
             
@@ -139,6 +130,9 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
                 auraFrame.Container.Active[auraFrame.Identifier] = nil
                 auraFrame.Container:AuraPositioning()
                 auraFrame.Container.Inactive[#auraFrame.Container.Inactive + 1] = auraFrame
+				if auraFrame.Type == "priorized" then
+					return --TODO
+				end
             end)
             -- auraFrame.Cooldown:SetScript("OnCooldownDone", function() 
             -- 	auraFrame.Stacks:SetText("")
@@ -203,8 +197,9 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 		end
 		auraFrame.Identifier = identifier
 		auraFrame.SpellID = spellID
-		auraFrame.Type = debuffType
+		auraFrame.DebuffType = debuffType
 		auraFrame.Icon:SetTexture(GetSpellTexture(spellID))
+		auraFrame.Type = self.type
 		if amount > 1 then
 			auraFrame.Stacks:SetText(amount)
 		else

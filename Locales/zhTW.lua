@@ -1,5 +1,6 @@
-local L = LibStub('AceLocale-3.0'):NewLocale('BattleGroundEnemies', 'zhTW')
+if not LOCALE_zhTW then return end
 
-if not L then return end
+local addonName, Data = ...
+local L = Data.L;
 
 --@localization(locale="zhTW", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@

@@ -1,5 +1,5 @@
 local addonName, Data = ...
-local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
+local L = Data.L
 local LSM = LibStub("LibSharedMedia-3.0")
 
 local CloseDropDownMenus = CloseDropDownMenus

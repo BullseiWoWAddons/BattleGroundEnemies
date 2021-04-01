@@ -1,7 +1,7 @@
 local addonName, Data = ...
 local GetAddOnMetadata = GetAddOnMetadata
 
-local L = LibStub("AceLocale-3.0"):GetLocale("BattleGroundEnemies")
+local L = Data.L
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
@@ -302,7 +302,7 @@ local function addNormalTextSettings(location, optionname)
 		[fontsize] = {
 			type = "range",
 			name = L.Fontsize,
-			desc = L[fontsize.."_Desc"],
+			desc = L["Fontsize_Desc"],
 			min = 1,
 			max = 40,
 			step = 1,
@@ -320,7 +320,7 @@ local function addNormalTextSettings(location, optionname)
 		[textcolor] = {
 			type = "color",
 			name = L.Fontcolor,
-			desc = L[textcolor.."_Desc"],
+			desc = L["Fontcolor_Desc"],
 			hasAlpha = true,
 			width = "half",
 			order = 4
@@ -357,7 +357,7 @@ local function addCooldownTextsettings(location, optionname)
 		[showNumbers] = {
 			type = "toggle",
 			name = L.ShowNumbers,
-			desc = L[showNumbers.."_Desc"],
+			desc = L["ShowNumbers_Desc"],
 			order = 1
 		},
 		asdfasdf = {
@@ -373,7 +373,7 @@ local function addCooldownTextsettings(location, optionname)
 				[fontsize] = {
 					type = "range",
 					name = L.Fontsize,
-					desc = L.Cooldown_Fontsize_Desc,
+					desc = L.Fontsize_Desc,
 					min = 6,
 					max = 40,
 					step = 1,
@@ -744,7 +744,7 @@ local function addEnemyAndAllySettings(self)
 							desc = L.BarHeight_Desc..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							min = 1,
-							max = 40,
+							max = 100,
 							step = 1,
 							order = 2
 						},
@@ -1269,11 +1269,123 @@ local function addEnemyAndAllySettings(self)
 									desc = L.Auras_Enabled_Desc,
 									order = 1
 								},
-								Auras_BuffsSettings = {
+								Auras_ImportantSettings = {
 									type = "group",
 									name = L.Buffs,
 									disabled = function() return not location.Auras_Enabled end,
 									order = 2,
+									args = {
+										Auras_Important_Enabled = {
+											type = "toggle",
+											name = ENABLE,
+											desc = SHOW_BUFFS,
+											order = 1
+										},
+										Auras_Important_Container_IconSettings = {
+											type = "group",
+											name = L.BuffIcon,
+											disabled = function() return not location.Auras_Important_Enabled end,
+											order = 2,
+											args = addIconPositionSettings(location, "Auras_Important"),
+										},
+										Auras_Important_Container_PositioningSettings = {
+											type = "group",
+											name = L.ContainerPosition,
+											disabled = function() return not location.Auras_Important_Enabled end,
+											args = addContainerPositionSettings(location, "Auras_Important_Container"),
+											order = 3
+										},
+										Auras_Important_StacktextSettings = {
+											type = "group",
+											name = L.AurasStacktextSettings,
+											--desc = L.MyAuraSettings_Desc,
+											disabled = function() return not location.Auras_Important_Enabled end,
+											order = 4,
+											args = addNormalTextSettings(location, "Auras_Important")
+										},
+										Auras_Important_CooldownTextSettings = {
+											type = "group",
+											name = L.Countdowntext,
+											--desc = L.TrinketSettings_Desc,
+											disabled = function() return not location.Auras_Important_Enabled end,
+											order = 5,
+											args = addCooldownTextsettings(location, "Auras_Important")
+										},
+										Auras_Important_FilteringSettings = {
+											type = "group",
+											name = FILTER,
+											desc = L.AurasFilteringSettings_Desc,
+											disabled = function() return not location.Auras_Important_Enabled end,
+											order = 6,
+											args = {
+												Auras_Important_Filtering_Enabled = {
+													type = "toggle",
+													name = L.Filtering_Enabled,
+													width = 'normal',
+													order = 1
+												},
+												Fake = addVerticalSpacing(2),
+												Auras_Important_OnlyShowMine = {
+													type = "toggle",
+													name = L.OnlyShowMine,
+													desc = L.OnlyShowMine_Desc:format(L.Buffs),
+													disabled = function() return not location.Auras_Important_Filtering_Enabled end,
+													order = 3,
+												},
+												Fake1 = addVerticalSpacing(4),
+												Auras_Important_SpellIDFiltering_Enabled = {
+													type = "toggle",
+													name = L.SpellID_Filtering,
+													disabled = function() return not location.Auras_Important_Filtering_Enabled end,
+													order = 5
+												},
+												Fake2 = addVerticalSpacing(6),
+												Auras_Important_SpellIDFiltering__AddSpellID = {
+													type = "input",
+													name = L.AurasFiltering_AddSpellID,
+													desc = L.AurasFiltering_AddSpellID_Desc,
+													hidden = function() return not (location.Auras_Important_Filtering_Enabled and location.Auras_Important_SpellIDFiltering_Enabled) end,
+													get = function() return "" end,
+													set = function(option, value, state)
+														local spellIDs = {strsplit(",", value)}
+														for i = 1, #spellIDs do
+															local spellID = tonumber(spellIDs[i])
+															location.Auras_Important_SpellIDFiltering_Filterlist[spellID] = true
+														end
+													end,
+													width = 'double',
+													order = 7
+												},
+												Fake3 = addVerticalSpacing(8),
+												Auras_Important_SpellIDFiltering_Filterlist = {
+													type = "multiselect",
+													name = L.Filtering_Filterlist,
+													desc = L.AurasFiltering_Filterlist_Desc:format(L.buff),
+													hidden = function() return not (location.Auras_Important_Filtering_Enabled and location.Auras_Important_SpellIDFiltering_Enabled) end,
+													get = function()
+														return true --to make it checked
+													end,
+													set = function(option, value) 
+														location.Auras_Important_SpellIDFiltering_Filterlist[value] = nil
+													end,
+													values = function()
+														local valueTable = {}
+														for spellID in pairs(location.Auras_Important_SpellIDFiltering_Filterlist) do
+															valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
+														end
+														return valueTable
+													end,
+													order = 9
+												}
+											}
+										}
+									}
+								},
+								Auras_BuffsSettings = {
+									type = "group",
+									name = L.Buffs,
+									disabled = function() return not location.Auras_Enabled end,
+									order = 3,
 									args = {
 										Auras_Buffs_Enabled = {
 											type = "toggle",
@@ -1709,38 +1821,39 @@ function BattleGroundEnemies:SetupOptions()
 					Notifications = {
 						type = "group",
 						name = COMMUNITIES_NOTIFICATION_SETTINGS,
-						desc = L.Notifications_Desc,
 						order = 1,
 						args = {
-							Notifications_Enabled = {
-								type = "toggle",
-								name = L.Notifications_Enabled,
-								desc = L["Notifications_Enemies_Enabled_Desc"],
-								--inline = true,
-								order = 1
-							},
 							EnemiesTargetingMe = {
 								type = "group",
-								name = "Player alert when enemy is targeting me",
-								desc = L.Notifications_Desc,
+								name = L.IAmTargeted,
 								order = 1,
 								args = {
-									MeAmount = {
-										type = "range",
-										name = "how many players are targeting me",
-										min = 0,
-										max = 40,
-										step = 1,
+									EnemiesTargetingMe_Enabled = {
+										type = "toggle",
+										name = ENABLE,
+										desc = L.EnemiesTargetingMe_Enabled_Desc,
+										desc = "test",
 										order = 1
+									},
+									EnemiesTargetingMe_Amount = {
+										type = "range",
+										name = L.TargetAmount,
+										desc = L.TargetAmount_Me,
+										min = 1,
+										max = 10,
+										step = 1,
+										disabled = function() return not location.RBG.EnemiesTargetingMe_Enabled end,
+										order = 2
 										
 									},
-									onyou = {
+									EnemiesTargetingMe_Sound = {
 										type = "select",
-										name = "SOUNDSELECTION",
-										order = 2,
+										name = SOUND,
 										values = AceGUIWidgetLSMlists.sound,
 										width = "full",
-										dialogControl = "LSM30_Sound"
+										dialogControl = "LSM30_Sound",
+										disabled = function() return not location.RBG.EnemiesTargetingMe_Enabled end,
+										order = 3
 									}
 									
 								}
@@ -1748,29 +1861,39 @@ function BattleGroundEnemies:SetupOptions()
 								
 
 							},
-							EnemiesTargetingGroupMembers = {
+							EnemiesTargetingAllies = {
 								type = "group",
-								name = "Player alert when enemies are targeting an ally",
-								desc = L.Notifications_Desc,
-								order = 1,
+								name = L.AllyIsTargeted,
+								order = 2,
 								args = {
-									MeAmount = {
-										type = "range",
-										name = "How many players are targeting an ally",
-										min = 0,
-										max = 40,
-										step = 1,
+									EnemiesTargetingAllies_Enabled = {
+										type = "toggle",
+										name = ENABLE,
+										desc = L.EnemiesTargetingAllies_Enabled_Desc,
+										desc = "test",
 										order = 1
+									},
+									EnemiesTargetingAllies_Amount = {
+										type = "range",
+										name = L.TargetAmount,
+										desc = L.TargetAmount_Ally,
+										min = 1,
+										max = 10,
+										step = 1,
+										disabled = function() return not location.RBG.EnemiesTargetingAllies_Enabled end,
+										order = 2
 										
 									},
-									onEnemies = {
+									EnemiesTargetingAllies_Sound = {
 										type = "select",
-										name = "SOUNDSELECTION",
-										order = 2,
+										name = SOUND,
 										values = AceGUIWidgetLSMlists.sound,
 										width = "full",
-										dialogControl = "LSM30_Sound"
+										dialogControl = "LSM30_Sound",
+										disabled = function() return not location.RBG.EnemiesTargetingAllies_Enabled end,
+										order = 3
 									}
+
 								}
 								
 
@@ -1836,40 +1959,6 @@ function BattleGroundEnemies:SetupOptions()
 								desc = L.TargetCallingShowIcon_Desc,
 								order = 2
 							},
-							Notifications_Enabled = {
-								type = "toggle",
-								name = L.Notifications_Enabled,
-								desc = L["Notifications_Enemies_Enabled_Desc"],
-								--inline = true,
-								order = 1
-							},
-							EnemiesTargetingMe = {
-								type = "group",
-								name = "Player alert when enemy is targeting me",
-								desc = L.Notifications_Desc,
-								order = 1,
-								args = {
-									MyFocus_Color = {
-										type = "color",
-										name = L.MyFocus_Color,
-										desc = L.MyFocus_Color_Desc,
-										hasAlpha = true,
-										order = 8
-									},
-									onyou = {
-										type = "select",
-										name = "SOUNDSELECTION",
-										order = 2,
-										values = AceGUIWidgetLSMlists.sound,
-										width = "full",
-										dialogControl = "LSM30_Sound"
-									}
-									
-								}
-								
-								
-
-							},
 							TargetCalling_Highlight = {
 								type = "group",
 								name = "highlight",
@@ -1877,8 +1966,8 @@ function BattleGroundEnemies:SetupOptions()
 								args = {
 									Icon = {
 										type = "select",
-										name = L.secondary,
-										desc = L.secondaryDesc,
+										name = "Icon",
+										desc = "test",
 										order = 4,
 										values = raidIcons,
 										width = "full",

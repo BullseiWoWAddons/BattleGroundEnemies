@@ -11,8 +11,8 @@
 embeds.xml
 #@end-no-lib-strip@
 
-Locales\deDE.lua
 Locales\enUS.lua
+Locales\deDE.lua
 Locales\esES.lua
 Locales\esMX.lua
 Locales\frFR.lua
