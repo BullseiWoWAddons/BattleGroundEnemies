@@ -196,7 +196,7 @@ function BattleGroundEnemies:UpdateTargetCallingCallers(prefix, sender, message)
     end
     if sender == self.Allies.groupLeader then
         self:Information(message == UnitGUID("player") and YOU or message, L.TargetCallerUpdated)
-        BattleGroundEnemies.Allies.TargetCaller = self.Allies.GuidToGroupMember[msg]
+        BattleGroundEnemies.Allies.TargetCaller = self.Allies.GuidToGroupMember[message]
     end
 end
 
