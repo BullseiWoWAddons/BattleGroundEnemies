@@ -25,7 +25,8 @@ Data.defaultSettings = {
             ObjectiveAndRespawn_Cooldown_EnableTextshadow = false,
             ObjectiveAndRespawn_Cooldown_TextShadowcolor = {0, 0, 0, 1},
 
-            Notifications_Enabled = true,
+            TargetCalling_SetMark = false,
+            TargetCalling_NotificationEnable = false
         },
     
         Enemies = {
@@ -171,7 +172,8 @@ Data.defaultSettings = {
                 Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
                 
                 Auras_Buffs_Filtering_Enabled = true,
-                Auras_Buffs_OnlyShowMine = true,
+                Auras_Buffs_Filtering_Blizzlike = false,
+                Auras_Buffs_ShowMine = true,
                 Auras_Buffs_SpellIDFiltering_Enabled = false,
                 Auras_Buffs_SpellIDFiltering_Filterlist = {},
                 
@@ -204,7 +206,8 @@ Data.defaultSettings = {
                 Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
                 
                 Auras_Debuffs_Filtering_Enabled = true,
-                Auras_Debuffs_OnlyShowMine = true,
+                Auras_Debuffs_Filtering_Blizzlike = false,
+                Auras_Debuffs_ShowMine = true,
                 Auras_Debuffs_DebuffTypeFiltering_Enabled = false,
                 Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
                 Auras_Debuffs_SpellIDFiltering_Enabled = false,
@@ -375,7 +378,8 @@ Data.defaultSettings = {
                 Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
                 
                 Auras_Buffs_Filtering_Enabled = true,
-                Auras_Buffs_OnlyShowMine = true,
+                Auras_Buffs_Filtering_Blizzlike = false,
+                Auras_Buffs_ShowMine = true,
                 Auras_Buffs_SpellIDFiltering_Enabled = false,
                 Auras_Buffs_SpellIDFiltering_Filterlist = {},
                 
@@ -408,7 +412,8 @@ Data.defaultSettings = {
                 Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
                 
                 Auras_Debuffs_Filtering_Enabled = true,
-                Auras_Debuffs_OnlyShowMine = true,
+                Auras_Debuffs_Filtering_Blizzlike = false,
+                Auras_Debuffs_ShowMine = true,
                 Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
                 Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
                 Auras_Debuffs_SpellIDFiltering_Enabled = false,
@@ -588,7 +593,8 @@ Data.defaultSettings = {
                 Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
                 
                 Auras_Buffs_Filtering_Enabled = true,
-                Auras_Buffs_OnlyShowMine = true,
+                Auras_Buffs_Filtering_Blizzlike = false,
+                Auras_Buffs_ShowMine = true,
                 Auras_Buffs_SpellIDFiltering_Enabled = false,
                 Auras_Buffs_SpellIDFiltering_Filterlist = {},
                 
@@ -621,7 +627,8 @@ Data.defaultSettings = {
                 Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
                 
                 Auras_Debuffs_Filtering_Enabled = true,
-                Auras_Debuffs_OnlyShowMine = true,
+                Auras_Debuffs_Filtering_Blizzlike = false,
+                Auras_Debuffs_ShowMine = true,
                 Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
                 Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
                 Auras_Debuffs_SpellIDFiltering_Enabled = false,
@@ -790,7 +797,8 @@ Data.defaultSettings = {
                 Auras_Buffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
                 
                 Auras_Buffs_Filtering_Enabled = true,
-                Auras_Buffs_OnlyShowMine = true,
+                Auras_Buffs_Filtering_Blizzlike = false,
+                Auras_Buffs_ShowMine = true,
                 Auras_Buffs_SpellIDFiltering_Enabled = false,
                 Auras_Buffs_SpellIDFiltering_Filterlist = {},
                 
@@ -823,7 +831,8 @@ Data.defaultSettings = {
                 Auras_Debuffs_Cooldown_TextShadowcolor = {0, 0, 0, 1},
                 
                 Auras_Debuffs_Filtering_Enabled = true,
-                Auras_Debuffs_OnlyShowMine = true,
+                Auras_Debuffs_Filtering_Blizzlike = false,
+                Auras_Debuffs_ShowMine = true,
                 Auras_Debuffs_DebuffTypeFiltering_Enabled = true,
                 Auras_Debuffs_DebuffTypeFiltering_Filterlist = {},
                 Auras_Debuffs_SpellIDFiltering_Enabled = false,
