@@ -1269,123 +1269,11 @@ local function addEnemyAndAllySettings(self)
 									desc = L.Auras_Enabled_Desc,
 									order = 1
 								},
-								Auras_ImportantSettings = {
-									type = "group",
-									name = L.Buffs,
-									disabled = function() return not location.Auras_Enabled end,
-									order = 2,
-									args = {
-										Auras_Important_Enabled = {
-											type = "toggle",
-											name = ENABLE,
-											desc = SHOW_BUFFS,
-											order = 1
-										},
-										Auras_Important_Container_IconSettings = {
-											type = "group",
-											name = L.BuffIcon,
-											disabled = function() return not location.Auras_Important_Enabled end,
-											order = 2,
-											args = addIconPositionSettings(location, "Auras_Important"),
-										},
-										Auras_Important_Container_PositioningSettings = {
-											type = "group",
-											name = L.ContainerPosition,
-											disabled = function() return not location.Auras_Important_Enabled end,
-											args = addContainerPositionSettings(location, "Auras_Important_Container"),
-											order = 3
-										},
-										Auras_Important_StacktextSettings = {
-											type = "group",
-											name = L.AurasStacktextSettings,
-											--desc = L.MyAuraSettings_Desc,
-											disabled = function() return not location.Auras_Important_Enabled end,
-											order = 4,
-											args = addNormalTextSettings(location, "Auras_Important")
-										},
-										Auras_Important_CooldownTextSettings = {
-											type = "group",
-											name = L.Countdowntext,
-											--desc = L.TrinketSettings_Desc,
-											disabled = function() return not location.Auras_Important_Enabled end,
-											order = 5,
-											args = addCooldownTextsettings(location, "Auras_Important")
-										},
-										Auras_Important_FilteringSettings = {
-											type = "group",
-											name = FILTER,
-											desc = L.AurasFilteringSettings_Desc,
-											disabled = function() return not location.Auras_Important_Enabled end,
-											order = 6,
-											args = {
-												Auras_Important_Filtering_Enabled = {
-													type = "toggle",
-													name = L.Filtering_Enabled,
-													width = 'normal',
-													order = 1
-												},
-												Fake = addVerticalSpacing(2),
-												Auras_Important_OnlyShowMine = {
-													type = "toggle",
-													name = L.OnlyShowMine,
-													desc = L.OnlyShowMine_Desc:format(L.Buffs),
-													disabled = function() return not location.Auras_Important_Filtering_Enabled end,
-													order = 3,
-												},
-												Fake1 = addVerticalSpacing(4),
-												Auras_Important_SpellIDFiltering_Enabled = {
-													type = "toggle",
-													name = L.SpellID_Filtering,
-													disabled = function() return not location.Auras_Important_Filtering_Enabled end,
-													order = 5
-												},
-												Fake2 = addVerticalSpacing(6),
-												Auras_Important_SpellIDFiltering__AddSpellID = {
-													type = "input",
-													name = L.AurasFiltering_AddSpellID,
-													desc = L.AurasFiltering_AddSpellID_Desc,
-													hidden = function() return not (location.Auras_Important_Filtering_Enabled and location.Auras_Important_SpellIDFiltering_Enabled) end,
-													get = function() return "" end,
-													set = function(option, value, state)
-														local spellIDs = {strsplit(",", value)}
-														for i = 1, #spellIDs do
-															local spellID = tonumber(spellIDs[i])
-															location.Auras_Important_SpellIDFiltering_Filterlist[spellID] = true
-														end
-													end,
-													width = 'double',
-													order = 7
-												},
-												Fake3 = addVerticalSpacing(8),
-												Auras_Important_SpellIDFiltering_Filterlist = {
-													type = "multiselect",
-													name = L.Filtering_Filterlist,
-													desc = L.AurasFiltering_Filterlist_Desc:format(L.buff),
-													hidden = function() return not (location.Auras_Important_Filtering_Enabled and location.Auras_Important_SpellIDFiltering_Enabled) end,
-													get = function()
-														return true --to make it checked
-													end,
-													set = function(option, value) 
-														location.Auras_Important_SpellIDFiltering_Filterlist[value] = nil
-													end,
-													values = function()
-														local valueTable = {}
-														for spellID in pairs(location.Auras_Important_SpellIDFiltering_Filterlist) do
-															valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
-														end
-														return valueTable
-													end,
-													order = 9
-												}
-											}
-										}
-									}
-								},
 								Auras_BuffsSettings = {
 									type = "group",
 									name = L.Buffs,
 									disabled = function() return not location.Auras_Enabled end,
-									order = 3,
+									order = 2,
 									args = {
 										Auras_Buffs_Enabled = {
 											type = "toggle",
@@ -1428,7 +1316,7 @@ local function addEnemyAndAllySettings(self)
 											name = FILTER,
 											desc = L.AurasFilteringSettings_Desc,
 											disabled = function() return not location.Auras_Buffs_Enabled end,
-											order = 6,
+											order = 9,
 											args = {
 												Auras_Buffs_Filtering_Enabled = {
 													type = "toggle",
@@ -1436,58 +1324,97 @@ local function addEnemyAndAllySettings(self)
 													width = 'normal',
 													order = 1
 												},
-												Fake = addVerticalSpacing(2),
-												Auras_Buffs_OnlyShowMine = {
-													type = "toggle",
-													name = L.OnlyShowMine,
-													desc = L.OnlyShowMine_Desc:format(L.Buffs),
+												Auras_Buffs_FilterSettings = {
+													type = "group",
+													name = L.FilterSettings,
+													desc = L.AurasFilteringSettings_Desc,
 													disabled = function() return not location.Auras_Buffs_Filtering_Enabled end,
-													order = 3,
-												},
-												Fake1 = addVerticalSpacing(4),
-												Auras_Buffs_SpellIDFiltering_Enabled = {
-													type = "toggle",
-													name = L.SpellID_Filtering,
-													disabled = function() return not location.Auras_Buffs_Filtering_Enabled end,
-													order = 5
-												},
-												Fake2 = addVerticalSpacing(6),
-												Auras_Buffs_SpellIDFiltering__AddSpellID = {
-													type = "input",
-													name = L.AurasFiltering_AddSpellID,
-													desc = L.AurasFiltering_AddSpellID_Desc,
-													hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_SpellIDFiltering_Enabled) end,
-													get = function() return "" end,
-													set = function(option, value, state)
-														local spellIDs = {strsplit(",", value)}
-														for i = 1, #spellIDs do
-															local spellID = tonumber(spellIDs[i])
-															location.Auras_Buffs_SpellIDFiltering_Filterlist[spellID] = true
-														end
-													end,
-													width = 'double',
-													order = 7
-												},
-												Fake3 = addVerticalSpacing(8),
-												Auras_Buffs_SpellIDFiltering_Filterlist = {
-													type = "multiselect",
-													name = L.Filtering_Filterlist,
-													desc = L.AurasFiltering_Filterlist_Desc:format(L.buff),
-													hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_SpellIDFiltering_Enabled) end,
-													get = function()
-														return true --to make it checked
-													end,
-													set = function(option, value) 
-														location.Auras_Buffs_SpellIDFiltering_Filterlist[value] = nil
-													end,
-													values = function()
-														local valueTable = {}
-														for spellID in pairs(location.Auras_Buffs_SpellIDFiltering_Filterlist) do
-															valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
-														end
-														return valueTable
-													end,
-													order = 9
+													order = 2,
+													args = {
+														Auras_Buffs_Filtering_Mode = {
+															type = "select",
+															name = L.Auras_Filtering_Mode,
+															desc = L.Auras_Filtering_Mode_Desc,
+															width = 'normal',
+															values = {
+																Custom = L.AurasCustomConditions,
+																Blizz = L.BlizzlikeAuraFiltering
+															},
+															order = 1
+														},
+														Auras_Buffs_CustomFilteringSettings = {
+															type = "group",
+															name = L.AurasCustomConditions,
+															disabled = function() 
+																return not (location.Auras_Buffs_Filtering_Mode == "Custom")
+															end,
+															inline = true,
+															order = 2,
+															args = {
+																Auras_Buffs_CustomFiltering_ConditionsMode = {
+																	type = "select",
+																	name = L.Auras_CustomFiltering_ConditionsMode,
+																	desc = L.Auras_CustomFiltering_ConditionsMode_Desc,
+																	width = 'normal',
+																	values = {
+																		All = L.Auras_CustomFiltering_Conditions_All,
+																		Any = L.Auras_CustomFiltering_Conditions_Any
+																	},
+																	order = 1
+																},
+
+																Fake = addVerticalSpacing(2),
+																Auras_Buffs_ShowMine = {
+																	type = "toggle",
+																	name = L.ShowMine,
+																	desc = L.ShowMine_Desc:format(L.Buffs),
+																	order = 4,
+																},
+																Auras_Buffs_SpellIDFiltering_Enabled = {
+																	type = "toggle",
+																	name = L.SpellID_Filtering,
+																	order = 8
+																},
+																Auras_Buffs_SpellIDFiltering__AddSpellID = {
+																	type = "input",
+																	name = L.AurasFiltering_AddSpellID,
+																	desc = L.AurasFiltering_AddSpellID_Desc,
+																	hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_SpellIDFiltering_Enabled) end,
+																	get = function() return "" end,
+																	set = function(option, value, state)
+																		local spellIDs = {strsplit(",", value)}
+																		for i = 1, #spellIDs do
+																			local spellID = tonumber(spellIDs[i])
+																			location.Auras_Buffs_SpellIDFiltering_Filterlist[spellID] = true
+																		end
+																	end,
+																	width = 'double',
+																	order = 9
+																},
+																Fake2 = addVerticalSpacing(10),
+																Auras_Buffs_SpellIDFiltering_Filterlist = {
+																	type = "multiselect",
+																	name = L.Filtering_Filterlist,
+																	desc = L.AurasFiltering_Filterlist_Desc:format(L.Buffs),
+																	hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_SpellIDFiltering_Enabled) end,
+																	get = function()
+																		return true --to make it checked
+																	end,
+																	set = function(option, value) 
+																		location.Auras_Buffs_SpellIDFiltering_Filterlist[value] = nil
+																	end,
+																	values = function()
+																		local valueTable = {}
+																		for spellID in pairs(location.Auras_Buffs_SpellIDFiltering_Filterlist) do
+																			valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
+																		end
+																		return valueTable
+																	end,
+																	order = 11
+																}
+															}
+														}
+													}
 												}
 											}
 										}
@@ -1497,7 +1424,7 @@ local function addEnemyAndAllySettings(self)
 									type = "group",
 									name = L.Debuffs,
 									disabled = function() return not location.Auras_Enabled end,
-									order = 4,
+									order = 3,
 									args = {
 										Auras_Debuffs_Enabled = {
 											type = "toggle",
@@ -1563,81 +1490,125 @@ local function addEnemyAndAllySettings(self)
 													width = 'normal',
 													order = 1
 												},
-												Fake = addVerticalSpacing(2),
-												Auras_Debuffs_OnlyShowMine = {
-													type = "toggle",
-													name = L.OnlyShowMine,
-													desc = L.OnlyShowMine_Desc:format(L.Debuffs),
+												Auras_Debuffs_FilterSettings = {
+													type = "group",
+													name = L.FilterSettings,
+													desc = L.AurasFilteringSettings_Desc,
 													disabled = function() return not location.Auras_Debuffs_Filtering_Enabled end,
-													order = 3,
-												},
-												Fake1 = addVerticalSpacing(4),
-												Auras_Debuffs_DebuffTypeFiltering_Enabled = {
-													type = "toggle",
-													name = L.DebuffType_Filtering,
-													desc = L.DebuffType_Filtering_Desc,
-													disabled = function() return not location.Auras_Debuffs_Filtering_Enabled end,
-													width = 'normal',
-													order = 5
-												},
-												Auras_Debuffs_DebuffTypeFiltering_Filterlist = {
-													type = "multiselect",
-													name = "",
-													desc = "",
-													hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_DebuffTypeFiltering_Enabled) end,
-													get = function(option, key)
-														return location.Auras_Debuffs_DebuffTypeFiltering_Filterlist[key]
-													end,
-													set = function(option, key, state) -- value = spellname
-														location.Auras_Debuffs_DebuffTypeFiltering_Filterlist[key] = state
-													end,
-													width = 'normal',
-													values = Data.DebuffTypes,
-													order = 6
-												},
-												Auras_Debuffs_SpellIDFiltering_Enabled = {
-													type = "toggle",
-													name = L.SpellID_Filtering,
-													disabled = function() return not (location.Auras_Debuffs_Filtering_Enabled) end,
-													order = 7
-												},
-												Auras_Debuffs_SpellIDFiltering__AddSpellID = {
-													type = "input",
-													name = L.AurasFiltering_AddSpellID,
-													desc = L.AurasFiltering_AddSpellID_Desc,
-													hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_SpellIDFiltering_Enabled) end,
-													get = function() return "" end,
-													set = function(option, value, state)
-														local spellIDs = {strsplit(",", value)}
-														for i = 1, #spellIDs do
-															local spellID = tonumber(spellIDs[i])
-															location.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID] = true
-														end
-													end,
-													width = 'double',
-													order = 8
-												},
-												Fake2 = addVerticalSpacing(9),
-												Auras_Debuffs_SpellIDFiltering_Filterlist = {
-													type = "multiselect",
-													name = L.Filtering_Filterlist,
-													desc = L.AurasFiltering_Filterlist_Desc:format(L.debuff),
-													hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_SpellIDFiltering_Enabled) end,
-													get = function()
-														return true --to make it checked
-													end,
-													set = function(option, value) 
-														location.Auras_Debuffs_SpellIDFiltering_Filterlist[value] = nil
-													end,
-													values = function()
-														local valueTable = {}
-														for spellID in pairs(location.Auras_Debuffs_SpellIDFiltering_Filterlist) do
-															valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
-														end
-														return valueTable
-													end,
-													order = 10
+													order = 2,
+													args = {
+														Auras_Debuffs_Filtering_Mode = {
+															type = "select",
+															name = L.Auras_Filtering_Mode,
+															desc = L.Auras_Filtering_Mode_Desc,
+															width = 'normal',
+															values = {
+																Custom = L.AurasCustomConditions,
+																Blizz = L.BlizzlikeAuraFiltering
+															},
+															order = 1
+														},
+														Auras_Debuffs_CustomFilteringSettings = {
+															type = "group",
+															name = L.AurasCustomConditions,
+															disabled = function() 
+																return not (location.Auras_Debuffs_Filtering_Mode == "Custom" )
+															end,
+															inline = true,
+															order = 2,
+															args = {
+																Auras_Debuffs_CustomFiltering_ConditionsMode = {
+																	type = "select",
+																	name = L.Auras_CustomFiltering_ConditionsMode,
+																	desc = L.Auras_CustomFiltering_ConditionsMode_Desc,
+																	width = 'normal',
+																	values = {
+																		All = L.Auras_CustomFiltering_Conditions_All,
+																		Any = L.Auras_CustomFiltering_Conditions_Any
+																	},
+																	order = 1
+																},
+
+																Fake = addVerticalSpacing(2),
+																Auras_Debuffs_ShowMine = {
+																	type = "toggle",
+																	name = L.ShowMine,
+																	desc = L.ShowMine_Desc:format(L.Debuffs),
+																	order = 4,
+																},
+																Fake1 = addVerticalSpacing(5),
+																Auras_Debuffs_DebuffTypeFiltering_Enabled = {
+																	type = "toggle",
+																	name = L.DebuffType_Filtering,
+																	desc = L.DebuffType_Filtering_Desc,
+																	width = 'normal',
+																	order = 6
+																},
+																Auras_Debuffs_DebuffTypeFiltering_Filterlist = {
+																	type = "multiselect",
+																	name = "",
+																	desc = "",
+																	hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_DebuffTypeFiltering_Enabled) end,
+																	get = function(option, key)
+																		return location.Auras_Debuffs_DebuffTypeFiltering_Filterlist[key]
+																	end,
+																	set = function(option, key, state) -- value = spellname
+																		location.Auras_Debuffs_DebuffTypeFiltering_Filterlist[key] = state
+																	end,
+																	width = 'normal',
+																	values = Data.DebuffTypes,
+																	order = 7
+																},
+																Auras_Debuffs_SpellIDFiltering_Enabled = {
+																	type = "toggle",
+																	name = L.SpellID_Filtering,
+																	order = 8
+																},
+																Auras_Debuffs_SpellIDFiltering__AddSpellID = {
+																	type = "input",
+																	name = L.AurasFiltering_AddSpellID,
+																	desc = L.AurasFiltering_AddSpellID_Desc,
+																	hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_SpellIDFiltering_Enabled) end,
+																	get = function() return "" end,
+																	set = function(option, value, state)
+																		local spellIDs = {strsplit(",", value)}
+																		for i = 1, #spellIDs do
+																			local spellID = tonumber(spellIDs[i])
+																			location.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID] = true
+																		end
+																	end,
+																	width = 'double',
+																	order = 9
+																},
+																Fake2 = addVerticalSpacing(10),
+																Auras_Debuffs_SpellIDFiltering_Filterlist = {
+																	type = "multiselect",
+																	name = L.Filtering_Filterlist,
+																	desc = L.AurasFiltering_Filterlist_Desc:format(L.debuff),
+																	hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_SpellIDFiltering_Enabled) end,
+																	get = function()
+																		return true --to make it checked
+																	end,
+																	set = function(option, value) 
+																		location.Auras_Debuffs_SpellIDFiltering_Filterlist[value] = nil
+																	end,
+																	values = function()
+																		local valueTable = {}
+																		for spellID in pairs(location.Auras_Debuffs_SpellIDFiltering_Filterlist) do
+																			valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
+																		end
+																		return valueTable
+																	end,
+																	order = 11
+																}
+															}
+		
+														}
+
+													}
 												}
+
+												
 											}
 										}
 									}
@@ -1947,34 +1918,31 @@ function BattleGroundEnemies:SetupOptions()
 						name = L.TargetCalling,
 						order = 6,
 						args = {
-							TargetCallingVolunteer = {
+							TargetCalling_SetMark = {
 								type = "toggle",
-								name = L.TargetCallingVolunteer,
-								desc = L.TargetCallingVolunteer_Desc,
-								order = 1
+								name = L.TargetCallingSetMark,
+								desc = L.TargetCallingSetMark_Desc,
+								order = 1,
+								width = "full",
 							},
-							TargetCallingShowIcon = {
+							TargetCalling_NotificationEnable = {
 								type = "toggle",
-								name = L.TargetCallingShowIcon,
-								desc = L.TargetCallingShowIcon_Desc,
-								order = 2
+								name = L.TargetCallingNotificationEnable,
+								desc = L.TargetCallingNotificationEnable_Desc,
+								order = 2,
+								width = "full",
 							},
-							TargetCalling_Highlight = {
-								type = "group",
-								name = "highlight",
+							TargetCalling_NotificationSound = {
+								type = "select",
+								name = SOUND,
+								values = AceGUIWidgetLSMlists.sound,
+								dialogControl = "LSM30_Sound",
+								disabled = function() return not location.RBG.TargetCalling_NotificationEnable end,
 								order = 3,
-								args = {
-									Icon = {
-										type = "select",
-										name = "Icon",
-										desc = "test",
-										order = 4,
-										values = raidIcons,
-										width = "full",
-										itemControl = "DDI-RaidIcon",
-									}
-								}
+								width = "full",
 							}
+								
+							
 							-- Sounds = {
 							-- 	type = "group",
 							-- 	name = SOUNDS,
