@@ -207,13 +207,6 @@ Data.Interruptdurations = {
 -- end
 
 
--- pvp talents that reduce lockouts by 70%
-Data.PvPTalentsReducingInterruptTime = { 
-	[GetSpellInfo(221404)] = 0.7, --  [Mage] Burning Determination, 70% reduction
-	[GetSpellInfo(221677)] = 0.5, --  [Shaman] Calming Waters, 50% reduction
-	[GetSpellInfo(221660)] = 0.7, --  [Priest] Holy Concentration, 70% reduction
-}
-
 Data.RandomDrCategory = {} --key = number, value = categorieName, used for Testmode
 Data.DrCategoryToSpell = {} --key = categorieName, value = table with key = number and value = spellID
 Data.SpellPriorities = {}

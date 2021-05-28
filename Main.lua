@@ -1664,9 +1664,6 @@ do
 			end
 
 			function playerButton.Spec_AuraDisplay:GotInterrupted(spellID, interruptDuration)
-				if self.HasAdditionalReducedInterruptTime then
-					interruptDuration = interruptDuration * (1 - self.HasAdditionalReducedInterruptTime)
-				end
 				self:NewAura(nil, spellID, nil, interruptDuration, GetTime() + interruptDuration, 4)
 			end		
 
@@ -1935,9 +1932,7 @@ do
 		
 		
 		playerButton:SetSpecAndRole()
-		
-		playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
-		
+				
 		-- level
 		if playerButton.PlayerLevel then playerButton:SetLevel(playerButton.PlayerLevel) end --for testmode
 
@@ -2316,9 +2311,6 @@ function CombatLogevents.SPELL_AURA_APPLIED(self, srcName, destName, spellID, sp
 	local playerButton = self.Enemies.Players[destName] or self.Allies.Players[destName]
 	if playerButton and playerButton.isShown then
 		playerButton:AuraApplied(spellID, spellName, srcName, auraType, amount)
-		if Data.PvPTalentsReducingInterruptTime[spellName] then
-			playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = Data.PvPTalentsReducingInterruptTime[spellName]
-		end
 	end
 end
 
@@ -2350,9 +2342,6 @@ function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellID, sp
 	local playerButton = self.Enemies.Players[destName] or self.Allies.Players[destName]
 	if playerButton and playerButton.isShown then
 		playerButton:AuraRemoved(true, spellID, srcName)
-		if Data.PvPTalentsReducingInterruptTime[spellName] then
-			playerButton.Spec_AuraDisplay.HasAdditionalReducedInterruptTime = false
-		end
 	end
 end
 
