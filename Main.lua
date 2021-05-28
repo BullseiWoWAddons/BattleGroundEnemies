@@ -10,6 +10,9 @@ LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusB
 local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies")
 BattleGroundEnemies.Counter = {}
 
+local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local isTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+
 
 
 -- for Clique Support
@@ -29,7 +32,6 @@ local random = math.random
 local tinsert = table.insert
 local tremove = table.remove
 
-local AuraUtil = AuraUtil
 local C_Covenants = C_Covenants
 local C_PvP = C_PvP
 local CompactUnitFrame_UpdateHealPrediction = CompactUnitFrame_UpdateHealPrediction
@@ -41,6 +43,7 @@ local GetBattlefieldArenaFaction = GetBattlefieldArenaFaction
 local GetBattlefieldScore = GetBattlefieldScore
 local GetBattlefieldTeamInfo = GetBattlefieldTeamInfo
 local GetBestMapForUnit = C_Map.GetBestMapForUnit
+local GetMaxPlayerLevel = GetMaxPlayerLevel
 local GetNumBattlefieldScores = GetNumBattlefieldScores
 local GetNumGroupMembers = GetNumGroupMembers
 local GetRaidRosterInfo = GetRaidRosterInfo
@@ -58,10 +61,15 @@ local PowerBarColor = PowerBarColor --table
 local RaidNotice_AddMessage = RaidNotice_AddMessage
 local RequestBattlefieldScoreData = RequestBattlefieldScoreData
 local SetBattlefieldScoreFaction = SetBattlefieldScoreFaction
-local SetMapToCurrentZone = SetMapToCurrentZone
+local SetRaidTargetIconTexture = SetRaidTargetIconTexture
+local SpellGetVisibilityInfo = SpellGetVisibilityInfo
+local SpellIsPriorityAura = SpellIsPriorityAura
+local SpellIsSelfBuff = SpellIsSelfBuff
+local UnitAffectingCombat = UnitAffectingCombat
 local UnitDebuff = UnitDebuff
 local UnitExists = UnitExists
 --local UnitGUID = UnitGUID
+local UnitFactionGroup = UnitFactionGroup
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 local UnitIsDead = UnitIsDead
@@ -246,16 +254,18 @@ BattleGroundEnemies:SetScript("OnShow", function(self)
 		self:RegisterEvent("PLAYER_UNGHOST")
 
 		self:RegisterEvent("UNIT_HEALTH")
+		if isTBCC then 
+			self:RegisterEvent("UNIT_HEALTH_FREQUENT")
+		else
+			self:RegisterEvent("UNIT_HEAL_PREDICTION")
+			self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
+			self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
+		end
 		self:RegisterEvent("UNIT_MAXHEALTH")
-		self:RegisterEvent("UNIT_HEAL_PREDICTION")
-		self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
-		self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
-
 		self:RegisterEvent("UNIT_POWER_FREQUENT") 
 
 		
 		RequestFrame:Show()
-		
 	else
 		RequestFrame:Hide()
 	end
@@ -279,11 +289,14 @@ BattleGroundEnemies:SetScript("OnHide", function(self)
 	self:UnregisterEvent("PLAYER_UNGHOST")
 	
 	self:UnregisterEvent("UNIT_HEALTH")
+	if isTBCC then 
+		self:UnregisterEvent("UNIT_HEALTH_FREQUENT")
+	else
+		self:UnregisterEvent("UNIT_HEAL_PREDICTION")
+		self:UnregisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
+		self:UnregisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
+	end
 	self:UnregisterEvent("UNIT_MAXHEALTH")
-	self:UnregisterEvent("UNIT_HEAL_PREDICTION")
-	self:UnregisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
-	self:UnregisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
-	
 	self:UnregisterEvent("UNIT_POWER_FREQUENT") 
 
 	self.BGSize = false
@@ -393,7 +406,7 @@ local function EnableShadowColor(fontString, enableShadow, shadowColor)
 	end
 end
 
-function BattleGroundEnemies.CropImage(texture, width, height)
+function BattleGroundEnemies.CropImage(texture, width, height, hasTexcoords)
 	local left, right, top, bottom = 0.075, 0.925, 0.075, 0.925
 	local ratio = height / width
 	if ratio > 1 then --crop the sides
@@ -601,12 +614,17 @@ do
 	end
 	
 	function buttonFunctions:SetSpecAndRole()
-		local specData = Data.Classes[self.PlayerClass][self.PlayerSpecName]
-		self.PlayerRoleNumber = specData.roleNumber
-		self.PlayerRoleID = specData.roleID
-		self.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(self.PlayerRoleID))
-		self.Spec.Icon:SetTexture(specData.specIcon)
-		self.PlayerSpecID = specData.specID
+		if isTBCC then
+			self.Spec.Icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[self.PlayerClass]))
+			self.Spec.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
+		else
+			local specData = Data.Classes[self.PlayerClass][self.PlayerSpecName]
+			self.PlayerRoleNumber = specData.roleNumber
+			self.PlayerRoleID = specData.roleID
+			self.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(self.PlayerRoleID))
+			self.Spec.Icon:SetTexture(specData.specIcon)
+			self.PlayerSpecID = specData.specID
+		end
 	end
 
 	function buttonFunctions:UpdateRaidTargetIcon()
@@ -668,7 +686,6 @@ do
 		self.Covenant:ApplySettings()
 		
 		-- level
-		
 		self.Level:ApplyFontStringSettings(self.config.LevelText_Fontsize, self.config.LevelText_Outline, self.config.LevelText_EnableTextshadow, self.config.LevelText_TextShadowcolor)
 		self.Level:SetTextColor(unpack(self.config.LevelText_Textcolor))
 		self:DisplayLevel()
@@ -1244,8 +1261,21 @@ do
 		end
 	end
 
+	-- CompactUnitFrame_Util_IsPriorityDebuff
+	local function IsPriorityDebuff(spellID)
+		if BattleGroundEnemies.PlayerDetails.PlayerClass == "PALADIN" then
+			local isForbearance = (spellID == 25771)
+			return isForbearance or SpellIsPriorityAura(spellID);
+		else
+			return SpellIsPriorityAura(spellID)
+		end
+	end
+	
+
 	-- CompactUnitFrame_Util_ShouldDisplayDebuff
 	local function ShouldDisplayDebuffBlizzLike(unitCaster, spellID, canApplyAura)
+
+		if IsPriorityDebuff(spellID) then return true end
 	
 		local hasCustom, alwaysShowMine, showForMySpec = SpellGetVisibilityInfo(spellID, UnitAffectingCombat("player") and "RAID_INCOMBAT" or "RAID_OUTOFCOMBAT");
 		if ( hasCustom ) then
@@ -1599,12 +1629,15 @@ do
 			playerButton.Spec:SetPoint('BOTTOMLEFT' , playerButton, 'BOTTOMLEFT', 0, 0)
 			
 			playerButton.Spec:SetScript("OnSizeChanged", function(self, width, height)
-				BattleGroundEnemies.CropImage(self.Icon, width, height)
+				if not isTBCC then
+					BattleGroundEnemies.CropImage(self.Icon, width, height)
+				end
 				BattleGroundEnemies.CropImage(playerButton.Spec_AuraDisplay.Icon, width, height)
 			end)
 
 			playerButton.Spec:HookScript("OnEnter", function(self)
-				BattleGroundEnemies:ShowTooltip(self, function() 
+				BattleGroundEnemies:ShowTooltip(self, function()
+					if isTBCC then return end 
 					GameTooltip:SetText(playerButton.PlayerSpecName)
 				end)
 			end)
@@ -1615,6 +1648,10 @@ do
 				end
 			end)
 			
+			playerButton.Spec.Background = playerButton.Spec:CreateTexture(nil, 'BACKGROUND')
+			playerButton.Spec.Background:SetAllPoints()
+			playerButton.Spec.Background:SetColorTexture(0,0,0,0.8)
+
 			playerButton.Spec.Icon = playerButton.Spec:CreateTexture(nil, 'BACKGROUND')
 			playerButton.Spec.Icon:SetAllPoints()
 					
@@ -1783,7 +1820,7 @@ do
 			playerButton.Role.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
 
 			playerButton.Role.ApplySettings = function(self)
-				if playerButton.bgSizeConfig.RoleIcon_Enabled then 
+				if not isTBCC and playerButton.bgSizeConfig.RoleIcon_Enabled then 
 					self:SetWidth(playerButton.bgSizeConfig.RoleIcon_Size)
 					self.Icon:SetSize(playerButton.bgSizeConfig.RoleIcon_Size, playerButton.bgSizeConfig.RoleIcon_Size)
 					self.Icon:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -playerButton.bgSizeConfig.RoleIcon_VerticalPosition)
@@ -1930,8 +1967,9 @@ do
 			playerButton[detail] = value
 		end
 		
-		
 		playerButton:SetSpecAndRole()
+		
+		
 				
 		-- level
 		if playerButton.PlayerLevel then playerButton:SetLevel(playerButton.PlayerLevel) end --for testmode
@@ -1945,9 +1983,21 @@ do
 		playerButton.totalAbsorbOverlay:Hide()
 		playerButton.totalAbsorb:Hide()
 		
-		color = PowerBarColor[Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName].Ressource]
-		playerButton.Power:SetStatusBarColor(color.r, color.g, color.b)
+		if isTBCC then
+			color = PowerBarColor[Data.Classes[playerButton.PlayerClass].Ressource]
+		else
+			color = PowerBarColor[Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName].Ressource]
+		end
 		
+		playerButton.Power:SetStatusBarColor(color.r, color.g, color.b)
+			
+		playerButton.UnitIDs = {TargetedByEnemy = {}}
+		if playerButton.PlayerIsEnemy then 
+			playerButton:UpdateRange(false)
+		else
+			playerButton:UpdateRange(true)
+		end
+
 		playerButton:SetName()
 		playerButton:SetBindings()
 		
@@ -2036,10 +2086,12 @@ do
 		
 		local playerButton = self.Players[name]
 		if playerButton then	--already existing
-			if playerButton.PlayerSpecName ~= specName then--its possible to change specName in battleground
-				playerButton.PlayerSpecName = specName
-				playerButton:SetSpecAndRole()
-				self.resort = true
+			if not isTBCC then 
+				if playerButton.PlayerSpecName ~= specName then--its possible to change specName in battleground
+					playerButton.PlayerSpecName = specName
+					playerButton:SetSpecAndRole()
+					self.resort = true
+				end
 			end
 			
 			playerButton.Status = 1 --1 means found, already existing
@@ -2077,18 +2129,7 @@ do
 		for name, playerDetails in pairs(self.NewPlayerDetails) do
 			local playerButton = self:SetupButtonForNewPlayer(playerDetails)
 			
-			-- set data for real players
 			playerButton.Status = 2
-			
-			playerButton.UnitIDs = {TargetedByEnemy = {}}
-			if playerButton.PlayerIsEnemy then 
-				playerButton:UpdateRange(false)
-			else
-				playerButton:UpdateRange(true)
-			end
-			
-		
-			-- end set data for real enemies
 		end
 
 		if self.resort then
@@ -2155,7 +2196,6 @@ do
 			-- user was looking at another tab than all players
 			SetBattlefieldScoreFaction() -- request a UPDATE_BATTLEFIELD_SCORE
 		end
-
 	end
 
 
@@ -2186,7 +2226,9 @@ do
 		AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 709, 532)
 		AceConfigDialog:AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
 
-		PVPMatchScoreboard:HookScript("OnHide", PVPMatchScoreboard_OnHide)
+		if PVPMatchScoreboard then -- for TBCC, isTBCC
+			PVPMatchScoreboard:HookScript("OnHide", PVPMatchScoreboard_OnHide)
+		end
 		
 		--DBObjectLib:ResetProfile(noChildren, noCallbacks)
 
@@ -2546,15 +2588,18 @@ function BattleGroundEnemies:RAID_TARGET_UPDATE()
 end
 
 
+
 function BattleGroundEnemies:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton.isShown then --unit is a shown player
 		playerButton:UpdateHealth(unitID)
 		playerButton.displayedUnit = unitID
 		playerButton.optionTable = {displayHealPrediction = true} 
-		CompactUnitFrame_UpdateHealPrediction(playerButton)
+		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
+
+BattleGroundEnemies.UNIT_HEALTH_FREQUENT = BattleGroundEnemies.UNIT_HEALTH --TBC compability, isTBCC
 
 function BattleGroundEnemies:UNIT_MAXHEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
@@ -2562,7 +2607,7 @@ function BattleGroundEnemies:UNIT_MAXHEALTH(unitID) --gets health of nameplates,
 		playerButton:UpdateHealth(unitID)
 		playerButton.displayedUnit = unitID
 		playerButton.optionTable = {displayHealPrediction = true} 
-		CompactUnitFrame_UpdateHealPrediction(playerButton)
+		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
 
@@ -2571,7 +2616,7 @@ function BattleGroundEnemies:UNIT_HEAL_PREDICTION(unitID) --gets health of namep
 	if playerButton and playerButton.isShown then --unit is a shown enemy
 		playerButton.displayedUnit = unitID
 		playerButton.optionTable = {displayHealPrediction = true} 
-		CompactUnitFrame_UpdateHealPrediction(playerButton)
+		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
 
@@ -2580,7 +2625,7 @@ function BattleGroundEnemies:UNIT_ABSORB_AMOUNT_CHANGED(unitID) --gets health of
 	if playerButton and playerButton.isShown then --unit is a shown enemy
 		playerButton.displayedUnit = unitID
 		playerButton.optionTable = {displayHealPrediction = true} 
-		CompactUnitFrame_UpdateHealPrediction(playerButton)
+		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
 
@@ -2589,7 +2634,7 @@ function BattleGroundEnemies:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitID) --gets heal
 	if playerButton and playerButton.isShown then --unit is a shown enemy
 		playerButton.displayedUnit = unitID
 		playerButton.optionTable = {displayHealPrediction = true} 
-		CompactUnitFrame_UpdateHealPrediction(playerButton)
+		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
 
@@ -2740,15 +2785,18 @@ do
 					return
 				end
 				
-				
-				local MyBgFaction = GetBattlefieldArenaFaction()  -- returns the playered faction 0 for horde, 1 for alliance
-				self:Debug("MyBgFaction:", MyBgFaction)
-				if MyBgFaction == 0 then -- i am Horde
-					self.EnemyFaction = 1 --Enemy is Alliance
-					self.AllyFaction = 0
+				if not isTBCC then
+					local MyBgFaction = GetBattlefieldArenaFaction()  -- returns the playered faction 0 for horde, 1 for alliance, doesnt exist in TBC
+					self:Debug("MyBgFaction:", MyBgFaction)
+					if MyBgFaction == 0 then -- i am Horde
+						self.EnemyFaction = 1 --Enemy is Alliance
+						self.AllyFaction = 0
+					else
+						self.EnemyFaction = 0 --Enemy is Horde
+						self.AllyFaction = 1
+					end
 				else
-					self.EnemyFaction = 0 --Enemy is Horde
-					self.AllyFaction = 1
+					self.EnemyFaction = 3 -- set a dummy value, we get data later from GetBattlefieldScore()
 				end
 				
 				if Data.BattlegroundspezificBuffs[CurrentMapID] then
@@ -2766,9 +2814,11 @@ do
 				
 				BattleGroundEnemies:ToggleArenaFrames()
 				
-				C_Timer.After(5, function() --Delay this check, since its happening sometimes that this data is not ready yet
-					self.IsRatedBG = IsRatedBattleground()
-				end)
+				if not isTBCC then
+					C_Timer.After(5, function() --Delay this check, since its happening sometimes that this data is not ready yet
+						self.IsRatedBG = IsRatedBattleground()
+					end)
+				end
 				
 				--self:Debug("IsRatedBG", IsRatedBG)
 			end
@@ -2801,12 +2851,19 @@ do
 			local foundAllies = 0
 			local foundEnemies = 0
 			for i = 1, numScores do
-				local name,_,_,_,_,faction,race, _, classTag,_,_,_,_,_,_,specName = GetBattlefieldScore(i)
+				local name, faction, race, classTag, specName
+				if isTBCC then
+					--name, killingBlows, honorableKills, deaths, honorGained, faction, rank, race, class, classToken, damageDone, healingDone = GetBattlefieldScore(index)
+					name, _, _, _, _, faction, _, race, _, classTag = GetBattlefieldScore(i)
+				else
+					name, _, _, _, _, faction, race, _, classTag, _, _, _, _, _, _, specName = GetBattlefieldScore(i)
+				end
+				
 				self:Debug("player", "name:", name, "faction:", faction, "race:", race, "classTag:", classTag, "specName:", specName)
 				--name = name-realm, faction = 0 or 1, race = localized race e.g. "Mensch",classTag = e.g. "PALADIN", spec = localized specname e.g. "holy"
 				--locale dependent are: race, specName
 				
-				if faction and name and race and classTag and specName and specName ~= "" then
+				if faction and name and race and classTag and (isTBCC or (specName and specName ~= ""))  then
 					--if name == PlayerDetails.PlayerName then EnemyFaction = EnemyFaction == 1 and 0 or 1 return end --support for the new brawl because GetBattlefieldArenaFaction() returns wrong data on that BG
 					 if name == self.PlayerDetails.PlayerName and faction == self.EnemyFaction then 
 						self.EnemyFaction = self.AllyFaction

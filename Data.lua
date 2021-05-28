@@ -9,6 +9,9 @@ local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
 local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 
+local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local isTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+
 Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/Romanization_of_Russian
 	["А"] = "a",
 	["а"] = "a",
@@ -447,6 +450,7 @@ Data.BattlegroundspezificDebuffs = { --key = mapID, value = table with key = num
 
 Data.TriggerSpellIDToTrinketnumber = {--key = which first row honor talent, value = fileID(used for SetTexture())
 	[195710] = 1, 	-- 1: Honorable Medallion, 3. min. CD, detected by Combatlog
+	[42292]  = 2,   -- 2: Medallion of the Alliance, Medallion of the Horde used in Classic, TBC, and probably some other Expansions  2 min. CD, detected by Combatlog
 	[208683] = 2, 	-- 2: Gladiator's Medallion, 2 min. CD, detected by Combatlog
 	[336126] = 2,   -- 2: Gladiator's Medallion, 2 min. CD, Shadowlands Update
 	[195901] = 3, 	-- 3: Adaptation, 1 min. CD, detected by Aura 195901
@@ -458,9 +462,10 @@ Data.TriggerSpellIDToTrinketnumber = {--key = which first row honor talent, valu
 }
 		
 	
-local TrinketTriggerSpellIDtoDisplayspellID = {
-	[195901] = 214027,	--Adapted, should display as Adaptation
-	[336139] = 214027 	--Adapted, should display as Adaptation, Shadowlands
+local TrinketTriggerSpellIDtoDisplayfileID = {
+	[42292]  = select(10, GetItemInfo(37865)),   	--PvP Trinket should show as Medaillon; used in TBC etc
+	[195901] = GetSpellTexture(214027),				--Adapted, should display as Adaptation
+	[336139] = GetSpellTexture(214027) 				--Adapted, should display as Adaptation, Shadowlands
 }
 
 
@@ -582,8 +587,8 @@ Data.RacialSpellIDtoCooldown = {
 
 Data.TriggerSpellIDToDisplayFileId = {}
 for triggerSpellID in pairs(Data.TriggerSpellIDToTrinketnumber) do
-	if TrinketTriggerSpellIDtoDisplayspellID[triggerSpellID] then
-		Data.TriggerSpellIDToDisplayFileId[triggerSpellID] = GetSpellTexture(TrinketTriggerSpellIDtoDisplayspellID[triggerSpellID])
+	if TrinketTriggerSpellIDtoDisplayfileID[triggerSpellID] then
+		Data.TriggerSpellIDToDisplayFileId[triggerSpellID] = TrinketTriggerSpellIDtoDisplayfileID[triggerSpellID]
 	else
 		Data.TriggerSpellIDToDisplayFileId[triggerSpellID] = GetSpellTexture(triggerSpellID)
 	end
@@ -594,11 +599,14 @@ Data.Racialnames = {}
 for spellID in pairs(Data.RacialSpellIDtoCooldown) do
 	Data.TriggerSpellIDToDisplayFileId[spellID] = GetSpellTexture(spellID)
 	local racialName = GetSpellInfo(spellID)
-	if not Data.RacialNameToSpellIDs[racialName] then
-		Data.RacialNameToSpellIDs[racialName] = {}
-		Data.Racialnames[GetSpellInfo(spellID)] = GetSpellInfo(spellID)
+	if racialName then
+		if not Data.RacialNameToSpellIDs[racialName] then
+			Data.RacialNameToSpellIDs[racialName] = {}
+			Data.Racialnames[GetSpellInfo(spellID)] = GetSpellInfo(spellID)
+		end
+		Data.RacialNameToSpellIDs[racialName][spellID] = true
 	end
-	Data.RacialNameToSpellIDs[racialName][spellID] = true
+	
 end
 
 Data.TrinketTriggerSpellIDtoCooldown = {
@@ -669,6 +677,7 @@ end
 
 Data.Classes = {}
 Data.RolesToSpec = {HEALER = {}, TANK = {}, DAMAGER = {}} --for Testmode only
+Data.ClassList = {} -- For TBCC Testmode only
 
 do
 	local roleNameToRoleNumber = {
@@ -726,21 +735,39 @@ do
 		[72] = "RAGE",			--Fury
 		[73] = "RAGE"			--Protection
 	}
+
+	local ClassRessources = { --used for TBCC
+		WARRIOR = "RAGE",
+		PALADIN = "MANA",
+		HUNTER = "MANA",
+		ROGUE = "ENERGY",
+		PRIEST = "MANA",
+		SHAMAN = "MANA", 
+		MAGE = "MANA", 
+		WARLOCK = "MANA",
+		DRUID = "MANA"
+	}
 	
 	
 	for classID = 1, MAX_CLASSES do --example classes[EnglishClass][SpecName].
 		local _, classTag = GetClassInfo(classID)
-		Data.Classes[classTag] = {}
-		for i = 1, GetNumSpecializationsForClassID(classID) do
-			
-			local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version
-			Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
-			table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = maleSpecName}) --for testmode
-			
-			--if specName == "Танцующий с ветром" then specName = "Танцующая с ветром" end -- fix for russian bug, fix added on 2017.08.27
-			local specID,specName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 3) -- female version	
-			if not Data.Classes[classTag][specName] then --there is a female version of that specName
-				Data.Classes[classTag][specName] = Data.Classes[classTag][maleSpecName]
+		if classTag then
+			Data.Classes[classTag] = {}
+			if isTBCC then 
+				Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}
+				table.insert(Data.ClassList, classTag)
+			else
+				for i = 1, GetNumSpecializationsForClassID(classID) do
+					local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version
+					Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
+					table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = maleSpecName}) --for testmode
+					
+					--if specName == "Танцующий с ветром" then specName = "Танцующая с ветром" end -- fix for russian bug, fix added on 2017.08.27
+					local specID,specName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 3) -- female version	
+					if not Data.Classes[classTag][specName] then --there is a female version of that specName
+						Data.Classes[classTag][specName] = Data.Classes[classTag][maleSpecName]
+					end
+				end
 			end
 		end
 	end
