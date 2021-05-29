@@ -1984,6 +1984,11 @@ do
 		playerButton.totalAbsorb:Hide()
 		
 		if isTBCC then
+			if not playerButton.PlayerClass then print("playerButton.PlayerClass:", playerButton.PlayerClass) end
+			if not Data.Classes[playerButton.PlayerClass] then print("Class not in Data.Classes:", playerButton.PlayerClass) end
+			if not Data.Classes[playerButton.PlayerClass].Ressource then print("Ressource doesnt exist", Data.Classes[playerButton.PlayerClass], playerButton.PlayerClass) end
+			if not PowerBarColor[Data.Classes[playerButton.PlayerClass].Ressource] then print("PowerBarColor doesnt exist:", Data.Classes[playerButton.PlayerClass].Ressource) end
+
 			color = PowerBarColor[Data.Classes[playerButton.PlayerClass].Ressource]
 		else
 			color = PowerBarColor[Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName].Ressource]
