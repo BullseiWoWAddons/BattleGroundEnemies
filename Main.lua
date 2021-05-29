@@ -2797,6 +2797,7 @@ do
 					end
 				else
 					self.EnemyFaction = 0 -- set a dummy value, we get data later from GetBattlefieldScore()
+					self.AllyFaction = 1 -- set a dummy value, we get data later from GetBattlefieldScore()
 				end
 				
 				if Data.BattlegroundspezificBuffs[CurrentMapID] then
