@@ -749,7 +749,7 @@ do
 	}
 	
 	
-	for classID = 1, MAX_CLASSES do --example classes[EnglishClass][SpecName].
+	for classID = 1, GetNumClasses() do --example classes[EnglishClass][SpecName].
 		local _, classTag = GetClassInfo(classID)
 		if classTag then
 			Data.Classes[classTag] = {}

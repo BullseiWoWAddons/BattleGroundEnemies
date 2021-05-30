@@ -157,6 +157,7 @@ globals = {
 	"GetItemInfo",
 	"GetLocale",
 	"GetNumAddOns",
+	"GetNumClasses",
 	"GetNumGroupMembers",
 	"GetNumSpecializationsForClassID",
 	"GetNumSpellTabs",
