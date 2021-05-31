@@ -82,6 +82,7 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 		
 	ObjectiveAndRespawn.PlayerDied = function(self)	
 		--dead
+		playerButton.healthBar:SetValue(0)
 		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.TestmodeActive and BattleGroundEnemies.BGSize == 15)) and BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_RespawnEnabled  then
 		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
