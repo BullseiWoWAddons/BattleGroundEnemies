@@ -7,7 +7,7 @@ local CTimerNewTicker = C_Timer.NewTicker
 local SendAddonMessage = C_ChatInfo.SendAddonMessage
 BattleGroundEnemies.Objects.DR = {}
 
-local BGE_VERSION = "9.0.5.1"
+local BGE_VERSION = "9.0.5.2"
 local AddonPrefix = "BGE"
 local versionQueryString, versionResponseString = "Q^%s", "V^%s"
 local targetCallVolunteerQueryString = "TVQ^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
