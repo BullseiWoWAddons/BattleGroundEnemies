@@ -1443,7 +1443,7 @@ do
 	
 	function MainFrameFunctions:ApplyBGSizeSettings()
 		if InCombatLockdown() then 
-			return C_Timer.After(1, function() MainFrameFunctions:ApplyBGSizeSettings() end)
+			return C_Timer.After(1, function() self:ApplyBGSizeSettings() end)
 		end
 		self.bgSizeConfig = self.config[tostring(BattleGroundEnemies.BGSize)]
 		local conf = self.bgSizeConfig
