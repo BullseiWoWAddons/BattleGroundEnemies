@@ -569,10 +569,18 @@ local function addEnemyAndAllySettings(self)
 				--childGroups = "tab",
 				order = 9,
 				args = {
+					UseClique = {
+						type = "toggle",
+						name = L.EnableClique,
+						desc = L.EnableClique_Desc,
+						order = 1,
+						hidden = playerType == "Enemies"
+					},
 					LeftButton = {
 						type = "group",
 						name = KEY_BUTTON1,
-						order = 1,
+						order = 2,
+						disabled = function() return location.UseClique end,
 						args = {
 							LeftButtonType = {
 								type = "select",
@@ -595,7 +603,8 @@ local function addEnemyAndAllySettings(self)
 					RightButton = {
 						type = "group",
 						name = KEY_BUTTON2,
-						order = 2,
+						order = 3,
+						disabled = function() return location.UseClique end,
 						args = {
 							RightButtonType = {
 								type = "select",
@@ -618,7 +627,8 @@ local function addEnemyAndAllySettings(self)
 					MiddleButton = {
 						type = "group",
 						name = KEY_BUTTON3,
-						order = 3,
+						order = 4,
+						disabled = function() return location.UseClique end,
 						args = {
 
 							MiddleButtonType = {
@@ -826,6 +836,13 @@ local function addEnemyAndAllySettings(self)
 											hasAlpha = true,
 											width = "normal",
 											order = 3
+										},
+										Fake = addVerticalSpacing(4),
+										HealthBar_HealthPrediction_Enabled = {
+											type = "toggle",
+											name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
+											width = "normal",
+											order = 5,
 										}
 									}
 								},

@@ -114,6 +114,7 @@ globals = {
 	"CheckInteractDistance",
 	"CinematicFrame_CancelCinematic",
 	"C_Map",
+	"COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION",
 	"CompactUnitFrame_UpdateHealPrediction",
 	"CombatLogGetCurrentEventInfo",
 	"ClickCastFrames",

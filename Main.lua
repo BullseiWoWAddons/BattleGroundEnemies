@@ -777,25 +777,40 @@ do
 		}
 		
 		function buttonFunctions:SetBindings()
-			
-			for i = 1, 3 do
-				local bindingType = self.config[mouseButtonNumberToBindingType[i]]
-			
-				if bindingType == "Target" then
-					self:SetAttribute('macrotext'..i,
-						'/cleartarget\n'..
-						'/targetexact '..self.PlayerName
-					)
-				elseif bindingType == "Focus" then
-					self:SetAttribute('macrotext'..i,
-						'/targetexact '..self.PlayerName..'\n'..
-						'/focus\n'..
-						'/targetlasttarget'
-					)
+
+			if not self.PlayerIsEnemy and BattleGroundEnemies.db.profile[self.PlayerType].UseClique then
+				BattleGroundEnemies:Debug("Clique used")
+				ClickCastFrames[self] = true
+			else
+				if ClickCastFrames[self] then
+					ClickCastFrames[self] = nil
+				end
 				
-				else -- Custom
-					local macrotext = BattleGroundEnemies.db.profile[self.PlayerType][mouseButtonNumberToBindingMacro[i]]:gsub("%%n", self.PlayerName)
-					self:SetAttribute('macrotext'..i, macrotext)
+				for i = 1, 3 do
+
+					self:RegisterForClicks('AnyUp')
+					self:SetAttribute('type1','macro')-- type1 = LEFT-Click
+					self:SetAttribute('type2','macro')-- type2 = Right-Click
+					self:SetAttribute('type3','macro')-- type3 = Middle-Click
+
+					local bindingType = self.config[mouseButtonNumberToBindingType[i]]
+				
+					if bindingType == "Target" then
+						self:SetAttribute('macrotext'..i,
+							'/cleartarget\n'..
+							'/targetexact '..self.PlayerName
+						)
+					elseif bindingType == "Focus" then
+						self:SetAttribute('macrotext'..i,
+							'/targetexact '..self.PlayerName..'\n'..
+							'/focus\n'..
+							'/targetlasttarget'
+						)
+					
+					else -- Custom
+						local macrotext = BattleGroundEnemies.db.profile[self.PlayerType][mouseButtonNumberToBindingMacro[i]]:gsub("%%n", self.PlayerName)
+						self:SetAttribute('macrotext'..i, macrotext)
+					end
 				end
 			end
 		end
@@ -1427,6 +1442,9 @@ do
 	end
 	
 	function MainFrameFunctions:ApplyBGSizeSettings()
+		if InCombatLockdown() then 
+			return C_Timer.After(1, function() MainFrameFunctions:ApplyBGSizeSettings() end)
+		end
 		self.bgSizeConfig = self.config[tostring(BattleGroundEnemies.BGSize)]
 		local conf = self.bgSizeConfig
 
@@ -1550,11 +1568,13 @@ do
 			-- setmetatable(playerButton, self)
 			-- self.__index = self
 
-			-- for Clique addon support
-			ClickCastFrames[playerButton] = true
+			
+			
 
 			playerButton.PlayerType = self.PlayerType
 			playerButton.PlayerIsEnemy = playerButton.PlayerType == "Enemies" and true or false
+
+		
 			
 			playerButton.config = self.config
 			playerButton.bgSizeConfig = self.bgSizeConfig
@@ -1595,18 +1615,12 @@ do
 			end)
 					
 			-- events/scripts
-			playerButton:RegisterForClicks('AnyUp')
 			playerButton:RegisterForDrag('LeftButton')
-			playerButton:SetAttribute('type1','macro')-- type1 = LEFT-Click
-			playerButton:SetAttribute('type2','macro')-- type2 = Right-Click
-			playerButton:SetAttribute('type3','macro')-- type3 = Middle-Click
 
 			playerButton:SetScript('OnDragStart', playerButton.OnDragStart)
 			playerButton:SetScript('OnDragStop', playerButton.OnDragStop)
-			playerButton:SetScript('OnEnter', playerButton.OnEnter)
-			playerButton:SetScript('OnLeave', playerButton.OnLeave)
-			
-			
+
+
 			playerButton.RangeIndicator_Frame = CreateFrame("Frame", nil, playerButton)
 			--playerButton.RangeIndicator_Frame:SetFrameLevel(playerButton:GetFrameLevel())
 			-- playerButton.RangeIndicator = playerButton.RangeIndicator_Frame
@@ -1652,7 +1666,7 @@ do
 			playerButton.Spec.Background:SetAllPoints()
 			playerButton.Spec.Background:SetColorTexture(0,0,0,0.8)
 
-			playerButton.Spec.Icon = playerButton.Spec:CreateTexture(nil, 'BACKGROUND')
+			playerButton.Spec.Icon = playerButton.Spec:CreateTexture(nil, 'OVERLAY')
 			playerButton.Spec.Icon:SetAllPoints()
 					
 			
@@ -1855,6 +1869,7 @@ do
 			playerButton.Covenant.Icon = playerButton.Covenant:CreateTexture(nil, 'OVERLAY')
 
 			playerButton.Covenant.DisplayCovenant = function(self, covenantID)
+				if not playerButton.bgSizeConfig.CovenantIcon_Enabled then return end
 				self.covenantID = covenantID
 				self:SetWidth(playerButton.bgSizeConfig.CovenantIcon_Size)
 				self.Icon:SetSize(playerButton.bgSizeConfig.CovenantIcon_Size, playerButton.bgSizeConfig.CovenantIcon_Size)
@@ -2594,7 +2609,7 @@ function BattleGroundEnemies:UNIT_HEALTH(unitID) --gets health of nameplates, pl
 	if playerButton and playerButton.isShown then --unit is a shown player
 		playerButton:UpdateHealth(unitID)
 		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = true} 
+		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
 		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
@@ -2606,7 +2621,7 @@ function BattleGroundEnemies:UNIT_MAXHEALTH(unitID) --gets health of nameplates,
 	if playerButton and playerButton.isShown then --unit is a shown enemy
 		playerButton:UpdateHealth(unitID)
 		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = true} 
+		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
 		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
@@ -2615,7 +2630,7 @@ function BattleGroundEnemies:UNIT_HEAL_PREDICTION(unitID) --gets health of namep
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton.isShown then --unit is a shown enemy
 		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = true} 
+		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
 		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
@@ -2624,7 +2639,7 @@ function BattleGroundEnemies:UNIT_ABSORB_AMOUNT_CHANGED(unitID) --gets health of
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton.isShown then --unit is a shown enemy
 		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = true} 
+		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
 		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
@@ -2633,7 +2648,7 @@ function BattleGroundEnemies:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitID) --gets heal
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton.isShown then --unit is a shown enemy
 		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = true} 
+		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled} 
 		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 	end
 end
