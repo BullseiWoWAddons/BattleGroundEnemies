@@ -967,7 +967,7 @@ do
 			newAlpha = 1
 		end
 
-		if newAlpha ~= oldAlpha then
+		if newAlpha ~= self.oldAlpha then
 			if self.config.RangeIndicator_Everything then
 				self:SetAlpha(newAlpha)
 			else
@@ -979,9 +979,8 @@ do
 					end
 				end
 			end
+			self.oldAlpha = newAlpha
 		end
-		
-		self.oldAlpha = newAlpha
 	end
 
 	function buttonFunctions:GetUnitID()
