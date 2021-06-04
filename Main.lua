@@ -661,7 +661,7 @@ do
 		self:SetWidth(conf.BarWidth)
 		self:SetHeight(conf.BarHeight)
 		
-		self:SetRangeIncicatorFrame()
+		self:UpdateAllRangeIndicatorFrames()
 		
 		--spec
 		self.Spec:ApplySettings()
@@ -829,19 +829,14 @@ do
 		self.healthBar:SetValue(UnitHealth(unitID))
 	end
 
-	function buttonFunctions:SetRangeIncicatorFrame()
-		if self.config.RangeIndicator_Everything then
-			self.RangeIndicator = self
-		else
-			self.RangeIndicator = self.RangeIndicator_Frame
-			for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
-				if enableRange then
-					self[frameName]:SetParent(self.RangeIndicator)
-				else
-					self[frameName]:SetParent(self)
-				end
+	function buttonFunctions:UpdateAllRangeIndicatorFrames()
+		for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
+			if enableRange then
+				self[frameName]:SetAlpha(self.oldAlpha or 1)
+			else
 				self[frameName]:SetAlpha(1)
 			end
+			
 		end
 		self:SetAlpha(1)
 	end
@@ -952,15 +947,41 @@ do
 		end
 		self.Power:SetValue(UnitPower(unitID)/UnitPowerMax(unitID))
 	end
+
+	function buttonFunctions:SetAlphaOfRangeFrames(alpha)
+		
+	end
 	
 	function buttonFunctions:UpdateRange(inRange)
 		BattleGroundEnemies.Counter.UpdateRange = (BattleGroundEnemies.Counter.UpdateRange or 0) + 1
 		--BattleGroundEnemies:Information("UpdateRange", inRange, self.PlayerName, self.config.RangeIndicator_Enabled, self.config.RangeIndicator_Alpha)
-		if self.config.RangeIndicator_Enabled and not inRange then
-			self.RangeIndicator:SetAlpha(self.config.RangeIndicator_Alpha)
+
+		local newAlpha
+		if self.config.RangeIndicator_Enabled then
+			if inRange then
+				newAlpha = 1
+			else
+				newAlpha = self.config.RangeIndicator_Alpha
+			end
 		else
-			self.RangeIndicator:SetAlpha(1)
+			newAlpha = 1
 		end
+
+		if newAlpha ~= oldAlpha then
+			if self.config.RangeIndicator_Everything then
+				self:SetAlpha(newAlpha)
+			else
+				for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
+					if enableRange then
+						self[frameName]:SetAlpha(newAlpha)
+					else
+						self[frameName]:SetAlpha(1)
+					end
+				end
+			end
+		end
+		
+		self.oldAlpha = newAlpha
 	end
 
 	function buttonFunctions:GetUnitID()
@@ -969,7 +990,7 @@ do
 
 	
 	function buttonFunctions:UpdateAll(unitID)
-		self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID))
+		self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID), true)
 		self:UpdateHealth(unitID)
 		self:UpdatePower(unitID)
 	end
@@ -1466,6 +1487,7 @@ do
 	
 		for name, playerButton in pairs(self.Players) do
 			playerButton:ApplyButtonSettings()
+
 			playerButton:SetName()
 			playerButton:SetBindings()
 		end
@@ -1542,7 +1564,6 @@ do
 			
 			tremove(self.InactivePlayerButtons, #self.InactivePlayerButtons)
 			--Cleanup previous shown stuff of another player
-			playerButton.RangeIndicator:SetAlpha(self.config.RangeIndicator_Alpha)
 			playerButton.Trinket:Reset()
 			playerButton.Racial:Reset()
 			playerButton.MyTarget:Hide()	--reset possible shown target indicator frame

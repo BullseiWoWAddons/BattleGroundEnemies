@@ -88,6 +88,17 @@ local function getOption(location, option)
 end
 
 local timer = nil
+local function ApplyAllSettings()
+	if timer then timer:Cancel() end -- use a timer to apply changes after 0.2 second, this prevents the UI from getting laggy when the user uses a slider option
+	timer = CTimerNewTicker(0.2, function() 
+		BattleGroundEnemies.Enemies:ApplyAllSettings()
+		BattleGroundEnemies.Allies:ApplyAllSettings()
+		timer = nil
+	end, 1)
+end
+
+
+
 local function setOption(location, option, ...)
 
 
@@ -101,13 +112,8 @@ local function setOption(location, option, ...)
 	end
 
 	location[option[#option]] = value
-
-	if timer then timer:Cancel() end -- use a timer to apply changes after 0.2 second, this prevents the UI from getting laggy when the user uses a slider option
-	timer = CTimerNewTicker(0.2, function() 
-		BattleGroundEnemies.Enemies:ApplyAllSettings()
-		BattleGroundEnemies.Allies:ApplyAllSettings()
-		timer = nil
-	end, 1)
+	ApplyAllSettings()
+	
 
 	--BattleGroundEnemies.db.profile[key] = value
 end
@@ -503,6 +509,7 @@ local function addEnemyAndAllySettings(self)
 						end,
 						set = function(option, key, state) 
 							location.RangeIndicator_Frames[key] = state
+							ApplyAllSettings()
 						end,
 						width = "double",
 						values = Data.RangeFrames,

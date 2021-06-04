@@ -283,7 +283,7 @@ do
 					end
 					if number == 6 then --toggle range
 						if playerType.config.RangeIndicator_Enabled then
-							playerButton:UpdateRange((playerButton.RangeIndicator:GetAlpha() ~= 1) and true or false)
+							playerButton:UpdateRange((playerButton.oldAlpha ~= 1) and true or false)
 						end
 					end
 				end
