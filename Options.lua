@@ -8,17 +8,6 @@ local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 
-local raidIcons = {
-	RAID_TARGET_1,
-	RAID_TARGET_2,
-	RAID_TARGET_3,
-	RAID_TARGET_4,
-	RAID_TARGET_5,
-	RAID_TARGET_6,
-	RAID_TARGET_7,
-	RAID_TARGET_8,
-}
-
 local CTimerNewTicker = C_Timer.NewTicker
 
 
@@ -1827,7 +1816,6 @@ function BattleGroundEnemies:SetupOptions()
 										type = "toggle",
 										name = ENABLE,
 										desc = L.EnemiesTargetingMe_Enabled_Desc,
-										desc = "test",
 										order = 1
 									},
 									EnemiesTargetingMe_Amount = {
@@ -1865,7 +1853,6 @@ function BattleGroundEnemies:SetupOptions()
 										type = "toggle",
 										name = ENABLE,
 										desc = L.EnemiesTargetingAllies_Enabled_Desc,
-										desc = "test",
 										order = 1
 									},
 									EnemiesTargetingAllies_Amount = {
