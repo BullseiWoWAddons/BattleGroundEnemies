@@ -635,8 +635,8 @@ do
 				SetRaidTargetIconTexture(self.RaidTargetIcon.Icon, index)
 				self.RaidTargetIcon:Show()
 				if index == 8 and (not self.RaidTargetIcon.HasIcon or self.RaidTargetIcon.HasIcon ~= 8) then
-					if BattleGroundEnemies.IsRatedBG and self.config.RBG.TargetCalling_NotificationEnable then
-						local path = LSM:Fetch("sound", self.config.RBG.TargetCalling_NotificationSound, true)
+					if BattleGroundEnemies.IsRatedBG and BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationEnable then
+						local path = LSM:Fetch("sound", BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationSound, true)
 						if path then
 							PlaySoundFile(path, "Master")
 						end
@@ -661,7 +661,7 @@ do
 		self:SetWidth(conf.BarWidth)
 		self:SetHeight(conf.BarHeight)
 		
-		self:UpdateAllRangeIndicatorFrames()
+		self:ApplyRangeIndicatorSettings()
 		
 		--spec
 		self.Spec:ApplySettings()
@@ -829,16 +829,29 @@ do
 		self.healthBar:SetValue(UnitHealth(unitID))
 	end
 
-	function buttonFunctions:UpdateAllRangeIndicatorFrames()
-		for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
-			if enableRange then
-				self[frameName]:SetAlpha(self.oldAlpha or 1)
+	function buttonFunctions:ApplyRangeIndicatorSettings()
+		if self.config.RangeIndicator_Enabled then
+			if self.config.RangeIndicator_Everything then
+				for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
+					self[frameName]:SetAlpha(1)
+				end
+				self:SetAlpha(self.wasInRange and 1 or self.config.RangeIndicator_Alpha)
 			else
+				for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
+					if enableRange then
+						self[frameName]:SetAlpha(self.wasInRange and 1 or self.config.RangeIndicator_Alpha)
+					else
+						self[frameName]:SetAlpha(1)
+					end
+				end
+				self:SetAlpha(1)
+			end
+		else
+			for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
 				self[frameName]:SetAlpha(1)
 			end
-			
+			self:SetAlpha(1)
 		end
-		self:SetAlpha(1)
 	end
 
 	function buttonFunctions:ArenaOpponentShown(unitID)
@@ -895,22 +908,25 @@ do
 		end
 
 		local enemyTargets = i - 1
-		if isAlly then
-			if BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Enabled then
-				if enemyTargets >= BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Amount  then
-					local path = LSM:Fetch("sound", BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Sound, true)
-					if path then
-						PlaySoundFile(path, "Master")
+
+		if BattleGroundEnemies.IsRatedBG then
+			if isAlly then
+				if BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Enabled then
+					if enemyTargets >= BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Amount  then
+						local path = LSM:Fetch("sound", BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Sound, true)
+						if path then
+							PlaySoundFile(path, "Master")
+						end
 					end
-				end
-			end			
-		end
-		if isPlayer then
-			if BattleGroundEnemies.db.profile.RBG.EnemiesTargetingMe_Enabled then
-				if enemyTargets >= BattleGroundEnemies.db.profile.RBG.EnemiesTargetingMe_Amount  then
-					local path = LSM:Fetch("sound", BattleGroundEnemies.db.profile.RBG.EnemiesTargetingMe_Sound, true)
-					if path then
-						PlaySoundFile(path, "Master")
+				end			
+			end
+			if isPlayer then
+				if BattleGroundEnemies.db.profile.RBG.EnemiesTargetingMe_Enabled then
+					if enemyTargets >= BattleGroundEnemies.db.profile.RBG.EnemiesTargetingMe_Amount  then
+						local path = LSM:Fetch("sound", BattleGroundEnemies.db.profile.RBG.EnemiesTargetingMe_Sound, true)
+						if path then
+							PlaySoundFile(path, "Master")
+						end
 					end
 				end
 			end
@@ -956,30 +972,21 @@ do
 		BattleGroundEnemies.Counter.UpdateRange = (BattleGroundEnemies.Counter.UpdateRange or 0) + 1
 		--BattleGroundEnemies:Information("UpdateRange", inRange, self.PlayerName, self.config.RangeIndicator_Enabled, self.config.RangeIndicator_Alpha)
 
-		local newAlpha
-		if self.config.RangeIndicator_Enabled then
-			if inRange then
-				newAlpha = 1
-			else
-				newAlpha = self.config.RangeIndicator_Alpha
-			end
-		else
-			newAlpha = 1
-		end
+		if not self.config.RangeIndicator_Enabled then return end
 
-		if newAlpha ~= self.oldAlpha then
+		if inRange ~= self.wasInRange then
 			if self.config.RangeIndicator_Everything then
-				self:SetAlpha(newAlpha)
+				self:SetAlpha(inRange and 1 or self.config.RangeIndicator_Alpha)
 			else
 				for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
 					if enableRange then
-						self[frameName]:SetAlpha(newAlpha)
+						self[frameName]:SetAlpha(inRange and 1 or self.config.RangeIndicator_Alpha)
 					else
 						self[frameName]:SetAlpha(1)
 					end
 				end
 			end
-			self.oldAlpha = newAlpha
+			self.wasInRange = inRange
 		end
 	end
 
@@ -1230,7 +1237,7 @@ do
 				end
 		
 
-				--if not (aurasEnabled or config.Spec_AuraDisplay_Enabled) then return end
+				if not (aurasEnabled or config.Spec_AuraDisplay_Enabled) then return end
 
 
 				for i = 1, 40 do
@@ -2525,7 +2532,7 @@ do
 			oldTarget = playerButton
  
 
-			if self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then  -- i am the target caller
+			if BattleGroundEnemies.IsRatedBG and self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then  -- i am the target caller
 				SetRaidTarget("target", 8)
 			end
 		else
