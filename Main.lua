@@ -996,7 +996,7 @@ do
 
 	
 	function buttonFunctions:UpdateAll(unitID)
-		self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID), true)
+		self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID))
 		self:UpdateHealth(unitID)
 		self:UpdatePower(unitID)
 	end

@@ -407,6 +407,10 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 		[0] = 156621, 					-- Alliance Flag
 		[1] = 156618 					-- Horde Flag	
 	}, 
+	[1460] = {						-- Warsong Gulch, used in Classic, TBCC
+		[0] = 301091, 					-- Alliance Flag
+		[1] = 301089 					-- Horde Flag	
+	}, 
 	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
 		[1] = 34976						-- Netherstorm Flag
