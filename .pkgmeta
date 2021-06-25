@@ -14,4 +14,4 @@ externals:
     Libs/UTF8: https://repos.wowace.com/wow/utf8/trunk
     Libs/DRList-1.0: https://github.com/wardz/DRList-1.0
     Libs/LibDDI-1.0: https://repos.wowace.com/wow/libddi-1-0/trunk
-    Libs/LibChangelog-1.0: https://github.com/BullseiWoWAddons/LibChangelog-1.0
+    Libs/LibChangelog: https://github.com/BullseiWoWAddons/LibChangelog

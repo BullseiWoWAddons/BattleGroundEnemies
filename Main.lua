@@ -4,7 +4,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local DRList = LibStub("DRList-1.0")
 local LibRaces = LibStub("LibRaces-1.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-local LibChangelog = LibStub("LibChangelog-1.0")
+local LibChangelog = LibStub("LibChangelog")
 
 
 
