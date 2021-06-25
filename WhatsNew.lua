@@ -70,6 +70,6 @@ local changelog = {
     }
 }
 
-LibChangelog:Register(addonName, changelog, "9.0.11", onlyShowWhenNewVersion)
+LibChangelog:Register(addonName, changelog, "9.0.11", true)
 
 LibChangelog:ShowChangelog(addonName)
