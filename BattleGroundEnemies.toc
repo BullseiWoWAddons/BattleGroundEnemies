@@ -31,7 +31,7 @@ Defaults.lua
 Main.lua
 Messaging.lua
 TargetCall.lua
-WhatsNew.lua
+Changelog.lua
 
 
 Objects\Auracontainer.lua
