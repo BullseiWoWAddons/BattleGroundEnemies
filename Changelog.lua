@@ -1,9 +1,6 @@
 local addonName, Data = ...
-local L = Data.L
 
-local LibChangelog = LibStub("LibChangelog-1.0")
-
-local changelog = {
+Data.changelog = {
     {
         Version = "9.0.12",
         General = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
@@ -69,7 +66,3 @@ local changelog = {
         }
     }
 }
-
-LibChangelog:Register(addonName, changelog, "9.0.11", true)
-
-LibChangelog:ShowChangelog(addonName)
