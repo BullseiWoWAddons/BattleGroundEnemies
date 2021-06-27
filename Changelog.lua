@@ -2,66 +2,18 @@ local addonName, Data = ...
 
 Data.changelog = {
     {
-        Version = "9.0.12",
-        General = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
+        Version = "9.0.5.6",
         Sections = {
             NewFeatures = {
-                "NewFeature 1",
-                "NewFeature 2"
-            },
-            Bugfixes = {
-                "Bugfix 1", 
-                "Bugfix 2"
+                "Added a new window that shows changes made in new releases"
             }
         }
     },
     {
-        Version = "9.0.11",
-        General = "General text",
+        Version = "9.0.5.5",
         Sections = {
             NewFeatures = {
-                "NewFeature 1",
-                "NewFeature 2"
-            },
-            Changes = {
-                "change 1", 
-                "Change 2"
-            },
-            Bugfixes = {
-                "Bugfix 1", 
-                "Bugfix 2"
-            }
-        }
-    },
-    {
-        Version = "9.0.10",
-        General = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
-        Sections = {
-            NewFeatures = {
-                "NewFeature 1",
-                "NewFeature 2"
-            },
-            Changes = {
-                "change 1", 
-                "Change 2"
-            },
-            Bugfixes = {
-                "Bugfix 1", 
-                "Bugfix 2"
-            }
-        }
-    },
-    {
-        Version = "9.0.9",
-        General = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
-        Sections = {
-            NewFeatures = {
-                "NewFeature 1",
-                "NewFeature 2"
-            },
-            Bugfixes = {
-                "Bugfix 1", 
-                "Bugfix 2"
+                "Added first version of target calling, feedback appreciated. Check out the Rated Battleground section in the options. Read about how it works in the FAQ at https://github.com/BullseiWoWAddons/BattleGroundEnemies/wiki/FAQ"
             }
         }
     }
