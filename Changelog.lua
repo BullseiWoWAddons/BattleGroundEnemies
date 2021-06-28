@@ -6,7 +6,7 @@ Data.changelog = {
         Sections = {
             {
                 Header = "New Features",
-                Entrys = {
+                Entries = {
                     "Added a new window that shows changes made in new releases"
                 }
             }
@@ -17,7 +17,7 @@ Data.changelog = {
         Sections = {
             {
                 Header = "New Features",
-                Entrys = {
+                Entries = {
                     "Added first version of target calling, feedback appreciated. Check out the Rated Battleground section in the options. Read about how it works in the FAQ at https://github.com/BullseiWoWAddons/BattleGroundEnemies/wiki/FAQ"
                 }
             }
