@@ -15,3 +15,4 @@ externals:
     Libs/DRList-1.0: https://github.com/wardz/DRList-1.0
     Libs/LibDDI-1.0: https://repos.wowace.com/wow/libddi-1-0/trunk
     Libs/LibChangelog: https://github.com/BullseiWoWAddons/LibChangelog
+    Libs/LibGroupInSpecT-1.1: https://repos.wowace.com/wow/libgroupinspect/trunk

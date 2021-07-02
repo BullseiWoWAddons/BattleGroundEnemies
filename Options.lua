@@ -58,6 +58,8 @@ local function addStaticPopupBGTypeConfigImport(playerType, oppositePlayerType, 
 	  whileDead = 1,
 	}
 end
+addStaticPopupBGTypeConfigImport("Enemies", "Allies", "5")
+addStaticPopupBGTypeConfigImport("Allies", "Enemies", "5")
 addStaticPopupBGTypeConfigImport("Enemies", "Allies", "15")
 addStaticPopupBGTypeConfigImport("Allies", "Enemies", "15")
 addStaticPopupBGTypeConfigImport("Enemies", "Allies", "40")
@@ -143,7 +145,7 @@ local function addIconPositionSettings(location, optionname)
 			type = "range",
 			name = L.Size,
 			min = 0,
-			max = 40,
+			max = 80,
 			step = 1,
 			order = 1
 		},
@@ -644,14 +646,13 @@ local function addEnemyAndAllySettings(self)
 							}
 						}
 					}
-				
 				}
 			}
 		}
 	}
 	
 
-	for k, BGSize in pairs({"15", "40"}) do
+	for k, BGSize in pairs({"5", "15", "40"}) do
 		local location = BattleGroundEnemies.db.profile[playerType][BGSize]
 		settings[BGSize] = {
 			type = "group", 
@@ -877,7 +878,7 @@ local function addEnemyAndAllySettings(self)
 											desc = L.RoleIcon_Size_Desc,
 											disabled = function() return not location.RoleIcon_Enabled end,
 											min = 2,
-											max = 40,
+											max = 80,
 											step = 1,
 											width = "normal",
 											order = 2
@@ -913,7 +914,7 @@ local function addEnemyAndAllySettings(self)
 											desc = L.CovenantIcon_Size_Desc,
 											disabled = function() return not location.CovenantIcon_Enabled end,
 											min = 2,
-											max = 40,
+											max = 80,
 											step = 1,
 											width = "normal",
 											order = 2
@@ -1036,7 +1037,7 @@ local function addEnemyAndAllySettings(self)
 									desc = L.Trinket_Width_Desc,
 									disabled = function() return not location.Trinket_Enabled end,
 									min = 1,
-									max = 40,
+									max = 80,
 									step = 1,
 									order = 3
 								},
@@ -1075,7 +1076,7 @@ local function addEnemyAndAllySettings(self)
 									desc = L.Racial_Width_Desc,
 									disabled = function() return not location.Racial_Enabled end,
 									min = 1,
-									max = 40,
+									max = 80,
 									step = 1,
 									order = 3
 								},
@@ -1143,7 +1144,7 @@ local function addEnemyAndAllySettings(self)
 									desc = L.Spec_Width_Desc,
 									disabled = function() return not location.Spec_Enabled end,
 									min = 1,
-									max = 40,
+									max = 80,
 									step = 1,
 									order = 2
 								},
@@ -1355,6 +1356,7 @@ local function addEnemyAndAllySettings(self)
 															},
 															order = 1
 														},
+														Fake1 = addVerticalSpacing(2),
 														Auras_Buffs_CustomFilteringSettings = {
 															type = "group",
 															name = L.AurasCustomConditions,
@@ -1362,7 +1364,7 @@ local function addEnemyAndAllySettings(self)
 																return not (location.Auras_Buffs_Filtering_Mode == "Custom")
 															end,
 															inline = true,
-															order = 2,
+															order = 3,
 															args = {
 																Auras_Buffs_CustomFiltering_ConditionsMode = {
 																	type = "select",
@@ -1716,7 +1718,7 @@ function BattleGroundEnemies:SetupOptions()
 								self:FillData()
 							end
 						end,
-						values = {[15] = L.BGSize_15, [40] = L.BGSize_40}
+						values = {[5] = L.BGSize_5, [15] = L.BGSize_15, [40] = L.BGSize_40}
 					},
 					Testmode_Enabled = {
 						type = "execute",

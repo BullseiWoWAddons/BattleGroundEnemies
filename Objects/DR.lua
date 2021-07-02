@@ -114,10 +114,10 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			drFrame:SetWidth(playerButton.bgSizeConfig.BarHeight - playerButton.bgSizeConfig.DrTracking_Container_BorderThickness * 2)
 
 			drFrame:SetBackdrop({
-                bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-                edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-                edgeSize = 1
-            })
+				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+				edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+				edgeSize = 1
+			})
 
 			drFrame:SetBackdropColor(0, 0, 0, 0)
 			drFrame:SetBackdropBorderColor(0, 0, 0, 0)

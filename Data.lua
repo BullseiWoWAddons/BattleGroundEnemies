@@ -82,13 +82,13 @@ Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/R
 }
 
 Data.FontOutlines = {
-    [""] = L["None"],
-    ["OUTLINE"] = L["Normal"],
-    ["THICKOUTLINE"] = L["Thick"],
+	[""] = L["None"],
+	["OUTLINE"] = L["Normal"],
+	["THICKOUTLINE"] = L["Thick"],
 }
 
 Data.Buttons = {
-    Target = TARGET,
+	Target = TARGET,
 	Focus = SET_FOCUS,
 	Custom = L.UserDefined
 }
@@ -185,24 +185,24 @@ Data.VerticalDirections = {
 
 
 Data.Interruptdurations = {
-    [6552] = 4,   -- [Warrior] Pummel
-    [96231] = 4,  -- [Paladin] Rebuke
-    [231665] = 3, -- [Paladin] Avengers Shield
-    [147362] = 3, -- [Hunter] Countershot
-    [187707] = 3, -- [Hunter] Muzzle
-    [1766] = 5,   -- [Rogue] Kick
-    [183752] = 3, -- [DH] Consume Magic
-    [47528] = 3,  -- [DK] Mind Freeze
-    [91802] = 2,  -- [DK] Shambling Rush
-    [57994] = 3,  -- [Shaman] Wind Shear
-    [115781] = 6, -- [Warlock] Optical Blast
-    [19647] = 6,  -- [Warlock] Spell Lock
-    [212619] = 6, -- [Warlock] Call Felhunter
-    [132409] = 6, -- [Warlock] Spell Lock
-    [171138] = 6, -- [Warlock] Shadow Lock
-    [2139] = 6,   -- [Mage] Counterspell
-    [116705] = 4, -- [Monk] Spear Hand Strike
-    [106839] = 4, -- [Feral] Skull Bash
+	[6552] = 4,   -- [Warrior] Pummel
+	[96231] = 4,  -- [Paladin] Rebuke
+	[231665] = 3, -- [Paladin] Avengers Shield
+	[147362] = 3, -- [Hunter] Countershot
+	[187707] = 3, -- [Hunter] Muzzle
+	[1766] = 5,   -- [Rogue] Kick
+	[183752] = 3, -- [DH] Consume Magic
+	[47528] = 3,  -- [DK] Mind Freeze
+	[91802] = 2,  -- [DK] Shambling Rush
+	[57994] = 3,  -- [Shaman] Wind Shear
+	[115781] = 6, -- [Warlock] Optical Blast
+	[19647] = 6,  -- [Warlock] Spell Lock
+	[212619] = 6, -- [Warlock] Call Felhunter
+	[132409] = 6, -- [Warlock] Spell Lock
+	[171138] = 6, -- [Warlock] Shadow Lock
+	[2139] = 6,   -- [Mage] Counterspell
+	[116705] = 4, -- [Monk] Spear Hand Strike
+	[106839] = 4, -- [Feral] Skull Bash
 	[93985] = 4,  -- [Feral] Skull Bash
 }
 
