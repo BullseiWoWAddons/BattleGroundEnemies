@@ -1718,7 +1718,7 @@ function BattleGroundEnemies:SetupOptions()
 								self:FillData()
 							end
 						end,
-						values = {[5] = L.BGSize_5, [15] = L.BGSize_15, [40] = L.BGSize_40}
+						values = {[5] = ARENA, [15] = L.BGSize_15, [40] = L.BGSize_40}
 					},
 					Testmode_Enabled = {
 						type = "execute",

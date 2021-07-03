@@ -242,7 +242,7 @@ Data.defaultSettings = {
 				RacialFiltering_Enabled = false,
 				RacialFiltering_Filterlist = {}, --key = spellID, value = spellName or false
 
-				ObjectiveAndRespawn_ObjectiveEnabled = true,
+				ObjectiveAndRespawn_ObjectiveEnabled = false,
 				ObjectiveAndRespawn_Width = 36,
 				ObjectiveAndRespawn_BasicPoint = "RIGHT",
 				ObjectiveAndRespawn_RelativeTo = "NumericTargetindicator",
@@ -871,7 +871,7 @@ Data.defaultSettings = {
 								-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
 				-- NegativeSound = [[Sound\Interface\UI_BattlegroundCountdown_Timer.ogg]],
 
-				ObjectiveAndRespawn_ObjectiveEnabled = true,
+				ObjectiveAndRespawn_ObjectiveEnabled = false,
 				ObjectiveAndRespawn_Width = 36,
 				ObjectiveAndRespawn_BasicPoint = "RIGHT",
 				ObjectiveAndRespawn_RelativeTo = "NumericTargetindicator",

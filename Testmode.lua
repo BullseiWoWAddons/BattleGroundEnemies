@@ -67,7 +67,7 @@ end
 do
 	local counter
 	
-	function BattleGroundEnemies:FillFakePlayerData(amount, playerType, role)
+	function BattleGroundEnemies:FillFakePlayerData(BGSize, amount, playerType, role)
 		for i = 1, amount do
 	
 			local classTag, randomSpec, specName
@@ -79,13 +79,31 @@ do
 				specName = randomSpec.specName
 			end
 			
-			local name = L[playerType]..counter.."-Realm"..counter
+			local unitID, name
+			if BGSize == 5 then
+				if playerType == "Enemy" then
+					unitID = "arena"..counter 
+				else
+					if counter == 1 then
+						unitID = "player"
+					else
+						unitID = "party"..(counter -1)
+					end
+				end
+			else
+				name = L[playerType]..counter.."-Realm"..counter
+			end
+
+			name = unitID or name
+
+			
 			fakePlayers[name] = {
 				PlayerClass = classTag,
 				PlayerName = name,
 				PlayerSpecName = specName, --will be nil for TBCC
 				PlayerClassColor = RAID_CLASS_COLORS[classTag],
-				PlayerLevel = mathrandom(PlayerLevel - 5, PlayerLevel)
+				PlayerLevel = mathrandom(PlayerLevel - 5, PlayerLevel),
+				unit = unitID
 			}
 			counter = counter + 1
 		end
@@ -97,9 +115,10 @@ do
 		
 			playerType:RemoveAllPlayers()
 			
-		
+			if self.BGSize ~= 5 then
+				playerType:UpdatePlayerCount(self.BGSize)
+			end
 			
-			playerType:UpdatePlayerCount(self.BGSize)
 			
 			
 			
@@ -109,9 +128,9 @@ do
 			
 			
 			counter = 1
-			BattleGroundEnemies:FillFakePlayerData(healerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "HEALER")
-			BattleGroundEnemies:FillFakePlayerData(tankAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "TANK")
-			BattleGroundEnemies:FillFakePlayerData(damagerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "DAMAGER")
+			BattleGroundEnemies:FillFakePlayerData(self.BGSize, healerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "HEALER")
+			BattleGroundEnemies:FillFakePlayerData(self.BGSize, tankAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "TANK")
+			BattleGroundEnemies:FillFakePlayerData(self.BGSize, damagerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "DAMAGER")
 			
 			for name, enemyDetails in pairs(fakePlayers) do
 				local playerButton = playerType:SetupButtonForNewPlayer(enemyDetails)
