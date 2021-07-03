@@ -6,6 +6,10 @@ local LibRaces = LibStub("LibRaces-1.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local LibChangelog = LibStub("LibChangelog")
 
+local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local isTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+
+
 local LGIST
 if not isTBCC then
 	LGIST=LibStub:GetLibrary("LibGroupInSpecT-1.1") 
@@ -24,8 +28,7 @@ LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusB
 local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies")
 BattleGroundEnemies.Counter = {}
 
-local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local isTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+
 
 
 
@@ -59,6 +62,7 @@ local GetBattlefieldArenaFaction = GetBattlefieldArenaFaction
 local GetBattlefieldScore = GetBattlefieldScore
 local GetBattlefieldTeamInfo = GetBattlefieldTeamInfo
 local GetBestMapForUnit = C_Map.GetBestMapForUnit
+local GetItemIcon = GetItemIcon
 local GetMaxPlayerLevel = GetMaxPlayerLevel
 local GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs
 local GetNumBattlefieldScores = GetNumBattlefieldScores
