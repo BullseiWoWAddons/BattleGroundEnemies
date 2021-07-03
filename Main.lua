@@ -401,7 +401,9 @@ BattleGroundEnemies.Enemies:SetScript("OnShow", function(self)
 		self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 		self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 		self:RegisterEvent("UNIT_NAME_UPDATE")
-		self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+		if not isTBCC then
+			self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+		end
 		
 		self:SetScript("OnUpdate", self.RealPlayersOnUpdate)
 	else
