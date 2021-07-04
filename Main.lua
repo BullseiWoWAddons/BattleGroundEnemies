@@ -2475,7 +2475,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	
 		local raceName = UnitRace(unitID)
 
-		if specName and classTag then
+		if (specName or isTBCC) and classTag then
 			self:CreateOrUpdateArenaEnemyPlayer(unitID, name, raceName or "placeholder", classTag, specName)
 		end
 		
