@@ -2407,10 +2407,12 @@ do
 end
 
 function BattleGroundEnemies.Enemies:ChangeName(oldName, newName)  --only used in arena when players switch from "arenaX" to a real name
+	print("ChangeName")
 	local playerButton = self.Players[oldName]
 	if playerButton then
 		playerButton.PlayerName = newName
 		playerButton:SetName()
+		print("ChangeName", oldName, newName)
 		
 
 		self.Players[newName] = playerButton
@@ -2420,8 +2422,10 @@ end
 
 
 function BattleGroundEnemies.Enemies:CreateOrUpdateArenaEnemyPlayer(unitID, name, race, classTag, specName)
+	CreateOrUpdateArenaEnemyPlayer(unitID, name, race, classTag, specName)
 	local playerName
 	if name and name ~= UNKNOWN then
+		print("CreateOrUpdateArenaEnemyPlayer name change")
 		-- player has a real name know, check if he is already shown as arenaX
 
 		BattleGroundEnemies.Enemies:ChangeName(unitID, name)
@@ -2506,6 +2510,7 @@ function BattleGroundEnemies.Enemies:UNIT_NAME_UPDATE(unitID)
 			name = name.."-"..realm
 		end
 	end
+	print("UNIT_NAME_UPDATE", unitID, name)
 	self:ChangeName(unitID, name)
 end
 
