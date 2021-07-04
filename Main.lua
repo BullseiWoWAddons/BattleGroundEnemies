@@ -2444,6 +2444,9 @@ end
 
 local activeCreateArenaEnemiesTimer
 function BattleGroundEnemies.Enemies:CreateArenaEnemies()
+	print("CreateArenaEnemies")
+	print("IsInArena", IsInArena, IsInBrawl())
+	print("InCombatLockdown()")
 	if not IsInArena or IsInBrawl() then return end
 	if InCombatLockdown() then 
 		if not activeCreateArenaEnemiesTimer then
@@ -2459,6 +2462,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	wipe(self.NewPlayerDetails)
 	for i = 1, 5 do
 		local unitID = "arena"..i
+		print("unitID", unitID)
 		local name, realm = UnitName(unitID)
 
 		local _, classTag, specName
@@ -2466,16 +2470,26 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 		if realm then 
 			name = name.."-"..realm
 		end			
-								
+				
+		print("name", name)
+
 		local specID, gender = GetArenaOpponentSpec(i)
+		print("specID", specID)
+		print("gender", gender)
+
+
 		if (specID and specID > 0) then 
 			_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
+			print("specName", specName)
+			print("classTag", classTag)
 		end
 		
 	
 		local raceName = UnitRace(unitID)
+		print("raceName", raceName)
 
 		if (specName or isTBCC) and classTag then
+			print("CreateOrUpdateArenaEnemyPlayer")
 			self:CreateOrUpdateArenaEnemyPlayer(unitID, name, raceName or "placeholder", classTag, specName)
 		end
 		
@@ -2566,6 +2580,7 @@ end
 
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
+	print("ARENA_OPPONENT_UPDATE", unitID, unitEvent)
 	--unitEvent can be: "seen", "unseen", "destroyed", "cleared"
 	--self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 	
