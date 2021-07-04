@@ -2422,10 +2422,10 @@ end
 
 
 function BattleGroundEnemies.Enemies:CreateOrUpdateArenaEnemyPlayer(unitID, name, race, classTag, specName)
-	CreateOrUpdateArenaEnemyPlayer(unitID, name, race, classTag, specName)
+	print("CreateOrUpdateArenaEnemyPlayer", unitID, name, race, classTag, specName)
 	local playerName
 	if name and name ~= UNKNOWN then
-		print("CreateOrUpdateArenaEnemyPlayer name change")
+		print("CreateOrUpdateArenaEnemyPlayer name change", UNKNOWN)
 		-- player has a real name know, check if he is already shown as arenaX
 
 		BattleGroundEnemies.Enemies:ChangeName(unitID, name)
