@@ -414,6 +414,10 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
 		[1] = 34976						-- Netherstorm Flag
+	},
+	[1956] = {						-- Eye of the Storm, TBCC
+		[0] = 34976,  					-- Netherstorm Flag
+		[1] = 34976						-- Netherstorm Flag
 	},	
 	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
@@ -436,6 +440,10 @@ Data.BattlegroundspezificDebuffs = { --key = mapID, value = table with key = num
 		46393						-- Brutal Assault							
 	},
 	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA 
+		46392,						-- Focused Assault
+		46393						-- Brutal Assault							
+	},
+	[1956] = {						-- Eye of the Storm, TBCC
 		46392,						-- Focused Assault
 		46393						-- Brutal Assault							
 	},

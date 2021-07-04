@@ -2230,7 +2230,7 @@ do
 			self.NewPlayerDetails[name] = { -- details of this new player
 				PlayerClass = string.upper(classTag), --apparently it can happen that we get a lowercase "druid" from GetBattlefieldScore() in TBCC, isTBCC
 				PlayerName = name,
-				PlayerRace = LibRaces:GetRaceToken(race), --delivers a locale independent token for relentless check
+				PlayerRace = race and LibRaces:GetRaceToken(race) or "Unknown", --delivers a locale independent token for relentless check
 				PlayerSpecName = specName,
 				PlayerClassColor = RAID_CLASS_COLORS[classTag],
 				PlayerLevel = false,
@@ -3183,7 +3183,7 @@ do
 				--name = name-realm, faction = 0 or 1, race = localized race e.g. "Mensch",classTag = e.g. "PALADIN", spec = localized specname e.g. "holy"
 				--locale dependent are: race, specName
 				
-				if faction and name and race and classTag and (isTBCC or (specName and specName ~= ""))  then
+				if faction and name and classTag and (isTBCC or (specName and specName ~= ""))  then
 					--if name == PlayerDetails.PlayerName then EnemyFaction = EnemyFaction == 1 and 0 or 1 return end --support for the new brawl because GetBattlefieldArenaFaction() returns wrong data on that BG
 					 if name == self.PlayerDetails.PlayerName and faction == self.EnemyFaction then 
 						self.EnemyFaction = self.AllyFaction
