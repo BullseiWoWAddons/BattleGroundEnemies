@@ -13,5 +13,7 @@
 	<Include file="Libs\DRList-1.0\DRList-1.0.xml"/>
 	<Include file="Libs\LibPlayerSpells-1.0\lib.xml"/>
 	<Include file="Libs\LibChangelog\LibChangelog.xml"/>
+	<!--@version-retail@--> 
 	<Include file="Libs\LibGroupInSpecT-1.1\lib.xml"/>
+	<!--@end-version-retail@-->
 </Ui>

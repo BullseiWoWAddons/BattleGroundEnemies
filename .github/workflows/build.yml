@@ -6,10 +6,10 @@ name: Package and release
 # events but only for the master branch
 on:
   push:
-    branches: 
+    branches:
       - master
     tags:
-      - '**'
+      - "**"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -20,20 +20,18 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-        # we first have to clone the AddOn project, this is a required step
+      # we first have to clone the AddOn project, this is a required step
       - name: Clone project
         uses: actions/checkout@v1
         with:
           # you can specify how much of the commit history you want to fetch,
           # which is useful for controlling the length of the automated changelog
-          fetch-depth: 50  
+          fetch-depth: 50
 
-          
       - name: Run luacheck
         uses: BigWigsMods/actions/luacheck@master
         with:
-          args: -q     
-    
+          args: -q
 
       # Runs a set of commands using the runners shell
       - name: Create Retail Package
@@ -42,11 +40,11 @@ jobs:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Create Burning Crusade Classic Package
         uses: BigWigsMods/packager@master
         with:
-          args: -g bcc
+          args: -g bcc -m .pkgmeta-TBCC
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
