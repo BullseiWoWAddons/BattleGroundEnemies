@@ -2898,43 +2898,10 @@ function BattleGroundEnemies:UNIT_HEALTH(unitID) --gets health of nameplates, pl
 end
 
 BattleGroundEnemies.UNIT_HEALTH_FREQUENT = BattleGroundEnemies.UNIT_HEALTH --TBC compability, isTBCC
-
-function BattleGroundEnemies:UNIT_MAXHEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
-		playerButton:UpdateHealth(unitID)
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-	end
-end
-
-function BattleGroundEnemies:UNIT_HEAL_PREDICTION(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-	end
-end
-
-function BattleGroundEnemies:UNIT_ABSORB_AMOUNT_CHANGED(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled}
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-	end
-end
-
-function BattleGroundEnemies:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
-		playerButton.displayedUnit = unitID
-		playerButton.optionTable = {displayHealPrediction = playerButton.bgSizeConfig.HealthBar_HealthPrediction_Enabled} 
-		if not isTBCC then CompactUnitFrame_UpdateHealPrediction(playerButton) end
-	end
-end
+BattleGroundEnemies.UNIT_MAXHEALTH = BattleGroundEnemies.UNIT_HEALTH
+BattleGroundEnemies.UNIT_HEAL_PREDICTION = BattleGroundEnemies.UNIT_HEALTH
+BattleGroundEnemies.UNIT_ABSORB_AMOUNT_CHANGED = BattleGroundEnemies.UNIT_HEALTH
+BattleGroundEnemies.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = BattleGroundEnemies.UNIT_HEALTH
 
 
 function BattleGroundEnemies:UNIT_POWER_FREQUENT(unitID, powerToken) --gets power of nameplates, player, target, focus, raid1 to raid40, partymember
