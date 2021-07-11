@@ -334,7 +334,7 @@ function BattleGroundEnemies:UnregisterEvents()
 		self:UnregisterEvent(self.GeneralEvents[i])
 	end
 	if isTBCC then 
-		for i = 1, #self.TBCEvents do
+		for i = 1, #self.TBCCEvents do
 			self:UnregisterEvent(self.TBCEvents[i])
 		end
 	end
@@ -541,11 +541,10 @@ function BattleGroundEnemies:BGSizeCheck(newBGSize)
 			end
 		else
 			if newBGSize <= 5 then
+				self.Allies:RemoveAllPlayers()
+				self.Enemies:RemoveAllPlayers()
 				if not self.BGSize or self.BGSize ~= 5 then --arena
-					self.Allies:RemoveAllPlayers()
-					self.Enemies:RemoveAllPlayers()
 					self:BGSizeChanged(5)
-					
 				end
 			else
 				if not self.BGSize or self.BGSize ~= 15 then
@@ -2407,12 +2406,10 @@ do
 end
 
 function BattleGroundEnemies.Enemies:ChangeName(oldName, newName)  --only used in arena when players switch from "arenaX" to a real name
-	print("ChangeName")
 	local playerButton = self.Players[oldName]
 	if playerButton then
 		playerButton.PlayerName = newName
 		playerButton:SetName()
-		print("ChangeName", oldName, newName)
 		
 
 		self.Players[newName] = playerButton
@@ -2422,10 +2419,8 @@ end
 
 
 function BattleGroundEnemies.Enemies:CreateOrUpdateArenaEnemyPlayer(unitID, name, race, classTag, specName)
-	print("CreateOrUpdateArenaEnemyPlayer", unitID, name, race, classTag, specName)
 	local playerName
 	if name and name ~= UNKNOWN then
-		print("CreateOrUpdateArenaEnemyPlayer name change", UNKNOWN)
 		-- player has a real name know, check if he is already shown as arenaX
 
 		BattleGroundEnemies.Enemies:ChangeName(unitID, name)
@@ -2448,9 +2443,6 @@ end
 
 local activeCreateArenaEnemiesTimer
 function BattleGroundEnemies.Enemies:CreateArenaEnemies()
-	print("CreateArenaEnemies")
-	print("IsInArena", IsInArena, IsInBrawl())
-	print("InCombatLockdown()")
 	if not IsInArena or IsInBrawl() then return end
 	if InCombatLockdown() then 
 		if not activeCreateArenaEnemiesTimer then
@@ -2466,7 +2458,6 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	wipe(self.NewPlayerDetails)
 	for i = 1, 5 do
 		local unitID = "arena"..i
-		print("unitID", unitID)
 		local name, realm = UnitName(unitID)
 
 		local _, classTag, specName
@@ -2475,25 +2466,24 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 			name = name.."-"..realm
 		end			
 				
-		print("name", name)
 
-		local specID, gender = GetArenaOpponentSpec(i)
-		print("specID", specID)
-		print("gender", gender)
+		local specName, classTag
+		if not isTBCC then
+			local specID, gender = GetArenaOpponentSpec(i)
 
 
-		if (specID and specID > 0) then 
-			_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
-			print("specName", specName)
-			print("classTag", classTag)
+			if (specID and specID > 0) then 
+				_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
+			end
+		else 
+			classTag = select(2, UnitClass(unitID))
 		end
+	
 		
 	
 		local raceName = UnitRace(unitID)
-		print("raceName", raceName)
 
 		if (specName or isTBCC) and classTag then
-			print("CreateOrUpdateArenaEnemyPlayer")
 			self:CreateOrUpdateArenaEnemyPlayer(unitID, name, raceName or "placeholder", classTag, specName)
 		end
 		
@@ -2510,7 +2500,6 @@ function BattleGroundEnemies.Enemies:UNIT_NAME_UPDATE(unitID)
 			name = name.."-"..realm
 		end
 	end
-	print("UNIT_NAME_UPDATE", unitID, name)
 	self:ChangeName(unitID, name)
 end
 
@@ -2585,7 +2574,6 @@ end
 
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
-	print("ARENA_OPPONENT_UPDATE", unitID, unitEvent)
 	--unitEvent can be: "seen", "unseen", "destroyed", "cleared"
 	--self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 	
@@ -3052,6 +3040,7 @@ do
 		local numArenaOpponents
 		
 		local function ArenaEnemiesAtBeginn()
+			BattleGroundEnemies.Enemies:CreateArenaEnemies()
 			if #BattleGroundEnemies.Enemies.PlayerSortingTable > 1 or #BattleGroundEnemies.Allies.PlayerSortingTable > 1 then --this ensures that we checked for enmys and the flag carrier will be shown (if its an enemy)
 				for i = 1,  numArenaOpponents do
 					local unitID = "arena"..i
@@ -3096,10 +3085,19 @@ do
 					CurrentMapID = mapID
 				end
 				
+
+				numArenaOpponents = GetNumArenaOpponents()-- returns valid data on PLAYER_ENTERING_WORLD
+					--self:Debug(numArenaOpponents)
+				if numArenaOpponents > 0 then 
+					C_Timer.After(2, ArenaEnemiesAtBeginn)
+				end
+
+
 				--self:Debug("test")
 				if IsInArena and not IsInBrawl() then
 
 					self:BGSizeCheck(5)
+					
 
 				--	self:Hide() --stopp the OnUpdateScript
 					return -- we are in a arena, UPDATE_BATTLEFIELD_SCORE is not the event we need
@@ -3126,12 +3124,6 @@ do
 				
 				BattleGroundEnemies.BattleGroundDebuffs = Data.BattlegroundspezificDebuffs[CurrentMapID]
 				
-				--Check if we joined a match late and there are already arena unitids (flag-, orb-, or minecart-carriers) we wont get a ARENA_OPPONENT_UPDATE 
-				numArenaOpponents = GetNumArenaOpponents()-- returns valid data on PLAYER_ENTERING_WORLD
-				--self:Debug(numArenaOpponents)
-				if numArenaOpponents > 0 then 
-					C_Timer.After(2, ArenaEnemiesAtBeginn)
-				end
 				
 				BattleGroundEnemies:ToggleArenaFrames()
 				
