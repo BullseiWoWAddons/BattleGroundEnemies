@@ -110,13 +110,13 @@ do
 	end
 	
 	function BattleGroundEnemies:FillData()
-		for number, playerType in pairs({self.Allies, self.Enemies}) do
+		for number, MainFrame in pairs({self.Allies, self.Enemies}) do
 			wipe(fakePlayers)
 		
-			playerType:RemoveAllPlayers()
+			MainFrame:RemoveAllPlayers()
 			
 			if self.BGSize ~= 5 then
-				playerType:UpdatePlayerCount(self.BGSize)
+				MainFrame:UpdatePlayerCount(self.BGSize)
 			end
 			
 			
@@ -128,17 +128,19 @@ do
 			
 			
 			counter = 1
-			BattleGroundEnemies:FillFakePlayerData(self.BGSize, healerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "HEALER")
-			BattleGroundEnemies:FillFakePlayerData(self.BGSize, tankAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "TANK")
-			BattleGroundEnemies:FillFakePlayerData(self.BGSize, damagerAmount, playerType.PlayerType == "Enemies" and "Enemy" or "Ally", "DAMAGER")
+			BattleGroundEnemies:FillFakePlayerData(self.BGSize, healerAmount, MainFrame.PlayerType == "Enemies" and "Enemy" or "Ally", "HEALER")
+			BattleGroundEnemies:FillFakePlayerData(self.BGSize, tankAmount, MainFrame.PlayerType == "Enemies" and "Enemy" or "Ally", "TANK")
+			BattleGroundEnemies:FillFakePlayerData(self.BGSize, damagerAmount, MainFrame.PlayerType == "Enemies" and "Enemy" or "Ally", "DAMAGER")
 			
 			for name, enemyDetails in pairs(fakePlayers) do
-				local playerButton = playerType:SetupButtonForNewPlayer(enemyDetails)
+				for k,v in pairs(enemyDetails) do 
+				end
+				local playerButton = MainFrame:SetupButtonForNewPlayer(enemyDetails)
 				if not isTBCC then
 					playerButton.Covenant:DisplayCovenant(mathrandom(1, #Data.CovenantIcons))  
 				end
 			end
-			playerType:SortPlayers()
+			MainFrame:SortPlayers()
 		end
 	end
 

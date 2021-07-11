@@ -335,7 +335,7 @@ function BattleGroundEnemies:UnregisterEvents()
 	end
 	if isTBCC then 
 		for i = 1, #self.TBCCEvents do
-			self:UnregisterEvent(self.TBCEvents[i])
+			self:UnregisterEvent(self.TBCCEvents[i])
 		end
 	end
 	if isRetail then
@@ -541,8 +541,6 @@ function BattleGroundEnemies:BGSizeCheck(newBGSize)
 			end
 		else
 			if newBGSize <= 5 then
-				self.Allies:RemoveAllPlayers()
-				self.Enemies:RemoveAllPlayers()
 				if not self.BGSize or self.BGSize ~= 5 then --arena
 					self:BGSizeChanged(5)
 				end
@@ -3363,6 +3361,8 @@ do
 			if zone == "arena" then
 				IsInArena = true
 				if not IsInBrawl() then
+					self.Allies:RemoveAllPlayers()
+					self.Enemies:RemoveAllPlayers()
 					self:BGSizeCheck(5)
 				end
 			end
