@@ -3328,7 +3328,6 @@ do
 			if zone == "arena" then
 				IsInArena = true
 				if not IsInBrawl() then
-					self.Allies:RemoveAllPlayers()
 					self.Enemies:RemoveAllPlayers()
 					self:BGSizeCheck(5)
 				end
