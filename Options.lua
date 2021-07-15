@@ -1,4 +1,4 @@
-local addonName, Data = ...
+local AddonName, Data = ...
 local GetAddOnMetadata = GetAddOnMetadata
 
 local L = Data.L
@@ -19,7 +19,7 @@ local function copy(obj)
 end
 						
 local function addStaticPopupForPlayerTypeConfigImport(playerType, oppositePlayerType)
-	StaticPopupDialogs["CONFIRM_OVERRITE_"..addonName..playerType] = {
+	StaticPopupDialogs["CONFIRM_OVERRITE_"..AddonName..playerType] = {
 	  text = L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]),
 	  button1 = YES,
 	  button2 = NO,
@@ -41,7 +41,7 @@ addStaticPopupForPlayerTypeConfigImport("Allies", "Enemies")
 
 
 local function addStaticPopupBGTypeConfigImport(playerType, oppositePlayerType, BGSize)
-	StaticPopupDialogs["CONFIRM_OVERRITE_"..addonName..playerType..BGSize] = {
+	StaticPopupDialogs["CONFIRM_OVERRITE_"..AddonName..playerType..BGSize] = {
 	  text = L.ConfirmProfileOverride:format(L[playerType]..": "..L["BGSize_"..BGSize], L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
 	  button1 = YES,
 	  button2 = NO,
@@ -442,7 +442,7 @@ local function addEnemyAndAllySettings(self)
 				desc = L.CopySettings_Desc:format(L[oppositePlayerType])..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
 				func = function()
-					StaticPopup_Show("CONFIRM_OVERRITE_"..addonName..playerType)
+					StaticPopup_Show("CONFIRM_OVERRITE_"..AddonName..playerType)
 				end,
 				width = "double",
 				order = 5
@@ -679,7 +679,7 @@ local function addEnemyAndAllySettings(self)
 					name = L.CopySettings:format(L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
 					desc = L.CopySettings_Desc:format(L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
 					func = function()
-						StaticPopup_Show("CONFIRM_OVERRITE_"..addonName..playerType..BGSize)
+						StaticPopup_Show("CONFIRM_OVERRITE_"..AddonName..playerType..BGSize)
 					end,
 					width = "double",
 					order = 3
@@ -1690,7 +1690,7 @@ function BattleGroundEnemies:SetupOptions()
 	local location = self.db.profile
 	self.options = {
 		type = "group",
-		name = "BattleGroundEnemies " .. GetAddOnMetadata(addonName, "Version"),
+		name = "BattleGroundEnemies " .. GetAddOnMetadata(AddonName, "Version"),
 		childGroups = "tab",
 		get = function(option)
 			return getOption(location, option)

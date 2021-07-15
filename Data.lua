@@ -1,4 +1,4 @@
-local addonName, Data = ...
+local AddonName, Data = ...
 
 local L = Data.L
 local DRList = LibStub("DRList-1.0")
@@ -9,8 +9,8 @@ local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
 local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 
-local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local isTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 
 Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/Romanization_of_Russian
 	["А"] = "a",
@@ -766,7 +766,7 @@ do
 		local _, classTag = GetClassInfo(classID)
 		if classTag then
 			Data.Classes[classTag] = {}
-			if isTBCC then 
+			if IsTBCC then 
 				Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}
 				table.insert(Data.ClassList, classTag)
 			else

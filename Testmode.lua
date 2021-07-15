@@ -1,4 +1,4 @@
-local addonName, Data = ...
+local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 
 local L = Data.L
@@ -7,8 +7,8 @@ local LibPlayerSpells = LibStub("LibPlayerSpells-1.0")
 
 local PlayerLevel = UnitLevel("player")
 
-local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local isTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 
 local mathrandom = math.random
 local tinsert = table.insert
@@ -72,7 +72,7 @@ do
 		for i = 1, amount do
 	
 			local classTag, randomSpec, specName
-			if isTBCC then
+			if IsTBCC then
 				classTag = Data.ClassList[mathrandom(1, #Data.ClassList)]
 			else
 				randomSpec = Data.RolesToSpec[role][mathrandom(1, #Data.RolesToSpec[role])]
@@ -130,7 +130,7 @@ do
 				for k,v in pairs(enemyDetails) do 
 				end
 				local playerButton = MainFrame:SetupButtonForNewPlayer(enemyDetails)
-				if not isTBCC then
+				if not IsTBCC then
 					playerButton.Covenant:DisplayCovenant(mathrandom(1, #Data.CovenantIcons))  
 				end
 			end

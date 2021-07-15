@@ -1,5 +1,5 @@
 local BattleGroundEnemies = BattleGroundEnemies
-local addonName, Data = ...
+local AddonName, Data = ...
 local GetTime = GetTime
 
 BattleGroundEnemies.Objects.Trinket = {}
