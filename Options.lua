@@ -1712,7 +1712,8 @@ function BattleGroundEnemies:SetupOptions()
 						order = 1,
 						get = function() return self.BGSize end,
 						set = function(option, value)
-							self:BGSizeCheck(value)
+							self.Allies:UpdatePlayerCount(value)
+							self.Enemies:UpdatePlayerCount(value)
 							
 							if self.TestmodeActive then
 								self:FillData()

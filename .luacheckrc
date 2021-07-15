@@ -217,6 +217,7 @@ globals = {
 	"LOCALE_zhCN",
 	"LOCALE_zhTW",
 	"LoggingCombat",
+	"MAX_ARENA_ENEMIES",
 	"Mixin",
 	"MovieFrame",
 	"NO",

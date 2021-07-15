@@ -62,6 +62,7 @@ function BattleGroundEnemies:DisableTestMode()
 	FakePlayersOnUpdateFrame:Hide()
 	self:Hide()
 	self.TestmodeActive = false
+	self:GROUP_ROSTER_UPDATE() -- to build up the players with the real allies 
 end
 
 do
@@ -114,14 +115,7 @@ do
 			wipe(fakePlayers)
 		
 			MainFrame:RemoveAllPlayers()
-			
-			if self.BGSize ~= 5 then
-				MainFrame:UpdatePlayerCount(self.BGSize)
-			end
-			
-			
-			
-			
+					
 			local healerAmount = mathrandom(1, 3)
 			local tankAmount = mathrandom(1, 2)
 			local damagerAmount = self.BGSize - healerAmount - tankAmount
@@ -181,7 +175,6 @@ do
 		self:FillData()
 		
 		self:Show()
-		self:BGSizeCheck(self.BGSize)
 
 		FakePlayersOnUpdateFrame:Show()
 	end

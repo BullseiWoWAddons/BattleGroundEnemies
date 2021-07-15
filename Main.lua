@@ -45,9 +45,11 @@ local type = type
 local unpack = unpack
 local gsub = gsub
 local floor = math.floor
+local max = math.max
 local random = math.random
 local tinsert = table.insert
 local tremove = table.remove
+
 
 local C_Covenants = C_Covenants
 local C_PvP = C_PvP
@@ -533,14 +535,15 @@ function BattleGroundEnemies:BGSizeChanged(newBGSize)
 	self.Allies:ApplyBGSizeSettings()
 end
 
-function BattleGroundEnemies:BGSizeCheck(newBGSize)
-	if newBGSize then
-		if newBGSize > 15 then
+function BattleGroundEnemies:UpdateBGSize()
+	local MaxNumPlayers = max(self.Allies.NumPlayers, self.Enemies.NumPlayers)
+	if MaxNumPlayers then
+		if MaxNumPlayers > 15 then
 			if not self.BGSize or self.BGSize ~= 40 then
 				self:BGSizeChanged(40)
 			end
 		else
-			if newBGSize <= 5 then
+			if MaxNumPlayers <= 5 then
 				if not self.BGSize or self.BGSize ~= 5 then --arena
 					self:BGSizeChanged(5)
 				end
@@ -1583,10 +1586,10 @@ do
 		end
 		
 		self:UpdatePlayerCount()
-		self:CheckIfShouldShow()
+		self:UpdateVisibility()
 	end
 	
-	function MainFrameFunctions:CheckIfShouldShow()
+	function MainFrameFunctions:UpdateVisibility()
 		if self.config.Enabled and BattleGroundEnemies.BGSize and self.bgSizeConfig.Enabled then
 			self:Show()
 		else
@@ -1596,16 +1599,15 @@ do
 	
 	
 	function MainFrameFunctions:UpdatePlayerCount(currentCount)
-		if IsInArena and not IsInBrawl() then return end
-
-		if not currentCount then currentCount = BattleGroundEnemies.BGSize end
+		self.NumPlayers = currentCount or self.NumPlayers or BattleGroundEnemies.BGSize
+		BattleGroundEnemies:UpdateBGSize()
 		
 		local isEnemy = self.PlayerType == "Enemies"
 		local enemyFaction = BattleGroundEnemies.EnemyFaction or (playerFaction == "Horde" and 1 or 0)
 
 		
 		local oldCount = self.PlayerCount.oldPlayerNumber or 0
-		if oldCount ~= currentCount then
+		if oldCount ~= self.NumPlayers then
 			-- if BattleGroundEnemies.IsRatedBG and self.config.RBG.Notifications_Enabled then
 			-- 	if currentCount < oldCount then
 			-- 		RaidNotice_AddMessage(RaidWarningFrame, L[isEnemy and "EnemyLeft" or "AllyLeft"], ChatTypeInfo["RAID_WARNING"]) 
@@ -1617,7 +1619,7 @@ do
 			-- end
 			
 
-			self.PlayerCount.oldPlayerNumber = currentCount
+			self.PlayerCount.oldPlayerNumber = self.NumPlayers
 		end
 		if self.bgSizeConfig.PlayerCount_Enabled then
 			self.PlayerCount:Show()
@@ -2454,7 +2456,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	end
 	self.resort = false
 	wipe(self.NewPlayerDetails)
-	for i = 1, 5 do
+	for i = 1, MAX_ARENA_ENEMIES do
 		local unitID = "arena"..i
 		local name, realm = UnitName(unitID)
 
@@ -3061,8 +3063,7 @@ do
 				--self:Debug("test")
 				if IsInArena and not IsInBrawl() then
 
-					self:BGSizeCheck(5)
-					
+					self.Enemies:UpdatePlayerCount(5)				
 
 				--	self:Hide() --stopp the OnUpdateScript
 					return -- we are in a arena, UPDATE_BATTLEFIELD_SCORE is not the event we need
@@ -3108,8 +3109,6 @@ do
 			--self:Debug("numAllies:", numAllies)
 
 			if InCombatLockdown() then return end
-
-			self:BGSizeCheck(numEnemies)
 			
 			self.Enemies:UpdatePlayerCount(numEnemies)
 			--self.Allies:UpdatePlayerCount(numAllies)
@@ -3273,7 +3272,6 @@ do
 		if IsInRaid() then 
 			local numGroupMembers = GetNumGroupMembers()
 			self.Allies:UpdatePlayerCount(numGroupMembers)
-			self:BGSizeCheck(numGroupMembers)
 			local unitIDPrefix = "raid"
 			for i = 1, numGroupMembers do -- the player itself only shows up here when he is in a raid		
 				local name, rank, subgroup, level, localizedClass, classTag, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(i)
@@ -3287,8 +3285,7 @@ do
 			local unitIDPrefix = "party"
 			local numGroupMembers = GetNumGroupMembers()
 			self.Allies:UpdatePlayerCount(numGroupMembers + 1)
-			self:BGSizeCheck(numGroupMembers + 1)
-
+			
 			for i = 1, numGroupMembers do
 				local unitID = unitIDPrefix..i
 				local name, realm = UnitName(unitID)
@@ -3329,7 +3326,7 @@ do
 				IsInArena = true
 				if not IsInBrawl() then
 					self.Enemies:RemoveAllPlayers()
-					self:BGSizeCheck(5)
+					self.Enemies:UpdatePlayerCount(5)
 				end
 			end
 			
