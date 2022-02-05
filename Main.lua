@@ -1432,11 +1432,23 @@ do
 	end
 
 	local function debuffSpellIDFiltering(config, spellID)
-		return config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID] 
+		for spellIDPair in pairs(config.Auras_Debuffs_SpellIDFiltering_Filterlist) do
+			if spellIDPair == spellID then
+				return true
+			end
+		end
+		return false		
+--		return config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID] 
 	end
 
 	local function buffSpellIDFiltering(config, spellID)
-		return config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID] 
+		for spellIDPair in pairs(config.Auras_Buffs_SpellIDFiltering_Filterlist) do
+			if spellIDPair == spellID then
+				return true
+			end
+		end
+		return false
+--		return config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID] 
 	end
 
 	function buttonFunctions:ShouldShowAura(filter, spellID, srcName, unitCaster, canApplyAura, amount, duration, expirationTime, debuffType)
