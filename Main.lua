@@ -107,7 +107,7 @@ local UnitRace = UnitRace
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
 --BattleGroundEnemies.BattlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
 BattleGroundEnemies.BattleGroundDebuffs = {} --contains battleground specific enemy debbuffs to watchout for of the current active battlefield
---BattleGroundEnemies.IsRatedBG
+BattleGroundEnemies.IsRatedBG = false
 local playerFaction = UnitFactionGroup("player")
 local PlayerButton
 local PlayerLevel = UnitLevel("player")
@@ -1084,7 +1084,7 @@ do
 		BattleGroundEnemies.Counter.AuraApplied = (BattleGroundEnemies.Counter.AuraApplied or 0) + 1
 		local config = self.bgSizeConfig
 		
-		local debuffType, duration, expirationTime, unitCaster, canApplyAura
+		local debuffType, duration, expirationTime, unitCaster, canStealOrPurge, canApplyAura
 
 		local isMine = srcName == BattleGroundEnemies.PlayerDetails.PlayerName
 		local isDebuff, filter, aurasEnabled
@@ -1133,11 +1133,11 @@ do
 				
 				if not activeUnitID then return end
 				if isMine then
-					index, _, _, amount, debuffType , duration, expirationTime, unitCaster, _, _, _, canApplyAura, _, _, _, _, _, _, _ = FindAuraBySpellID(activeUnitID, spellID, "PLAYER|" .. filter)
+					index, _, _, amount, debuffType , duration, expirationTime, unitCaster, canStealOrPurge, _, _, canApplyAura, _, _, _, _, _, _, _ = FindAuraBySpellID(activeUnitID, spellID, "PLAYER|" .. filter)
 				else
 					for i = 1, 40 do
 						local _spellID
-						_, _, amount, debuffType , duration, expirationTime, unitCaster, _, _, _spellID, canApplyAura, _, _, _, _, _, _, _ = UnitAura(activeUnitID, i, filter)
+						_, _, amount, debuffType , duration, expirationTime, unitCaster, canStealOrPurge, _, _spellID, canApplyAura, _, _, _, _, _, _, _ = UnitAura(activeUnitID, i, filter)
 						if spellID == _spellID and unitCaster then
 							local uName, realm = UnitName(unitCaster)
 							if realm then
@@ -1155,7 +1155,7 @@ do
 		
 		if duration and duration > 0 then
 		
-			self:ShouldShowAura(filter, spellID, srcName, unitCaster, canApplyAura, amount, duration, expirationTime, debuffType)
+			self:ShouldShowAura(filter, spellID, srcName, unitCaster, canStealOrPurge, canApplyAura, amount, duration, expirationTime, debuffType)
 		
 			if drTrackingEnabled then
 				self.DRContainer:DisplayDR(drCat, spellID, duration)
@@ -1334,7 +1334,7 @@ do
 						--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
 				
 						
-						self:ShouldShowAura(filter, spellID, srcName, unitCaster, canApplyAura, amount, duration, expirationTime, debuffType)
+						self:ShouldShowAura(filter, spellID, srcName, unitCaster, canStealOrPurge, canApplyAura, amount, duration, expirationTime, debuffType)
 					end
 				end
 
@@ -1440,7 +1440,16 @@ do
 		return config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID] 
 	end
 
-	function buttonFunctions:ShouldShowAura(filter, spellID, srcName, unitCaster, canApplyAura, amount, duration, expirationTime, debuffType)
+	local function buffCanStealorPurgeFiltering(config, canStealOrPurge)
+		return config.Auras_Buffs_ShowStealOrPurgeable and canStealOrPurge
+	end
+
+	local function debuffCanStealorPurgeFiltering(config, canStealOrPurge)
+		return config.Auras_Debuffs_ShowStealOrPurgeable and canStealOrPurge
+	end
+
+
+	function buttonFunctions:ShouldShowAura(filter, spellID, srcName, unitCaster, canStealOrPurge, canApplyAura, amount, duration, expirationTime, debuffType)
 		BattleGroundEnemies.Counter.ShouldShowAura = (BattleGroundEnemies.Counter.ShouldShowAura or 0) + 1
 
 		local config = self.bgSizeConfig
@@ -1485,6 +1494,9 @@ do
 						if config.Auras_Debuffs_DebuffTypeFiltering_Enabled then
 							table.insert(conditions, debuffTypeFiltering(config, spellID))
 						end
+
+						table.insert(conditions, debuffCanStealorPurgeFiltering(config, canStealOrPurge))
+
 						if conditionFuncs[config.Auras_Debuffs_CustomFiltering_ConditionsMode] and conditionFuncs[config.Auras_Debuffs_CustomFiltering_ConditionsMode](conditions) then
 							return self.DebuffContainer:DisplayAura(spellID, srcName, amount, duration, expirationTime, debuffType)
 						end
@@ -1504,6 +1516,8 @@ do
 						if config.Auras_Buffs_SpellIDFiltering_Enabled then
 							table.insert(conditions, buffSpellIDFiltering(config, spellID))
 						end
+						table.insert(conditions, buffCanStealorPurgeFiltering(config, canStealOrPurge))
+
 						if conditionFuncs[config.Auras_Buffs_CustomFiltering_ConditionsMode] and conditionFuncs[config.Auras_Buffs_CustomFiltering_ConditionsMode](conditions) then
 							return self.BuffContainer:DisplayAura(spellID, srcName, amount, duration, expirationTime)
 						end
@@ -1661,7 +1675,7 @@ do
 			playerButton.DebuffContainer:Reset()
 			playerButton.DRContainer:Reset()
 			playerButton.Covenant:Reset()
-			playerButton:ObjectiveAndRespawn:Reset()
+			playerButton.ObjectiveAndRespawn:Reset()
 			playerButton.NumericTargetindicator:SetText(0) --reset testmode
 
 			if playerButton.UnitIDs then
