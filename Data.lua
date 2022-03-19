@@ -628,7 +628,7 @@ Data.TrinketTriggerSpellIDtoCooldown = {
 	[208683] = 120,	-- Gladiator's Medallion, 2 min. CD
 	[336126] = 120, -- Gladiator's Medallion, 2 min. CD, Shadowlands Update
 	[195901] = 60, 	-- Adaptation PvP Talent
-	[336135] = 60   -- Adapation, Shadowlands Update
+	[336135] = 60,	-- Adapation, Shadowlands Update
 	[363117] = 180 	-- Gladiator's Fastidious Resolve, Added in Shadowlands Patch 9.2 
 
 }
