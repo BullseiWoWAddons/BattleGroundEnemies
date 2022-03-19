@@ -471,7 +471,8 @@ Data.TriggerSpellIDToTrinketnumber = {--key = which first row honor talent, valu
 	[336135] = 3, 	-- 3: Adaptation, 1 min. CD, Shadowlands Update
 	[336139] = 3,   -- 3: Adapted, 1 min. CD, Shadowlands Update
 	[196029] = 4, 	-- 4: Relentless, passive, no CD
-	[336128] = 4 	-- 4: Relentless, passive, no CD, Shadowlands Update
+	[336128] = 4, 	-- 4: Relentless, passive, no CD, Shadowlands Update
+	[363117] = 5    -- 5: Gladiator's Fastidious Resolve, Added in Shadowlands Patch 9.2  
 }
 		
 	
@@ -628,6 +629,8 @@ Data.TrinketTriggerSpellIDtoCooldown = {
 	[336126] = 120, -- Gladiator's Medallion, 2 min. CD, Shadowlands Update
 	[195901] = 60, 	-- Adaptation PvP Talent
 	[336135] = 60   -- Adapation, Shadowlands Update
+	[363117] = 180 	-- Gladiator's Fastidious Resolve, Added in Shadowlands Patch 9.2 
+
 }
 
 Data.RacialSpellIDtoCooldownTrigger = {

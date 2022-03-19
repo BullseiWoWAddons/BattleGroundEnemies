@@ -2,6 +2,25 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "9.2.0.0",
+		Sections = {
+			{
+				Header = "New Features:",
+				Entries = {
+					"Added support for arenas. It might still be a bit buggy and the default settings aren't really updated yet. Testmode is working. Feedback appreciated",
+					"Addes support for the new pvp trinket Gladiator's Fastidious Resolve"
+				},
+				
+			},
+			{
+				Header = "Changes:",
+				Entries = {
+					"Toc update for 9.2"
+				}
+			}
+		}
+	},
+	{
 		Version = "9.1.0.0",
 		Sections = {
 			{
