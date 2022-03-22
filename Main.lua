@@ -1560,11 +1560,11 @@ local MainFrameFunctions = {}
 do
 	function MainFrameFunctions:ApplyAllSettings()
 		--BattleGroundEnemies:Debug(self.PlayerType)
-		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
 		if BattleGroundEnemies.BGSize then self:ApplyBGSizeSettings() end
 	end
 	
 	function MainFrameFunctions:ApplyBGSizeSettings()
+		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
 		if InCombatLockdown() then 
 			return C_Timer.After(1, function() self:ApplyBGSizeSettings() end)
 		end
@@ -1729,7 +1729,6 @@ do
 					playerButton[funcName] = func
 				end
 				RegisterUnitWatch(playerButton, true)
-				
 			end
 			
 			playerButton.Counter = {}
