@@ -1267,19 +1267,6 @@ do
 			end
 		end
 	end 
-
-	function buttonFunctions:AuraCouldShow(auraInfo, ...)
-		local self = ...;
-		if auraInfo.isHelpful then
-			return not auraInfo.isNameplateOnly;
-		end
-	
-		if auraInfo.isHarmful then
-			return TargetFrame_ShouldShowDebuffs(self.unit, auraInfo.sourceUnit, auraInfo.nameplateShowAll, auraInfo.isFromPlayerOrPlayerPet);
-		end
-	
-		return false;
-	end
 	
 	function buttonFunctions:UNIT_AURA(unitID, isFullUpdate, updatedAuraInfos)
 
