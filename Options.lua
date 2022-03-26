@@ -1379,11 +1379,17 @@ local function addEnemyAndAllySettings(self)
 																},
 
 																Fake = addVerticalSpacing(2),
+																Auras_Buffs_SourceFilter_Enabled = {
+																	type = "toggle",
+																	name = L.SourceFilter,
+																	order = 2,
+																},
 																Auras_Buffs_ShowMine = {
 																	type = "toggle",
 																	name = L.ShowMine,
 																	desc = L.ShowMine_Desc:format(L.Buffs),
-																	order = 4,
+																	hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_SourceFilter_Enabled) end,
+																	order = 3,
 																},
 																Auras_Buffs_SpellIDFiltering_Enabled = {
 																	type = "toggle",

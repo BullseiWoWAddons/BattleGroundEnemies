@@ -360,8 +360,6 @@ end)
 
 BattleGroundEnemies:SetScript("OnHide", function(self)
 	self:UnregisterEvents()
-
-	self.BGSize = false
 end)
 
 do
@@ -398,7 +396,7 @@ do
 	end
 end
 
-BattleGroundEnemies.Enemies:SetScript("OnShow", function(self) 
+BattleGroundEnemies.Enemies:SetScript("OnShow", function(self)
 	if not BattleGroundEnemies.TestmodeActive then
 		self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 		self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
@@ -554,10 +552,6 @@ function BattleGroundEnemies:UpdateBGSize()
 			end
 		end
 	end
-	if not (self.Allies:IsShown() or self.Enemies:IsShown()) then -- if neither the enemies or allies frame is enabled for that size also hide the main frame, this stops the request frame from updating
-		self:Hide()
-	end
-
 end
 
 
@@ -1472,7 +1466,7 @@ do
 			--self:Debug(unitID, "target changed")
 
 
-			-- todo: whitelisting system, user can  choose conditions and decide if teh aura must match all conditions or if the auro should shown if only one condition is met
+			-- todo: whitelisting system, user can  choose conditions and decide if the aura must match all conditions or if the auro should shown if only one condition is met
 
 
 			if aurasEnabled then
@@ -1487,7 +1481,10 @@ do
 						end
 					else
 						local conditions = {}
-						table.insert(conditions, MyDebuffFiltering(config, isMine))
+						if config.Auras_Buffs_SourceFilter_Enabled then
+							table.insert(conditions, MyDebuffFiltering(config, isMine))
+						end
+						
 						if config.Auras_Debuffs_SpellIDFiltering_Enabled then
 							table.insert(conditions, debuffSpellIDFiltering(config, spellID))
 						end
@@ -1564,11 +1561,13 @@ do
 	end
 	
 	function MainFrameFunctions:ApplyBGSizeSettings()
+		--if not BattleGroundEnemies.BGSize then return end
 		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
 		if InCombatLockdown() then 
 			return C_Timer.After(1, function() self:ApplyBGSizeSettings() end)
 		end
 		self.bgSizeConfig = self.config[tostring(BattleGroundEnemies.BGSize)]
+		
 		local conf = self.bgSizeConfig
 
 		self:SetSize(conf.BarWidth, 30)
@@ -1609,6 +1608,10 @@ do
 		else
 			self:Hide()
 		end
+
+		if not (BattleGroundEnemies.Allies:IsShown() or BattleGroundEnemies.Enemies:IsShown()) then -- if neither the enemies or allies frame is enabled for that size also hide the main frame, this stops the request frame from updating
+			self:Hide()
+		end
 	end
 	
 	
@@ -1635,7 +1638,7 @@ do
 
 			self.PlayerCount.oldPlayerNumber = self.NumPlayers
 		end
-		if self.bgSizeConfig.PlayerCount_Enabled then
+		if self.bgSizeConfig and self.bgSizeConfig.PlayerCount_Enabled then
 			self.PlayerCount:Show()
 			self.PlayerCount:SetText(format(isEnemy == (enemyFaction == 0) and PLAYER_COUNT_HORDE or PLAYER_COUNT_ALLIANCE, currentCount))
 		else
@@ -2435,7 +2438,7 @@ end
 function BattleGroundEnemies.Enemies:CreateOrUpdateArenaEnemyPlayer(unitID, name, race, classTag, specName)
 	local playerName
 	if name and name ~= UNKNOWN then
-		-- player has a real name know, check if he is already shown as arenaX
+		-- player has a real name, check if he is already shown as arenaX
 
 		BattleGroundEnemies.Enemies:ChangeName(unitID, name)
 		playerName = name
@@ -2608,7 +2611,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 	else 
 		self.Enemies:CreateArenaEnemies()
 		
-		--seen, "unseen" or "destroyed"
+		--"seen", "unseen" or "destroyed"
 		--self:Debug(UnitName(unitID))
 		local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 		if playerButton then
@@ -3179,6 +3182,8 @@ do
 				self.Enemies:DeleteAndCreateNewPlayers()
 			end
 
+			self:GROUP_ROSTER_UPDATE()
+
 			-- if foundAllies == 0 then
 			-- 	if numAllies ~= 0 then
 			-- 		self:Debug("Missing Allies, probably the enemy tab is selected")
@@ -3208,6 +3213,8 @@ do
 			local specName = specCache[GUID]
 			if specName then
 				self:CreateOrUpdatePlayer(name, raceName, classTag, specName, additionalData)
+			else
+				BattleGroundEnemies:Debug(name, "has no specName")
 			end
 		end
 		
@@ -3227,7 +3234,7 @@ do
 			if allyButton then
 				if allyButton.PlayerName ~= BattleGroundEnemies.PlayerDetails.PlayerName then
 					local unit = allyButton.unitID
-	
+					
 	
 					if allyButton.unit ~= unit then --it happens that numGroupMembers is higher than the value of the maximal players for that battleground, for example 15 in a 10 man bg, thats why we wipe AllyUnitIDToAllyDetails
 						-- ally has a new unitID now
@@ -3328,7 +3335,6 @@ do
 		if self.TestmodeActive then --disable testmode
 			self:DisableTestMode()
 		end
-
 		
 		
 		CurrentMapID = false
