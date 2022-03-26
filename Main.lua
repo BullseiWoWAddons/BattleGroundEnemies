@@ -125,7 +125,7 @@ local IsInArena --wheter or not the player is in a arena map
 
 BattleGroundEnemies:SetScript("OnEvent", function(self, event, ...)
 	self.Counter[event] = (self.Counter[event] or 0) + 1
-	BattleGroundEnemies:Debug("BattleGroundEnemies OnEvent", event, ...)
+	--BattleGroundEnemies:Debug("BattleGroundEnemies OnEvent", event, ...)
 	self[event](self, ...) 
 end)
 BattleGroundEnemies:Hide()
@@ -220,7 +220,7 @@ BattleGroundEnemies.Enemies.OnUpdate = {} --key = number from 1 to x, value = en
 BattleGroundEnemies.Enemies:Hide()
 BattleGroundEnemies.Enemies:SetScript("OnEvent", function(self, event, ...)
 	self.Counter[event] = (self.Counter[event] or 0) + 1
-	BattleGroundEnemies:Debug("Enemies OnEvent", event, ...)
+	--BattleGroundEnemies:Debug("Enemies OnEvent", event, ...)
 	self[event](self, ...)
 end)
 
@@ -234,7 +234,7 @@ BattleGroundEnemies.Allies:Hide()
 BattleGroundEnemies.Allies:SetScript("OnEvent", function(self, event, ...)
 	self.Counter[event] = (self.Counter[event] or 0) + 1
 
-	BattleGroundEnemies:Debug("Allies OnEvent", event, ...)
+	--BattleGroundEnemies:Debug("Allies OnEvent", event, ...)
 	self[event](self, ...)
 end)
 
@@ -984,7 +984,7 @@ do
 		if BattleGroundEnemies.IsRatedBG then
 			if isAlly then
 				if BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Enabled then
-					if enemyTargets >= BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Amount  then
+					if enemyTargets >= (BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Amount or 1)  then
 						local path = LSM:Fetch("sound", BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Sound, true)
 						if path then
 							PlaySoundFile(path, "Master")
@@ -1137,7 +1137,7 @@ do
 							if realm then
 								uName = uName.."-"..realm
 							end
-							if uName == srcName then
+							if uName == srcName then -- we found the right aura, because it could be possible that the same spellID is existing but from another source/player
 								break
 							end
 						end
@@ -1267,11 +1267,25 @@ do
 			end
 		end
 	end 
-	
-	function buttonFunctions:UNIT_AURA(unitID)
 
+	function buttonFunctions:AuraCouldShow(auraInfo, ...)
+		local self = ...;
+		if auraInfo.isHelpful then
+			return not auraInfo.isNameplateOnly;
+		end
+	
+		if auraInfo.isHarmful then
+			return TargetFrame_ShouldShowDebuffs(self.unit, auraInfo.sourceUnit, auraInfo.nameplateShowAll, auraInfo.isFromPlayerOrPlayerPet);
+		end
+	
+		return false;
+	end
+	
+	function buttonFunctions:UNIT_AURA(unitID, isFullUpdate, updatedAuraInfos)
+
+		-- example of updatedAuraInfos: { [1] = { ["spellId"] = 34914,["isBossAura"] = false,["nameplateShowPersonal"] = true,["isRaid"] = false,["isHarmful"] = true,["isHelpful"] = false,["canApplyAura"] = false,["name"] = Vampirberührung,["nameplateShowAll"] = false,["isFromPlayerOrPlayerPet"] = true,["isNameplateOnly"] = false,["debuffType"] = Magic,} ,[2] = { ["spellId"] = 15407,["isBossAura"] = false,["nameplateShowPersonal"] = false,["isRaid"] = false,["isHarmful"] = true,["isHelpful"] = false,["canApplyAura"] = false,["name"] = Gedankenschinden,["nameplateShowAll"] = false,["isFromPlayerOrPlayerPet"] = true,["isNameplateOnly"] = false,["debuffType"] = ,} ,[3] = { ["spellId"] = 353354,["isBossAura"] = false,["nameplateShowPersonal"] = false,["isRaid"] = false,["isHarmful"] = true,["isHelpful"] = false,["canApplyAura"] = false,["name"] = Traumerforscher,["nameplateShowAll"] = false,["isFromPlayerOrPlayerPet"] = true,["isNameplateOnly"] = false,["debuffType"] = ,} ,[4] = { ["spellId"] = 335467,["isBossAura"] = false,["nameplateShowPersonal"] = true,["isRaid"] = false,["isHarmful"] = true,["isHelpful"] = false,["canApplyAura"] = false,["name"] = Verschlingende Seuche,["nameplateShowAll"] = false,["isFromPlayerOrPlayerPet"] = true,["isNameplateOnly"] = false,["debuffType"] = Disease,} ,} 
 		
-		--BattleGroundEnemies:Information("UNIT_AURA", unitID, self.PlayerName, self.PlayerIsEnemy)
+		--BattleGroundEnemies:Information("UNIT_AURA", isFullUpdate, updatedAuraInfos, unitID, self.PlayerName, self.PlayerIsEnemy)
 		if self.UnitIDs.Arena then -- this player is shown on the arena frame and is carrying a flag, orb, etc.. 
 			if BattleGroundEnemies.BattleGroundDebuffs then
 				if CurrentMapID == 417 then --417 is kotmogu
@@ -1309,29 +1323,36 @@ do
 					self.BuffContainer:Reset()
 				end
 		
-
-				if not (aurasEnabled or config.Spec_AuraDisplay_Enabled) then return end
-
-
-				for i = 1, 40 do
-					local name, icon, amount, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, _ , spellID, canApplyAura, _, casterIsPlayer, nameplateShowAll = UnitAura(unitID, i, filter)
-					if not spellID then 
-						break
-					end
-					if unitCaster then
-						local srcName, realm = UnitName(unitCaster)
-						if realm then
-							srcName = srcName.."-"..realm
-						end		
-						--BattleGroundEnemies:Debug(operation, spellID)
-						
-						--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
-				
-						
-						self:ShouldShowAura(filter, spellID, srcName, unitCaster, canStealOrPurge, canApplyAura, amount, duration, expirationTime, debuffType)
+				local continue = false
+				if aurasEnabled or config.Spec_AuraDisplay_Enabled then 
+					if isFullUpdate then 
+						continue = true 
+					else 
+						-- todo, maybe don't scan all auras, need to think about it
+						continue = true
 					end
 				end
 
+				if continue then
+					for i = 1, 40 do
+						local name, icon, amount, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, _ , spellID, canApplyAura, _, casterIsPlayer, nameplateShowAll = UnitAura(unitID, i, filter)
+						if not spellID then 
+							break
+						end
+						if unitCaster then
+							local srcName, realm = UnitName(unitCaster)
+							if realm then
+								srcName = srcName.."-"..realm
+							end		
+							--BattleGroundEnemies:Debug(operation, spellID)
+							
+							--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
+					
+							
+							self:ShouldShowAura(filter, spellID, srcName, unitCaster, canStealOrPurge, canApplyAura, amount, duration, expirationTime, debuffType)
+						end
+					end
+				end
 			end
 		end
 	end
@@ -1427,19 +1448,19 @@ do
 	end
 
 	local function debuffSpellIDFiltering(config, spellID)
-		return config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID] 
+		return not not config.Auras_Debuffs_SpellIDFiltering_Filterlist[spellID] -- the not not is necessary for the loop in conditionFuncs, otherwise the for loop does not loop thorugh the item since its nil
 	end
 
 	local function buffSpellIDFiltering(config, spellID)
-		return config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID] 
+		return not not config.Auras_Buffs_SpellIDFiltering_Filterlist[spellID] 
 	end
 
 	local function buffCanStealorPurgeFiltering(config, canStealOrPurge)
-		return config.Auras_Buffs_ShowStealOrPurgeable and canStealOrPurge
+		return config.Auras_Buffs_ShowDispellable and canStealOrPurge
 	end
 
 	local function debuffCanStealorPurgeFiltering(config, canStealOrPurge)
-		return config.Auras_Debuffs_ShowStealOrPurgeable and canStealOrPurge
+		return config.Auras_Debuffs_ShowDispellable and canStealOrPurge
 	end
 
 
@@ -1465,10 +1486,6 @@ do
 			end
 			--self:Debug(unitID, "target changed")
 
-
-			-- todo: whitelisting system, user can  choose conditions and decide if the aura must match all conditions or if the auro should shown if only one condition is met
-
-
 			if aurasEnabled then
 				local isMine = srcName == BattleGroundEnemies.PlayerDetails.PlayerName
 				if isDebuff then
@@ -1481,7 +1498,7 @@ do
 						end
 					else
 						local conditions = {}
-						if config.Auras_Buffs_SourceFilter_Enabled then
+						if config.Auras_Debuffs_SourceFilter_Enabled then
 							table.insert(conditions, MyDebuffFiltering(config, isMine))
 						end
 						
@@ -1492,7 +1509,9 @@ do
 							table.insert(conditions, debuffTypeFiltering(config, spellID))
 						end
 
-						table.insert(conditions, debuffCanStealorPurgeFiltering(config, canStealOrPurge))
+						if config.Auras_Debuffs_DispellFilter_Enabled then
+							table.insert(conditions, debuffCanStealorPurgeFiltering(config, canStealOrPurge))
+						end
 
 						if conditionFuncs[config.Auras_Debuffs_CustomFiltering_ConditionsMode] and conditionFuncs[config.Auras_Debuffs_CustomFiltering_ConditionsMode](conditions) then
 							return self.DebuffContainer:DisplayAura(spellID, srcName, amount, duration, expirationTime, debuffType)
@@ -1508,12 +1527,17 @@ do
 						end
 					else
 						local conditions = {}
-						table.insert(conditions, MyBuffFiltering(config, isMine))
+						if config.Auras_Buffs_SourceFilter_Enabled then
+							table.insert(conditions, MyBuffFiltering(config, isMine))
+						end
 
 						if config.Auras_Buffs_SpellIDFiltering_Enabled then
 							table.insert(conditions, buffSpellIDFiltering(config, spellID))
 						end
-						table.insert(conditions, buffCanStealorPurgeFiltering(config, canStealOrPurge))
+
+						if config.Auras_Buffs_DispellFilter_Enabled then
+							table.insert(conditions, buffCanStealorPurgeFiltering(config, canStealOrPurge))
+						end
 
 						if conditionFuncs[config.Auras_Buffs_CustomFiltering_ConditionsMode] and conditionFuncs[config.Auras_Buffs_CustomFiltering_ConditionsMode](conditions) then
 							return self.BuffContainer:DisplayAura(spellID, srcName, amount, duration, expirationTime)
@@ -2555,8 +2579,18 @@ end
 
 function BattleGroundEnemies:ProfileChanged()
 	self:SetupOptions()
-	self.Enemies:ApplyAllSettings()
-	self.Allies:ApplyAllSettings()
+	self:ApplyAllSettings()
+end
+
+
+local timer = nil
+function BattleGroundEnemies:ApplyAllSettings()
+	if timer then timer:Cancel() end -- use a timer to apply changes after 0.2 second, this prevents the UI from getting laggy when the user uses a slider option
+	timer = CTimerNewTicker(0.2, function() 
+		BattleGroundEnemies.Enemies:ApplyAllSettings()
+		BattleGroundEnemies.Allies:ApplyAllSettings()
+		timer = nil
+	end, 1)
 end
 
 BattleGroundEnemies.DebugText = BattleGroundEnemies.DebugText or ""
@@ -2732,7 +2766,7 @@ end
 
 function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
 	local timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType = CombatLogGetCurrentEventInfo()
-	self:Debug(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType)
+	--self:Debug(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType)
 	local covenantID = Data.CovenantSpells[spellID]
 	if covenantID then
 		local playerButton = self:GetPlayerbuttonByName(srcName)
@@ -2947,7 +2981,7 @@ function BattleGroundEnemies:PLAYER_ALIVE()
 end
 
 function BattleGroundEnemies:UNIT_TARGET(unitID)
-	self:Debug("unitID:", unitID, "unit:", UnitName(unitID), "unittarget:", UnitName(unitID.."target"))
+	--self:Debug("unitID:", unitID, "unit:", UnitName(unitID), "unittarget:", UnitName(unitID.."target"))
 	
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton ~= PlayerButton then
@@ -3120,23 +3154,23 @@ do
 			end
 			
 			local _, _, _, _, numEnemies = GetBattlefieldTeamInfo(self.EnemyFaction)
-			--local _, _, _, _, numAllies = GetBattlefieldTeamInfo(self.AllyFaction)
+			local _, _, _, _, numAllies = GetBattlefieldTeamInfo(self.AllyFaction)
 
 			self:Debug("numEnemies:", numEnemies)
-			--self:Debug("numAllies:", numAllies)
+			self:Debug("numAllies:", numAllies)
 
 			if InCombatLockdown() then return end
 			
 			self.Enemies:UpdatePlayerCount(numEnemies)
-			--self.Allies:UpdatePlayerCount(numAllies)
+			self.Allies:UpdatePlayerCount(numAllies)
 			
 			
 	
 			
 			wipe(self.Enemies.NewPlayerDetails) --use a local table to not create an unnecessary new button if another player left
-			--wipe(self.Allies.NewPlayerDetails) --use a local table to not create an unnecessary new button if another player left
+			wipe(self.Allies.NewPlayerDetails) --use a local table to not create an unnecessary new button if another player left
 			self.Enemies.resort = false
-			--self.Allies.resort = false
+			self.Allies.resort = false
 			
 			local numScores = GetNumBattlefieldScores()
 			self:Debug("numScores:", numScores)
@@ -3152,7 +3186,7 @@ do
 					name, _, _, _, _, faction, race, _, classTag, _, _, _, _, _, _, specName = GetBattlefieldScore(i)
 				end
 				
-				self:Debug("player", "name:", name, "faction:", faction, "race:", race, "classTag:", classTag, "specName:", specName)
+				--self:Debug("player", "name:", name, "faction:", faction, "race:", race, "classTag:", classTag, "specName:", specName)
 				--name = name-realm, faction = 0 or 1, race = localized race e.g. "Mensch",classTag = e.g. "PALADIN", spec = localized specname e.g. "holy"
 				--locale dependent are: race, specName
 				
@@ -3168,8 +3202,8 @@ do
 						self.Enemies:CreateOrUpdatePlayer(name, race, classTag, specName)
 						foundEnemies = foundEnemies + 1
 					else
-						-- self.Allies:CreateOrUpdatePlayer(name, race, classTag, specName)
-						-- foundAllies = foundAllies + 1
+						self.Allies:CreateOrUpdatePlayer(name, race, classTag, specName)
+						foundAllies = foundAllies + 1
 					end
 				end
 			end
@@ -3182,22 +3216,20 @@ do
 				self.Enemies:DeleteAndCreateNewPlayers()
 			end
 
-			self:GROUP_ROSTER_UPDATE()
-
-			-- if foundAllies == 0 then
-			-- 	if numAllies ~= 0 then
-			-- 		self:Debug("Missing Allies, probably the enemy tab is selected")
-			-- 	end
-			-- else
-			-- 	self.Allies:DeleteAndCreateNewPlayers()
-			-- end
-			
+			if foundAllies == 0 then
+				if numAllies ~= 0 then
+					self:Debug("Missing Allies, probably the enemy tab is selected")
+				end
+			else
+				self.Allies:DeleteAndCreateNewPlayers()
+			end			
 		end--functions end
 	end-- do-end block end for locals of the function UPDATE_BATTLEFIELD_SCORE
 
 
 	function BattleGroundEnemies.Allies:AddGroupMember(name, isLeader, isAssistant, classTag, unitID)
 		local raceName, raceFile, raceID = UnitRace(unitID)
+		local CreatedOrUpdatedAll = true
 
 		local GUID = UnitGUID(unitID)
 		local additionalData = {
@@ -3215,6 +3247,7 @@ do
 				self:CreateOrUpdatePlayer(name, raceName, classTag, specName, additionalData)
 			else
 				BattleGroundEnemies:Debug(name, "has no specName")
+				CreatedOrUpdatedAll = false
 			end
 		end
 		
@@ -3227,6 +3260,7 @@ do
 		if isAssistant then
 			table.insert(self.assistants, name)
 		end
+		return CreatedOrUpdatedAll
 	end
 
 	function BattleGroundEnemies.Allies:UpdateAllUnitIDs()
@@ -3278,6 +3312,7 @@ do
 			ticker = CTimerNewTicker(3, function() BattleGroundEnemies:GROUP_ROSTER_UPDATE() end, 1)
 			return 
 		end
+
 		
 		wipe(self.Allies.NewPlayerDetails)
 		self.Allies.groupLeader = nil
@@ -3289,6 +3324,7 @@ do
 				
 		-- GetRaidRosterInfo also works when in a party (not raid) but i am not 100% sure how the party unitID maps to the index in GetRaidRosterInfo()
 
+		local CreatedOrUpdatedAll = false
 
 		if IsInRaid() then 
 			local numGroupMembers = GetNumGroupMembers()
@@ -3298,7 +3334,7 @@ do
 				local name, rank, subgroup, level, localizedClass, classTag, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(i)
 				
 				if name and rank and classTag then 
-					self.Allies:AddGroupMember(name, rank == 2, rank == 1, classTag, unitIDPrefix..i)
+					CreatedOrUpdatedAll = self.Allies:AddGroupMember(name, rank == 2, rank == 1, classTag, unitIDPrefix..i)
 				end
 			end
 		else
@@ -3315,15 +3351,23 @@ do
 						name = name.."-"..realm
 					end
 		
-					self.Allies:AddGroupMember(name, UnitIsGroupLeader(unitID), UnitIsGroupAssistant(unitID), select(2, UnitClass(unitID)), unitID)
+					CreatedOrUpdatedAll = self.Allies:AddGroupMember(name, UnitIsGroupLeader(unitID), UnitIsGroupAssistant(unitID), select(2, UnitClass(unitID)), unitID)
 				end
 			end
 
 			self.PlayerDetails.isGroupLeader = UnitIsGroupLeader("player")
 			self.PlayerDetails.isGroupAssistant = UnitIsGroupAssistant("player")
-			self.Allies:AddGroupMember(self.PlayerDetails.PlayerName, self.PlayerDetails.isGroupLeader, self.PlayerDetails.isGroupAssistant, self.PlayerDetails.PlayerClass, "player")
+			CreatedOrUpdatedAll = self.Allies:AddGroupMember(self.PlayerDetails.PlayerName, self.PlayerDetails.isGroupLeader, self.PlayerDetails.isGroupAssistant, self.PlayerDetails.PlayerClass, "player")
 		end
-		self.Allies:DeleteAndCreateNewPlayers()
+
+		
+		if CreatedOrUpdatedAll then
+			if InCombatLockdown() then
+				return C_Timer.After(1, function() BattleGroundEnemies:GROUP_ROSTER_UPDATE() end)
+			else 
+				self.Allies:DeleteAndCreateNewPlayers()
+			end 		
+		end
 		self.Allies:UpdateAllUnitIDs()
 		lastRun = now
 	end

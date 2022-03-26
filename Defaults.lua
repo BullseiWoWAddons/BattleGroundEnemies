@@ -143,7 +143,7 @@ Data.defaultSettings = {
 				DrTrackingFiltering_Filterlist = {},
 				
 				
-				Auras_Enabled = true,
+				Auras_Enabled = false,
 				
 				Auras_Buffs_Enabled = false,
 				Auras_Buffs_Size = 15,

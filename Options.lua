@@ -78,23 +78,8 @@ local function getOption(location, option)
 	end
 end
 
-local timer = nil
-local function ApplyAllSettings()
-	if timer then timer:Cancel() end -- use a timer to apply changes after 0.2 second, this prevents the UI from getting laggy when the user uses a slider option
-	timer = CTimerNewTicker(0.2, function() 
-		BattleGroundEnemies.Enemies:ApplyAllSettings()
-		BattleGroundEnemies.Allies:ApplyAllSettings()
-		timer = nil
-	end, 1)
-end
-
-
 
 local function setOption(location, option, ...)
-
-
-	
-
 	local value
 	if option.type == "color" then
 		value = {...}   -- local r, g, b, alpha = ...
@@ -103,7 +88,7 @@ local function setOption(location, option, ...)
 	end
 
 	location[option[#option]] = value
-	ApplyAllSettings()
+	BattleGroundEnemies:ApplyAllSettings()
 	
 
 	--BattleGroundEnemies.db.profile[key] = value
@@ -500,7 +485,7 @@ local function addEnemyAndAllySettings(self)
 						end,
 						set = function(option, key, state) 
 							location.RangeIndicator_Frames[key] = state
-							ApplyAllSettings()
+							BattleGroundEnemies:ApplyAllSettings()
 						end,
 						width = "double",
 						values = Data.RangeFrames,
@@ -1382,19 +1367,34 @@ local function addEnemyAndAllySettings(self)
 																Auras_Buffs_SourceFilter_Enabled = {
 																	type = "toggle",
 																	name = L.SourceFilter,
-																	order = 2,
+																	order = 3,
 																},
 																Auras_Buffs_ShowMine = {
 																	type = "toggle",
 																	name = L.ShowMine,
 																	desc = L.ShowMine_Desc:format(L.Buffs),
 																	hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_SourceFilter_Enabled) end,
-																	order = 3,
+																	width = "double",
+																	order = 4,
 																},
+																Fake1 = addVerticalSpacing(5),
+																Auras_Buffs_DispellFilter_Enabled = {
+																	type = "toggle",
+																	name = L.DispellFilter,
+																	order = 6,
+																},
+																Auras_Buffs_ShowDispellable = {
+																	type = "toggle",
+																	name = L.ShowDispellable,
+																	desc = L.ShowDispellable_Desc:format(L.Buffs),
+																	hidden = function() return not (location.Auras_Buffs_Filtering_Enabled and location.Auras_Buffs_DispellFilter_Enabled) end,
+																	order = 7,
+																},
+																Fake2 = addVerticalSpacing(8),
 																Auras_Buffs_SpellIDFiltering_Enabled = {
 																	type = "toggle",
 																	name = L.SpellID_Filtering,
-																	order = 8
+																	order = 9
 																},
 																Auras_Buffs_SpellIDFiltering__AddSpellID = {
 																	type = "input",
@@ -1410,9 +1410,9 @@ local function addEnemyAndAllySettings(self)
 																		end
 																	end,
 																	width = 'double',
-																	order = 9
+																	order = 10
 																},
-																Fake2 = addVerticalSpacing(10),
+																Fake3 = addVerticalSpacing(11),
 																Auras_Buffs_SpellIDFiltering_Filterlist = {
 																	type = "multiselect",
 																	name = L.Filtering_Filterlist,
@@ -1431,7 +1431,7 @@ local function addEnemyAndAllySettings(self)
 																		end
 																		return valueTable
 																	end,
-																	order = 11
+																	order = 12
 																}
 															}
 														}
@@ -1551,19 +1551,38 @@ local function addEnemyAndAllySettings(self)
 																},
 
 																Fake = addVerticalSpacing(2),
+																Auras_Debuffs_SourceFilter_Enabled = {
+																	type = "toggle",
+																	name = L.SourceFilter,
+																	order = 3,
+																},
 																Auras_Debuffs_ShowMine = {
 																	type = "toggle",
 																	name = L.ShowMine,
 																	desc = L.ShowMine_Desc:format(L.Debuffs),
+																	hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_SourceFilter_Enabled) end,
 																	order = 4,
 																},
 																Fake1 = addVerticalSpacing(5),
+																Auras_Debuffs_DispellFilter_Enabled = {
+																	type = "toggle",
+																	name = L.DispellFilter,
+																	order = 6,
+																},
+																Auras_Debuffs_ShowDispellable = {
+																	type = "toggle",
+																	name = L.ShowDispellable,
+																	desc = L.ShowMine_Desc:format(L.Buffs),
+																	hidden = function() return not (location.Auras_Debuffs_Filtering_Enabled and location.Auras_Debuffs_DispellFilter_Enabled) end,
+																	order = 7,
+																},
+																Fake2 = addVerticalSpacing(8),
 																Auras_Debuffs_DebuffTypeFiltering_Enabled = {
 																	type = "toggle",
 																	name = L.DebuffType_Filtering,
 																	desc = L.DebuffType_Filtering_Desc,
 																	width = 'normal',
-																	order = 6
+																	order = 9
 																},
 																Auras_Debuffs_DebuffTypeFiltering_Filterlist = {
 																	type = "multiselect",
@@ -1578,12 +1597,12 @@ local function addEnemyAndAllySettings(self)
 																	end,
 																	width = 'normal',
 																	values = Data.DebuffTypes,
-																	order = 7
+																	order = 10
 																},
 																Auras_Debuffs_SpellIDFiltering_Enabled = {
 																	type = "toggle",
 																	name = L.SpellID_Filtering,
-																	order = 8
+																	order = 11
 																},
 																Auras_Debuffs_SpellIDFiltering__AddSpellID = {
 																	type = "input",
@@ -1599,9 +1618,9 @@ local function addEnemyAndAllySettings(self)
 																		end
 																	end,
 																	width = 'double',
-																	order = 9
+																	order = 12
 																},
-																Fake2 = addVerticalSpacing(10),
+																Fake3 = addVerticalSpacing(13),
 																Auras_Debuffs_SpellIDFiltering_Filterlist = {
 																	type = "multiselect",
 																	name = L.Filtering_Filterlist,
@@ -1620,7 +1639,7 @@ local function addEnemyAndAllySettings(self)
 																		end
 																		return valueTable
 																	end,
-																	order = 11
+																	order = 14
 																}
 															}
 		

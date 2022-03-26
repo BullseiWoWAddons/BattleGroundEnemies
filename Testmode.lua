@@ -115,6 +115,7 @@ do
 			wipe(fakePlayers)
 		
 			MainFrame:RemoveAllPlayers()
+			MainFrame:UpdatePlayerCount(self.BGSize)
 					
 			local healerAmount = mathrandom(1, 3)
 			local tankAmount = mathrandom(1, 2)
