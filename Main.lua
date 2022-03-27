@@ -248,15 +248,12 @@ local specCache = {} -- key = GUID, value = specName (localized)
 function BattleGroundEnemies.Allies:GroupInSpecT_Update(event, GUID, unitID, info)
 	if not GUID or not info.class then return end
 
-
 	specCache[GUID] = info.spec_name_localized
 
 	BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 end
 
-if LGIST then -- the libary doesnt work in TBCC, IsTBCC
-	LGIST.RegisterCallback(BattleGroundEnemies.Allies, "GroupInSpecT_Update")
-end
+
 
 
 BattleGroundEnemies:RegisterEvent("PLAYER_LOGIN") --Fired on reload UI and on initial loading screen
@@ -2410,6 +2407,10 @@ do
 		CreateMainFrame("Allies")
 		CreateMainFrame("Enemies")
 
+		if LGIST then -- the libary doesnt work in TBCC, IsTBCC
+			LGIST.RegisterCallback(BattleGroundEnemies.Allies, "GroupInSpecT_Update")
+		end
+
 		self:RegisterEvent("GROUP_ROSTER_UPDATE")
 		self:RegisterEvent("PLAYER_ENTERING_WORLD") -- fired on reload UI and on every loading screen (for switching zones, intances etc)
 		self:RegisterEvent("PARTY_LEADER_CHANGED")
@@ -2778,7 +2779,7 @@ do
 	local oldTarget
 	function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
 		if not PlayerButton then return end
-		
+
 		local playerButton = self:GetPlayerbuttonByUnitID("target")
 		
 		if oldTarget then
