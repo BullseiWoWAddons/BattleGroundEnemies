@@ -7,7 +7,7 @@ Data.changelog = {
 			{
 				Header = "Bugfixes:",
 				Entries = {
-					"Fixed two lua errors after login"
+					"Fixed two Lua errors after login"
 				}
 			}
 		}
@@ -33,7 +33,6 @@ Data.changelog = {
 					"Added support for arenas. Feedback appreciated",
 					"Added support for the new pvp trinket Gladiator's Fastidious Resolve"
 				}
-				
 			},
 			{
 				Header = "Bugfixes:",
@@ -41,7 +40,6 @@ Data.changelog = {
 					"Fixed a bug reported by mltco78dhs@curseforge that happened in rated battlegrounds.",
 					"Fixed a bug reported by zooloogorbonos and Air10000 that happened in open world"
 				}
-				
 			},
 			{
 				Header = "Changes:",
@@ -58,8 +56,7 @@ Data.changelog = {
 				Header = "New Features:",
 				Entries = {
 					"Added support for arenas. It might still be a bit buggy and the default settings aren't really updated yet. Testmode is working. Feedback appreciated",
-				}
-				
+				}	
 			},
 			{
 				Header = "Changes:",
