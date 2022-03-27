@@ -2,6 +2,17 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "9.2.0.2",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed the target indicators, which i broke accidentally in 9.2.0.0",
+				},
+			},
+		}
+	},
+	{
 		Version = "9.2.0.0",
 		Sections = {
 			{

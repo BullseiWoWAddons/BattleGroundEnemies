@@ -2968,7 +2968,7 @@ function BattleGroundEnemies:PLAYER_ALIVE()
 end
 
 function BattleGroundEnemies:UNIT_TARGET(unitID)
-	--self:Debug("unitID:", unitID, "unit:", UnitName(unitID), "unittarget:", UnitName(unitID.."target"))
+	--self:Debug("unitID:", unitID, "unitname:", UnitName(unitID), "unittarget:", UnitName(unitID.."target"))
 	
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if playerButton and playerButton ~= PlayerButton then
@@ -3347,7 +3347,7 @@ do
 			CreatedOrUpdatedAll = self.Allies:AddGroupMember(self.PlayerDetails.PlayerName, self.PlayerDetails.isGroupLeader, self.PlayerDetails.isGroupAssistant, self.PlayerDetails.PlayerClass, "player")
 		end
 
-		
+		self.Allies:UpdateAllUnitIDs()
 		if CreatedOrUpdatedAll then
 			if InCombatLockdown() then
 				return C_Timer.After(1, function() BattleGroundEnemies:GROUP_ROSTER_UPDATE() end)
@@ -3355,7 +3355,7 @@ do
 				self.Allies:DeleteAndCreateNewPlayers()
 			end 		
 		end
-		self.Allies:UpdateAllUnitIDs()
+		
 		lastRun = now
 	end
 
@@ -3371,6 +3371,7 @@ do
 		CurrentMapID = false
 	
 		local _, zone = IsInInstance()
+
 		if zone == "pvp" or zone == "arena" then
 			self:Show()
 			if zone == "arena" then

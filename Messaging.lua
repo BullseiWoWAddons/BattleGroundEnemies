@@ -70,7 +70,7 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 	}
 
 
-	--loop through all of the BattleGroundEnemies.Allies.groupMembers to find out which one of them send us their addon version
+	--loop through all of the BattleGroundEnemies.Allies.Players to find out which one of them send us their addon version
 	for allyName, allyButton in pairs(BattleGroundEnemies.Allies.Players) do
   
 		if versions[allyName] then
@@ -94,7 +94,7 @@ end
 local timers = {}
 --[[ 
   we use timers to broadcast information, we do this because it may happen that 
-many players request the same information in a shortm time due to
+many players request the same information in a short time due to
  ingame events like GROUP_ROSTER_UPDATE, this way we only send out the information 
 once when requested in a 3 second time frame, every new request resets the timer
  ]]
