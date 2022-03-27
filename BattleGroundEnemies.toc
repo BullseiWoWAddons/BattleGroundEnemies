@@ -1,6 +1,6 @@
 ## Interface: 90200
 ## Interface-Retail: 90200
-## Interface-BCC: 20502
+## Interface-BCC: 20503
 ## Title: BattleGroundEnemies
 ## Version: @project-version@
 ## Author: Bullsei
