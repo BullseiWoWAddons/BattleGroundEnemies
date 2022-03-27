@@ -3067,7 +3067,6 @@ do
 		
 
 		function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
-			print("UPDATE_BATTLEFIELD_SCORE")
 			-- self:Debug(GetCurrentMapAreaID())
 			-- self:Debug("UPDATE_BATTLEFIELD_SCORE")
 			-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
@@ -3234,7 +3233,6 @@ do
 			if specName then
 				self:CreateOrUpdatePlayer(name, raceName, classTag, specName, additionalData)
 			else
-				print(name, "has no specName")
 				stop = true
 			end
 		end
@@ -3293,7 +3291,6 @@ do
 	local ticker 
 	local lastRun = GetTime()
 	function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
-		print("GROUP_ROSTER_UPDATE")
 		local now = GetTime()
 		if now - lastRun < 2 then 
 			if ticker then ticker:Cancel() end
@@ -3303,7 +3300,6 @@ do
 
 		
 		wipe(self.Allies.NewPlayerDetails)
-		print("wiped self.Allies.NewPlayerDetails in group_roster_update")
 		self.Allies.groupLeader = nil
 		self.Allies.assistants = {}  
 
@@ -3355,7 +3351,6 @@ do
 				C_Timer.After(1, function() BattleGroundEnemies:GROUP_ROSTER_UPDATE() end)
 			else 
 				self.Allies:DeleteAndCreateNewPlayers()
-				print("DeleteAndCreateNewPlayers in Group_roster_update")
 				self.Allies:UpdateAllUnitIDs()
 			end 		
 		end
