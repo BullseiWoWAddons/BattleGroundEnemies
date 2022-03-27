@@ -260,10 +260,6 @@ end
 
 
 BattleGroundEnemies:RegisterEvent("PLAYER_LOGIN") --Fired on reload UI and on initial loading screen
-BattleGroundEnemies:RegisterEvent("PLAYER_ENTERING_WORLD") -- fired on reload UI and on every loading screen (for switching zones, intances etc)
-BattleGroundEnemies:RegisterEvent("GROUP_ROSTER_UPDATE")
-BattleGroundEnemies:RegisterEvent("PARTY_LEADER_CHANGED")
-BattleGroundEnemies:RegisterEvent("UI_SCALE_CHANGED")
 
 
 
@@ -2413,6 +2409,11 @@ do
 		
 		CreateMainFrame("Allies")
 		CreateMainFrame("Enemies")
+
+		self:RegisterEvent("GROUP_ROSTER_UPDATE")
+		self:RegisterEvent("PLAYER_ENTERING_WORLD") -- fired on reload UI and on every loading screen (for switching zones, intances etc)
+		self:RegisterEvent("PARTY_LEADER_CHANGED")
+		self:RegisterEvent("UI_SCALE_CHANGED")
 		
 		self:SetupOptions()
 
@@ -2776,6 +2777,8 @@ end
 do
 	local oldTarget
 	function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
+		if not PlayerButton then return end
+		
 		local playerButton = self:GetPlayerbuttonByUnitID("target")
 		
 		if oldTarget then
@@ -2811,6 +2814,8 @@ end
 do
 	local oldFocus
 	function BattleGroundEnemies:PLAYER_FOCUS_CHANGED()
+		if not PlayerButton then return end
+
 		local playerButton = self:GetPlayerbuttonByUnitID("focus")
 		if oldFocus then
 			if oldFocus.PlayerIsEnemy then
@@ -3298,7 +3303,6 @@ do
 			return 
 		end
 
-		
 		wipe(self.Allies.NewPlayerDetails)
 		self.Allies.groupLeader = nil
 		self.Allies.assistants = {}  
