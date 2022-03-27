@@ -2,6 +2,17 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "9.2.0.4",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed two lua errors after login"
+				}
+			}
+		}
+	},
+	{
 		Version = "9.2.0.3",
 		Sections = {
 			{
