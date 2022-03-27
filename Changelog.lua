@@ -8,8 +8,9 @@ Data.changelog = {
 				Header = "Bugfixes:",
 				Entries = {
 					"Fixed the target indicators, which i broke accidentally in 9.2.0.0",
-				},
-			},
+					"Fixed an issue that made allies disappear and reappear shortly after joining the group or after a reload"
+				}
+			}
 		}
 	},
 	{
@@ -20,15 +21,15 @@ Data.changelog = {
 				Entries = {
 					"Added support for arenas. Feedback appreciated",
 					"Added support for the new pvp trinket Gladiator's Fastidious Resolve"
-				},
+				}
 				
 			},
 			{
 				Header = "Bugfixes:",
 				Entries = {
 					"Fixed a bug reported by mltco78dhs@curseforge that happened in rated battlegrounds.",
-					"Fixed a bug reported by zooloogorbonos and Air10000 that happened in open world",
-				},
+					"Fixed a bug reported by zooloogorbonos and Air10000 that happened in open world"
+				}
 				
 			},
 			{
@@ -46,7 +47,7 @@ Data.changelog = {
 				Header = "New Features:",
 				Entries = {
 					"Added support for arenas. It might still be a bit buggy and the default settings aren't really updated yet. Testmode is working. Feedback appreciated",
-				},
+				}
 				
 			},
 			{
