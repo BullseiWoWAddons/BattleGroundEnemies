@@ -15,20 +15,11 @@ if not IsTBCC then
 	LGIST=LibStub:GetLibrary("LibGroupInSpecT-1.1") 
 end
 
-
-
-
-
-
-
-
 LSM:Register("font", "PT Sans Narrow Bold", [[Interface\AddOns\BattleGroundEnemies\Fonts\PT Sans Narrow Bold.ttf]])
 LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusBar")
 
 local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies")
 BattleGroundEnemies.Counter = {}
-
-
 
 
 

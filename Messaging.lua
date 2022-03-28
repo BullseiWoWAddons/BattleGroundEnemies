@@ -84,9 +84,19 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 		end
 	end
 
+	
 	for k,v in pairs(results) do
 		if #v> 0 then
-			BattleGroundEnemies:Information(texts[k]..":", unpack(v))
+			local text = ""
+			for i = 1, #v do
+				if i == 1 then
+					text = text..v[i]
+				else 
+					text = text..", "..v[i]
+				end
+				
+			end
+			BattleGroundEnemies:Information(texts[k]..":", text)
 		end
 	end
 end
