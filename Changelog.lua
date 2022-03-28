@@ -2,6 +2,17 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "9.2.0.5",
+		Sections = {
+			{
+				Header = "Changes:",
+				Entries = {
+					"Added a comma between the name list in the /bgev text"
+				}
+			}
+		}
+	},
+	{
 		Version = "9.2.0.4",
 		Sections = {
 			{
