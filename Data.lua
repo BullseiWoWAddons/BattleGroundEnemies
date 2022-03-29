@@ -265,7 +265,6 @@ Data.cCduration = {	-- this is basically data from DRList-1 with durations, used
 		[321395] = 8, -- Polymorph (Mawrat)
 		[161355] = 8, -- Polymorph (penguin)
 		[161372] = 8, -- Polymorph (peacock)
-		[126819] = 8, -- Polymorph (Porcupine)
 		[ 82691] = 8, -- Ring of Frost
 		-- Monk
 		[115078] = 4, -- Paralysis
