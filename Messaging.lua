@@ -175,7 +175,7 @@ function BattleGroundEnemies:UpdateVersions(sender, prefix, version)
 			if version > BGE_VERSION then
 				if timers.outdatedTimer then timers.outdatedTimer:Cancel() end
 				timers.outdatedTimer = CTimerNewTicker(3, function() 
-					BattleGroundEnemies:Information(L.NewVersionAvailable)
+					BattleGroundEnemies:Information(L.NewVersionAvailable..": ", version)
 					timers.outdatedTimer = nil
 				end, 1)
 			end
