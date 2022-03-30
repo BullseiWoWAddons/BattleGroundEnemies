@@ -9,6 +9,7 @@ local PlayerLevel = UnitLevel("player")
 
 local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local mathrandom = math.random
 local tinsert = table.insert
@@ -72,7 +73,7 @@ do
 		for i = 1, amount do
 	
 			local classTag, randomSpec, specName
-			if IsTBCC then
+			if IsTBCC or isClassic then
 				classTag = Data.ClassList[mathrandom(1, #Data.ClassList)]
 			else
 				randomSpec = Data.RolesToSpec[role][mathrandom(1, #Data.RolesToSpec[role])]
@@ -131,7 +132,7 @@ do
 				for k,v in pairs(enemyDetails) do 
 				end
 				local playerButton = MainFrame:SetupButtonForNewPlayer(enemyDetails)
-				if not IsTBCC then
+				if not (IsTBCC or isClassic) then
 					playerButton.Covenant:DisplayCovenant(mathrandom(1, #Data.CovenantIcons))  
 				end
 			end

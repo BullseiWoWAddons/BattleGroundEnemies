@@ -11,6 +11,7 @@ local GetSpellTexture = GetSpellTexture
 
 local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/Romanization_of_Russian
 	["А"] = "a",
@@ -768,7 +769,7 @@ do
 		local _, classTag = GetClassInfo(classID)
 		if classTag then
 			Data.Classes[classTag] = {}
-			if IsTBCC then 
+			if IsTBCC or isClassic then 
 				Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}
 				table.insert(Data.ClassList, classTag)
 			else
