@@ -1,0 +1,18 @@
+package-as: BattleGroundEnemies
+
+externals:
+    Libs/LibStub: https://repos.wowace.com/wow/libstub/trunk
+    Libs/CallbackHandler-1.0: https://repos.wowace.com/wow/callbackhandler/trunk/CallbackHandler-1.0
+    Libs/AceConfig-3.0: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
+    Libs/AceDB-3.0: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
+    Libs/AceDBOptions-3.0: https://repos.wowace.com/wow/ace3/trunk/AceDBOptions-3.0
+    Libs/AceGUI-3.0: https://repos.wowace.com/wow/ace3/trunk/AceGUI-3.0
+    Libs/AceGUI-3.0-SharedMediaWidgets: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
+    Libs/LibPlayerSpells-1.0: https://github.com/AdiAddons/LibPlayerSpells-1.0
+    Libs/LibRaces-1.0: https://repos.curseforge.com/wow/libraces-1-0
+    Libs/LibSharedMedia-3.0: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
+    Libs/UTF8: https://repos.wowace.com/wow/utf8/trunk
+    Libs/DRList-1.0: https://github.com/wardz/DRList-1.0
+    Libs/LibDDI-1.0: https://repos.wowace.com/wow/libddi-1-0/trunk
+    Libs/LibChangelog: https://github.com/BullseiWoWAddons/LibChangelog
+    Libs/FlyPaper-2.0: https://github.com/Tuller/FlyPaper-2.0
