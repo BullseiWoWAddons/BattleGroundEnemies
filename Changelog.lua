@@ -5,6 +5,12 @@ Data.changelog = {
 		Version = "9.2.0.5",
 		Sections = {
 			{
+				Header = "New Features:",
+				Entries = {
+					"Added support for Classic"
+				}
+			},
+			{
 				Header = "Changes:",
 				Entries = {
 					"Added a comma between the name list in the /bgev text",
