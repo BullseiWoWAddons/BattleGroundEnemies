@@ -42,6 +42,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 	AuraContainer.Reset = function(self)
 		for identifier, auraFrame in pairs(self.Active) do
 			auraFrame.Cooldown:Clear()
+			auraFrame:Remove()
 		end
 	end
 	
@@ -124,23 +125,20 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 			auraFrame.Stacks:SetJustifyV("BOTTOM")
 
 			auraFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(auraFrame)
-			auraFrame.Cooldown:SetScript("OnHide", function() 
-				auraFrame.Stacks:SetText("")
-				auraFrame:Hide()
-				auraFrame.Container.Active[auraFrame.Identifier] = nil
-				auraFrame.Container:AuraPositioning()
-				auraFrame.Container.Inactive[#auraFrame.Container.Inactive + 1] = auraFrame
-				if auraFrame.Type == "priorized" then
+			auraFrame.Cooldown:SetScript("OnCooldownDone", function() 
+				auraFrame:Remove()
+			end)
+
+			auraFrame.Remove = function(self) 
+				self.Stacks:SetText("")
+				self:Hide()
+				self.Container.Active[self.Identifier] = nil
+				self.Container:AuraPositioning()
+				self.Container.Inactive[#self.Container.Inactive + 1] = self
+				if self.Type == "priorized" then
 					return --TODO
 				end
-			end)
-			-- auraFrame.Cooldown:SetScript("OnCooldownDone", function() 
-			-- 	auraFrame.Stacks:SetText("")
-			-- 	auraFrame:Hide()
-			-- 	auraFrame.Active[auraFrame.Identifier] = nil
-			-- 	auraFrame.Container:AuraPositioning()
-			-- 	auraFrame.Inactive[#auraFrame.Inactive + 1] = auraFrame
-			-- end)
+			end
 			
 
 			auraFrame.Container = self		

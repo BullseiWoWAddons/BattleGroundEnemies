@@ -25,7 +25,7 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 	ObjectiveAndRespawn.Cooldown:Hide()
 	
 
-	ObjectiveAndRespawn.Cooldown:SetScript("OnHide", function() 
+	ObjectiveAndRespawn.Cooldown:SetScript("OnCooldownDone", function() 
 		ObjectiveAndRespawn:Reset()
 	end)
 	-- ObjectiveAndRespawn.Cooldown:SetScript("OnCooldownDone", function() 
