@@ -14,7 +14,8 @@ Data.changelog = {
 				Header = "Changes:",
 				Entries = {
 					"Added a comma between the name list in the /bgev text",
-					"print the newest available version when out of date"
+					"print the newest available version when out of date",
+					"The addon now uses the same package/zip for Classic, TBC and Retail"
 				}
 			}
 		}
