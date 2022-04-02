@@ -15,6 +15,10 @@
 embeds.xml
 #@end-no-lib-strip@
 
+#@retail@
+Libs\LibGroupInSpecT-1.1\lib.xml
+#@end-retail@
+
 Locales\enUS.lua
 Locales\deDE.lua
 Locales\esES.lua
