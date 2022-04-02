@@ -34,7 +34,7 @@ jobs:
           args: -q
 
       # Runs a set of commands using the runners shell
-      - name: Create Retail Package
+      - name: Create Addon Package
         uses: BigWigsMods/packager@master
         with:
           args: -S
