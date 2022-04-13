@@ -15,7 +15,13 @@ Data.changelog = {
 				Entries = {
 					"Added a comma between the name list in the /bgev text",
 					"print the newest available version when out of date",
-					"The addon now uses the same package/zip for Classic, TBC and Retail"
+					"The addon now uses the same package/zip for Classic, TBC and Retail",
+				}
+			},
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Gladiator's resolve has no Cooldown."
 				}
 			}
 		}
