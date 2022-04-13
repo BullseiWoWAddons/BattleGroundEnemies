@@ -476,7 +476,7 @@ Data.TrinketData = {
 	[336139] = {cd = 60, fileID = GetSpellTexture(214027)			},		-- 3: Adapted, 1 min. CD, Shadowlands Update
 	[196029] = {cd = false											}, 		-- 4: Relentless, passive, no CD
 	[336128] = {cd = false											}, 		-- 4: Relentless, passive, no CD, Shadowlands Update
-	[363117] = {cd = 180											},		-- 5: Gladiator's Fastidious Resolve, Added in Shadowlands Patch 9.2  
+	[363117] = {cd = false											},		-- 5: Gladiator's Fastidious Resolve, Added in Shadowlands Patch 9.2  
 }
 
 
