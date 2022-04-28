@@ -24,7 +24,7 @@ BattleGroundEnemies.Counter = {}
 
 --todo, fix the testmode when the user is in a group
 -- todo, maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
-
+--todo C_PvP.GetScoreInfo() replaces GetBattleFieldScore(), doesnt seem to exist on classic tho...
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -685,17 +685,22 @@ do
 	end
 	
 	function buttonFunctions:SetSpecAndRole()
-		if IsTBCC or isClassic then
-			self.Spec.Icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[self.PlayerClass]))
-			self.Spec.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
-		else
+		if self.PlayerSpecName then 
+			
 			local specData = Data.Classes[self.PlayerClass][self.PlayerSpecName]
 			self.PlayerRoleNumber = specData.roleNumber
 			self.PlayerRoleID = specData.roleID
+			self.Role.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
 			self.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(self.PlayerRoleID))
 			self.Spec.Icon:SetTexture(specData.specIcon)
 			self.PlayerSpecID = specData.specID
+		else
+			--isTBCC, TBCC
+			self.Spec.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
+			self.Spec.Icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[self.PlayerClass]))
 		end
+
+		self.Spec:CropImage(self.Spec:GetWidth(), self.Spec:GetHeight())
 	end
 
 	function buttonFunctions:UpdateRaidTargetIcon()
@@ -895,6 +900,7 @@ do
 			self.ObjectiveAndRespawn:PlayerDied()
 		elseif self.ObjectiveAndRespawn.ActiveRespawnTimer then --player is alive again
 			self.ObjectiveAndRespawn.Cooldown:Clear()
+			self.ObjectiveAndRespawn:Reset()
 		end
 		self.healthBar:SetMinMaxValues(0, UnitHealthMax(unitID))
 		self.healthBar:SetValue(UnitHealth(unitID))
@@ -1710,6 +1716,9 @@ do
 			playerButton.Covenant:Reset()
 			playerButton.ObjectiveAndRespawn:Reset()
 			playerButton.NumericTargetindicator:SetText(0) --reset testmode
+			playerButton.Spec_AuraDisplay:Clear()
+			playerButton.Spec_AuraDisplay:ActiveAuraRemoved()
+
 
 			if playerButton.UnitIDs then
 				wipe(playerButton.UnitIDs.TargetedByEnemy)  
@@ -1799,15 +1808,19 @@ do
 			playerButton.Spec:SetPoint('BOTTOMLEFT' , playerButton, 'BOTTOMLEFT', 0, 0)
 			
 			playerButton.Spec:SetScript("OnSizeChanged", function(self, width, height)
-				if not (IsTBCC or isClassic) then
+				self:CropImage(width, height)
+			end)
+
+			function playerButton.Spec:CropImage(width, height)
+				if playerButton.PlayerSpecName then
 					BattleGroundEnemies.CropImage(self.Icon, width, height)
 				end
 				BattleGroundEnemies.CropImage(playerButton.Spec_AuraDisplay.Icon, width, height)
-			end)
+			end
 
 			playerButton.Spec:HookScript("OnEnter", function(self)
 				BattleGroundEnemies:ShowTooltip(self, function()
-					if IsTBCC or isClassic then return end 
+					if not playerButton.PlayerSpecName then return end 
 					GameTooltip:SetText(playerButton.PlayerSpecName)
 				end)
 			end)
@@ -1987,7 +2000,7 @@ do
 			playerButton.Role:SetPoint("TOPLEFT")
 			playerButton.Role:SetPoint("BOTTOMLEFT")
 			playerButton.Role.Icon = playerButton.Role:CreateTexture(nil, 'OVERLAY')
-			playerButton.Role.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
+			
 
 			playerButton.Role.ApplySettings = function(self)
 				if not (IsTBCC or isClassic) and playerButton.bgSizeConfig.RoleIcon_Enabled then 
@@ -2152,10 +2165,10 @@ do
 		playerButton.totalAbsorbOverlay:Hide()
 		playerButton.totalAbsorb:Hide()
 		
-		if IsTBCC or isClassic then
-			color = PowerBarColor[Data.Classes[playerButton.PlayerClass].Ressource]
-		else
+		if playerButton.PlayerSpecName then
 			color = PowerBarColor[Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName].Ressource]
+		else
+			color = PowerBarColor[Data.Classes[playerButton.PlayerClass].Ressource]
 		end
 		
 		playerButton.Power:SetStatusBarColor(color.r, color.g, color.b)
@@ -2252,10 +2265,9 @@ do
 	end
 
 	function MainFrameFunctions:CreateOrUpdatePlayer(name, race, classTag, specName, additionalData)
-		
 		local playerButton = self.Players[name]
 		if playerButton then	--already existing
-			if not (IsTBCC or isClassic) then 
+			if specName and specName ~= "" then -- isTBCC, TBCC
 				if playerButton.PlayerSpecName ~= specName then--its possible to change specName in battleground
 					playerButton.PlayerSpecName = specName
 					playerButton:SetSpecAndRole()
@@ -2272,7 +2284,7 @@ do
 				PlayerClass = string.upper(classTag), --apparently it can happen that we get a lowercase "druid" from GetBattlefieldScore() in TBCC, IsTBCC
 				PlayerName = name,
 				PlayerRace = race and LibRaces:GetRaceToken(race) or "Unknown", --delivers a locale independent token for relentless check
-				PlayerSpecName = specName,
+				PlayerSpecName = specName ~= "" and specName or false, --set to false since we use Mixin() and Mixin doesnt mixin nil values and therefore we dont overwrite values with nil
 				PlayerClassColor = RAID_CLASS_COLORS[classTag],
 				PlayerLevel = false,
 			}
@@ -2320,11 +2332,17 @@ do
 		end
 
 		local function PlayerSortingByRoleClassName(playerA, playerB)-- a and b are playerButtons
-			if playerA.PlayerRoleNumber == playerB.PlayerRoleNumber then
+			if playerA.PlayerRoleNumber and playerB.PlayerRoleNumber then
+				if playerA.PlayerRoleNumber == playerB.PlayerRoleNumber then
+					if BlizzardsSortOrder[ playerA.PlayerClass ] == BlizzardsSortOrder[ playerB.PlayerClass ] then
+						if playerA.PlayerName < playerB.PlayerName then return true end
+					elseif BlizzardsSortOrder[ playerA.PlayerClass ] < BlizzardsSortOrder[ playerB.PlayerClass ] then return true end
+				elseif playerA.PlayerRoleNumber < playerB.PlayerRoleNumber then return true end
+			else
 				if BlizzardsSortOrder[ playerA.PlayerClass ] == BlizzardsSortOrder[ playerB.PlayerClass ] then
 					if playerA.PlayerName < playerB.PlayerName then return true end
 				elseif BlizzardsSortOrder[ playerA.PlayerClass ] < BlizzardsSortOrder[ playerB.PlayerClass ] then return true end
-			elseif playerA.PlayerRoleNumber < playerB.PlayerRoleNumber then return true end
+			end
 		end
 
 		local function PlayerSortingByArenaUnitID(playerA, playerB)-- a and b are playerButtons
@@ -3202,7 +3220,7 @@ do
 				--name = name-realm, faction = 0 or 1, race = localized race e.g. "Mensch",classTag = e.g. "PALADIN", spec = localized specname e.g. "holy"
 				--locale dependent are: race, specName
 				
-				if faction and name and classTag and (IsTBCC or isClassic or (specName and specName ~= ""))  then
+				if faction and name and classTag then
 					--if name == PlayerDetails.PlayerName then EnemyFaction = EnemyFaction == 1 and 0 or 1 return end --support for the new brawl because GetBattlefieldArenaFaction() returns wrong data on that BG
 					 if name == self.PlayerDetails.PlayerName and faction == self.EnemyFaction then 
 						self.EnemyFaction = self.AllyFaction
