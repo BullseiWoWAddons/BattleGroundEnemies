@@ -68,6 +68,7 @@ local GetSpecializationInfoByID = GetSpecializationInfoByID
 local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 local GetTime = GetTime
+local GetUnitName = GetUnitName 
 local InCombatLockdown = InCombatLockdown
 local isInGroup =  IsInGroup
 local IsInInstance = IsInInstance
@@ -97,6 +98,25 @@ local UnitLevel = UnitLevel
 local UnitName = UnitName
 local UnitRace = UnitRace
 
+if not GetUnitName then 
+	GetUnitName = function(unit, showServerName)
+		local name, server = UnitName(unit);
+		local relationship = UnitRealmRelationship(unit);
+		if ( server and server ~= "" ) then
+			if ( showServerName ) then
+				return name.."-"..server;
+			else
+				if (relationship == LE_REALM_RELATION_VIRTUAL) then
+					return name;
+				else
+					return name..FOREIGN_SERVER_LABEL;
+				end
+			end
+		else
+			return name;
+		end
+	end
+end
 
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
 --BattleGroundEnemies.BattlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
@@ -1144,10 +1164,8 @@ do
 						_name, _, amount, debuffType , duration, expirationTime, unitCaster, canStealOrPurge, _, _spellID, canApplyAura, _, _, _, _, _, _, _ = UnitAura(activeUnitID, i, filter)
 						if isClassic then
 							if spellName == _name and unitCaster then
-								local uName, realm = UnitName(unitCaster)
-								if realm then
-									uName = uName.."-"..realm
-								end
+								local uName = GetUnitName(unitCaster, true)
+							
 								if uName == srcName then -- we found the right aura, because it could be possible that the same spellID is existing but from another source/player
 									spellID = _spellID
 									break
@@ -1155,10 +1173,8 @@ do
 							end
 						else
 							if spellID == _spellID and unitCaster then
-								local uName, realm = UnitName(unitCaster)
-								if realm then
-									uName = uName.."-"..realm
-								end
+								local uName = GetUnitName(unitCaster, true)
+							
 								if uName == srcName then -- we found the right aura, because it could be possible that the same spellID is existing but from another source/player
 									break
 								end
@@ -1352,10 +1368,7 @@ do
 							break
 						end
 						if unitCaster then
-							local srcName, realm = UnitName(unitCaster)
-							if realm then
-								srcName = srcName.."-"..realm
-							end		
+							local srcName = GetUnitName(unitCaster, true)	
 							--BattleGroundEnemies:Debug(operation, spellID)
 							
 							--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
@@ -1684,10 +1697,8 @@ do
 	end
 	
 	function MainFrameFunctions:GetPlayerbuttonByUnitID(unitID)
-		local uName, realm = UnitName(unitID)
-		if realm then
-			uName = uName.."-"..realm
-		end
+		local uName = GetUnitName(unitID, true)
+
 		return self.Players[uName]
 	end
 
@@ -1732,6 +1743,7 @@ do
 
 			playerButton.unitID = nil
 			playerButton.unit = nil
+			playerButton.PlayerArenaUnitID = nil
 
 
 		else --no recycleable buttons remaining => create a new one
@@ -2525,15 +2537,10 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	wipe(self.NewPlayerDetails)
 	for i = 1, MAX_ARENA_ENEMIES or 5 do
 		local unitID = "arena"..i
-		local name, realm = UnitName(unitID)
+		local name = GetUnitName(unitID, true)
 
 		local _, classTag, specName
-
-		if realm then 
-			name = name.."-"..realm
-		end			
 				
-
 		local specName, classTag
 		if not (IsTBCC or isClassic) then
 			local specID, gender = GetArenaOpponentSpec(i)
@@ -2561,12 +2568,7 @@ end
 BattleGroundEnemies.Enemies.ARENA_PREP_OPPONENT_SPECIALIZATIONS = BattleGroundEnemies.Enemies.CreateArenaEnemies -- for Prepframe, not available in TBC
 
 function BattleGroundEnemies.Enemies:UNIT_NAME_UPDATE(unitID)
-	local name, realm = UnitName(unitID)
-	if name and name ~= UNKNOWN then
-		if realm then 
-			name = name.."-"..realm
-		end
-	end
+	local name = GetUnitName(unitID, true)
 	self:ChangeName(unitID, name)
 end
 
@@ -2682,10 +2684,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 end
 
 function BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
-	local uName, realm = UnitName(unitID)
-	if realm then
-		uName = uName.."-"..realm
-	end
+	local uName = GetUnitName(unitID, true)
 	return self.Enemies.Players[uName] or self.Allies.Players[uName]
 end
 
@@ -3270,10 +3269,12 @@ do
 		}
 
 		if IsTBCC or isClassic then
-			self:CreateOrUpdatePlayer(name, raceName, classTag, nil, additionalData)
+			if name and raceName and classTag then
+				self:CreateOrUpdatePlayer(name, raceName, classTag, nil, additionalData)
+			end
 		else
 			local specName = specCache[GUID]
-			if specName then
+			if name and raceName and classTag and specName then
 				self:CreateOrUpdatePlayer(name, raceName, classTag, specName, additionalData)
 			else
 				stop = true
@@ -3373,13 +3374,12 @@ do
 			
 			for i = 1, numGroupMembers do
 				local unitID = unitIDPrefix..i
-				local name, realm = UnitName(unitID)
-				if name then
-					if realm then 
-						name = name.."-"..realm
-					end
-		
-					stop = self.Allies:AddGroupMember(name, UnitIsGroupLeader(unitID), UnitIsGroupAssistant(unitID), (select(2, UnitClass(unitID))), unitID) or stop
+				local name = GetUnitName(unitID, true)
+			
+				local classTag = select(2, UnitClass(unitID))
+
+				if name and classTag then
+					stop = self.Allies:AddGroupMember(name, UnitIsGroupLeader(unitID), UnitIsGroupAssistant(unitID), classTag, unitID) or stop
 				end
 			end
 

@@ -187,6 +187,7 @@ globals = {
 	"GetSubZoneText",
 	"GetTime",
 	"GetTrackedAchievements",
+	"GetUnitName",
 	"InCombatLockdown",
 	"IsAddOnLoaded",
 	"IsAddOnLoadOnDemand",

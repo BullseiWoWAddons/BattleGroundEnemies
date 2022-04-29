@@ -2,6 +2,17 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "9.2.0.9",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed a error message that happened in TBC or Classic. It was probably caused by some data not yet being available. Thanks to Maas1337@Github for reporting."
+				}
+			}
+		}
+	},
+	{
 		Version = "9.2.0.8",
 		Sections = {
 			{
