@@ -2,6 +2,17 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "9.2.0.7",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed an error that appeared in battlegrounds wich was caused by another addon or probably by disabling the default arena UI addon. Thank to Sharki519@curseforge for reporting."
+				}
+			}
+		}
+	},
+	{
 		Version = "9.2.0.6",
 		Sections = {
 			{

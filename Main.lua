@@ -2523,7 +2523,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	end
 	self.resort = false
 	wipe(self.NewPlayerDetails)
-	for i = 1, MAX_ARENA_ENEMIES do
+	for i = 1, MAX_ARENA_ENEMIES or 5 do
 		local unitID = "arena"..i
 		local name, realm = UnitName(unitID)
 
