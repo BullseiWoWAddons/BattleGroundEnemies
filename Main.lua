@@ -97,6 +97,7 @@ local UnitIsGhost = UnitIsGhost
 local UnitLevel = UnitLevel
 local UnitName = UnitName
 local UnitRace = UnitRace
+local UnitRealmRelationship = UnitRealmRelationship
 
 if not GetUnitName then 
 	GetUnitName = function(unit, showServerName)

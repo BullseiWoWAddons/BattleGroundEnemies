@@ -285,6 +285,7 @@ globals = {
 	"UnitPowerMax",
 	"UnitPowerType", -- Multiple old modules
 	"UnitRace",
+	"UnitRealmRelationship",
 	"UnitSetRole",
 	"UnitThreatSituation", -- Cataclysm/Bastion/Sinestra.lua
 	-- Legion/TombOfSargeras/Kiljaeden.lua
