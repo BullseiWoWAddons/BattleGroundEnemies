@@ -1716,7 +1716,7 @@ do
 			playerButton.Covenant:Reset()
 			playerButton.ObjectiveAndRespawn:Reset()
 			playerButton.NumericTargetindicator:SetText(0) --reset testmode
-			playerButton.Spec_AuraDisplay:Clear()
+			playerButton.Spec_AuraDisplay.Cooldown:Clear()
 			playerButton.Spec_AuraDisplay:ActiveAuraRemoved()
 
 
