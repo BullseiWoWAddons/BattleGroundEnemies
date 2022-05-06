@@ -2,6 +2,17 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "9.2.0.10",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"The addon frames should no longer be able to be placed outside the screen."
+				}
+			}
+		}
+	},
+	{
 		Version = "9.2.0.9",
 		Sections = {
 			{
