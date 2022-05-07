@@ -128,39 +128,25 @@ end
 --     end
 -- end
 
---arguments are version tables. example: {"9", "2", ""0", "10"}
---return true only when the first version is bigger than the second, return false when equal or smaller
-local function FirstGreaterThanSecond(firstVersion, secondVersion, index)
-	for i = index or 1, max(#firstVersion, #secondVersion) do
+function IsFirstNewerThanSecond(versionString1, versionString2)
+	--versionString can be "9.2.0.10" for example, another player can have "9.2.0.9"
+	-- we cant make a simple comparison like "9.2.0.10" > "9.2.0.9" because this would result in false
+	
+	local firstVersion = {strsplit(".", versionString1)}
+	local secondVersion = {strsplit(".", versionString2)}
+
+	for i = 1, max(#firstVersion, #secondVersion) do
 		local firstVersionNumber = tonumber(firstVersion[i]) or 0
 		local secondVersionNumber = tonumber(secondVersion[i]) or 0
 
 		if firstVersionNumber > secondVersionNumber then
 			return true
-		elseif firstVersionNumber == secondVersionNumber then
-			--continue to compare the next table element
-			return FirstGreaterThanSecond(firstVersion, secondVersion, i + 1)
-		else
+		elseif firstVersionNumber < secondVersionNumber then --otherwise its equal and we compare the next table item
 			return false
 		end
 	end
 	return false --we checked both arrays, both versions are equal
 end
-
-local function IsFirstNewerThanSecond(versionString1, versionString2)
-	--versionString can be "9.2.0.10" for example, another player can have "9.2.0.9"
-	-- we cant make a simple comparison like "9.2.0.10" > "9.2.0.9" because this would result in false
-	
-	
-	local firstVersion = {strsplit(".", versionString1)}
-	local secondVersion = {strsplit(".", versionString2)}
-	return FirstGreaterThanSecond(firstVersion, secondVersion)
-end
-
-
-
-
-
 
 local wasInGroup = nil
 function BattleGroundEnemies:RequestEverythingFromGroupmembers()
