@@ -128,16 +128,6 @@ end
 --     end
 -- end
 
-local function IsFirstNewerThanSecond(versionString1, versionString2)
-	--versionString can be "9.2.0.10" for example, another player can have "9.2.0.9"
-	-- we cant make a simple comparison like "9.2.0.10" > "9.2.0.9" because this would result in false
-	
-	
-	local firstVersion = {strsplit(".", versionString1)}
-	local secondVersion = {strsplit(".", versionString2)}
-	return FirstGreaterThanSecond(firstVersion, secondVersion)
-end
-
 --arguments are version tables. example: {"9", "2", ""0", "10"}
 --return true only when the first version is bigger than the second, return false when equal or smaller
 local function FirstGreaterThanSecond(firstVersion, secondVersion, index)
@@ -156,6 +146,18 @@ local function FirstGreaterThanSecond(firstVersion, secondVersion, index)
 	end
 	return false --we checked both arrays, both versions are equal
 end
+
+local function IsFirstNewerThanSecond(versionString1, versionString2)
+	--versionString can be "9.2.0.10" for example, another player can have "9.2.0.9"
+	-- we cant make a simple comparison like "9.2.0.10" > "9.2.0.9" because this would result in false
+	
+	
+	local firstVersion = {strsplit(".", versionString1)}
+	local secondVersion = {strsplit(".", versionString2)}
+	return FirstGreaterThanSecond(firstVersion, secondVersion)
+end
+
+
 
 
 
