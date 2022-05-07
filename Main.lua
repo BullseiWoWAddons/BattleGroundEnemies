@@ -2657,11 +2657,18 @@ function BattleGroundEnemies:Debug(...)
 	end
 end
 
+local sentMessages = {}
+
+function BattleGroundEnemies:OnetimeInformation(...)
+	local message = table.concat({...}, ", ")
+	if sentMessages[message] then return end
+	print("|cff0099ffBattleGroundEnemies:|r", message) 
+	sentMessages[message] = true
+end
+
 function BattleGroundEnemies:Information(...)
 	print("|cff0099ffBattleGroundEnemies:|r", ...) 
 end
-
-
 
 
 --fires when a arena enemy appears and a frame is ready to be shown
