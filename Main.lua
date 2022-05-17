@@ -245,7 +245,6 @@ BattleGroundEnemies.Enemies = CreateFrame("Frame", nil, BattleGroundEnemies)
 BattleGroundEnemies.Enemies.Counter = {}
 
 
-BattleGroundEnemies.Enemies.OnUpdate = {} --key = number from 1 to x, value = enemyButton
 BattleGroundEnemies.Enemies:Hide()
 BattleGroundEnemies.Enemies:SetScript("OnEvent", function(self, event, ...)
 	self.Counter[event] = (self.Counter[event] or 0) + 1
@@ -318,6 +317,7 @@ BattleGroundEnemies.GeneralEvents = {
 	"UNIT_TARGET",
 	"PLAYER_ALIVE",
 	"PLAYER_UNGHOST",
+	"UNIT_AURA"
 	"UNIT_HEALTH",
 	"UNIT_MAXHEALTH",
 	"UNIT_POWER_FREQUENT"
@@ -390,14 +390,11 @@ do
 		if TimeSinceLastOnUpdate > UpdatePeroid then
 			if BattleGroundEnemies.PlayerIsAlive then
 
-				local onUpdate = self.OnUpdate
-				for i = 1, #onUpdate do
-					local enemyButton = onUpdate[i]
+				for playerName, enemyButton in pairs(self.Players) do
 					local unitIDs = enemyButton.UnitIDs
 					local activeUnitID = unitIDs.Active
 
-					if UnitExists(activeUnitID) then 
-
+					if activeUnitID and UnitExists(activeUnitID) then 
 
 						-- we don't get health update events of targets of allies, so we have to use a onUpdate for that
 						if unitIDs.HasAllyUnitID then
@@ -405,7 +402,7 @@ do
 							enemyButton:UpdateHealth(activeUnitID)
 						end
 
-						--Updates stuff that don't have events
+						--Updates stuff that doesn't have events
 						enemyButton:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, activeUnitID))
 						enemyButton:UpdateTargets()
 					end
@@ -579,11 +576,7 @@ local enemyButtonFunctions = {}
 do
 	function enemyButtonFunctions:HasUnitID() --Add to OnUpdate
 		local unitIDs = self.UnitIDs
-		if not unitIDs.OnUpdate then
-			local i = #BattleGroundEnemies.Enemies.OnUpdate + 1
-			BattleGroundEnemies.Enemies.OnUpdate[i] = self
-			self.UnitIDs.OnUpdate = i
-		end
+	
 		if not UnitExists(unitIDs.Active) then return end
 		self:UpdateRaidTargetIcon()
 		self:UpdateHealth(unitIDs.Active)
@@ -609,17 +602,7 @@ do
 		unitIDs.Active = false
 		self:UpdateRange(false)
 		
-		local onUpdate = unitIDs.OnUpdate
-		if onUpdate then
-			unitIDs.OnUpdate = false
-			unitIDs.HasAllyUnitID = false
-			local BGEEnemieOnUpdate = BattleGroundEnemies.Enemies.OnUpdate
-			tremove(BGEEnemieOnUpdate, onUpdate)
-			for i = onUpdate, #BGEEnemieOnUpdate do
-				local enemyButton = BGEEnemieOnUpdate[i]
-				enemyButton.UnitIDs.OnUpdate = i
-			end
-		end
+		unitIDs.HasAllyUnitID = false
 	end
 	
 	function enemyButtonFunctions:FetchAnotherUnitID()
@@ -725,6 +708,14 @@ do
 	end
 
 	function buttonFunctions:UpdateRaidTargetIcon()
+		if not self.bgSizeConfig.RaidTargetIcon_Enabled then 
+			if self.RaidTargetIcon.HasIcon then
+				self.RaidTargetIcon:HideIcon()
+			end
+			return
+		end
+
+
 		local unit = self:GetUnitID()
 		if unit then
 			local index = GetRaidTargetIndex(unit)
@@ -742,8 +733,7 @@ do
 
 				self.RaidTargetIcon.HasIcon = index
 			else
-				self.RaidTargetIcon:Hide()
-				self.RaidTargetIcon.HasIcon = false
+				self.RaidTargetIcon:HideIcon()
 			end
 		end
 	end
@@ -961,7 +951,6 @@ do
 			self.UnitIDs.Arena = unitID
 
 			if self.PlayerIsEnemy then
-				self:RegisterUnitEvent("UNIT_AURA", unitID)
 				self:FetchAnotherUnitID()
 			end
 			
@@ -1107,24 +1096,22 @@ do
 		local debuffType, duration, expirationTime, unitCaster, canStealOrPurge, canApplyAura
 
 		local isMine = srcName == BattleGroundEnemies.PlayerDetails.PlayerName
-		local isDebuff, filter, aurasEnabled
+		local isDebuff, filter
 		if auraType == "DEBUFF" then
 			isDebuff = true
 			filter = "HARMFUL"
-			aurasEnabled = config.Auras_Enabled and config.Auras_Debuffs_Enabled 
 		else
 			isDebuff = false
 			filter = "HELPFUL"
-			aurasEnabled = config.Auras_Enabled and config.Auras_Buffs_Enabled 
 		end
 		local drCat = DRList:GetCategoryBySpellID(isClassic and spellName or spellID)
 		--BattleGroundEnemies:Debug(operation, spellID)
 		local showAurasOnSpecicon = config.Spec_AuraDisplay_Enabled
 		local drTrackingEnabled = drCat and config.DrTracking_Enabled and (not config.DrTrackingFiltering_Enabled or config.DrTrackingFiltering_Filterlist[drCat])
-		local relentlessCheck = drCat and config.Trinket_Enabled and not (self.Trinket.SpellID == 336128) and Data.cCduration[drCat] and Data.cCduration[drCat][spellID]
+		local relentlessCheck = drCat and config.Trinket_Enabled and not self.Trinket.SpellID and Data.cCduration[drCat] and Data.cCduration[drCat][spellID]
 		
 		--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
-		if not (showAurasOnSpecicon or drTrackingEnabled or aurasEnabled or relentlessCheck) then return end
+		if not (showAurasOnSpecicon or drTrackingEnabled or relentlessCheck) then return end
 		
 
 		local amount, index, _name, _spellID, _
@@ -1186,10 +1173,7 @@ do
 			end
 		end
 		--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID], duration) end
-		if duration and duration > 0 then
-		
-			self:ShouldShowAura(filter, spellID, srcName, unitCaster, canStealOrPurge, canApplyAura, amount, duration, expirationTime, debuffType)
-		
+		if duration and duration > 0 then		
 			if drTrackingEnabled then
 				self.DRContainer:DisplayDR(drCat, spellID, spellName, duration)
 				self.DRContainer.DRFrames[drCat]:IncreaseDRState()
@@ -1326,57 +1310,52 @@ do
 		end
 
 		local time = GetTime()
-		if time - (self.lastAuraScan or 0) < 3 then return end
+		if time - (self.lastAuraScan or 0) < 1 then return end
 		self.lastAuraScan = time
 
+		local filters = {"HELPFUL", "HARMFUL"}
+		local config = self.bgSizeConfig
 
-		--if true then return end -- too cpu intensive to do the rest in this function
-		if not self.PlayerIsEnemy then -- its an ally, we scan all auras in this case to update the frame more reguraly because we might not get all the changes with the combatlog events
+		for curFilter = 1, #filters do
 
-			local filters = {"HELPFUL", "HARMFUL"}
-			local config = self.bgSizeConfig
+			local filter = filters[curFilter]
+			local continue = false
+			if filter == "HARMFUL" then
+				continue = config.Auras_Enabled and config.Auras_Debuffs_Enabled or config.Spec_AuraDisplay_Enabled
 
-			for curFilter = 1, #filters do
+				-- remove all shown debuffs
+				self.DebuffContainer:Reset()
+			else
+				continue = config.Auras_Enabled and config.Auras_Buffs_Enabled 
 
-				local filter = filters[curFilter]
-				local aurasEnabled
-				if filter == "HARMFUL" then
-					aurasEnabled = config.Auras_Enabled and config.Auras_Debuffs_Enabled
-
-					-- remove all shown debuffs
-					self.DebuffContainer:Reset()
-				else
-					aurasEnabled = config.Auras_Enabled and config.Auras_Buffs_Enabled 
-
-					-- remove all shown buffs
-					self.BuffContainer:Reset()
+				-- remove all shown buffs
+				self.BuffContainer:Reset()
+			end
+	
+			
+			if continue then 
+				if isFullUpdate then 
+					continue = true 
+				else 
+					-- todo, maybe don't scan all auras, need to think about it
+					continue = true
 				end
-		
-				local continue = false
-				if aurasEnabled or config.Spec_AuraDisplay_Enabled then 
-					if isFullUpdate then 
-						continue = true 
-					else 
-						-- todo, maybe don't scan all auras, need to think about it
-						continue = true
+			end
+
+			if continue then
+				for i = 1, 40 do
+					local name, icon, amount, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, _ , spellID, canApplyAura, _, casterIsPlayer, nameplateShowAll = UnitAura(unitID, i, filter)
+					if not spellID then 
+						break
 					end
-				end
-
-				if continue then
-					for i = 1, 40 do
-						local name, icon, amount, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, _ , spellID, canApplyAura, _, casterIsPlayer, nameplateShowAll = UnitAura(unitID, i, filter)
-						if not spellID then 
-							break
-						end
-						if unitCaster then
-							local srcName = GetUnitName(unitCaster, true)	
-							--BattleGroundEnemies:Debug(operation, spellID)
-							
-							--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
-					
-							
-							self:ShouldShowAura(filter, spellID, srcName, unitCaster, canStealOrPurge, canApplyAura, amount, duration, expirationTime, debuffType)
-						end
+					if unitCaster then
+						local srcName = GetUnitName(unitCaster, true)	
+						--BattleGroundEnemies:Debug(operation, spellID)
+						
+						--if srcName == PlayerDetails.PlayerName then BattleGroundEnemies:Debug(aurasEnabled, config.Auras_Enabled, config.AurasFiltering_Enabled, config.AurasFiltering_Filterlist[spellID]) end
+				
+						
+						self:ShouldShowAura(filter, spellID, srcName, unitCaster, canStealOrPurge, canApplyAura, amount, duration, expirationTime, debuffType)
 					end
 				end
 			end
@@ -1598,8 +1577,6 @@ do
 		else
 			C_Timer.After(1, function() return BattleGroundEnemies:GROUP_ROSTER_UPDATE() end)
 		end
-		
-		self:RegisterUnitEvent("UNIT_AURA", unitID)
 	end
 end
 
@@ -1740,7 +1717,7 @@ do
 				end
 			end
 
-			playerButton.RaidTargetIcon:Hide()
+			playerButton.RaidTargetIcon:HideIcon()
 
 			playerButton.unitID = nil
 			playerButton.unit = nil
@@ -2132,6 +2109,11 @@ do
 			playerButton.RaidTargetIcon.Icon:SetTexture("Interface/TargetingFrame/UI-RaidTargetingIcons")
 			playerButton.RaidTargetIcon.Icon:SetAllPoints()
 			playerButton.RaidTargetIcon:Hide()
+
+			function playerButton.RaidTargetIcon:HideIcon()
+				self:Hide()
+				self.HasIcon = false
+			end
 
 			
 			-- symbolic target indicator
@@ -2686,7 +2668,6 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			playerButton.UnitIDs.Arena = false
 			
 			if playerButton.PlayerIsEnemy then -- then this button is an ally button
-				playerButton:UnregisterEvent("UNIT_AURA")
 				playerButton:FetchAnotherUnitID()
 			end
 		end
@@ -2988,7 +2969,12 @@ function BattleGroundEnemies:RAID_TARGET_UPDATE()
 	end
 end
 
-
+function BattleGroundEnemies:UNIT_AURA(unitID, isFullUpdate, updatedAuraInfos) -
+	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
+	if playerButton and playerButton.isShown then --unit is a shown player
+		playerButton:UNIT_AURA(unitID, isFullUpdate, updatedAuraInfos)
+	end
+end
 
 function BattleGroundEnemies:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)

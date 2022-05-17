@@ -922,7 +922,7 @@ local function addEnemyAndAllySettings(self)
 									desc = L.TargetIndicator_Desc,
 									--childGroups = "select",
 									--inline = true,
-									order = 4,
+									order = 5,
 									args = {
 										NumericTargetindicator_Enabled = {
 											type = "toggle",
@@ -947,6 +947,21 @@ local function addEnemyAndAllySettings(self)
 											desc = L.SymbolicTargetindicator_Enabled_Desc:format(L[playerType == "Enemies" and "enemy" or "ally"]),
 											width = "full",
 											order = 4
+										}
+									}
+								}
+								RaidTargetIcon = {
+									type = "group",
+									name = L.TARGETICONS,
+									--childGroups = "select",
+									--inline = true,
+									order = 6,
+									args = {
+										RaidTargetIcon_Enabled = {
+											type = "toggle",
+											name = L.TARGETICONS,
+											width = "full",
+											order = 1
 										}
 									}
 								}

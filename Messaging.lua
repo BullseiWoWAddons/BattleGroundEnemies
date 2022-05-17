@@ -145,7 +145,7 @@ function IsFirstNewerThanSecond(versionString1, versionString2)
 			return false
 		end
 	end
-	return false --we checked both arrays, both versions are equal
+	return false --we didnt return anything yet since all numbers where equal, we are at the end of the arrays so both versions are equal
 end
 
 local wasInGroup = nil
