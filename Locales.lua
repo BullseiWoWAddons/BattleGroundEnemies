@@ -33,6 +33,7 @@ local L = defaultLocale --set to L for curseforges system
 
 --@localization(locale="enUS", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@
 
+local L = Data.L;
 
 if LOCALE_deDE then
 --@localization(locale="deDE", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@
