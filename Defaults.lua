@@ -122,6 +122,8 @@ Data.defaultSettings = {
 				NumericTargetindicator_Textcolor = {1, 1, 1, 1},
 				NumericTargetindicator_EnableTextshadow = false,
 				NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
+
+				RaidTargetIcon_Enabled = true,
 				
 				DrTracking_Enabled = true,
 				DrTracking_HorizontalSpacing = 1,
@@ -332,6 +334,8 @@ Data.defaultSettings = {
 				NumericTargetindicator_Textcolor = {1, 1, 1, 1},
 				NumericTargetindicator_EnableTextshadow = false,
 				NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
+
+				RaidTargetIcon_Enabled = true,
 				
 				DrTracking_Enabled = true,
 				DrTracking_HorizontalSpacing = 1,
@@ -542,6 +546,8 @@ Data.defaultSettings = {
 				NumericTargetindicator_Textcolor = {1, 1, 1, 1},
 				NumericTargetindicator_EnableTextshadow = false,
 				NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
+
+				RaidTargetIcon_Enabled = false
 				
 				DrTracking_Enabled = true,
 				DrTracking_HorizontalSpacing = 1,
@@ -762,6 +768,8 @@ Data.defaultSettings = {
 				NumericTargetindicator_EnableTextshadow = false,
 				NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
 				
+				RaidTargetIcon_Enabled = true,
+
 				DrTracking_Enabled = true,
 				DrTracking_HorizontalSpacing = 1,
 				DrTracking_GrowDirection = "rightwards",
@@ -969,6 +977,8 @@ Data.defaultSettings = {
 				NumericTargetindicator_Textcolor = {1, 1, 1, 1},
 				NumericTargetindicator_EnableTextshadow = false,
 				NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
+
+				RaidTargetIcon_Enabled = true,
 				
 				DrTracking_Enabled = true,
 				DrTracking_HorizontalSpacing = 1,
@@ -1177,6 +1187,8 @@ Data.defaultSettings = {
 				NumericTargetindicator_Textcolor = {1, 1, 1, 1},
 				NumericTargetindicator_EnableTextshadow = false,
 				NumericTargetindicator_TextShadowcolor = {0, 0, 0, 1},
+
+				RaidTargetIcon_Enabled = false,
 				
 				DrTracking_Enabled = true,
 				DrTracking_HorizontalSpacing = 1,
