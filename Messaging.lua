@@ -75,7 +75,7 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 	for allyName, allyButton in pairs(BattleGroundEnemies.Allies.Players) do
   
 		if versions[allyName] then
-			if versions[allyName] < highestVersion then
+			if IsFirstNewerThanSecond(highestVersion, versions[allyName]) then
 				results.old[#results.old+1] = coloredNameVersion(allyButton, versions[allyName])
 			else
 				results.current[#results.current+1] = coloredNameVersion(allyButton, versions[allyName])  
