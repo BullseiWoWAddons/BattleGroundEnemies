@@ -949,7 +949,7 @@ local function addEnemyAndAllySettings(self)
 											order = 4
 										}
 									}
-								}
+								},
 								RaidTargetIcon = {
 									type = "group",
 									name = L.TARGETICONS,
