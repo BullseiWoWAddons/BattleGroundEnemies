@@ -1,7 +1,7 @@
 ## Interface: 90200
 ## Interface-Retail: 90200
-## Interface-BCC: 20503
-## Interface-Classic: 11402
+## Interface-BCC: 20504
+## Interface-Classic: 11403
 ## Title: BattleGroundEnemies
 ## Version: @project-version@
 ## Author: Bullsei
@@ -19,17 +19,7 @@ embeds.xml
 Libs\LibGroupInSpecT-1.1\lib.xml
 #@end-retail@
 
-Locales\enUS.lua
-Locales\deDE.lua
-Locales\esES.lua
-Locales\esMX.lua
-Locales\frFR.lua
-Locales\itIT.lua
-Locales\koKR.lua
-Locales\ptBR.lua
-Locales\ruRU.lua
-Locales\zhCN.lua
-Locales\zhTW.lua
+Locales.lua
 
 Data.lua
 Defaults.lua
