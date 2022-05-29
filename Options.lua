@@ -146,7 +146,6 @@ local function addIconPositionSettings(location, optionname)
 		[horizontalDirection] = {
 			type = "select",
 			name = L.HorizontalGrowdirection,
-			width = "normal",
 			values = Data.HorizontalDirections,
 			order = 4
 		},
@@ -162,7 +161,6 @@ local function addIconPositionSettings(location, optionname)
 		[verticalDirection] = {
 			type = "select",
 			name = L.VerticalGrowdirection,
-			width = "half",
 			values = Data.VerticalDirections,
 			order = 7
 		},
@@ -206,7 +204,7 @@ local function addContainerPositionSettings(location, optionname)
 		[relativePoint] = {
 			type = "select",
 			name = L.PointAtObject,
-			width = "half",
+			width = "normal",
 			values = Data.AllPositions,
 			order = 4
 		},
@@ -257,7 +255,7 @@ local function addBasicPositionSettings(location, optionname)
 		[relativePoint] = {
 			type = "select",
 			name = L.SideAtObject,
-			width = "half",
+			width = "normal",
 			values = Data.BasicPositions,
 			order = 4
 		},
@@ -304,7 +302,6 @@ local function addNormalTextSettings(location, optionname)
 			name = L.Fontcolor,
 			desc = L["Fontcolor_Desc"],
 			hasAlpha = true,
-			width = "half",
 			order = 4
 		},
 		[enableTextShadow] = {
@@ -952,14 +949,14 @@ local function addEnemyAndAllySettings(self)
 								},
 								RaidTargetIcon = {
 									type = "group",
-									name = L.TARGETICONS,
+									name = TARGETICONS,
 									--childGroups = "select",
 									--inline = true,
 									order = 6,
 									args = {
 										RaidTargetIcon_Enabled = {
 											type = "toggle",
-											name = L.TARGETICONS,
+											name = TARGETICONS,
 											width = "full",
 											order = 1
 										}
