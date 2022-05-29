@@ -1,6 +1,10 @@
 local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local DebuffTypeColor = DebuffTypeColor
+
+local tinsert = table.insert
+
+
 BattleGroundEnemies.Objects.AuraContainer = {}
 
 local function debuffFrameUpdateStatusBorder(debuffFrame)
@@ -18,8 +22,9 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 
 	
 	local AuraContainer = CreateFrame("Frame", nil, playerButton)
-	AuraContainer.Active = {}
-	AuraContainer.Inactive = {}
+	AuraContainer.Auras = {}
+	AuraContainer.AuraFrames = {}
+	AuraContainer.PriorityAuras = {}
 	AuraContainer.type = type
 
 	AuraContainer:SetScript("OnHide", function(self) 
@@ -40,41 +45,20 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 	end
 	
 	AuraContainer.Reset = function(self)
-		for identifier, auraFrame in pairs(self.Active) do
-			auraFrame.Cooldown:Clear()
-			auraFrame:Remove()
-		end
+		wipe(self.Auras)
+		self:AuraUpdateFinished()
 	end
 	
 	AuraContainer.ApplySettings = function(self)
-		local conf = playerButton.bgSizeConfig
-		
-		--self:UpdateBackdrop(conf.Auras_Buffs_Container_BorderThickness)
-
-		for identifier, auraFrame in pairs(self.Active) do
+		for i = 1, #self.AuraFrames do
+			local auraFrame = self.AuraFrames[i]
 			auraFrame:ApplyAuraFrameSettings()
 			if self.type == "debuff" then
 				auraFrame:ChangeDisplayType()
 			end
 		end
-	
-		for identifier, auraFrame in pairs(self.Inactive) do
-			auraFrame:ApplyAuraFrameSettings()
-			if self.type == "debuff" then
-				auraFrame:ChangeDisplayType()
-			end 
-		end
 		
 		self:SetContainerPosition()
-	end
-	
-	AuraContainer.AuraPositioning = function(self)
-		local conf = playerButton.bgSizeConfig
-		if self.type == "buff" then
-			self:Positioning(conf.Auras_Buffs_Size, conf.Auras_Buffs_VerticalGrowdirection, conf.Auras_Buffs_HorizontalGrowDirection, conf.Auras_Buffs_IconsPerRow, conf.Auras_Buffs_HorizontalSpacing, conf.Auras_Buffs_VerticalSpacing)
-		else
-			self:Positioning(conf.Auras_Debuffs_Size, conf.Auras_Debuffs_VerticalGrowdirection, conf.Auras_Debuffs_HorizontalGrowDirection, conf.Auras_Debuffs_IconsPerRow, conf.Auras_Debuffs_HorizontalSpacing, conf.Auras_Debuffs_VerticalSpacing)
-		end
 	end
 	
 	AuraContainer.SetContainerPosition = function(self)
@@ -85,137 +69,52 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 			self:SetPosition(conf.Auras_Debuffs_Container_Point, conf.Auras_Debuffs_Container_RelativeTo, conf.Auras_Debuffs_Container_RelativePoint, conf.Auras_Debuffs_Container_OffsetX, conf.Auras_Debuffs_Container_OffsetY)
 		end
 	end
-	
-	AuraContainer.DisplayAura = function (self, spellID, srcName, amount, duration, expirationTime, debuffType)
-		local identifier = spellID..srcName
-		local conf = playerButton.bgSizeConfig
-		
-		local auraFrame = self.Active[identifier]
-		if not auraFrame then 
-			auraFrame = self.Inactive[#self.Inactive] 
-			if auraFrame then --recycle a previous used Frame
-				tremove(self.Inactive, #self.Inactive)
-				auraFrame:Show()
-			end
-		end
-		if not auraFrame then
-			auraFrame = CreateFrame('Frame', nil, self, BackdropTemplateMixin and "BackdropTemplate")
-			auraFrame:SetFrameLevel(self:GetFrameLevel() + 5)
-			
-			
-			auraFrame:SetScript("OnEnter", function(self)
-				BattleGroundEnemies:ShowTooltip(self, function()
-					local unitID = playerButton.unit or playerButton.UnitIDs and playerButton.UnitIDs.Active
-					BattleGroundEnemies:ShowAuraTooltip(unitID, auraFrame.SpellID, auraFrame.Type == "debuff" and "HARMFUL" or "HELPFUL")
-				end)
-			end)
-			
-			auraFrame:SetScript("OnLeave", function(self)
-				if GameTooltip:IsOwned(self) then
-					GameTooltip:Hide()
-				end
-			end)
-				
-			auraFrame.Icon = auraFrame:CreateTexture(nil, "BACKGROUND")
-			auraFrame.Icon:SetAllPoints()
 
-			auraFrame.Stacks = BattleGroundEnemies.MyCreateFontString(auraFrame)
-			auraFrame.Stacks:SetAllPoints()
-			auraFrame.Stacks:SetJustifyH("RIGHT")
-			auraFrame.Stacks:SetJustifyV("BOTTOM")
-
-			auraFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(auraFrame)
-			auraFrame.Cooldown:SetScript("OnCooldownDone", function() 
-				auraFrame:Remove()
-			end)
-
-			auraFrame.Remove = function(self) 
-				self.Stacks:SetText("")
-				self:Hide()
-				self.Container.Active[self.Identifier] = nil
-				self.Container:AuraPositioning()
-				self.Container.Inactive[#self.Container.Inactive + 1] = self
-				if self.Type == "priorized" then
-					return --TODO
-				end
-			end
-			
-
-			auraFrame.Container = self		
-			auraFrame.Icon:SetDrawLayer("BORDER", -1) -- 1 to make it behind the SetBackdrop bg
-
-			auraFrame:SetBackdrop({
-				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-				edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-				edgeSize = 1
-			})
-			
-			auraFrame:SetBackdropColor(0, 0, 0, 0)
-			auraFrame:SetBackdropBorderColor(0, 0, 0, 0) 		
-
-			auraFrame.ApplyAuraFrameSettings = function(self)
-				local conf = playerButton.bgSizeConfig
-				local container = self:GetParent()
-				if container.type == "buff"	then
-					self.Stacks:SetTextColor(unpack(conf.Auras_Buffs_Textcolor))
-					self.Stacks:ApplyFontStringSettings(conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline, conf.Auras_Buffs_EnableTextshadow, conf.Auras_Buffs_TextShadowcolor)
-					self.Cooldown:ApplyCooldownSettings(conf.Auras_Buffs_ShowNumbers, true, false)
-					self.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline, conf.Auras_Buffs_Cooldown_EnableTextshadow, conf.Auras_Buffs_Cooldown_TextShadowcolor)
-					self:SetSize(conf.Auras_Buffs_Size, conf.Auras_Buffs_Size)
-				else
-					self.Stacks:SetTextColor(unpack(conf.Auras_Debuffs_Textcolor))
-					self.Stacks:ApplyFontStringSettings(conf.Auras_Debuffs_Fontsize, conf.Auras_Debuffs_Outline, conf.Auras_Debuffs_EnableTextshadow, conf.Auras_Debuffs_TextShadowcolor)
-					self.Cooldown:ApplyCooldownSettings(conf.Auras_Debuffs_ShowNumbers, true, false)
-					self.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline, conf.Auras_Debuffs_Cooldown_EnableTextshadow, conf.Auras_Debuffs_Cooldown_TextShadowcolor)
-					self:SetSize(conf.Auras_Debuffs_Size, conf.Auras_Debuffs_Size)
-				end
-				
-			end
-			if self.type == "debuff" then
-				auraFrame.ChangeDisplayType = function(self)
-					self:SetDisplayType()
-					
-					--reset settings
-					self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
-					self:SetBackdropBorderColor(0, 0, 0, 0)
-					if playerButton.bgSizeConfig.Auras_Debuffs_Coloring_Enabled then self:SetType() end
-				end
-
-				auraFrame.SetDisplayType = function(self)
-					if playerButton.bgSizeConfig.Auras_Debuffs_DisplayType == "Frame" then
-						self.SetType = debuffFrameUpdateStatusBorder
-					else
-						self.SetType = debuffFrameUpdateStatusText
-					end
-				end
-				
-				auraFrame:SetDisplayType()
-			end
-			auraFrame:ApplyAuraFrameSettings()
-		end
-		auraFrame.Identifier = identifier
-		auraFrame.SpellID = spellID
-		auraFrame.DebuffType = debuffType
-		auraFrame.Icon:SetTexture(GetSpellTexture(spellID))
-		auraFrame.Type = self.type
-		if amount > 1 then
-			auraFrame.Stacks:SetText(amount)
-		else
-			auraFrame.Stacks:SetText()
-		end
-		if self.type == "debuff" then
-			if playerButton.bgSizeConfig.Auras_Debuffs_Coloring_Enabled then auraFrame:SetType() end
-		end
-	   
-
-		auraFrame.Cooldown:SetCooldown(expirationTime - duration, duration)
-		--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
-		auraFrame:Show()
-		self.Active[identifier] = auraFrame
-		self:AuraPositioning()
+	AuraContainer.PrepareForUpdate = function(self)
+		wipe(self.Auras)
 	end
 	
-	AuraContainer.Positioning = function(self, iconSize, verticalGrowdirection, horizontalGrowdirection, framesPerRow, horizontalSpacing, verticalSpacing)
+	AuraContainer.NewAura = function(self, spellID, amount, duration, expirationTime, debuffType)
+		local conf = playerButton.bgSizeConfig
+	
+		local priority = Data.SpellPriorities[spellID]
+		local ID = #self.Auras + 1
+		local auraDetails = {
+			ID = ID,
+			SpellID = spellID,
+			DebuffType = debuffType,
+			Type = self.type,
+			Priority = priority,
+			Stacks = amount,
+			ExpirationTime = expirationTime,
+			Duration = duration
+		}
+		self.Auras[ID] = auraDetails
+	end
+
+	AuraContainer.AuraUpdateFinished = function(self)
+		
+		-- for Spec_Auradisplay
+		wipe(self.PriorityAuras)
+		for i = 1, #self.Auras do
+			local auraDetails = self.Auras[i]
+			if auraDetails.Priority and self.type == "debuff" then 
+				tinsert(self.PriorityAuras, auraDetails)
+			end
+		end
+		playerButton.Spec_AuraDisplay:Update()
+
+		local conf = playerButton.bgSizeConfig
+		if self.type == "buff" then
+			if not conf.Auras_Buffs_Enabled then return end
+			self:DisplayAuras(conf.Auras_Buffs_Size, conf.Auras_Buffs_VerticalGrowdirection, conf.Auras_Buffs_HorizontalGrowDirection, conf.Auras_Buffs_IconsPerRow, conf.Auras_Buffs_HorizontalSpacing, conf.Auras_Buffs_VerticalSpacing)
+		else
+			if not conf.Auras_Debuffs_Enabled then return end
+			self:DisplayAuras(conf.Auras_Debuffs_Size, conf.Auras_Debuffs_VerticalGrowdirection, conf.Auras_Debuffs_HorizontalGrowDirection, conf.Auras_Debuffs_IconsPerRow, conf.Auras_Debuffs_HorizontalSpacing, conf.Auras_Debuffs_VerticalSpacing)
+		end
+	end
+
+	AuraContainer.DisplayAuras = function(self, iconSize, verticalGrowdirection, horizontalGrowdirection, framesPerRow, horizontalSpacing, verticalSpacing)
 		local growLeft = horizontalGrowdirection == "leftwards"
 		local growUp = verticalGrowdirection == "upwards"
 		local previousFrame = self
@@ -253,7 +152,115 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 			offsetY = -verticalSpacing
 		end
 
-		for Identifier, auraFrame in pairs(self.Active) do
+		local numAuras = #self.Auras
+		for i = 1, numAuras do
+			local auraDetails = self.Auras[i]
+			local auraFrame = self.AuraFrames[i]
+			if not auraFrame then
+				auraFrame = CreateFrame('Frame', nil, self, BackdropTemplateMixin and "BackdropTemplate")
+				auraFrame:SetFrameLevel(self:GetFrameLevel() + 5)
+				
+				
+				auraFrame:SetScript("OnEnter", function(self)
+					BattleGroundEnemies:ShowTooltip(self, function()
+						BattleGroundEnemies:ShowAuraTooltip(playerButton, auraFrame)
+					end)
+				end)
+				
+				auraFrame:SetScript("OnLeave", function(self)
+					if GameTooltip:IsOwned(self) then
+						GameTooltip:Hide()
+					end
+				end)
+	
+				function auraFrame:Remove()
+					table.remove(AuraContainer.Auras, auraFrame.AuraDetails.ID)
+					for i = 1, #AuraContainer.Auras do
+						local auraDetails = AuraContainer.Auras[i]
+						auraDetails.ID = i
+					end
+					AuraContainer:AuraUpdateFinished()
+				end
+	
+	
+					
+				auraFrame.Icon = auraFrame:CreateTexture(nil, "BACKGROUND")
+				auraFrame.Icon:SetAllPoints()
+	
+				auraFrame.Stacks = BattleGroundEnemies.MyCreateFontString(auraFrame)
+				auraFrame.Stacks:SetAllPoints()
+				auraFrame.Stacks:SetJustifyH("RIGHT")
+				auraFrame.Stacks:SetJustifyV("BOTTOM")
+	
+				auraFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(auraFrame)
+				auraFrame.Cooldown:SetScript("OnCooldownDone", function(self) -- only do this for the case that we dont get a UNIT_AURA for an ending aura, if we dont do this the aura is stuck even tho its expired
+					auraFrame.Remove()
+				end)
+	
+				auraFrame.Container = self		
+				auraFrame.Icon:SetDrawLayer("BORDER", -1) -- 1 to make it behind the SetBackdrop bg
+	
+				auraFrame:SetBackdrop({
+					bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+					edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+					edgeSize = 1
+				})
+				
+				auraFrame:SetBackdropColor(0, 0, 0, 0)
+				auraFrame:SetBackdropBorderColor(0, 0, 0, 0) 		
+	
+				auraFrame.ApplyAuraFrameSettings = function(self)
+					local conf = playerButton.bgSizeConfig
+					local container = self:GetParent()
+					if container.type == "buff"	then
+						self.Stacks:SetTextColor(unpack(conf.Auras_Buffs_Textcolor))
+						self.Stacks:ApplyFontStringSettings(conf.Auras_Buffs_Fontsize, conf.Auras_Buffs_Outline, conf.Auras_Buffs_EnableTextshadow, conf.Auras_Buffs_TextShadowcolor)
+						self.Cooldown:ApplyCooldownSettings(conf.Auras_Buffs_ShowNumbers, true, false)
+						self.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Buffs_Cooldown_Fontsize, conf.Auras_Buffs_Cooldown_Outline, conf.Auras_Buffs_Cooldown_EnableTextshadow, conf.Auras_Buffs_Cooldown_TextShadowcolor)
+						self:SetSize(conf.Auras_Buffs_Size, conf.Auras_Buffs_Size)
+					else
+						self.Stacks:SetTextColor(unpack(conf.Auras_Debuffs_Textcolor))
+						self.Stacks:ApplyFontStringSettings(conf.Auras_Debuffs_Fontsize, conf.Auras_Debuffs_Outline, conf.Auras_Debuffs_EnableTextshadow, conf.Auras_Debuffs_TextShadowcolor)
+						self.Cooldown:ApplyCooldownSettings(conf.Auras_Debuffs_ShowNumbers, true, false)
+						self.Cooldown.Text:ApplyFontStringSettings(conf.Auras_Debuffs_Cooldown_Fontsize, conf.Auras_Debuffs_Cooldown_Outline, conf.Auras_Debuffs_Cooldown_EnableTextshadow, conf.Auras_Debuffs_Cooldown_TextShadowcolor)
+						self:SetSize(conf.Auras_Debuffs_Size, conf.Auras_Debuffs_Size)
+					end
+					
+				end
+				if self.type == "debuff" then
+					auraFrame.ChangeDisplayType = function(self)
+						self:SetDisplayType()
+						
+						--reset settings
+						self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
+						self:SetBackdropBorderColor(0, 0, 0, 0)
+						if playerButton.bgSizeConfig.Auras_Debuffs_Coloring_Enabled then self:SetType() end
+					end
+	
+					auraFrame.SetDisplayType = function(self)
+						if playerButton.bgSizeConfig.Auras_Debuffs_DisplayType == "Frame" then
+							self.SetType = debuffFrameUpdateStatusBorder
+						else
+							self.SetType = debuffFrameUpdateStatusText
+						end
+					end
+					
+					auraFrame:SetDisplayType()
+				end
+				auraFrame:ApplyAuraFrameSettings()
+				self.AuraFrames[i] = auraFrame
+			end
+
+			auraFrame.AuraDetails = auraDetails
+			
+			auraFrame.Stacks:SetText(auraDetails.Stacks > 1 and auraDetails.Stacks)
+			if auraDetails.Type == "debuff" then
+				if playerButton.bgSizeConfig.Auras_Debuffs_Coloring_Enabled then auraFrame:SetType() end
+			end
+			auraFrame.Icon:SetTexture(GetSpellTexture(auraDetails.SpellID))
+			auraFrame.Cooldown:SetCooldown(auraDetails.ExpirationTime - auraDetails.Duration, auraDetails.Duration)
+			--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
+			
 			auraFrame:ClearAllPoints()
 			if framesInRow < framesPerRow then
 				if count == 0 then
@@ -277,6 +284,12 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 			end
 			previousFrame = auraFrame
 			count = count + 1
+			auraFrame:Show()
+		end
+
+		for i = numAuras + 1, #self.AuraFrames do --hide all unused frames
+			local auraFrame = self.AuraFrames[i]
+			auraFrame:Hide()
 		end
 		
 		if widestRow == 0 then 
