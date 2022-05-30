@@ -60,7 +60,7 @@ function BattleGroundEnemies.Objects.Racial.New(playerButton)
 		local insi = playerButton.Trinket
 		
 
-		if Data.RacialSpellIDtoCooldown[spellID].trinketCD and not (insi.SpellID == 336128) and insi.Cooldown:GetCooldownDuration() < Data.RacialSpellIDtoCooldown[spellID].trinketCD * 1000 then
+		if Data.RacialSpellIDtoCooldown[spellID].trinketCD and not (insi.SpellID == 336128) and insi.SpellID and insi.Cooldown:GetCooldownDuration() < Data.RacialSpellIDtoCooldown[spellID].trinketCD * 1000 then
 			insi.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID].trinketCD)
 		end
 		
