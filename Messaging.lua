@@ -128,7 +128,7 @@ end
 --     end
 -- end
 
-function IsFirstNewerThanSecond(versionString1, versionString2)
+local function IsFirstNewerThanSecond(versionString1, versionString2)
 	--versionString can be "9.2.0.10" for example, another player can have "9.2.0.9"
 	-- we cant make a simple comparison like "9.2.0.10" > "9.2.0.9" because this would result in false
 	
