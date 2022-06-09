@@ -2,7 +2,7 @@ local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local DebuffTypeColor = DebuffTypeColor
 
-local tinsert = table.insert
+local table_insert = table.insert
 
 
 BattleGroundEnemies.Objects.AuraContainer = {}
@@ -26,6 +26,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 	AuraContainer.AuraFrames = {}
 	AuraContainer.PriorityAuras = {}
 	AuraContainer.type = type
+	AuraContainer.filter = type == "debuff" and "HARMFUL" or "HELPFUL"
 
 	AuraContainer:SetScript("OnHide", function(self) 
 		self:SetWidth(0.001)
@@ -50,6 +51,13 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 	end
 	
 	AuraContainer.ApplySettings = function(self)
+		local conf = playerButton.bgSizeConfig
+		if self.type == "buff" then
+			if not conf.Auras_Buffs_Enabled then self:Reset() end
+		else
+			if not conf.Auras_Debuffs_Enabled then self:Reset() end
+		end
+
 		for i = 1, #self.AuraFrames do
 			local auraFrame = self.AuraFrames[i]
 			auraFrame:ApplyAuraFrameSettings()
@@ -74,7 +82,34 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 		wipe(self.Auras)
 	end
 	
-	AuraContainer.NewAura = function(self, spellID, amount, duration, expirationTime, debuffType)
+	AuraContainer.NewAura = function(self, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod)
+
+		local filter = self.filter
+		if true then
+ 			BattleGroundEnemies.db.profile.Auras = BattleGroundEnemies.db.profile.Auras or {}
+			BattleGroundEnemies.db.profile.Auras[filter] = BattleGroundEnemies.db.profile.Auras[filter] or {}
+			BattleGroundEnemies.db.profile.Auras[filter][spellID] = BattleGroundEnemies.db.profile.Auras[filter][spellID] or {
+				name = name,
+				icon = icon,
+				count = count,
+				debuffType = debuffType,
+				duration = duration,
+				expirationTime = expirationTime,
+				unitCaster = unitCaster,
+				canStealOrPurge = canStealOrPurge,
+				nameplateShowPersonal = nameplateShowPersonal,
+				spellID = spellID,
+				canApplyAura = canApplyAura,
+				isBossAura = isBossAura,
+				castByPlayer = castByPlayer,
+				nameplateShowAll = nameplateShowAll,
+				timeMod = timeMod
+			}
+		end
+
+
+		if not playerButton:ShouldDisplayAura(false, filter, spellID, unitCaster, canStealOrPurge, canApplyAura, debuffType) then print("didnt make it through the filter") return end	
+		
 		local conf = playerButton.bgSizeConfig
 	
 		local priority = Data.SpellPriorities[spellID]
@@ -82,10 +117,11 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 		local auraDetails = {
 			ID = ID,
 			SpellID = spellID,
+			Icon = icon,
 			DebuffType = debuffType,
 			Type = self.type,
 			Priority = priority,
-			Stacks = amount,
+			Stacks = count,
 			ExpirationTime = expirationTime,
 			Duration = duration
 		}
@@ -94,22 +130,20 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 
 	AuraContainer.AuraUpdateFinished = function(self)
 		
-		-- for Spec_Auradisplay
+		-- for Spec_HighestActivePriority
 		wipe(self.PriorityAuras)
 		for i = 1, #self.Auras do
 			local auraDetails = self.Auras[i]
 			if auraDetails.Priority and self.type == "debuff" then 
-				tinsert(self.PriorityAuras, auraDetails)
+				table_insert(self.PriorityAuras, auraDetails)
 			end
 		end
-		playerButton.Spec_AuraDisplay:Update()
+		playerButton.Spec_HighestActivePriority:Update()
 
 		local conf = playerButton.bgSizeConfig
 		if self.type == "buff" then
-			if not conf.Auras_Buffs_Enabled then return end
 			self:DisplayAuras(conf.Auras_Buffs_Size, conf.Auras_Buffs_VerticalGrowdirection, conf.Auras_Buffs_HorizontalGrowDirection, conf.Auras_Buffs_IconsPerRow, conf.Auras_Buffs_HorizontalSpacing, conf.Auras_Buffs_VerticalSpacing)
 		else
-			if not conf.Auras_Debuffs_Enabled then return end
 			self:DisplayAuras(conf.Auras_Debuffs_Size, conf.Auras_Debuffs_VerticalGrowdirection, conf.Auras_Debuffs_HorizontalGrowDirection, conf.Auras_Debuffs_IconsPerRow, conf.Auras_Debuffs_HorizontalSpacing, conf.Auras_Debuffs_VerticalSpacing)
 		end
 	end
@@ -163,7 +197,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 				
 				auraFrame:SetScript("OnEnter", function(self)
 					BattleGroundEnemies:ShowTooltip(self, function()
-						BattleGroundEnemies:ShowAuraTooltip(playerButton, auraFrame)
+						BattleGroundEnemies:ShowAuraTooltip(playerButton, auraFrame.AuraDetails)
 					end)
 				end)
 				
@@ -257,7 +291,7 @@ function BattleGroundEnemies.Objects.AuraContainer.New(playerButton, type)
 			if auraDetails.Type == "debuff" then
 				if playerButton.bgSizeConfig.Auras_Debuffs_Coloring_Enabled then auraFrame:SetType() end
 			end
-			auraFrame.Icon:SetTexture(GetSpellTexture(auraDetails.SpellID))
+			auraFrame.Icon:SetTexture(auraDetails.Icon)
 			auraFrame.Cooldown:SetCooldown(auraDetails.ExpirationTime - auraDetails.Duration, auraDetails.Duration)
 			--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
 			

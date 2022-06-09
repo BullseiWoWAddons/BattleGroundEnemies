@@ -27,13 +27,14 @@ Main.lua
 Messaging.lua
 TargetCall.lua
 Changelog.lua
+ImportExport.lua
 
 
-Objects\Auracontainer.lua
+Objects\Auracontainer2.lua
 Objects\DR.lua
 Objects\ObjectiveAndRespawn.lua
 Objects\Racial.lua
 Objects\Trinket.lua
+Objects\HighestActivePriority.lua
 
-Testmode.lua
 Options.lua

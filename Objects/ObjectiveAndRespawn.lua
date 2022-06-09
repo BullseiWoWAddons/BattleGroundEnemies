@@ -2,87 +2,169 @@ local BattleGroundEnemies = BattleGroundEnemies
 local AddonName, Data = ...
 local GetTime = GetTime
 
-BattleGroundEnemies.Objects.ObjectiveAndRespawn = {}
+local AddonName, Data = ...
+local L = Data.L
 
+local defaultSettings = {
+	ObjectiveEnabled = true,
+	Cooldown = {
+		ShowNumbers = true,
+		Fontsize = 12,
+		Outline = "OUTLINE",
+		EnableTextshadow = false,
+		TextShadowcolor = {0, 0, 0, 1},
+	},
+	Text = {
+		Fontsize = 17,
+		Outline = "THICKOUTLINE",
+		Textcolor = {1, 1, 1, 1},
+		EnableTextshadow = false,
+		TextShadowcolor = {0, 0, 0, 1}
+	}
+}
 
-function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
-	local ObjectiveAndRespawn = CreateFrame("Frame", nil, playerButton)
-	ObjectiveAndRespawn:SetFrameLevel(playerButton:GetFrameLevel()+5)
+local options = function(location) 
+	return {
+		TextSettings = {
+			type = "group",
+			name = "",
+			--desc = L.TrinketSettings_Desc,
+			inline = true,
+			order = 4,
+			get = function(option)
+				return Data.GetOption(location.Text, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.Text, option, ...)
+			end,
+			args = Data.AddNormalTextSettings(location.Text)
+		},
+		CooldownTextSettings = {
+			type = "group",
+			name = L.Countdowntext,
+			inline = true,
+			get = function(option)
+				return Data.GetOption(location.Cooldown, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.Cooldown, option, ...)
+			end,
+			order = 2,
+			args = Data.AddCooldownSettings(location.Cooldown)
+		}
+	}
+end
+
+local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "UnitDied", "ArenaOpponentShown"}
+
+local objectiveAndRespawn = BattleGroundEnemies:NewModule("ObjectiveAndRespawn", "ObjectiveAndRespawn", 3, defaultSettings, options, events)
+
+function objectiveAndRespawn:AttachToPlayerButton(playerButton)
+	local frame = CreateFrame("frame", nil, playerButton)
+	frame:SetFrameLevel(playerButton:GetFrameLevel()+5)
 	
-	ObjectiveAndRespawn.Icon = ObjectiveAndRespawn:CreateTexture(nil, "BORDER")
-	ObjectiveAndRespawn.Icon:SetAllPoints()
+	frame.Icon = frame:CreateTexture(nil, "BORDER")
+	frame.Icon:SetAllPoints()
 	
-	ObjectiveAndRespawn:SetScript("OnSizeChanged", function(self, width, height)
+	frame:SetScript("OnSizeChanged", function(self, width, height)
 		BattleGroundEnemies.CropImage(self.Icon, width, height)
 	end)
-	ObjectiveAndRespawn:Hide()
+	frame:Hide()
 	
-	ObjectiveAndRespawn.AuraText = BattleGroundEnemies.MyCreateFontString(ObjectiveAndRespawn)
-	ObjectiveAndRespawn.AuraText:SetAllPoints()
-	ObjectiveAndRespawn.AuraText:SetJustifyH("CENTER")
+	frame.AuraText = BattleGroundEnemies.MyCreateFontString(frame)
+	frame.AuraText:SetAllPoints()
+	frame.AuraText:SetJustifyH("CENTER")
 	
-	ObjectiveAndRespawn.Cooldown = BattleGroundEnemies.MyCreateCooldown(ObjectiveAndRespawn)	
-	ObjectiveAndRespawn.Cooldown:Hide()
+	frame.Cooldown = BattleGroundEnemies.MyCreateCooldown(frame)	
+	frame.Cooldown:Hide()
 	
 
-	ObjectiveAndRespawn.Cooldown:SetScript("OnCooldownDone", function() 
-		ObjectiveAndRespawn:Reset()
+	frame.Cooldown:SetScript("OnCooldownDone", function() 
+		frame:Reset()
 	end)
 	-- ObjectiveAndRespawn.Cooldown:SetScript("OnCooldownDone", function() 
 	-- 	ObjectiveAndRespawn:Reset()
 	-- end)
-	ObjectiveAndRespawn:SetScript("OnHide", function(self) 
+	frame:SetScript("OnHide", function(self) 
 		BattleGroundEnemies:Debug("ObjectiveAndRespawn hidden")
 		self:SetAlpha(0)
 	end)
 	
-	ObjectiveAndRespawn:SetScript("OnShow", function(self) 
+	frame:SetScript("OnShow", function(self) 
 		BattleGroundEnemies:Debug("ObjectiveAndRespawn shown")
 		self:SetAlpha(1)
 	end)
+
+	function frame:Reset()
+		frame:Hide()
+		frame.Icon:SetTexture()
+		if frame.AuraText:GetFont() then frame.AuraText:SetText("") end
+		frame.ActiveRespawnTimer = false
+	end
 	
-	ObjectiveAndRespawn.SetPosition = function(self)
+	function frame:SetPosition()
 		BattleGroundEnemies.SetBasicPosition(self, playerButton.bgSizeConfig.ObjectiveAndRespawn_BasicPoint, playerButton.bgSizeConfig.ObjectiveAndRespawn_RelativeTo, playerButton.bgSizeConfig.ObjectiveAndRespawn_RelativePoint, playerButton.bgSizeConfig.ObjectiveAndRespawn_OffsetX)
 	end
-	
-	ObjectiveAndRespawn.Reset = function(self)	
-		self:Hide()
-		self.Icon:SetTexture()
-		if self.AuraText:GetFont() then self.AuraText:SetText("") end
-		self.ActiveRespawnTimer = false
-	end
-	
-	ObjectiveAndRespawn.ApplySettings = function(self)
+		
+	function frame:ApplyAllSettings()
 		if BattleGroundEnemies.BGSize == 15 then
-			local conf = playerButton.bgSizeConfig
+			local conf = self.config
 		
 			self:SetWidth(conf.ObjectiveAndRespawn_Width)		
 			
 			self.AuraText:SetTextColor(unpack(conf.ObjectiveAndRespawn_Textcolor))
-			self.AuraText:ApplyFontStringSettings(conf.ObjectiveAndRespawn_Fontsize, conf.ObjectiveAndRespawn_Outline, conf.ObjectiveAndRespawn_EnableTextshadow, conf.ObjectiveAndRespawn_TextShadowcolor)
+			self.AuraText:ApplyFontStringSettings(conf.ObjectiveAndRespawn.Text)
 			
 			self.Cooldown:ApplyCooldownSettings(BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})
-			self.Cooldown.Text:ApplyFontStringSettings(BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_Cooldown_Fontsize, BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_Cooldown_Outline, BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_Cooldown_EnableTextshadow, BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_Cooldown_TextShadowcolor)
+			self.Cooldown.Text:ApplyFontStringSettings(BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn.Cooldown)
 			
 			self:SetPosition()
 		end
 	end
+	function frame:SearchForDebuffs(name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
+		--BattleGroundEnemies:Debug("Läüft")
+		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
+		local value
+		for i = 1, #battleGroundDebuffs do
+			if spellID == battleGroundDebuffs[i] then
+				if BattleGroundEnemies.CurrentMapID == 417 then -- 417 is Kotmogu, we scan for orb debuffs
 
-	ObjectiveAndRespawn.ShowObjective = function(self)
-		if BattleGroundEnemies.BattlegroundBuff then
-			--BattleGroundEnemies:Debug(self:GetParent().PlayerName, "has buff")
-			self.Icon:SetTexture(GetSpellTexture(BattleGroundEnemies.BattlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]))
-			self:Show()
+					--kotmogu
+					if value2 then
+						if not self.Value then
+							--BattleGroundEnemies:Debug("hier")
+							--player just got the debuff
+							self.Icon:SetTexture(GetSpellTexture(spellID))
+							self:Show()
+							--BattleGroundEnemies:Debug("Texture set")
+						end
+						value = value2
+						
+								--values for orb debuff:
+								--BattleGroundEnemies:Debug(value1, value2, value3, value4)
+								-- value1 = Reduces healing received by value1
+								-- value2 = Increases damage taken by value2
+								-- value3 = Increases damage done by value3
+					end
+					--end of kotmogu
+
+				else
+					-- not kotmogu
+					value = count
+				end
+				if value ~= self.Value then
+					self.AuraText:SetText(value)
+					self.Value = value
+				end
+				return
+			end		
 		end
-		
-		self.AuraText:SetText("")
-		self.Value = false
 	end
 		
-	ObjectiveAndRespawn.PlayerDied = function(self)	
+	function frame:PlayerDied()	
 		--dead
 		playerButton.healthBar:SetValue(0)
-		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.TestmodeActive and BattleGroundEnemies.BGSize == 15)) and BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_RespawnEnabled  then
+		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.TestmodeActive and BattleGroundEnemies.BGSize == 15)) then
 		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
 				self:Show()
@@ -93,5 +175,71 @@ function BattleGroundEnemies.Objects.ObjectiveAndRespawn.New(playerButton)
 			self.Cooldown:SetCooldown(GetTime(), 26) --overwrite an already active timer
 		end
 	end
-	return ObjectiveAndRespawn
+
+	function frame:ShouldQueryAuras(unitID, filter)
+		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then
+			return filter == "HARMFUL"
+		else
+			return false
+		end
+	end
+	
+	
+	function frame:CareAboutThisAura(unitID, auraInfo, filter, spellID, unitCaster, canStealOrPurge, canApplyAura, debuffType)
+		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then -- this player is shown on the arena frame and is carrying a flag, orb, etc.. 
+			local bgDebuffs = BattleGroundEnemies.BattleGroundDebuffs
+			if bgDebuffs then
+				if auraInfo then spellID = auraInfo.spellId end
+	
+				for i = 1, #bgDebuffs do
+					if spellID == bgDebuffs[i] then
+						return true
+					end
+				end
+			end
+		end
+	end
+	
+	function frame:UnitAura(unitID, filter, ...)
+		if filter ~= "HARMFUL" then return end
+	
+		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then -- This player is shown on arena enemy frames because he holds a objective
+			if BattleGroundEnemies.BattleGroundDebuffs then
+				self:SearchForDebuffs(...)
+			end
+		end
+	end
+	
+	function frame:UnitDied()
+		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.TestmodeActive and BattleGroundEnemies.BGSize == 15)) then
+		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
+			if not self.ActiveRespawnTimer then
+				self:Show()
+				self.Icon:SetTexture(GetSpellTexture(8326))
+				self.AuraText:SetText("")
+				self.ActiveRespawnTimer = true
+			end
+			self.Cooldown:SetCooldown(GetTime(), 26) --overwrite an already active timer
+		end
+	end
+	
+	function frame:ArenaOpponentShown()	
+		if BattleGroundEnemies.BattlegroundBuff then
+			if self.config.ObjectiveEnabled then
+				--BattleGroundEnemies:Debug(self:Getframe().PlayerName, "has buff")
+				local playerButton = self:Getframe()
+				self.Icon:SetTexture(GetSpellTexture(BattleGroundEnemies.BattlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]))
+				self:Show()
+			end
+		end
+		
+		self.AuraText:SetText("")
+		self.Value = false
+	end
+	
+	function frame:ArenaOpponentHidden()	
+		self:Reset()
+	end
+	playerButton.ObjectiveAndRespawn = frame
 end
+

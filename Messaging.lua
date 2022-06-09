@@ -41,6 +41,26 @@ C_ChatInfo.RegisterAddonMessagePrefix(AddonPrefix)
 LE_PARTY_CATEGORY_HOME will query information about your "real" group -- the group you were in on your Home realm, before entering any instance/battleground.
 LE_PARTY_CATEGORY_INSTANCE will query information about your "fake" group -- the group created by the instance/battleground matching mechanism.
  ]]
+ local function IsFirstNewerThanSecond(versionString1, versionString2)
+	--versionString can be "9.2.0.10" for example, another player can have "9.2.0.9"
+	-- we cant make a simple comparison like "9.2.0.10" > "9.2.0.9" because this would result in false
+	
+	local firstVersion = {strsplit(".", versionString1)}
+	local secondVersion = {strsplit(".", versionString2)}
+
+	for i = 1, max(#firstVersion, #secondVersion) do
+		local firstVersionNumber = tonumber(firstVersion[i]) or 0
+		local secondVersionNumber = tonumber(secondVersion[i]) or 0
+
+		if firstVersionNumber > secondVersionNumber then
+			return true
+		elseif firstVersionNumber < secondVersionNumber then --otherwise its equal and we compare the next table item
+			return false
+		end
+	end
+	return false --we didnt return anything yet since all numbers where equal, we are at the end of the arrays so both versions are equal
+end
+
 
 SLASH_BattleGroundEnemiesVersion1 = "/bgev"
 SLASH_BattleGroundEnemiesVersion2 = "/BGEV"
@@ -128,25 +148,7 @@ end
 --     end
 -- end
 
-local function IsFirstNewerThanSecond(versionString1, versionString2)
-	--versionString can be "9.2.0.10" for example, another player can have "9.2.0.9"
-	-- we cant make a simple comparison like "9.2.0.10" > "9.2.0.9" because this would result in false
-	
-	local firstVersion = {strsplit(".", versionString1)}
-	local secondVersion = {strsplit(".", versionString2)}
 
-	for i = 1, max(#firstVersion, #secondVersion) do
-		local firstVersionNumber = tonumber(firstVersion[i]) or 0
-		local secondVersionNumber = tonumber(secondVersion[i]) or 0
-
-		if firstVersionNumber > secondVersionNumber then
-			return true
-		elseif firstVersionNumber < secondVersionNumber then --otherwise its equal and we compare the next table item
-			return false
-		end
-	end
-	return false --we didnt return anything yet since all numbers where equal, we are at the end of the arrays so both versions are equal
-end
 
 local wasInGroup = nil
 function BattleGroundEnemies:RequestEverythingFromGroupmembers()

@@ -2,6 +2,7 @@ std = "lua51"
 max_line_length = false
 exclude_files = {
 	"**/Libs",
+	"**.release"
 }
 only = {
 	"011", -- syntax
@@ -50,7 +51,7 @@ globals = {
 	"min",
 	"mod",
 	"rad",
-	"random",
+	"math_random",
 	"scrub",
 	"securecall",
 	"seterrorhandler",
@@ -77,8 +78,8 @@ globals = {
 	"table.wipe",
 	"tan",
 	"time",
-	"tinsert",
-	"tremove",
+	"table_insert",
+	"table_remove",
 	"wipe",
 
 	-- framexml
@@ -105,6 +106,7 @@ globals = {
 	"BNIsSelf",
 	"BNSendWhisper",
 	"BossBanner",
+	"ButtonFrameTemplate_HidePortrait",
 	"C_BattleNet",
 	"C_ChatInfo",
 	"C_Covenants",
@@ -175,7 +177,7 @@ globals = {
 	"GetMacroItemIcons",
 	"GetMaxPlayerLevel",
 	"GetNumAddOns",
-	"GetNumArenaOpponents"
+	"GetNumArenaOpponents",
 	"GetNumArenaOpponentSpecs",
 	"GetNumBattlefieldScores",
 	"GetNumClasses",
@@ -240,6 +242,7 @@ globals = {
 	"LOCALE_itIT",
 	"LOCALE_koKR",
 	"LOCALE_ptBR",
+	"LOCALE_ptPT",
 	"LOCALE_ruRU",
 	"LOCALE_zhCN",
 	"LOCALE_zhTW",

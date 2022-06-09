@@ -1,13 +1,122 @@
-local BattleGroundEnemies = BattleGroundEnemies
 local AddonName, Data = ...
-local GetTime = GetTime
+local BattleGroundEnemies = BattleGroundEnemies
+local L = Data.L
 
 local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
-BattleGroundEnemies.Objects.DR = {}
 local DRList = LibStub("DRList-1.0")
+
+local defaultSettings = {
+	HorizontalSpacing = 1,
+	GrowDirection = "leftwards",
+	Container_Color = {0, 0, 1, 1},
+	Container_BorderThickness = 1,
+	BasicPosition = {
+		BasicPoint = "RIGHT",
+		RelativeTo = "Button",
+		RelativePoint = "LEFT",
+		OffsetX = 1,
+	},
+	DisplayType = "Countdowntext",
+	Cooldown = {
+		ShowNumbers = true,
+		Fontsize = 12,
+		Outline = "OUTLINE",
+		EnableTextshadow = false,
+		TextShadowcolor = {0, 0, 0, 1},
+	},
+	Filtering_Enabled = false,
+	Filtering_Filterlist = {},
+}
+
+local options = function(location)
+	return {
+		HorizontalSpacing = {
+			type = "range",
+			name = L.DrTracking_Spacing,
+			desc = L.DrTracking_Spacing_Desc,
+			min = 0,
+			max = 10,
+			step = 1,
+			order = 3
+		},
+		Container_Color = {
+			type = "color",
+			name = L.Container_Color,
+			desc = L.DrTracking_Container_Color_Desc,
+			hasAlpha = true,
+			order = 4
+		},
+		Container_BorderThickness = {
+			type = "range",
+			name = L.BorderThickness,
+			min = 1,
+			max = 6,
+			step = 1,
+			order = 5
+		},
+		DisplayType = {
+			type = "select",
+			name = L.DisplayType,
+			desc = L.DrTracking_DisplayType_Desc,
+			values = Data.DisplayType,
+			order = 6
+		},
+		GrowDirection = {
+			type = "select",
+			name = L.VerticalGrowdirection,
+			desc = L.VerticalGrowdirection_Desc,
+			values = Data.HorizontalDirections,
+			order = 7
+		},
+		CooldownTextSettings = {
+			type = "group",
+			name = L.Countdowntext,
+			--desc = L.TrinketSettings_Desc,
+			get = function(option)
+				return Data.GetOption(location.Cooldown, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.Cooldown, option, ...)
+			end,
+			order = 8,
+			args = Data.AddCooldownSettings(location.Cooldown)
+		},
+		Fake1 = Data.AddVerticalSpacing(6),
+		FilteringSettings = {
+			type = "group",
+			name = FILTER,
+			--desc = L.DrTrackingFilteringSettings_Desc,
+			--inline = true,
+			order = 9,
+			args = {
+				Filtering_Enabled = {
+					type = "toggle",
+					name = L.Filtering_Enabled,
+					desc = L.DrTrackingFiltering_Enabled_Desc,
+					width = 'normal',
+					order = 1
+				},
+				Filtering_Filterlist = {
+					type = "multiselect",
+					name = L.Filtering_Filterlist,
+					desc = L.DrTrackingFiltering_Filterlist_Desc,
+					disabled = function() return not location.DrTrackingFiltering_Enabled end,
+					get = function(option, key)
+						return location.Filtering_Filterlist[key]
+					end,
+					set = function(option, key, state) -- key = category name
+						location.Filtering_Filterlist[key] = state or nil
+					end,
+					values = Data.DrCategorys,
+					order = 2
+				}
+			}
+		}
+	}
+end
 
 local dRstates = {
 	[1] = { 0, 1, 0, 1}, --green (next cc in DR time will be only half duration)
@@ -23,17 +132,24 @@ local function drFrameUpdateStatusText(drFrame)
 	drFrame.Cooldown.Text:SetTextColor(unpack(dRstates[drFrame.status] or dRstates[3]))
 end	
 
-function BattleGroundEnemies.Objects.DR.New(playerButton)
+
+local events = {"AuraRemoved"}
+
+local dRTracking = BattleGroundEnemies:NewModule("DRTracking", "DRTracking", 3, defaultSettings, options, events)
 
 
-	local DRContainer = CreateFrame("Frame", nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
-	DRContainer:SetPoint("TOPRIGHT", playerButton, "TOPLEFT", -1, 0)
-	DRContainer:SetPoint("BOTTOMRIGHT", playerButton, "BOTTOMLEFT", -1, 0)
-	DRContainer:SetBackdropColor(0, 0, 0, 0)
-	DRContainer.DRFrames = {}
+function dRTracking:AttachToPlayerButton(playerButton)
 
-	DRContainer.ApplySettings = function(self)
-		self:UpdateBackdrop(playerButton.bgSizeConfig.DrTracking_Container_BorderThickness)
+	local frame = CreateFrame("frame", nil, playerButton)
+
+	Mixin(frame, BackdropTemplateMixin)
+	frame:SetPoint("TOPRIGHT", playerButton, "TOPLEFT", -1, 0)
+	frame:SetPoint("BOTTOMRIGHT", playerButton, "BOTTOMLEFT", -1, 0)
+	frame:SetBackdropColor(0, 0, 0, 0)
+	frame.DRFrames = {}
+
+	function frame:ApplyAllSettings()
+		self:UpdateBackdrop(self.config.Container_BorderThickness)
 		self:SetPosition()
 		self:DrPositioning()
 		
@@ -43,20 +159,20 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		end	
 	end
 	
-	DRContainer.Reset = function(self)
+	function frame:Reset()
 		for drCategory, drFrame in pairs(self.DRFrames) do
 			drFrame.Cooldown:Clear()
 			drFrame:Remove()
 		end	
 	end
 	
-	DRContainer.SetPosition = function(self)
-		BattleGroundEnemies.SetBasicPosition(self, playerButton.bgSizeConfig.DrTracking_Container_BasicPoint, playerButton.bgSizeConfig.DrTracking_Container_RelativeTo, playerButton.bgSizeConfig.DrTracking_Container_RelativePoint, playerButton.bgSizeConfig.DrTracking_Container_OffsetX)
+	function frame:SetPosition()
+		BattleGroundEnemies.SetBasicPosition(self, self.config.BasicPosition.BasicPoint, self.config.BasicPosition.RelativeTo, self.config.BasicPosition.RelativePoint, self.config.BasicPosition.OffsetX)
 	end
 
 
-	DRContainer.SetWidthOfAuraFrames = function(self, height)
-		local borderThickness = playerButton.bgSizeConfig.DrTracking_Container_BorderThickness
+	function frame:SetWidthOfAuraFrames(height)
+		local borderThickness = self.config.Container_BorderThickness
 		for drCategorie, drFrame in pairs(self.DRFrames) do
 			drFrame:SetWidth(height - borderThickness * 2)
 		end
@@ -64,7 +180,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 	
 
 
-	DRContainer.DisplayDR = function(self, drCat, spellID, spellName, additionalDuration)
+	function frame:DisplayDR(drCat, spellID, spellName)
 		local drFrame = self.DRFrames[drCat]
 		if not drFrame then  --create a new frame for this categorie
 			
@@ -72,7 +188,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 
 			drFrame:HookScript("OnEnter", function(self)
 				BattleGroundEnemies:ShowTooltip(self, function() 
-					if isClassic then return end
+					if IsClassic then return end
 					GameTooltip:SetSpellByID(self.SpellID)
 				end)
 			end)
@@ -86,11 +202,10 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			drFrame.Container = self
 			
 			drFrame.ApplyDrFrameSettings = function(self)
-				local conf = playerButton.bgSizeConfig
+				local conf = playerButton.config
 				
-				self.Cooldown:ApplyCooldownSettings(conf.DrTracking_ShowNumbers, false, false)
-				self.Cooldown.Text:ApplyFontStringSettings(conf.DrTracking_Cooldown_Fontsize, conf.DrTracking_Cooldown_Outline, conf.DrTracking_Cooldown_EnableTextshadow, conf.DrTracking_Cooldown_TextShadowcolor)
-			
+				self.Cooldown:ApplyCooldownSettings(conf.Cooldown.ShowNumbers, false, false)
+				self.Cooldown.Text:ApplyFontStringSettings(conf.Cooldown)
 			end
 
 
@@ -110,14 +225,14 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			end
 
 			drFrame.SetDisplayType = function(self)
-				if playerButton.bgSizeConfig.DrTracking_DisplayType == "Frame" then
+				if playerButton.config.DisplayType == "Frame" then
 					self.SetStatus = drFrameUpdateStatusBorder
 				else
 					self.SetStatus = drFrameUpdateStatusText
 				end
 			end
 			
-			drFrame:SetWidth(playerButton.bgSizeConfig.BarHeight - playerButton.bgSizeConfig.DrTracking_Container_BorderThickness * 2)
+			drFrame:SetWidth(playerButton.config.BarHeight - playerButton.bgSizeConfig.DrTracking_Container_BorderThickness * 2)
 
 			drFrame:SetBackdrop({
 				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
@@ -160,11 +275,11 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		end
 		drFrame.SpellID = spellID
 
-		drFrame.Icon:SetTexture(isClassic and GetSpellTexture(DRList.spells[spellName].spellID) or GetSpellTexture(spellID))
-		drFrame.Cooldown:SetCooldown(GetTime(), DRList:GetResetTime(drCat) + additionalDuration)
+		drFrame.Icon:SetTexture(IsClassic and GetSpellTexture(DRList.spells[spellName].spellID) or GetSpellTexture(spellID))
+		drFrame.Cooldown:SetCooldown(GetTime(), DRList:GetResetTime(drCat))
 	end
 
-	DRContainer.DrPositioning = function(self)
+	function frame:DrPositioning()
 		local config = playerButton.bgSizeConfig
 		local spacing = config.DrTracking_HorizontalSpacing
 		local borderThickness = config.DrTracking_Container_BorderThickness
@@ -208,7 +323,7 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 		end
 	end
 
-	DRContainer.UpdateBackdrop = function(self, borderThickness)
+	function frame:UpdateBackdrop(borderThickness)
 		self:SetBackdrop(nil)
 		self:SetBackdrop({
 			bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
@@ -216,9 +331,27 @@ function BattleGroundEnemies.Objects.DR.New(playerButton)
 			edgeSize = borderThickness
 		})
 		self:SetBackdropColor(0, 0, 0, 0)
-		self:SetBackdropBorderColor(unpack(playerButton.bgSizeConfig.DrTracking_Container_Color))
-		self:SetWidthOfAuraFrames(playerButton.bgSizeConfig.BarHeight)
+		self:SetBackdropBorderColor(unpack(self.config.Container_Color))
+		self:SetWidthOfAuraFrames(self.bgSizeConfig.BarHeight)
 		self:DrPositioning()
 	end
-	return DRContainer
+
+	function frame:AuraRemoved(spellID, spellName)
+		local config = self.config
+		--BattleGroundEnemies:Debug(operation, spellID)
+
+		local drCat = DRList:GetCategoryBySpellID(IsClassic and spellName or spellID)
+
+		if not drCat then return end
+
+		local drTrackingEnabled = not config.Filtering_Enabled or config.Filtering_Filterlist[drCat]
+					
+		if drTrackingEnabled then
+			self:DisplayDR(drCat, spellID, spellName)
+			local drFrame = self.DRFrames[drCat]
+				--BattleGroundEnemies:Debug("DR Problem")
+			drFrame:IncreaseDRState()
+		end
+	end
+	playerButton.DR = frame
 end

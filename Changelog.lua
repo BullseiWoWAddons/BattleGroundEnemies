@@ -2,6 +2,27 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "9.2.5.13",
+		Sections = {
+			{
+				Header = "New Features:",
+				Entries = {
+					"Added an option to disable target icons.",
+					"Added the option to export and import profiles to and from a string.",
+					"Added the option to reset modules individually to the default setting."
+				}
+			},
+			{
+				Header = "Changes:",
+				Entries = {
+					"Reworked the aura system once again. it now should update the auras of enemies more often if an unit ID is available.",
+					"Only send infos about a missing localization entry once.",
+					"Toc updates for Classic and TBCC."
+				}
+			}
+		}
+	},
+	{
 		Version = "9.2.0.11",
 		Sections = {
 			{
