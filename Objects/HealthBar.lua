@@ -1,5 +1,6 @@
 local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
+local LSM = LibStub("LibSharedMedia-3.0")
 local L = Data.L
 local GetTime = GetTime
 
@@ -62,7 +63,7 @@ local healthBar = BattleGroundEnemies:NewModule("healthBar", "HealthBar", 3, def
 
 function healthBar:AttachToPlayerButton(playerButton)
 	playerButton.healthBar = CreateFrame('StatusBar', nil, playerButton)
-	playerButton.healthBar:SetPoint('BOTTOMLEFT', playerButton.Power, "TOPLEFT")
+	playerButton.healthBar:SetPoint('BOTTOMLEFT', playerButton, "TOPLEFT")
 	playerButton.healthBar:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT")
 	playerButton.healthBar:SetMinMaxValues(0, 1)
 

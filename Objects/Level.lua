@@ -10,29 +10,27 @@ local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local defaultSettings = {
-	Level = {
-		OnlyShowIfNotMaxLevel = true,
-		Text = {
-			Fontsize = 18,
-			Outline = "",
-			Textcolor = {1, 1, 1, 1},
-			EnableTextshadow = false,
-			TextShadowcolor = {0, 0, 0, 1}
+	Points = {
+		{
+			Point = "TOPLEFTT",
+			relativeFrame = "Covenant",
+			relativePoint = "TOPRIGHT",
+			offsetX = 2,
+			offsetY = 2
 		}
 	},
+	OnlyShowIfNotMaxLevel = true,
+	Text = {
+		Fontsize = 18,
+		Outline = "",
+		Textcolor = {1, 1, 1, 1},
+		EnableTextshadow = false,
+		TextShadowcolor = {0, 0, 0, 1}
+	}
 }
 
 local options = function(location) 
 	return {
-		Points = {
-			{
-				Point = "TOPLEFTT",
-				relativeFrame = "Covenant",
-				relativePoint = "TOPRIGHT",
-				offsetX = 2,
-				offsetY = 2
-			}
-		},
 		OnlyShowIfNotMaxLevel = {
 			type = "toggle",
 			name = L.LevelText_OnlyShowIfNotMaxLevel,
@@ -61,7 +59,7 @@ local Level = BattleGroundEnemies:NewModule("Level", "Level", 2, defaultSettings
 
 function Level:AttachToPlayerButton(playerButton)
 	local fs = BattleGroundEnemies.MyCreateFontString(playerButton)
-	fs:SetPoint("TOPLEFT", playerButton.Covenant, "TOPRIGHT", 2, 2)
+	fs:SetPoint("TOPLEFT", playerButton, "TOPRIGHT", 2, 2)
 	fs:SetJustifyH("LEFT")
 
 
@@ -96,10 +94,6 @@ function Level:AttachToPlayerButton(playerButton)
 	function fs:PlayerButtonSizeChanged(width, height)
 		fs:SetHeight(height)
 		self:DisplayLevel()
-	end
-
-	function fs:SetPosition()
-		BattleGroundEnemies.SetBasicPosition(self, playerButton.bgSizeConfig.Level_BasicPoint, playerButton.bgSizeConfig.Level_RelativeTo, playerButton.bgSizeConfig.Level_RelativePoint, playerButton.bgSizeConfig.Level_OffsetX)
 	end
 	
 	function fs:Reset()

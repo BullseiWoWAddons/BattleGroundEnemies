@@ -65,9 +65,10 @@ function role:AttachToPlayerButton(playerButton)
 
 	playerButton.Role.ApplyAllSettings = function(self)
 		if not (IsTBCC or IsClassic) then 
-			self:SetWidth(playerButton.bgSizeConfig.RoleIcon_Size)
-			self.Icon:SetSize(playerButton.bgSizeConfig.RoleIcon_Size, playerButton.bgSizeConfig.RoleIcon_Size)
-			self.Icon:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -playerButton.bgSizeConfig.RoleIcon_VerticalPosition)
+			self.config.
+			self:SetWidth(self.config.Size)
+			self.Icon:SetSize(self.config.Size, self.config.Size)
+			self.Icon:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -self.config.VerticalPosition)
 			self:Show()
 		else
 			self:Disable()

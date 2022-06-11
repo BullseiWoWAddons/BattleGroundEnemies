@@ -153,10 +153,6 @@ function racial:AttachToPlayerButton(playerButton)
 	function frame:SPELL_CAST_SUCCESS(srcName, destName, spellID)
 		self:RacialCheck(spellID)
 	end
-
-	function frame:SetPosition()
-		BattleGroundEnemies.SetBasicPosition(self, playerButton.bgSizeConfig.Racial_BasicPoint, playerButton.bgSizeConfig.Racial_RelativeTo, playerButton.bgSizeConfig.Racial_RelativePoint, playerButton.bgSizeConfig.Racial_OffsetX)
-	end
 	playerButton.Racial = frame
 end
 

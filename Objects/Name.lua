@@ -56,8 +56,6 @@ local healthBar = BattleGroundEnemies:NewModule("Name", "Name", 3, defaultSettin
 
 function healthBar:AttachToPlayerButton(playerButton)
 	playerButton.Name = BattleGroundEnemies.MyCreateFontString(playerButton)
-	playerButton.Name:SetPoint('TOPLEFT', playerButton.Level, "TOPRIGHT", 5, 2)
-	playerButton.Name:SetPoint('BOTTOMRIGHT', playerButton.NumericTargetIndicator, "BOTTOMLEFT", 0, 0)
 	playerButton.Name:SetJustifyH("LEFT")
 
 	function playerButton.Name:OnNewPlayer()

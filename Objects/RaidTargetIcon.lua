@@ -1,6 +1,8 @@
 
 local BattleGroundEnemies = BattleGroundEnemies
 local AddonName, Data = ...
+local LSM = LibStub("LibSharedMedia-3.0")
+
 local GetTime = GetTime
 
 local AddonName, Data = ...
@@ -8,21 +10,27 @@ local L = Data.L
 
 
 local defaultSettings = {
+	Points = {
+		{
+			Point = "TOP",
+			relativeTo = "Button",
+			relativePoint = "TOP"
+		},
+		{
+			Point = "BOTTOM",
+			relativeTo = "Button",
+			relativePoint = "BOTTOM"
+		},
+	},
+	Width = 30
 }
-
-local options = function(location) 
-	return 
-end
 
 local events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"}
 
-local raidTargetIcon = BattleGroundEnemies:NewModule("RaidTargetIcon", "RaidTargetIcon", 3, defaultSettings, options, events)
+local raidTargetIcon = BattleGroundEnemies:NewModule("RaidTargetIcon", "RaidTargetIcon", 3, defaultSettings, nil, events)
 
 function raidTargetIcon:AttachToPlayerButton(playerButton)
 	playerButton.RaidTargetIcon = CreateFrame('Frame', nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
-	playerButton.RaidTargetIcon:SetPoint("TOP")
-	playerButton.RaidTargetIcon:SetPoint("BOTTOM")
-	playerButton.RaidTargetIcon:SetWidth(30)
 	playerButton.RaidTargetIcon.Icon = playerButton.RaidTargetIcon:CreateTexture(nil, "OVERLAY")
 	playerButton.RaidTargetIcon.Icon:SetTexture("Interface/TargetingFrame/UI-RaidTargetingIcons")
 	playerButton.RaidTargetIcon.Icon:SetAllPoints()
@@ -61,13 +69,11 @@ function raidTargetIcon:AttachToPlayerButton(playerButton)
 	end
 
 	function playerButton.RaidTargetIcon:PlayerButtonSizeChanged(width, height)
-		playerButton.RaidTargetIcon:SetWidth(height)
+		self:SetWidth(height)
 	end
 
 	function playerButton.RaidTargetIcon:ApplyAllSettings()
-		local config = self.config
-		self:SetStatusBarTexture(LSM:Fetch("statusbar", config.Texture))--self.healthBar:SetStatusBarTexture(137012)
-		self.Background:SetVertexColor(unpack(config.Background))
+		return
 	end
 
 	function playerButton.RaidTargetIcon:Reset()

@@ -4,24 +4,24 @@ local L = Data.L
 local C_Covenants = C_Covenants
 
 local defaultSettings = {
+	Points = {
+		{
+			Point = "TOPLEFTT",
+			RelativeFrame = "Role",
+			RelativePoint = "TOPRIGHT",
+		},
+		{
+			Point = "BOTTOMLEFT",
+			RelativeFrame = "Role",
+			RelativePoint = "BOTTOMRIGHT",
+		}
+	},
 	Size = 20,
 	VerticalPosition = 3,
 }
 
 local options = function(location) 
 	return {
-		Points = {
-			{
-				Point = "TOPLEFTT",
-				relativeFrame = "Role",
-				relativePoint = "TOPRIGHT",
-			},
-			{
-				Point = "BOTTOMLEFT",
-				relativeFrame = "Role",
-				relativePoint = "BOTTOMRIGHT",
-			}
-		},
 		Size = {
 			type = "range",
 			name = L.Size,

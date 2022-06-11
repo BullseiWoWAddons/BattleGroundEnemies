@@ -123,7 +123,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 
 
 	frame:SetAllPoints()
-	frame:SetFrameLevel(playerButton.Spec:GetFrameLevel() + 1)
+	frame:SetFrameLevel(playerButton:GetFrameLevel() + 1)
 	frame.PriorityAuras = {}
 	frame.ActiveInterrupt = false
 	frame.Icon = frame:CreateTexture(nil, 'BACKGROUND')

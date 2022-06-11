@@ -55,7 +55,7 @@ local options = function(location)
 	}
 end
 
-local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "UnitDied", "ArenaOpponentShown"}
+local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"}
 
 local objectiveAndRespawn = BattleGroundEnemies:NewModule("ObjectiveAndRespawn", "ObjectiveAndRespawn", 3, defaultSettings, options, events)
 
@@ -102,9 +102,6 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		frame.ActiveRespawnTimer = false
 	end
 	
-	function frame:SetPosition()
-		BattleGroundEnemies.SetBasicPosition(self, playerButton.bgSizeConfig.ObjectiveAndRespawn_BasicPoint, playerButton.bgSizeConfig.ObjectiveAndRespawn_RelativeTo, playerButton.bgSizeConfig.ObjectiveAndRespawn_RelativePoint, playerButton.bgSizeConfig.ObjectiveAndRespawn_OffsetX)
-	end
 		
 	function frame:ApplyAllSettings()
 		if BattleGroundEnemies.BGSize == 15 then
@@ -155,14 +152,13 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 					self.AuraText:SetText(value)
 					self.Value = value
 				end
+				self.continue = false
 				return
 			end		
 		end
 	end
 		
 	function frame:PlayerDied()	
-		--dead
-		playerButton.healthBar:SetValue(0)
 		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.TestmodeActive and BattleGroundEnemies.BGSize == 15)) then
 		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
@@ -198,9 +194,16 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 			end
 		end
 	end
+
+	function frame:BeforeUnitAura(unitID, filter) 
+		if filter == "HARMFUL" then
+			self.continue = true
+		end
+	end
 	
 	function frame:UnitAura(unitID, filter, ...)
 		if filter ~= "HARMFUL" then return end
+		if not self.continue then return end
 	
 		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then -- This player is shown on arena enemy frames because he holds a objective
 			if BattleGroundEnemies.BattleGroundDebuffs then

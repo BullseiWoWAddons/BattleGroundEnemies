@@ -2,7 +2,15 @@ local AddonName, Data = ...
 local L = Data.L
 local filters = {"HELPFUL", "HARMFUL"}
 
-local temp = {
+local defaultSettings = {
+	Points = {
+		{
+			Point = "LEFT",
+			relativeFrame = "Button",
+			relativePoint = "RIGHT",
+			OffsetX = 1
+		}
+	},
 	Enabled = true,
 	Icons = {
 		Size = 15,
@@ -54,20 +62,6 @@ local temp = {
 			DurationFilter_CustomdMaxDuration = 10
 		}
 	}
-}
-
-local defaultSettings = {
-	Points = {
-		{
-			Point = "LEFT",
-			relativeFrame = "Button",
-			relativePoint = "RIGHT",
-			OffsetX = 1
-		}
-	},
-	Enabled = true,
-	HELPFUL = temp,
-	HARMFUL = temp,		
 }
 
 -- CompactUnitFrame_Util_IsPriorityDebuff
@@ -399,31 +393,36 @@ local function AddAuraSettings(location, filter)
 	}
 end
 
-local options = function(location) 
+local buffOptions = function(location) 
 	return {
-		Auras_BuffsSettings = {
+		Settings = {
 			type = "group",
 			name = L.Buffs,
 			order = 1,
 			get = function(option)
-				return Data.GetOption(location.HELPFUL, option)
+				return Data.GetOption(location, option)
 			end,
 			set = function(option, ...)
-				return Data.SetOption(location.HELPFUL, option, ...)
+				return Data.SetOption(location, option, ...)
 			end,
-			args = AddAuraSettings(location.HELPFUL, "HELPFUL")
-		},
-		Auras_DebuffsSettings = {
+			args = AddAuraSettings(location, "HELPFUL")
+		}
+	}
+end
+
+local debuffOptions = function(location) 
+	return {
+		Settings = {
 			type = "group",
 			name = L.Debuffs,
 			order = 2,
 			get = function(option)
-				return Data.GetOption(location.HARMFUL, option)
+				return Data.GetOption(location, option)
 			end,
 			set = function(option, ...)
-				return Data.SetOption(location.HARMFUL, option, ...)
+				return Data.SetOption(location, option, ...)
 			end,
-			args = AddAuraSettings(location.HARMFUL, "HARMFUL")
+			args = AddAuraSettings(location, "HARMFUL")
 		}
 	}
 end
@@ -431,345 +430,45 @@ end
 
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura, UnitAura, AfterUnitAura", "UnitDied"}
 
-local auras = BattleGroundEnemies:NewModule("Auras", "Auras", 3, defaultSettings, options, events)
+local buffs = BattleGroundEnemies:NewModule("Buffs", "Buffs", 3, defaultSettings, buffOptions, events)
+local debuffs = BattleGroundEnemies:NewModule("Debuffs", "Debuffs", 3, defaultSettings, debuffOptions, events)
 
-function auras:AttachToPlayerButton(playerButton)
-	local frame = CreateFrame("frame", nil, playerButton)
+local function AttachToPlayerButton(playerButton, filter)		
+	local auraContainer = CreateFrame("Frame", nil, playerButton)
 
-	for i = 1, #filters do
-		local filter = filters[i]
-		
-		local auraContainer = CreateFrame("Frame", nil, frame)
+	auraContainer.Auras = {}
+	auraContainer.AuraFrames = {}
+	auraContainer.PriorityAuras = {}
+	auraContainer.filter = filter
 
-		auraContainer.Auras = {}
-		auraContainer.AuraFrames = {}
-		auraContainer.PriorityAuras = {}
-		auraContainer.filter = filter
+	auraContainer:SetScript("OnHide", function(self) 
+		self:SetWidth(0.001)
+		self:SetHeight(0.001)
+	end)
 	
-		auraContainer:SetScript("OnHide", function(self) 
-			self:SetWidth(0.001)
-			self:SetHeight(0.001)
-		end)
-		
-		auraContainer:Hide()
-		
-		function auraContainer:SetPosition(point, relativeTo, relativePoint, offsetX, offsetY)
-			self:ClearAllPoints()
-			if relativeTo == "Button" then 
-				relativeTo = frame
-			else
-				relativeTo = frame[relativeTo]
-			end
-			self:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY)
-		end
-		
-		function auraContainer:Reset()
-			wipe(self.Auras)
-			self:AuraUpdateFinished()
-		end
-		
-		function auraContainer:ApplySettings(moduleConfig)
-			if not self.config.Enabled then self:Reset() end
-		
-			for i = 1, #self.AuraFrames do
-				local auraFrame = self.AuraFrames[i]
-				auraFrame:ApplyAuraFrameSettings()
-				if self.filter == "HARMFUL" then
-					auraFrame:ChangeDisplayType()
-				end
-			end
-			
-			self:SetContainerPosition()
-		end
-		
-		function auraContainer:SetContainerPosition()
-			local conf = self.config.Container
-			self:SetPosition(conf.Container_Point, conf.Container_RelativeTo, conf.Container_RelativePoint, conf.Container_OffsetX, conf.Container_OffsetY)
-		end
+	auraContainer:Hide()
 	
-		function auraContainer:PrepareForUpdate()
-			wipe(self.Auras)
-		end
-		
-		function auraContainer:NewAura(name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod)
-	
-			local filter = self.filter
-			if true then
-				BattleGroundEnemies.db.profile.Auras = BattleGroundEnemies.db.profile.Auras or {}
-				BattleGroundEnemies.db.profile.Auras[filter] = BattleGroundEnemies.db.profile.Auras[filter] or {}
-				BattleGroundEnemies.db.profile.Auras[filter][spellID] = BattleGroundEnemies.db.profile.Auras[filter][spellID] or {
-					name = name,
-					icon = icon,
-					count = count,
-					debuffType = debuffType,
-					duration = duration,
-					expirationTime = expirationTime,
-					unitCaster = unitCaster,
-					canStealOrPurge = canStealOrPurge,
-					nameplateShowPersonal = nameplateShowPersonal,
-					spellID = spellID,
-					canApplyAura = canApplyAura,
-					isBossAura = isBossAura,
-					castByPlayer = castByPlayer,
-					nameplateShowAll = nameplateShowAll,
-					timeMod = timeMod
-				}
-			end
-	
-			if not frame:CareAboutThisAura(frame, nil, nil, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType) then print("didnt make it through the filter") return end	
-					
-			local ID = #self.Auras + 1
-			local auraDetails = {
-				ID = ID,
-				SpellID = spellID,
-				Icon = icon,
-				DebuffType = debuffType,
-				Filter = self.filter,
-				Priority =  BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID],
-				Stacks = count,
-				ExpirationTime = expirationTime,
-				Duration = duration
-			}
-			self.Auras[ID] = auraDetails
-		end
-	
-		function auraContainer:AuraUpdateFinished()	
-			local conf = self.config.Icons
-			self:DisplayAuras(conf.Size, conf.VerticalGrowdirection, conf.HorizontalGrowDirection, conf.IconsPerRow, conf.HorizontalSpacing, conf.VerticalSpacing)
-		end
-	
-		function auraContainer:DisplayAuras(iconSize, verticalGrowdirection, horizontalGrowdirection, framesPerRow, horizontalSpacing, verticalSpacing)
-			local growLeft = horizontalGrowdirection == "leftwards"
-			local growUp = verticalGrowdirection == "upwards"
-			local previousFrame = self
-			self:Show()
-			local framesInRow = 0
-			local count = 0
-			local firstFrameInRow
-			local lastFrameInRow
-			local width = 0
-			local widestRow = 0
-			local height = 0
-			local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRow, relativePointNewRow
-	
-			if growLeft then
-				pointX = "RIGHT"
-				relativePointX = "LEFT"
-				offsetX = -horizontalSpacing
-			else
-				pointX = "LEFT"
-				relativePointX = "RIGHT"
-				offsetX = horizontalSpacing
-			end
-	
-			if growUp then
-				pointY = "BOTTOM"
-				relativePointY = "BOTTOM"
-				pointNewRow = "BOTTOM"
-				relativePointNewRow = "TOP"
-				offsetY = verticalSpacing
-			else
-				pointY = "TOP"
-				relativePointY = "TOP"
-				pointNewRow = "TOP"
-				relativePointNewRow = "BOTTOM"
-				offsetY = -verticalSpacing
-			end
-	
-			local numAuras = #self.Auras
-			for i = 1, numAuras do
-				local auraDetails = self.Auras[i]
-				local auraFrame = self.AuraFrames[i]
-				if not auraFrame then
-					auraFrame = CreateFrame('Frame', nil, self, BackdropTemplateMixin and "BackdropTemplate")
-					auraFrame:SetFrameLevel(self:GetFrameLevel() + 5)
-					
-					
-					auraFrame:SetScript("OnEnter", function(self)
-						BattleGroundEnemies:ShowTooltip(self, function()
-							BattleGroundEnemies:ShowAuraTooltip(playerButton, auraFrame.AuraDetails)
-						end)
-					end)
-					
-					auraFrame:SetScript("OnLeave", function(self)
-						if GameTooltip:IsOwned(self) then
-							GameTooltip:Hide()
-						end
-					end)
-		
-					function auraFrame:Remove()
-						table.remove(auraContainer.Auras, auraFrame.AuraDetails.ID)
-						for i = 1, #auraContainer.Auras do
-							local auraDetails = auraContainer.Auras[i]
-							auraDetails.ID = i
-						end
-						auraContainer:AuraUpdateFinished()
-					end
-		
-		
-						
-					auraFrame.Icon = auraFrame:CreateTexture(nil, "BACKGROUND")
-					auraFrame.Icon:SetAllPoints()
-		
-					auraFrame.Stacks = BattleGroundEnemies.MyCreateFontString(auraFrame)
-					auraFrame.Stacks:SetAllPoints()
-					auraFrame.Stacks:SetJustifyH("RIGHT")
-					auraFrame.Stacks:SetJustifyV("BOTTOM")
-		
-					auraFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(auraFrame)
-					auraFrame.Cooldown:SetScript("OnCooldownDone", function(self) -- only do this for the case that we dont get a UNIT_AURA for an ending aura, if we dont do this the aura is stuck even tho its expired
-						auraFrame.Remove()
-					end)
-		
-					auraFrame.Container = self		
-					auraFrame.Icon:SetDrawLayer("BORDER", -1) -- 1 to make it behind the SetBackdrop bg
-		
-					auraFrame:SetBackdrop({
-						bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-						edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-						edgeSize = 1
-					})
-					
-					auraFrame:SetBackdropColor(0, 0, 0, 0)
-					auraFrame:SetBackdropBorderColor(0, 0, 0, 0) 		
-		
-					auraFrame.ApplyAuraFrameSettings = function(self)
-						local conf = auraContainer.config
-						local container = self:Getframe()
-					
-						self.Stacks:ApplyFontStringSettings(conf.StackText)
-						local cooldownConfig = conf.Cooldown
-						self.Cooldown:ApplyCooldownSettings(cooldownConfig.ShowNumbers, true, false)
-						self.Cooldown.Text:ApplyFontStringSettings(cooldownConfig.Cooldown_Fontsize, cooldownConfig.Cooldown_Outline, cooldownConfig.Cooldown_EnableTextshadow, cooldownConfig.Cooldown_TextShadowcolor)
-						self:SetSize(conf.Icons.Size, conf.Icons.Size)
-					end
-					if self.filter == "HARMFUL" then
-						auraFrame.ChangeDisplayType = function(self)
-							self:SetDisplayType()
-							
-							--reset settings
-							self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
-							self:SetBackdropBorderColor(0, 0, 0, 0)
-							if auraContainer.config.Coloring_Enabled then self:SetType() end
-						end
-		
-						auraFrame.SetDisplayType = function(self)
-							if auraContainer.config.DisplayType == "Frame" then
-								self.SetType = debuffFrameUpdateStatusBorder
-							else
-								self.SetType = debuffFrameUpdateStatusText
-							end
-						end
-						
-						auraFrame:SetDisplayType()
-					end
-					auraFrame:ApplyAuraFrameSettings()
-					self.AuraFrames[i] = auraFrame
-				end
-	
-				auraFrame.AuraDetails = auraDetails
-				
-				auraFrame.Stacks:SetText(auraDetails.Stacks > 1 and auraDetails.Stacks)
-				if auraDetails.Type == "Debuffs" then
-					if auraContainer.config.Coloring_Enabled then auraFrame:SetType() end
-				end
-				auraFrame.Icon:SetTexture(auraDetails.Icon)
-				auraFrame.Cooldown:SetCooldown(auraDetails.ExpirationTime - auraDetails.Duration, auraDetails.Duration)
-				--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
-				
-				auraFrame:ClearAllPoints()
-				if framesInRow < framesPerRow then
-					if count == 0 then
-						auraFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..pointX, 0, 0)
-						firstFrameInRow = auraFrame
-					else
-						auraFrame:SetPoint(pointX, previousFrame, relativePointX, offsetX, 0)
-					end
-					framesInRow = framesInRow + 1
-					width = width + iconSize + horizontalSpacing
-					if width > widestRow then
-						widestRow = width
-					end
-				else
-					width = 0
-					auraFrame:SetPoint(pointNewRow, firstFrameInRow, relativePointNewRow, 0, offsetY)
-					framesInRow = 1
-					firstFrameInRow = auraFrame
-					lastFrameInRow = previousFrame
-					height = height + iconSize + verticalSpacing
-				end
-				previousFrame = auraFrame
-				count = count + 1
-				auraFrame:Show()
-			end
-	
-			for i = numAuras + 1, #self.AuraFrames do --hide all unused frames
-				local auraFrame = self.AuraFrames[i]
-				auraFrame:Hide()
-			end
-			
-			if widestRow == 0 then 
-				self:Hide()
-			else
-				self:SetWidth(widestRow - horizontalSpacing)
-				self:SetHeight(height + iconSize)
-			end
-		end
-
-
-
-		frame[filter] = auraContainer
+	function auraContainer:Reset()
+		wipe(self.Auras)
+		self:AfterUnitAura()
 	end
 
-	function frame:CallFuncOnAllContainers(func)
-		for i = 1, #filters do
-			local filter = filters[i]
-	
-			local containerFrame = self[filter]
-			containerFrame[func](containerFrame)
-		end
+	function auraContainer:ShouldQueryAuras(unitID, filter)
+		if not filter == self.filter then return end
 	end
 
-	function frame:Reset()
-		self:CallFuncOnAllContainers("Reset")
-	end
-		
-	function frame:ApplyAllSettings()
-		for i = 1, #filters do
-			local filter = filters[i]
-	
-			local containerFrame = self[filter]
-			containerFrame.config = self.config
-			containerFrame:ApplySettings()
-		end
+	function auraContainer:BeforeUnitAura()
+		wipe(self.Auras)
 	end
 
-	--[[ auraInfo = {  Optional table of information about changed auras.
-
-	
-	Key						Type		Description
-	canApplyAura			boolean		Whether or not the player can apply this aura.
-	debuffType				string		Type of debuff this aura applies. May be an empty string.
-	isBossAura				boolean		Whether or not this aura was applied by a boss.
-	isFromPlayerOrPlayerPet	boolean		Whether or not this aura was applied by the player or their pet.
-	isHarmful				boolean		Whether or not this aura is a debuff.
-	isHelpful				boolean		Whether or not this aura is a buff.
-	isNameplateOnly			boolean		Whether or not this aura should appear on nameplates.
-	isRaid					boolean		Whether or not this aura meets the conditions of the RAID aura filter.
-	name					string		The name of the aura.
-	nameplateShowAll		boolean		Whether or not this aura should be shown on all nameplates, instead of just the personal one.
-	sourceUnit				UnitId		Token of the unit that applied the aura.
-	spellId					number		The spell ID of the aura.
-}  ]]
-
-	function frame:CareAboutThisAura(unitID, auraInfo, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType)
+	function auraContainer:CareAboutThisAura(unitID, auraInfo, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType)
 		local config = self.config
 		local auraConfig
 		local aurasEnabled, isDebuff
 		local isMine
 		local blizzlikeFunc
 		local filterFunc 
-
+	
 		if auraInfo then
 			spellID = auraInfo.spellId
 			canApplyAura = auraInfo.canApplyAura
@@ -779,7 +478,7 @@ function auras:AttachToPlayerButton(playerButton)
 		else
 			isMine = unitCaster and UnitName(unitCaster) == BattleGroundEnemies.PlayerDetails.PlayerName
 		end
-
+	
 		if filter == "HARMFUL" then
 			isDebuff = true
 			blizzlikeFunc = ShouldDisplayDebuffBlizzLike
@@ -789,8 +488,8 @@ function auras:AttachToPlayerButton(playerButton)
 			auraConfig = config.Buffs
 			blizzlikeFunc = ShouldDisplayBuffBlizzLike
 		end
-
-
+	
+	
 		if not auraConfig.Enabled then return false end		
 		local filteringConfig = auraConfig.Filtering
 		if not filteringConfig.Enabled then 
@@ -801,10 +500,10 @@ function auras:AttachToPlayerButton(playerButton)
 				return true
 			end
 		else --custom filtering
-
+	
 			local conditions = {}
 			local customFilterConfig = filteringConfig.CustomFiltering
-
+	
 			if customFilterConfig.SourceFilter_Enabled then
 				table_insert(conditions, myAuraFiltering(auraConfig, isMine))
 			end
@@ -815,7 +514,7 @@ function auras:AttachToPlayerButton(playerButton)
 			if customFilterConfig.DebuffTypeFiltering_Enabled then
 				table_insert(conditions, debuffTypeFiltering(auraConfig, debuffType))
 			end
-
+	
 			if not auraInfo then
 				if customFilterConfig.DispelFilter_Enabled then
 					table_insert(conditions, canStealorPurgeFiltering(config, canStealOrPurge))
@@ -825,34 +524,265 @@ function auras:AttachToPlayerButton(playerButton)
 					table_insert(conditions, maxDurationFiltering(config, duration))
 				end
 			end
-
+	
 			if conditionFuncs[customFilterConfig.CustomFiltering_ConditionsMode] and conditionFuncs[customFilterConfig.CustomFiltering_ConditionsMode](conditions) then
 				return true
 			end
 		end
 	end
 
-	function frame:ShouldQueryAuras(unitID, filter)
-		return self[filter].config.Enabled 
+	function auraContainer:UnitAura(unitID, filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4) 
+		if not filter == self.filter then return end
+		if true then
+			BattleGroundEnemies.db.profile.Auras = BattleGroundEnemies.db.profile.Auras or {}
+			BattleGroundEnemies.db.profile.Auras[filter] = BattleGroundEnemies.db.profile.Auras[filter] or {}
+			BattleGroundEnemies.db.profile.Auras[filter][spellID] = BattleGroundEnemies.db.profile.Auras[filter][spellID] or {
+				name = name,
+				icon = icon,
+				count = count,
+				debuffType = debuffType,
+				duration = duration,
+				expirationTime = expirationTime,
+				unitCaster = unitCaster,
+				canStealOrPurge = canStealOrPurge,
+				nameplateShowPersonal = nameplateShowPersonal,
+				spellID = spellID,
+				canApplyAura = canApplyAura,
+				isBossAura = isBossAura,
+				castByPlayer = castByPlayer,
+				nameplateShowAll = nameplateShowAll,
+				timeMod = timeMod
+			}
+		end
+
+		if not auraContainer:CareAboutThisAura(unitID, nil, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType) then print("didnt make it through the filter") return end	
+				
+		local ID = #self.Auras + 1
+		local auraDetails = {
+			ID = ID,
+			SpellID = spellID,
+			Icon = icon,
+			DebuffType = debuffType,
+			Filter = filter,
+			Priority =  BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID],
+			Stacks = count,
+			ExpirationTime = expirationTime,
+			Duration = duration
+		}
+		self.Auras[ID] = auraDetails
 	end
 
-	function frame:BeforeUnitAura(filter)
-		self[filter]:PrepareForUpdate()
+	function auraContainer:AfterUnitAura()	
+		local conf = self.config.Icons
+		self:DisplayAuras(conf.Size, conf.VerticalGrowdirection, conf.HorizontalGrowDirection, conf.IconsPerRow, conf.HorizontalSpacing, conf.VerticalSpacing)
 	end
 
-	function frame:UnitAura(unitID, filter, ...)
-		self[filter]:NewAura(unitID, filter, ...)
-	end
-
-	function frame:AfterUnitAura(filter)
-		self[filter]:AuraUpdateFinished()
-	end
-
-	function frame:UnitDied()
+	function auraContainer:UnitDied()	
 		self:Reset()
 	end
-	playerButton.Auras = frame
+
+	function auraContainer:DisplayAuras(iconSize, verticalGrowdirection, horizontalGrowdirection, framesPerRow, horizontalSpacing, verticalSpacing)
+		local growLeft = horizontalGrowdirection == "leftwards"
+		local growUp = verticalGrowdirection == "upwards"
+		local previousFrame = self
+		self:Show()
+		local framesInRow = 0
+		local count = 0
+		local firstFrameInRow
+		local lastFrameInRow
+		local width = 0
+		local widestRow = 0
+		local height = 0
+		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRow, relativePointNewRow
+
+		if growLeft then
+			pointX = "RIGHT"
+			relativePointX = "LEFT"
+			offsetX = -horizontalSpacing
+		else
+			pointX = "LEFT"
+			relativePointX = "RIGHT"
+			offsetX = horizontalSpacing
+		end
+
+		if growUp then
+			pointY = "BOTTOM"
+			relativePointY = "BOTTOM"
+			pointNewRow = "BOTTOM"
+			relativePointNewRow = "TOP"
+			offsetY = verticalSpacing
+		else
+			pointY = "TOP"
+			relativePointY = "TOP"
+			pointNewRow = "TOP"
+			relativePointNewRow = "BOTTOM"
+			offsetY = -verticalSpacing
+		end
+
+		local numAuras = #self.Auras
+		for i = 1, numAuras do
+			local auraDetails = self.Auras[i]
+			local auraFrame = self.AuraFrames[i]
+			if not auraFrame then
+				auraFrame = CreateFrame('Frame', nil, self, BackdropTemplateMixin and "BackdropTemplate")
+				auraFrame:SetFrameLevel(self:GetFrameLevel() + 5)
+				
+				
+				auraFrame:SetScript("OnEnter", function(self)
+					BattleGroundEnemies:ShowTooltip(self, function()
+						BattleGroundEnemies:ShowAuraTooltip(playerButton, auraFrame.AuraDetails)
+					end)
+				end)
+				
+				auraFrame:SetScript("OnLeave", function(self)
+					if GameTooltip:IsOwned(self) then
+						GameTooltip:Hide()
+					end
+				end)
+	
+				function auraFrame:Remove()
+					table.remove(auraContainer.Auras, auraFrame.AuraDetails.ID)
+					for i = 1, #auraContainer.Auras do
+						local auraDetails = auraContainer.Auras[i]
+						auraDetails.ID = i
+					end
+					auraContainer:AfterUnitAura()
+				end
+	
+	
+					
+				auraFrame.Icon = auraFrame:CreateTexture(nil, "BACKGROUND")
+				auraFrame.Icon:SetAllPoints()
+	
+				auraFrame.Stacks = BattleGroundEnemies.MyCreateFontString(auraFrame)
+				auraFrame.Stacks:SetAllPoints()
+				auraFrame.Stacks:SetJustifyH("RIGHT")
+				auraFrame.Stacks:SetJustifyV("BOTTOM")
+	
+				auraFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(auraFrame)
+				auraFrame.Cooldown:SetScript("OnCooldownDone", function(self) -- only do this for the case that we dont get a UNIT_AURA for an ending aura, if we dont do this the aura is stuck even tho its expired
+					auraFrame.Remove()
+				end)
+	
+				auraFrame.Container = self		
+				auraFrame.Icon:SetDrawLayer("BORDER", -1) -- 1 to make it behind the SetBackdrop bg
+	
+				auraFrame:SetBackdrop({
+					bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+					edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+					edgeSize = 1
+				})
+				
+				auraFrame:SetBackdropColor(0, 0, 0, 0)
+				auraFrame:SetBackdropBorderColor(0, 0, 0, 0) 		
+	
+				auraFrame.ApplyAuraFrameSettings = function(self)
+					local conf = auraContainer.config
+					local container = self:Getframe()
+				
+					self.Stacks:ApplyFontStringSettings(conf.StackText)
+					local cooldownConfig = conf.Cooldown
+					self.Cooldown:ApplyCooldownSettings(cooldownConfig.ShowNumbers, true, false)
+					self.Cooldown.Text:ApplyFontStringSettings(cooldownConfig.Cooldown_Fontsize, cooldownConfig.Cooldown_Outline, cooldownConfig.Cooldown_EnableTextshadow, cooldownConfig.Cooldown_TextShadowcolor)
+					self:SetSize(conf.Icons.Size, conf.Icons.Size)
+				end
+				if self.filter == "HARMFUL" then
+					auraFrame.ChangeDisplayType = function(self)
+						self:SetDisplayType()
+						
+						--reset settings
+						self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
+						self:SetBackdropBorderColor(0, 0, 0, 0)
+						if auraContainer.config.Coloring_Enabled then self:SetType() end
+					end
+	
+					auraFrame.SetDisplayType = function(self)
+						if auraContainer.config.DisplayType == "Frame" then
+							self.SetType = debuffFrameUpdateStatusBorder
+						else
+							self.SetType = debuffFrameUpdateStatusText
+						end
+					end
+					
+					auraFrame:SetDisplayType()
+				end
+				auraFrame:ApplyAuraFrameSettings()
+				self.AuraFrames[i] = auraFrame
+			end
+
+			auraFrame.AuraDetails = auraDetails
+			
+			auraFrame.Stacks:SetText(auraDetails.Stacks > 1 and auraDetails.Stacks)
+			if auraDetails.DebuffType then
+				if auraContainer.config.Coloring_Enabled then auraFrame:SetType() end
+			end
+			auraFrame.Icon:SetTexture(auraDetails.Icon)
+			auraFrame.Cooldown:SetCooldown(auraDetails.ExpirationTime - auraDetails.Duration, auraDetails.Duration)
+			--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
+			
+			auraFrame:ClearAllPoints()
+			if framesInRow < framesPerRow then
+				if count == 0 then
+					auraFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..pointX, 0, 0)
+					firstFrameInRow = auraFrame
+				else
+					auraFrame:SetPoint(pointX, previousFrame, relativePointX, offsetX, 0)
+				end
+				framesInRow = framesInRow + 1
+				width = width + iconSize + horizontalSpacing
+				if width > widestRow then
+					widestRow = width
+				end
+			else
+				width = 0
+				auraFrame:SetPoint(pointNewRow, firstFrameInRow, relativePointNewRow, 0, offsetY)
+				framesInRow = 1
+				firstFrameInRow = auraFrame
+				lastFrameInRow = previousFrame
+				height = height + iconSize + verticalSpacing
+			end
+			previousFrame = auraFrame
+			count = count + 1
+			auraFrame:Show()
+		end
+
+		for i = numAuras + 1, #self.AuraFrames do --hide all unused frames
+			local auraFrame = self.AuraFrames[i]
+			auraFrame:Hide()
+		end
+		
+		if widestRow == 0 then 
+			self:Hide()
+		else
+			self:SetWidth(widestRow - horizontalSpacing)
+			self:SetHeight(height + iconSize)
+		end
+	end
+		
+	function auraContainer:ApplyAllSettings()	
+		for i = 1, #self.AuraFrames do
+			local auraFrame = self.AuraFrames[i]
+			auraFrame:ApplyAuraFrameSettings()
+			if self.filter == "HARMFUL" then
+				auraFrame:ChangeDisplayType()
+			end
+		end
+	end
+	return auraContainer
 end
+
+
+function buffs:AttachToPlayerButton(playerButton)
+	local auraContainer = AttachToPlayerButton(playerButton, "HELPFUL")
+	playerButton.Buffs = auraContainer
+end
+
+function debuffs:AttachToPlayerButton(playerButton)
+	local auraContainer = AttachToPlayerButton(playerButton, "HARMFUL")
+	playerButton.Buffs = auraContainer
+end
+
+
 
 
 

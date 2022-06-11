@@ -43,7 +43,8 @@ Objects\Racial.lua
 Objects\RaidTargetIcon.lua
 Objects\Role.lua
 Objects\Spec.lua
-Objects\TargetIndicator.lua
+Objects\TargetIndicatorNumeric.lua
+Objects\TargetIndicatorSymbolic.lua
 Objects\Trinket.lua
 
 

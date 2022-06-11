@@ -503,7 +503,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 	
 
 		local locationn = location.Modules[moduleName]
-		
+
 		temp[moduleName]  = {
 			type = "group",
 			name = moduleFrame.localizedModuleName,
@@ -520,7 +520,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 					name = VIDEO_OPTIONS_ENABLED,
 					width = "normal",
 					order = 1
-				},
+				}, 
 				ModuleSettings = {
 					type = "group",
 					name = "Settings",
@@ -532,7 +532,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 					end,
 					disabled = not locationn.Enabled,
 					order = 2,
-					args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options
+					args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options or {}
 				},
 				PositionSetting = {
 					type = "group",

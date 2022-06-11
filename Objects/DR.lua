@@ -232,7 +232,7 @@ function dRTracking:AttachToPlayerButton(playerButton)
 				end
 			end
 			
-			drFrame:SetWidth(playerButton.config.BarHeight - playerButton.bgSizeConfig.DrTracking_Container_BorderThickness * 2)
+			drFrame:SetWidth(playerButton.config.BarHeight - frame.config.Container_BorderThickness * 2)
 
 			drFrame:SetBackdrop({
 				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
@@ -332,7 +332,7 @@ function dRTracking:AttachToPlayerButton(playerButton)
 		})
 		self:SetBackdropColor(0, 0, 0, 0)
 		self:SetBackdropBorderColor(unpack(self.config.Container_Color))
-		self:SetWidthOfAuraFrames(self.bgSizeConfig.BarHeight)
+		self:SetWidthOfAuraFrames(playerButton:GetHeight())
 		self:DrPositioning()
 	end
 
@@ -353,5 +353,5 @@ function dRTracking:AttachToPlayerButton(playerButton)
 			drFrame:IncreaseDRState()
 		end
 	end
-	playerButton.DR = frame
+	playerButton.DRTracking = frame
 end

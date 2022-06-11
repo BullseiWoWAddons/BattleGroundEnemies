@@ -157,11 +157,6 @@ function trinket:AttachToPlayerButton(playerButton)
 		self:TrinketCheck(spellID)
 	end
 	
-
-
-	function frame:SetPosition()
-		BattleGroundEnemies.SetBasicPosition(self, playerButton.bgSizeConfig.Trinket_BasicPoint, playerButton.bgSizeConfig.Trinket_RelativeTo, playerButton.bgSizeConfig.Trinket_RelativePoint, playerButton.bgSizeConfig.Trinket_OffsetX)
-	end
 	
 	function frame:Reset()
 		self.SpellID = false

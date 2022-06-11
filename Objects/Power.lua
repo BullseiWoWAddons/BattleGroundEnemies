@@ -1,5 +1,6 @@
 local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
+local LSM = LibStub("LibSharedMedia-3.0")
 local L = Data.L
 local GetTime = GetTime
 
@@ -66,8 +67,6 @@ local power = BattleGroundEnemies:NewModule("Power", "Power", 3, defaultSettings
 
 function power:AttachToPlayerButton(playerButton)
 	playerButton.Power = CreateFrame('StatusBar', nil, playerButton)
-	playerButton.Power:SetPoint('BOTTOMLEFT', playerButton.Spec, "BOTTOMRIGHT")
-	playerButton.Power:SetPoint('BOTTOMRIGHT', playerButton, "BOTTOMRIGHT")
 	playerButton.Power:SetMinMaxValues(0, 1)
 
 	

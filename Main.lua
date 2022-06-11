@@ -1609,6 +1609,13 @@ do
 				end
 				moduleFrameOnButton:SetPoint(pointConfig.Piont, relativeTo, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
 			end
+
+		end
+		if config.Width then
+			moduleFrameOnButton:SetWidth(config.Width)
+		end
+		if config.Height then
+			moduleFrameOnButton:SetWidth(config.Height)
 		end
 	end
 end
@@ -1874,10 +1881,8 @@ do
 			for moduleName, moduleFrame in pairs(BattleGroundEnemies.Modules) do
 				if moduleFrame.AttachToPlayerButton then
 					moduleFrame:AttachToPlayerButton(playerButton)
+					if not playerButton[moduleName] then print("something went wrong here after AttachToPlayerButton", moduleName) end
 					playerButton[moduleName].moduleName = moduleName
-					for k,v in pairs(playerButton.Modules[moduleName]) do 
-						--print(k,v)
-					end
 				end
 			end
 			
