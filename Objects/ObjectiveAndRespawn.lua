@@ -112,7 +112,6 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		
 			self:SetWidth(conf.ObjectiveAndRespawn_Width)		
 			
-			self.AuraText:SetTextColor(unpack(conf.ObjectiveAndRespawn_Textcolor))
 			self.AuraText:ApplyFontStringSettings(conf.ObjectiveAndRespawn.Text)
 			
 			self.Cooldown:ApplyCooldownSettings(BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})

@@ -10,12 +10,19 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local defaultSettings = {
 	Points = {
 		{
-			Point = "LEFT",
-			relativeFrame = "Button",
-			relativePoint = "RIGHT",
+			Point = "TOPLEFT",
+			RelativeFrame = "Button",
+			RelativePoint = "TOPRIGHT",
+			OffsetX = 1
+		},
+		{
+			Point = "BOTTOMLEFT",
+			RelativeFrame = "Button",
+			RelativePoint = "BOTTOMRIGHT",
 			OffsetX = 1
 		}
 	},
+	Width = 28,
 	Cooldown = {
 		ShowNumbers = true,
 		Fontsize = 12,
@@ -163,9 +170,11 @@ function trinket:AttachToPlayerButton(playerButton)
 	end
 	
 	function frame:ApplyAllSettings()
+
 		local moduleSettings = self.config
 		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown.ShowNumbers, true, true, {0, 0, 0, 0.5})
 		self.Cooldown.Text:ApplyFontStringSettings(moduleSettings.Cooldown)
+		self:SetWidth(moduleSettings.Width)
 	end
 	playerButton.Trinket = frame
 end

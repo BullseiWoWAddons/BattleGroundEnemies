@@ -19,7 +19,7 @@ local events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"}
 local raidTargetIcon = BattleGroundEnemies:NewModule("RaidTargetIcon", "RaidTargetIcon", 3, defaultSettings, options, events)
 
 function raidTargetIcon:AttachToPlayerButton(playerButton)
-	playerButton.RaidTargetIcon = CreateFrame('Frame', nil, playerButton.healthBar, BackdropTemplateMixin and "BackdropTemplate")
+	playerButton.RaidTargetIcon = CreateFrame('Frame', nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
 	playerButton.RaidTargetIcon:SetPoint("TOP")
 	playerButton.RaidTargetIcon:SetPoint("BOTTOM")
 	playerButton.RaidTargetIcon:SetWidth(30)

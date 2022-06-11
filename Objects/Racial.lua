@@ -10,11 +10,19 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local defaultSettings = {
 	Width = 28,
-	BasicPosition = {
-		BasicPoint = "LEFT",
-		RelativeTo = "Trinket",
-		RelativePoint = "RIGHT",
-		OffsetX = 2,
+	Points = {
+		{
+			Point = "TOPLEFT",
+			RelativeFrame = "Trinket",
+			RelativePoint = "TOPRIGHT",
+			OffsetX = 1
+		},
+		{
+			Point = "BOTTOMLEFT",
+			RelativeFrame = "Trinket",
+			RelativePoint = "BOTTOMRIGHT",
+			OffsetX = 1
+		}
 	},
 	Cooldown = {
 		ShowNumbers = true,

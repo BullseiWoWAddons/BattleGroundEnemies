@@ -29,17 +29,7 @@ Data.defaultSettings = {
 			
 			ShowRealmnames = true,
 			ConvertCyrillic = true,
-			Level = {
-				Enabled = false,
-				OnlyShowIfNotMaxLevel = true,
-				Text = {
-					Fontsize = 18,
-					Outline = "",
-					Textcolor = {1, 1, 1, 1},
-					EnableTextshadow = false,
-					TextShadowcolor = {0, 0, 0, 1}
-				}
-			},
+		
 
 			RangeIndicator_Enabled = true,
 			RangeIndicator_Range = 28767,
@@ -56,17 +46,7 @@ Data.defaultSettings = {
 		   
 			["5"] = {
 				Enabled = true,
-			
-				Name = {
-					Text = {
-						Fontsize = 13,
-						Outline = "",
-						Textcolor = {1, 1, 1, 1}, 
-						EnableTextshadow = true,
-						TextShadowcolor = {0, 0, 0, 1},
-					}
-				},
-			
+
 				
 				Position_X = false,
 				Position_Y = false,
@@ -77,25 +57,6 @@ Data.defaultSettings = {
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
-				
-				HealthBar_Texture = 'UI-StatusBar',
-				HealthBar_Background = {0, 0, 0, 0.66},
-
-				HealthBar_HealthPrediction_Enabled = true,
-				
-				PowerBar_Enabled = false,
-				PowerBar_Height = 4,
-				PowerBar_Texture = 'UI-StatusBar',
-				PowerBar_Background = {0, 0, 0, 0.66},
-				
-
-				RoleIcon_Enabled = true,
-				RoleIcon_Size = 13,
-				RoleIcon_VerticalPosition = 2,
-
-				CovenantIcon_Enabled = true,
-				CovenantIcon_Size = 20,
-				CovenantIcon_VerticalPosition = 3,
 				
 				PlayerCount = {
 					Enabled = true,
@@ -109,42 +70,13 @@ Data.defaultSettings = {
 				},
 			
 				Framescale = 1,
-				
-				Spec_Enabled = true,
-				Spec_Width = 36,
-							
-				TargetIndicator = {
-					Numeric = {
-						Enabled = true,
-						Text = {
-							Fontsize = 18,
-							Outline = "",
-							Textcolor = {1, 1, 1, 1},
-							EnableTextshadow = false,
-							TextShadowcolor = {0, 0, 0, 1}
-						}
-					},
-					SymbolicTargetIndicator_Enabled = true,
-				},
 					
-				RaidTargetIcon_Enabled = true,		
-				
-				
 				-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
 				-- NegativeSound = [[Sound\Interface\UI_BattlegroundCountdown_Timer.ogg]],
 			},
 			["15"] = {
 				Enabled = true,
 			
-				Name = {
-					Text = {
-						Fontsize = 13,
-						Outline = "",
-						Textcolor = {1, 1, 1, 1}, 
-						EnableTextshadow = true,
-						TextShadowcolor = {0, 0, 0, 1},
-					}
-				},
 				Position_X = false,
 				Position_Y = false,
 				BarWidth = 220,
@@ -154,26 +86,7 @@ Data.defaultSettings = {
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
-				
-				HealthBar_Texture = 'UI-StatusBar',
-				HealthBar_Background = {0, 0, 0, 0.66},
-
-				HealthBar_HealthPrediction_Enabled = true,
-				
-				PowerBar_Enabled = false,
-				PowerBar_Height = 4,
-				PowerBar_Texture = 'UI-StatusBar',
-				PowerBar_Background = {0, 0, 0, 0.66},
-				
-
-				RoleIcon_Enabled = true,
-				RoleIcon_Size = 13,
-				RoleIcon_VerticalPosition = 2,
-
-				CovenantIcon_Enabled = true,
-				CovenantIcon_Size = 20,
-				CovenantIcon_VerticalPosition = 3,
-				
+								
 				PlayerCount = {
 					Enabled = true,
 					Text = {
@@ -189,22 +102,7 @@ Data.defaultSettings = {
 				
 				Spec_Enabled = true,
 				Spec_Width = 36,
-				
-				TargetIndicator = {
-					Numeric = {
-						Enabled = true,
-						Text = {
-							Fontsize = 18,
-							Outline = "",
-							Textcolor = {1, 1, 1, 1},
-							EnableTextshadow = false,
-							TextShadowcolor = {0, 0, 0, 1}
-						}
-					},
-					SymbolicTargetIndicator_Enabled = true,
-				},
 
-				RaidTargetIcon_Enabled = true,
 				
 				
 				-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
@@ -212,16 +110,6 @@ Data.defaultSettings = {
 			},
 			["40"] = {
 				Enabled = true,
-				
-				Name = {
-					Text = {
-						Fontsize = 13,
-						Outline = "",
-						Textcolor = {1, 1, 1, 1}, 
-						EnableTextshadow = true,
-						TextShadowcolor = {0, 0, 0, 1},
-					}
-				},
 				
 				Position_X = false,
 				Position_Y = false,
@@ -232,26 +120,7 @@ Data.defaultSettings = {
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
-				
-				HealthBar_Texture = 'UI-StatusBar',
-				HealthBar_Background = {0, 0, 0, 0.66},
-
-				HealthBar_HealthPrediction_Enabled = true,
-				
-				PowerBar_Enabled = false,
-				PowerBar_Height = 4,
-				PowerBar_Texture = 'UI-StatusBar',
-				PowerBar_Background = {0, 0, 0, 0.66},
-				
-				
-				RoleIcon_Enabled = true,
-				RoleIcon_Size = 13,
-				RoleIcon_VerticalPosition = 2,
-
-				CovenantIcon_Enabled = true,
-				CovenantIcon_Size = 20,
-				CovenantIcon_VerticalPosition = 3,
-				
+					
 				PlayerCount = {
 					Enabled = true,
 					Text = {
@@ -264,25 +133,7 @@ Data.defaultSettings = {
 				},
 				
 				Framescale = 1,
-				
-				Spec_Enabled = true,
-				Spec_Width = 36,
-								
-				TargetIndicator = {
-					Numeric = {
-						Enabled = true,
-						Text = {
-							Fontsize = 18,
-							Outline = "",
-							Textcolor = {1, 1, 1, 1},
-							EnableTextshadow = false,
-							TextShadowcolor = {0, 0, 0, 1}
-						}
-					},
-					SymbolicTargetIndicator_Enabled = true,
-				},
 
-				RaidTargetIcon_Enabled = false,
 			}
 			
 		},
@@ -291,17 +142,6 @@ Data.defaultSettings = {
 			
 			ShowRealmnames = true,
 			ConvertCyrillic = true,
-			Level = {
-				Enabled = false,
-				OnlyShowIfNotMaxLevel = true,
-				Text = {
-					Fontsize = 18,
-					Outline = "",
-					Textcolor = {1, 1, 1, 1},
-					EnableTextshadow = false,
-					TextShadowcolor = {0, 0, 0, 1}
-				}
-			},
 			
 			RangeIndicator_Enabled = true,
 			RangeIndicator_Range = 34471,
@@ -318,17 +158,7 @@ Data.defaultSettings = {
 			
 			["5"] = {
 				Enabled = true,
-			
-				Name = {
-					Text = {
-						Fontsize = 13,
-						Outline = "",
-						Textcolor = {1, 1, 1, 1}, 
-						EnableTextshadow = true,
-						TextShadowcolor = {0, 0, 0, 1},
-					}
-				},
-				
+							
 				Position_X = false,
 				Position_Y = false,
 				BarWidth = 220,
@@ -338,26 +168,7 @@ Data.defaultSettings = {
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
-				
-				HealthBar_Texture = 'UI-StatusBar',
-				HealthBar_Background = {0, 0, 0, 0.66},
-
-				HealthBar_HealthPrediction_Enabled = true,
-				
-				PowerBar_Enabled = false,
-				PowerBar_Height = 4,
-				PowerBar_Texture = 'UI-StatusBar',
-				PowerBar_Background = {0, 0, 0, 0.66},
-				
-				
-				RoleIcon_Enabled = true,
-				RoleIcon_Size = 13,
-				RoleIcon_VerticalPosition = 2,
-
-				CovenantIcon_Enabled = true,
-				CovenantIcon_Size = 20,
-				CovenantIcon_VerticalPosition = 3,
-				
+						
 				PlayerCount = {
 					Enabled = true,
 					Text = {
@@ -371,24 +182,6 @@ Data.defaultSettings = {
 				
 				Framescale = 1,
 				
-				Spec_Enabled = true,
-				Spec_Width = 36,
-								
-				TargetIndicator = {
-					Numeric = {
-						Enabled = true,
-						Text = {
-							Fontsize = 18,
-							Outline = "",
-							Textcolor = {1, 1, 1, 1},
-							EnableTextshadow = false,
-							TextShadowcolor = {0, 0, 0, 1}
-						}
-					},
-					SymbolicTargetIndicator_Enabled = true,
-				},
-				
-				RaidTargetIcon_Enabled = true,
 	
 								-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
 				-- NegativeSound = [[Sound\Interface\UI_BattlegroundCountdown_Timer.ogg]],
@@ -396,16 +189,6 @@ Data.defaultSettings = {
 			},
 			["15"] = {
 				Enabled = true,
-			
-				Name = {
-					Text = {
-						Fontsize = 13,
-						Outline = "",
-						Textcolor = {1, 1, 1, 1}, 
-						EnableTextshadow = true,
-						TextShadowcolor = {0, 0, 0, 1},
-					}
-				},
 				
 				Position_X = false,
 				Position_Y = false,
@@ -416,26 +199,7 @@ Data.defaultSettings = {
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
-				
-				HealthBar_Texture = 'UI-StatusBar',
-				HealthBar_Background = {0, 0, 0, 0.66},
-
-				HealthBar_HealthPrediction_Enabled = true,
-				
-				PowerBar_Enabled = false,
-				PowerBar_Height = 4,
-				PowerBar_Texture = 'UI-StatusBar',
-				PowerBar_Background = {0, 0, 0, 0.66},
-				
-				
-				RoleIcon_Enabled = true,
-				RoleIcon_Size = 13,
-				RoleIcon_VerticalPosition = 2,
-
-				CovenantIcon_Enabled = true,
-				CovenantIcon_Size = 20,
-				CovenantIcon_VerticalPosition = 3,
-				
+								
 				PlayerCount = {
 					Enabled = true,
 					Text = {
@@ -449,41 +213,13 @@ Data.defaultSettings = {
 				
 				Framescale = 1,
 				
-				Spec_Enabled = true,
-				Spec_Width = 36,
-								
-				TargetIndicator = {
-					Numeric = {
-						Enabled = true,
-						Text = {
-							Fontsize = 18,
-							Outline = "",
-							Textcolor = {1, 1, 1, 1},
-							EnableTextshadow = false,
-							TextShadowcolor = {0, 0, 0, 1}
-						}
-					},
-					SymbolicTargetIndicator_Enabled = true,
-				},
-
-				RaidTargetIcon_Enabled = true,
 
 								-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
 				-- NegativeSound = [[Sound\Interface\UI_BattlegroundCountdown_Timer.ogg]],
 			},
 			["40"] = {
 				Enabled = true,
-			
-				Name = {
-					Text = {
-						Fontsize = 13,
-						Outline = "",
-						Textcolor = {1, 1, 1, 1}, 
-						EnableTextshadow = true,
-						TextShadowcolor = {0, 0, 0, 1},
-					}
-				},
-				
+							
 				Position_X = false,
 				Position_Y = false,
 				BarWidth = 220,
@@ -494,25 +230,6 @@ Data.defaultSettings = {
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
 				
-				HealthBar_Texture = 'UI-StatusBar',
-				HealthBar_Background = {0, 0, 0, 0.66},
-
-				HealthBar_HealthPrediction_Enabled = true,
-				
-				PowerBar_Enabled = false,
-				PowerBar_Height = 4,
-				PowerBar_Texture = 'UI-StatusBar',
-				PowerBar_Background = {0, 0, 0, 0.66},
-				
-				
-				RoleIcon_Enabled = true,
-				RoleIcon_Size = 13,
-				RoleIcon_VerticalPosition = 2,
-
-				CovenantIcon_Enabled = true,
-				CovenantIcon_Size = 20,
-				CovenantIcon_VerticalPosition = 3,
-				
 				PlayerCount = {
 					Enabled = true,
 					Text = {
@@ -526,24 +243,6 @@ Data.defaultSettings = {
 				
 				Framescale = 1,
 				
-				Spec_Enabled = true,
-				Spec_Width = 36,
-								
-				TargetIndicator = {
-					Numeric = {
-						Enabled = true,
-						Text = {
-							Fontsize = 18,
-							Outline = "",
-							Textcolor = {1, 1, 1, 1},
-							EnableTextshadow = false,
-							TextShadowcolor = {0, 0, 0, 1}
-						}
-					},
-					SymbolicTargetIndicator_Enabled = true,
-				},
-
-				RaidTargetIcon_Enabled = false,
 			}
 		}
 	}

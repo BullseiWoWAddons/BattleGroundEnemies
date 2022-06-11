@@ -11,7 +11,19 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local defaultSettings = {
 	Texture = 'UI-StatusBar',
 	Background = {0, 0, 0, 0.66},
-	HealthPrediction_Enabled = true
+	HealthPrediction_Enabled = true,
+	Points = {
+		{
+			Point = "BOTTOMLEFT",
+			relativeFrame = "Power",
+			relativePoint = "TOPLEFT",
+		},
+		{
+			Point = "TOPRIGHT",
+			relativeFrame = "Button",
+			relativePoint = "TOPRIGHT",
+		}
+	}
 }
 
 local options = function(location) 

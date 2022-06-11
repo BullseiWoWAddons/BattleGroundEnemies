@@ -11,97 +11,119 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local CTimerNewTicker = C_Timer.NewTicker
 
 function Data.AddPositionSetting(location)
-	local numPoints = #location
+	local numPoints = 0
 	local temp = {}
-	for i = 1, numPoints do
-		temp["Point"..i] = {
-			type = "group",
-			name = "Point"..i,
-			desc = "",
-			get =  function(option)
-				return Data.GetOption(location[i], option)
-			end,
-			set = function(option, ...) 
-				return Data.SetOption(location[i], option, ...)
-			end,
-			inline = true,
-			order = 2,
-			args = {
-				Point = {
-					type = "select",
-					values = Data.AllPositions 
-				},
-				RelativeFrame = {
-					type = "select",
-					values = {1,2,3}
-				},
-				RelativePoint = {
-					type = "select",
-					values = Data.AllPositions 
-				},
-				OffsetX = {
-					type = "range",
-					name = L.OffsetX,
-					min = -100,
-					max = 100,
-					step = 1,
-					order = 2
-				},
-				OffsetY = {
-					type = "range",
-					name = L.OffsetY,
-					min = -100,
-					max = 100,
-					step = 1,
-					order = 2
-				},
-				DeletePoint = {
-					type = "execute",
-					name = "delete Point point",
-					func = function() 
-						location[i] = nil
+	if location.Points then
+		numPoints = #location.Points
 		
-						BattleGroundEnemies:ProfileChanged()
-						AceConfigRegistry:NotifyChange("BattleGroundEnemies");
-					end,
-					width = "full",
-					order = 3,
+		for i = 1, numPoints do
+			temp["Point"..i] = {
+				type = "group",
+				name = "Point"..i,
+				desc = "",
+				get =  function(option)
+					return Data.GetOption(location.Points[i], option)
+				end,
+				set = function(option, ...) 
+					return Data.SetOption(location.Points[i], option, ...)
+				end,
+				inline = true,
+				order = i,
+				args = {
+					Point = {
+						type = "select",
+						name = "Point",
+						values = Data.AllPositions,
+						order = 1
+					},
+					RelativeFrame = {
+						type = "select",
+						name = "RelativeFrame",
+						values = {1,2,3},
+						order = 2
+					},
+					RelativePoint = {
+						type = "select",
+						name = "RelativePoint",
+						values = Data.AllPositions,
+						order = 3
+					},
+					OffsetX = {
+						type = "range",
+						name = L.OffsetX,
+						min = -100,
+						max = 100,
+						step = 1,
+						order = 2,
+						order = 4
+					},
+					OffsetY = {
+						type = "range",
+						name = L.OffsetY,
+						min = -100,
+						max = 100,
+						step = 1,
+						order = 2,
+						order = 5
+					},
+					DeletePoint = {
+						type = "execute",
+						name = "delete Point point",
+						func = function() 
+							location.Points[i] = nil
+			
+							BattleGroundEnemies:ProfileChanged()
+							AceConfigRegistry:NotifyChange("BattleGroundEnemies");
+						end,
+						width = "full",
+						order = 6,
+					}
 				}
 			}
-		}
-		
+			
+		end
 	end
-	temp[numPoints + 1] = {
-		AddNewPoint = {
-			type = "execute",
-			name = "Add another point",
-			func = function() 
-				location[numPoints + 1] = {}
+	
+	temp.AddPoint = {
+		type = "execute",
+		name = "Add another point",
+		func = function() 
+			location.Points = location.Points or {}
+			location.Points[numPoints + 1] = {}
 
-				BattleGroundEnemies:ProfileChanged()
-				AceConfigRegistry:NotifyChange("BattleGroundEnemies");
-			end,
-			width = "full",
-			order = 3,
-		}
+			BattleGroundEnemies:ProfileChanged()
+			AceConfigRegistry:NotifyChange("BattleGroundEnemies");
+		end,
+		width = "full",
+		order = numPoints + 1
 	}
-	temp[numPoints + 2] = {
-		Width = {
-			type = "range",
-			name = "width",
-			min = 0,
-			max = 100,
-			step = 1,
-			order = 2
-		},
-		Height = {
-			type = "range",
-			name = "Height",
-			min = 0,
-			max = 100,
-			step = 1,
-			order = 2
-		},
+	temp.EnableWidth = {
+		type =  "toggle",
+		name = "Set Width",
+		order = numPoints + 2
+	}
+	temp.Width = {
+		type = "range",
+		name = "width",
+		min = 0,
+		max = 100,
+		step = 1,
+		disabled = function() return not location.EnableWidth end,
+		order = numPoints + 3
+	}
+	temp.EnableHeight = {
+		type =  "toggle",
+		name = "Set Height",
+		order = numPoints + 4
+	}
+	temp.Height = {
+		type = "range",
+		name = "Height",
+		min = 0,
+		max = 100,
+		step = 1,
+		disabled = function() return not location.EnableHeight end,
+		order = numPoints + 5
 	}
 	return temp
 end
@@ -474,7 +496,7 @@ function Data.AddCooldownSettings(location)
 	}
 end
 
-function BattleGroundEnemies:AddModuleSettings(location, defaults) 
+function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType) 
 	local i = 1
 	local temp = {}
 	for moduleName, moduleFrame in pairs(self.Modules) do
@@ -510,18 +532,18 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults)
 					end,
 					disabled = not locationn.Enabled,
 					order = 2,
-					args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn) or moduleFrame.options
+					args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options
 				},
 				PositionSetting = {
 					type = "group",
 					name = "PositionSettings",
 					get =  function(option)
-						return Data.GetOption(location.Points, option)
+						return Data.GetOption(location, option)
 					end,
 					set = function(option, ...) 
-						return Data.SetOption(location.Points, option, ...)
+						return Data.SetOption(location, option, ...)
 					end,
-					args = Data.AddPositionSetting(location.Points)
+					args = Data.AddPositionSetting(location)
 
 				},
 				Reset = {
@@ -663,47 +685,6 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						desc = L.ShowRealmnames_Desc,
 						width = "normal",
 						order = 2
-					},
-					Fake = Data.AddVerticalSpacing(3),
-					LevelSettings = {
-						type = "group",
-						name = L.LevelTextSettings,
-						get = function(option)
-							return Data.GetOption(location.Level, option)
-						end,
-						set = function(option, ...)
-							return Data.SetOption(location.Level, option, ...)
-						end,
-						inline = true,
-						order = 4,
-						args = {
-							Enabled = {
-								type = "toggle",
-								name = L.LevelText_Enabled,
-								order = 1
-							},
-							OnlyShowIfNotMaxLevel = {
-								type = "toggle",
-								name = L.LevelText_OnlyShowIfNotMaxLevel,
-								disabled = function() return not location.Level.Enabled end,
-								order = 2
-							},
-							LevelTextTextSettings = {
-								type = "group",
-								name = "",
-								--desc = L.TrinketSettings_Desc,
-								disabled = function() return not location.Level.Enabled end,
-								get = function(option)
-									return Data.GetOption(location.Level.Text, option)
-								end,
-								set = function(option, ...)
-									return Data.SetOption(location.Level.Text, option, ...)
-								end,
-								inline = true,
-								order = 3,
-								args = Data.AddNormalTextSettings(location.Level.Text)
-							}
-						}
 					}
 				}
 			},
@@ -964,296 +945,12 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							step = 1,
 							order = 7
 						},
-						HealthBarSettings = {
-							type = "group",
-							name = L.HealthBarSettings,
-							desc = L.HealthBarSettings_Desc,
-							order = 8,
-							args = {
-								General = {
-									type = "group",
-									name = L.General,
-									desc = "",
-									--inline = true,
-									order = 7,
-									args = {
-										HealthBar_Texture = {
-											type = "select",
-											name = L.BarTexture,
-											desc = L.HealthBar_Texture_Desc,
-											dialogControl = 'LSM30_Statusbar',
-											values = AceGUIWidgetLSMlists.statusbar,
-											width = "normal",
-											order = 1
-										},
-										Fake = Data.AddHorizontalSpacing(2),
-										HealthBar_Background = {
-											type = "color",
-											name = L.BarBackground,
-											desc = L.HealthBar_Background_Desc,
-											hasAlpha = true,
-											width = "normal",
-											order = 3
-										},
-										Fake = Data.AddVerticalSpacing(4),
-										HealthBar_HealthPrediction_Enabled = {
-											type = "toggle",
-											name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
-											width = "normal",
-											order = 5,
-										}
-									}
-								},
-								Name = {
-									type = "group",
-									name = L.Name,
-									desc = L.Name_Desc,
-									order = 2,
-									args = {
-										NameTextSettings = {
-											type = "group",
-											name = "",
-											--desc = L.TrinketSettings_Desc,
-											inline = true,
-											get = function(option)
-												return Data.GetOption(location.Name.Text, option)
-											end,
-											set = function(option, ...)
-												return Data.SetOption(location.Name.Text, option, ...)
-											end,
-											order = 1,
-											args = Data.AddNormalTextSettings(location.Name.Text)
-										},
-									}
-								},
-								RoleIconSettings = {
-									type = "group",
-									name = L.RoleIconSettings,
-									desc = L.RoleIconSettings_Desc,
-									order = 3,
-									args = {
-										RoleIcon_Enabled = {
-											type = "toggle",
-											name = L.RoleIcon_Enabled,
-											desc = L.RoleIcon_Enabled_Desc,
-											width = "normal",
-											order = 1
-										},
-										RoleIcon_Size = {
-											type = "range",
-											name = L.Size,
-											desc = L.RoleIcon_Size_Desc,
-											disabled = function() return not location.RoleIcon_Enabled end,
-											min = 2,
-											max = 80,
-											step = 1,
-											width = "normal",
-											order = 2
-										},
-										RoleIcon_VerticalPosition = {
-											type = "range",
-											name = L.VerticalPosition,
-											disabled = function() return not location.RoleIcon_Enabled end,
-											min = 0,
-											max = 50,
-											step = 1,
-											width = "normal",
-											order = 3,
-										}
-									}
-								},
-								CovenantIconSettings = {
-									type = "group",
-									name = L.CovenantIconSettings,
-									desc = L.CovenantIconSettings_Desc,
-									order = 4,
-									args = {
-										CovenantIcon_Enabled = {
-											type = "toggle",
-											name = L.CovenantIcon_Enabled,
-											desc = L.CovenantIcon_Enabled_Desc,
-											width = "normal",
-											order = 1
-										},
-										CovenantIcon_Size = {
-											type = "range",
-											name = L.Size,
-											desc = L.CovenantIcon_Size_Desc,
-											disabled = function() return not location.CovenantIcon_Enabled end,
-											min = 2,
-											max = 80,
-											step = 1,
-											width = "normal",
-											order = 2
-										},
-										CovenantIcon_VerticalPosition = {
-											type = "range",
-											name = L.VerticalPosition,
-											disabled = function() return not location.CovenantIcon_Enabled end,
-											min = 0,
-											max = 50,
-											step = 1,
-											width = "normal",
-											order = 3,
-										}
-									}
-								},
-								TargetIndicator = {
-									type = "group",
-									name = L.TargetIndicator,
-									desc = L.TargetIndicator_Desc,
-									--childGroups = "select",
-									--inline = true,
-									get = function(option)
-										return Data.GetOption(location.TargetIndicator, option)
-									end,
-									set = function(option, ...)
-										return Data.SetOption(location.TargetIndicator, option, ...)
-									end,
-									order = 5,
-									args = {
-										Numeric = {
-											type = "group",
-											name = L.TargetIndicator,
-											desc = L.TargetIndicator_Desc,
-											--childGroups = "select",
-											--inline = true,
-											get = function(option)
-												return Data.GetOption(location.TargetIndicator.Numeric, option)
-											end,
-											set = function(option, ...)
-												return Data.SetOption(location.TargetIndicator.Numeric, option, ...)
-											end,
-											order = 1,
-											args = {
-												Enabled = {
-													type = "toggle",
-													name = L.NumericTargetIndicator,
-													desc = L.NumericTargetindicator_Enabled_Desc:format(L[playerType == "Enemies" and "enemies" or "allies"]),
-													width = "full",
-													order = 1
-												},
-												NumericTargetindicatorTextSettings = {
-													type = "group",
-													name = "",
-													--desc = L.TrinketSettings_Desc,
-													disabled = function() return not location.TargetIndicator.Numeric.Enabled end,
-													inline = true,
-													get = function(option)
-														return Data.GetOption(location.TargetIndicator.Numeric.Text, option)
-													end,
-													set = function(option, ...)
-														return Data.SetOption(location.TargetIndicator.Numeric.Text, option, ...)
-													end,
-													order = 2,
-													args = Data.AddNormalTextSettings(location.TargetIndicator.Numeric.Text)
-												}
-											}
-										},
-
-										Fake2 = Data.AddVerticalSpacing(3),
-										SymbolicTargetindicator_Enabled = {
-											type = "toggle",
-											name = L.SymbolicTargetindicator_Enabled,
-											desc = L.SymbolicTargetindicator_Enabled_Desc:format(L[playerType == "Enemies" and "enemy" or "ally"]),
-											width = "full",
-											order = 4
-										}
-									}
-								},
-								RaidTargetIcon = {
-									type = "group",
-									name = TARGETICONS,
-									--childGroups = "select",
-									--inline = true,
-									order = 6,
-									args = {
-										RaidTargetIcon_Enabled = {
-											type = "toggle",
-											name = TARGETICONS,
-											width = "full",
-											order = 1
-										}
-									}
-								}
-							}
-						},
-						PowerBarSettings = {
-							type = "group",
-							name = L.PowerBarSettings,
-							desc = L.PowerBarSettings_Desc,
-							order = 8,
-							args = {
-								PowerBar_Enabled = {
-									type = "toggle",
-									name = L.PowerBar_Enabled,
-									desc = L.PowerBar_Enabled_Desc,
-									order = 1
-								},
-								PowerBar_Height = {
-									type = "range",
-									name = L.Height,
-									desc = L.PowerBar_Height_Desc,
-									disabled = function() return not location.PowerBar_Enabled end,
-									min = 1,
-									max = 10,
-									step = 1,
-									width = "normal",
-									order = 2
-								},
-								PowerBar_Texture = {
-									type = "select",
-									name = L.BarTexture,
-									desc = L.PowerBar_Texture_Desc,
-									disabled = function() return not location.PowerBar_Enabled end,
-									dialogControl = 'LSM30_Statusbar',
-									values = AceGUIWidgetLSMlists.statusbar,
-									width = "normal",
-									order = 3
-								},
-								Fake = Data.AddHorizontalSpacing(4),
-								PowerBar_Background = {
-									type = "color",
-									name = L.BarBackground,
-									desc = L.PowerBar_Background_Desc,
-									disabled = function() return not location.PowerBar_Enabled end,
-									hasAlpha = true,
-									width = "normal",
-									order = 5
-								}
-							}
-						},
-		
-						SpecSettings = {
-							type = "group",
-							name = L.SpecSettings,
-							desc = L.SpecSettings_Desc,
-							order = 11,
-							args = {
-								Spec_Enabled = {
-									type = "toggle",
-									name = L.Spec_Enabled,
-									desc = L.Spec_Enabled_Desc,
-									order = 1
-								},
-								Spec_Width = {
-									type = "range",
-									name = L.Width,
-									desc = L.Spec_Width_Desc,
-									disabled = function() return not location.Spec_Enabled end,
-									min = 1,
-									max = 80,
-									step = 1,
-									order = 2
-								},
-							}
-						},
 						ModuleSettings = {
 							type = "group",
 							name = "Module Settings",
 							desc = "Module specific settings",
 							order = 3,
-							args = self:AddModuleSettings(location, defaults)
+							args = self:AddModuleSettings(location, defaults, playerType)
 						}
 					}
 				}

@@ -637,9 +637,7 @@ function auras:AttachToPlayerButton(playerButton)
 						local conf = auraContainer.config
 						local container = self:Getframe()
 					
-						local StackTextConfig = conf.StackText
-						self.Stacks:SetTextColor(unpack(StackTextConfig.Textcolor))
-						self.Stacks:ApplyFontStringSettings(StackTextConfig.Fontsize, StackTextConfig.Outline, StackTextConfig.EnableTextshadow, StackTextConfig.TextShadowcolor)
+						self.Stacks:ApplyFontStringSettings(conf.StackText)
 						local cooldownConfig = conf.Cooldown
 						self.Cooldown:ApplyCooldownSettings(cooldownConfig.ShowNumbers, true, false)
 						self.Cooldown.Text:ApplyFontStringSettings(cooldownConfig.Cooldown_Fontsize, cooldownConfig.Cooldown_Outline, cooldownConfig.Cooldown_EnableTextshadow, cooldownConfig.Cooldown_TextShadowcolor)

@@ -31,10 +31,20 @@ ImportExport.lua
 
 
 Objects\Auracontainer2.lua
+Objects\Covenant.lua
 Objects\DR.lua
-Objects\ObjectiveAndRespawn.lua
-Objects\Racial.lua
-Objects\Trinket.lua
+Objects\HealthBar.lua
 Objects\HighestActivePriority.lua
+Objects\Level.lua
+Objects\Name.lua
+Objects\ObjectiveAndRespawn.lua
+Objects\Power.lua
+Objects\Racial.lua
+Objects\RaidTargetIcon.lua
+Objects\Role.lua
+Objects\Spec.lua
+Objects\TargetIndicator.lua
+Objects\Trinket.lua
+
 
 Options.lua

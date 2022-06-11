@@ -132,7 +132,6 @@ BattleGroundEnemies.Modules = {} --contains moduleFrames, key is the module name
 local playerFaction = UnitFactionGroup("player")
 local PlayerButton
 local PlayerLevel = UnitLevel("player")
-local MaxLevel = GetMaxPlayerLevel()
 local IsInArena --wheter or not the player is in a arena map
 --BattleGroundEnemies.EnemyFaction 
 --BattleGroundEnemies.AllyFaction
@@ -960,7 +959,6 @@ BattleGroundEnemies.Allies:SetScript("OnHide", BattleGroundEnemies.Allies.Unregi
 -- if lets say raid1 leaves all remaining players get shifted up, so raid2 is the new raid1, raid 3 gets raid2 etc.
 
 
-
 BattleGroundEnemies.SetBasicPosition = function(frame, basicPoint, relativeTo, relativePoint, space)
 	frame:ClearAllPoints()
 	if relativeTo == "Button" then 
@@ -1077,12 +1075,10 @@ local enemyButtonFunctions = {}
 do
 	function enemyButtonFunctions:HasUnitID() --Add to OnUpdate
 		local activeUnitID = self.UnitIDs.Active
-
 		if not UnitExists(activeUnitID) then return end
-		self:DispatchEvent("EnemyHasUnitID")
+		self:DispatchEvent("EnemyHasUnitID", activeUnitID)
 		self:UpdateRaidTargetIcon()
 		self:UpdateAll(activeUnitID)
-		self:SetLevel(UnitLevel(activeUnitID))
 	end
 	
 	function enemyButtonFunctions:FetchAnAllyUnitID()
@@ -1178,47 +1174,19 @@ do
 		end
 	end
 	
-	function buttonFunctions:SetLevel(level)
-		if not self.PlayerLevel or level ~= self.PlayerLevel then
-			self.PlayerLevel = level
-			self:DisplayLevel()
-		end
-	end
-	
-	function buttonFunctions:DisplayLevel()
-		if self.config.Level.Enabled and (not self.config.Level.OnlyShowIfNotMaxLevel or (self.PlayerLevel and self.PlayerLevel < MaxLevel)) then
-			self.Level:SetText(MaxLevel - 1) -- to set the width of the frame (the name shoudl have the same space from the role icon/spec icon regardless of level shown)
-			self.Level:SetWidth(0)
-			self.Level:SetText(self.PlayerLevel)
-		else
-			self.Level:SetWidth(0.01) --we do that because the name is anhored right to the level and with this method the name moves more towards the edge
-		end
-	end
-	
 	function buttonFunctions:SetSpecAndRole()
 		if self.PlayerSpecName then 
-			
 			local specData = Data.Classes[self.PlayerClass][self.PlayerSpecName]
+			self.PlayerSpecID = specData.specID
 			self.PlayerRoleNumber = specData.roleNumber
 			self.PlayerRoleID = specData.roleID
-			self.Role.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
-			self.Role.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(self.PlayerRoleID))
-			self.Spec.Icon:SetTexture(specData.specIcon)
-			self.PlayerSpecID = specData.specID
-		else
-			--isTBCC, TBCC
-			self.Spec.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
-			self.Spec.Icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[self.PlayerClass]))
 		end
-
-		self.Spec:CropImage(self.Spec:GetWidth(), self.Spec:GetHeight())
+		self:DispatchEvent("SetSpecAndRole")
 	end
 
 	function buttonFunctions:UpdateRaidTargetIcon()
 		self:DispatchEvent("UpdateRaidTargetIcon")
 	end
-
-
 
 	function buttonFunctions:ApplyButtonSettings()
 		self.config = self:GetParent().config
@@ -1230,42 +1198,14 @@ do
 		
 		self:ApplyRangeIndicatorSettings()
 		
-		--spec
-		self.Spec:ApplySettings()
-		
 		-- auras on spec
-	
-		
-		-- power
-		self.Power:SetHeight(conf.PowerBar_Enabled and conf.PowerBar_Height or 0.01)
-		self.Power:SetStatusBarTexture(LSM:Fetch("statusbar", conf.PowerBar_Texture))--self.healthBar:SetStatusBarTexture(137012)
-		self.Power.Background:SetVertexColor(unpack(conf.PowerBar_Background))
-		
-		-- role
-		self.Role:ApplySettings()
-
-		-- role
-		self.Covenant:ApplySettings()
-		
-		-- level
-		self.Level:ApplyFontStringSettings(self.config.Level.Text)
-		self.Level:SetTextColor(unpack(self.config.Level.Text.Textcolor))
-		self:DisplayLevel()
-		
 	
 		--MyTarget, indicating the current target of the player
 		self.MyTarget:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyTarget_Color))
 		
 		--MyFocus, indicating the current focus of the player
 		self.MyFocus:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyFocus_Color))
-		
-		-- numerical target indicator
-		self.NumericTargetIndicator:SetShown(conf.TargetIndicator.Numeric.Enabled) 
-		
-		self.NumericTargetIndicator:SetTextColor(unpack(conf.TargetIndicator.Numeric.Text.Textcolor))
-		self.NumericTargetIndicator:ApplyFontStringSettings(conf.TargetIndicator.Numeric.Text)
-		self.NumericTargetIndicator:SetText(0)
-		
+				
 		self.ButtonEvents = self.ButtonEvents or {}
 		wipe(self.ButtonEvents)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.Modules) do
@@ -1281,9 +1221,11 @@ do
 					end
 				end
 				self[moduleName]:Show()
+				self:SetModulePosition(self[moduleName])
 				self[moduleName]:ApplyAllSettings()
 			else
 				self[moduleName]:Hide()
+				if self[moduleName].Disable then self[moduleName]:Disable() end
 				self[moduleName]:Reset() 
 			end
 		end
@@ -1398,8 +1340,8 @@ do
 	
 	-- Shows/Hides targeting indicators for a button
 	function buttonFunctions:UpdateTargetIndicators()
+		buttonFunctions:DispatchEvent("UpdateTargetIndicators", PlayerButton)
 		BattleGroundEnemies.Counter.UpdateTargetIndicators = (BattleGroundEnemies.Counter.UpdateTargetIndicators or 0) + 1
-
 		local isAlly = false
 		local isPlayer = false
 
@@ -1408,28 +1350,9 @@ do
 		elseif not self.PlayerIsEnemy then 
 			isAlly = true 
 		end
-		local targetIndicatorConfig = self.bgSizeConfig.TargetIndicator
 
 		local i = 1
 		for enemyButton in pairs(self.UnitIDs.TargetedByEnemy) do
-			if targetIndicatorConfig.SymbolicTargetIndicator_Enabled then
-				local indicator = self.TargetIndicators[i]
-				if not indicator then
-					indicator = CreateFrame("frame", nil, self.healthBar, BackdropTemplateMixin and "BackdropTemplate")
-					indicator:SetSize(8,10)
-					indicator:SetPoint("TOP",floor(i/2)*(i%2==0 and -10 or 10), 0) --1: 0, 0 2: -10, 0 3: 10, 0 4: -20, 0 > i = even > left, uneven > right
-					indicator:SetBackdrop({
-						bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-						edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-						edgeSize = 1
-					}) 
-					indicator:SetBackdropBorderColor(0,0,0,1)
-					self.TargetIndicators[i] = indicator
-				end
-				local classColor = enemyButton.PlayerClassColor
-				indicator:SetBackdropColor(classColor.r,classColor.g,classColor.b)
-				indicator:Show()
-			end
 			i = i + 1
 		end
 
@@ -1455,24 +1378,6 @@ do
 						end
 					end
 				end
-			end
-		end
-
-		if targetIndicatorConfig.Numeric.Enabled then 
-			self.NumericTargetIndicator:SetText(enemyTargets)
-		end
-		while self.TargetIndicators[i] do --hide no longer used ones
-			self.TargetIndicators[i]:Hide()
-			i = i + 1
-		end
-	end
-	
-	function buttonFunctions:CheckForNewPowerColor(powerToken)
-		if self.Power.powerToken ~= powerToken then
-			local color = PowerBarColor[powerToken]
-			if color then
-				self.Power:SetStatusBarColor(color.r, color.g, color.b)
-				self.Power.powerToken = powerToken
 			end
 		end
 	end
@@ -1623,15 +1528,7 @@ do
 	
 	
 	function buttonFunctions:UNIT_POWER_FREQUENT(unitID, powerToken) --gets power of nameplates, player, target, focus, raid1 to raid40, partymember
-		if not self.bgSizeConfig.PowerBar_Enabled then return end
-
-		if powerToken then
-			self:CheckForNewPowerColor(powerToken)
-		else
-			local powerType, powerToken, altR, altG, altB = UnitPowerType(unitID)
-			self:CheckForNewPowerColor(powerToken)
-		end
-		self.Power:SetValue(UnitPower(unitID)/UnitPowerMax(unitID))
+		self:DispatchEvent("UNIT_POWER_FREQUENT", unitID, powerToken)
 	end
 	
 	function buttonFunctions:UpdateTargets()
@@ -1692,6 +1589,28 @@ do
 			end
 		end
 	end
+
+	function buttonFunctions:SetModulePosition(moduleFrameOnButton)
+		local config = moduleFrameOnButton.config
+		if not config then return print("no config exists") end
+		
+		local point, relativeTo, relativePoint, offsetX, offsetY
+		if config.Points then 
+			moduleFrameOnButton:ClearAllPoints()
+
+			for i = 1, #config.Points do
+				local pointConfig = config.Points[i]
+
+				if pointConfig.RelativeTo == "Button" then 
+					relativeTo = self
+				else
+					relativeTo = self[pointConfig.RelativeTo]
+					if not relativeTo then return print("error", relativeTo, "doesnt exist") end
+				end
+				moduleFrameOnButton:SetPoint(pointConfig.Piont, relativeTo, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
+			end
+		end
+	end
 end
 
 local allyButtonFunctions = {}
@@ -1710,6 +1629,7 @@ do
 	function allyButtonFunctions:NewUnitID(unitID, targetUnitID)
 		self.unit = unitID
 		self.TargetUnitID = targetUnitID
+		self:DispatchEvent("AllyNewUnitID", unitID)
 		if not InCombatLockdown() then
 			self:SetAttribute('unit', unitID)
 			BattleGroundEnemies.Allies:SortPlayers()
@@ -1835,9 +1755,6 @@ do
 			playerButton.MyFocus:Hide()	--reset possible shown target indicator frame
 			--playerButton.BuffContainer:Reset()
 			--playerButton.DebuffContainer:Reset()
-			playerButton.DRContainer:Reset()
-			playerButton.Covenant:Reset()
-			playerButton.NumericTargetIndicator:SetText(0) --reset testmode
 
 			for moduleName, moduleFrameOnButton in pairs(BattleGroundEnemies.Modules) do
 				if playerButton[moduleName] and playerButton[moduleName].Reset then
@@ -1873,8 +1790,6 @@ do
 			
 			playerButton:SetScript("OnSizeChanged", function(self, width, height)
 				self.DRContainer:SetWidthOfAuraFrames(height)
-				playerButton.Level:SetHeight(height)
-				playerButton:DisplayLevel()
 				self:DispatchEvent("PlayerButtonSizeChanged", width, height)
 			end)
 			
@@ -1910,150 +1825,7 @@ do
 			playerButton.RangeIndicator_Frame = CreateFrame("Frame", nil, playerButton)
 			--playerButton.RangeIndicator_Frame:SetFrameLevel(playerButton:GetFrameLevel())
 			-- playerButton.RangeIndicator = playerButton.RangeIndicator_Frame
-			
-			-- spec
-			playerButton.Spec = CreateFrame("Frame", nil, playerButton) 
-			
-			playerButton.Spec.ApplySettings = function(self)
-				if playerButton.bgSizeConfig.Spec_Enabled then
-					self:Show()
-					self:SetWidth(playerButton.bgSizeConfig.Spec_Width)
-				else
-					--dont SetWidth before Hide() otherwise it won't work as aimed
-					self:Hide()
-					self:SetWidth(0.01) --we do that because the level is anchored right to this and the name is anhored right to the level
-				end
-			end
-			
-			playerButton.Spec:SetPoint('TOPLEFT', playerButton, 'TOPLEFT', 0, 0)
-			playerButton.Spec:SetPoint('BOTTOMLEFT' , playerButton, 'BOTTOMLEFT', 0, 0)
-			
-			playerButton.Spec:SetScript("OnSizeChanged", function(self, width, height)
-				self:CropImage(width, height)
-			end)
-
-			function playerButton.Spec:CropImage(width, height)
-				if playerButton.PlayerSpecName then
-					BattleGroundEnemies.CropImage(self.Icon, width, height)
-				end
-				BattleGroundEnemies.CropImage(playerButton.Spec_HighestActivePriority.Icon, width, height)
-			end
-
-			playerButton.Spec:HookScript("OnEnter", function(self)
-				BattleGroundEnemies:ShowTooltip(self, function()
-					if not playerButton.PlayerSpecName then return end 
-					GameTooltip:SetText(playerButton.PlayerSpecName)
-				end)
-			end)
-			
-			playerButton.Spec:HookScript("OnLeave", function(self)
-				if GameTooltip:IsOwned(self) then
-					GameTooltip:Hide()
-				end
-			end)
-			
-			playerButton.Spec.Background = playerButton.Spec:CreateTexture(nil, 'BACKGROUND')
-			playerButton.Spec.Background:SetAllPoints()
-			playerButton.Spec.Background:SetColorTexture(0,0,0,0.8)
-
-			playerButton.Spec.Icon = playerButton.Spec:CreateTexture(nil, 'OVERLAY')
-			playerButton.Spec.Icon:SetAllPoints()
 					
-			
-			-- power
-			playerButton.Power = CreateFrame('StatusBar', nil, playerButton)
-			playerButton.Power:SetPoint('BOTTOMLEFT', playerButton.Spec, "BOTTOMRIGHT")
-			playerButton.Power:SetPoint('BOTTOMRIGHT', playerButton, "BOTTOMRIGHT")
-			playerButton.Power:SetMinMaxValues(0, 1)
-
-			
-			--playerButton.Power.Background = playerButton.Power:CreateTexture(nil, 'BACKGROUND', nil, 2)
-			playerButton.Power.Background = playerButton.Power:CreateTexture(nil, 'BACKGROUND', nil, 2)
-			playerButton.Power.Background:SetAllPoints()
-			playerButton.Power.Background:SetTexture("Interface/Buttons/WHITE8X8")
-			
-			
-			-- role
-			playerButton.Role = CreateFrame("Frame", nil, playerButton.healthBar)
-			playerButton.Role:SetPoint("TOPLEFT")
-			playerButton.Role:SetPoint("BOTTOMLEFT")
-			playerButton.Role.Icon = playerButton.Role:CreateTexture(nil, 'OVERLAY')
-			
-
-			playerButton.Role.ApplySettings = function(self)
-				if not (IsTBCC or IsClassic) and playerButton.bgSizeConfig.RoleIcon_Enabled then 
-					self:SetWidth(playerButton.bgSizeConfig.RoleIcon_Size)
-					self.Icon:SetSize(playerButton.bgSizeConfig.RoleIcon_Size, playerButton.bgSizeConfig.RoleIcon_Size)
-					self.Icon:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -playerButton.bgSizeConfig.RoleIcon_VerticalPosition)
-					self:Show()
-				else
-					self:Hide()
-					self:SetSize(0.01, 0.01)
-				end
-			end
-
-			-- Covenant Icon
-			playerButton.Covenant = CreateFrame("Frame", nil, playerButton.healthBar)
-
-			playerButton.Covenant:HookScript("OnEnter", function(self)
-				BattleGroundEnemies:ShowTooltip(self, function() 
-					if self.covenantID then
-						GameTooltip:SetText(C_Covenants.GetCovenantData(self.covenantID).name)
-					end
-				end)
-			end)
-			
-			playerButton.Covenant:HookScript("OnLeave", function(self)
-				if GameTooltip:IsOwned(self) then
-					GameTooltip:Hide()
-				end
-			end)
-
-			playerButton.Covenant:SetPoint("TOPLEFT", playerButton.Role, "TOPRIGHT")
-			playerButton.Covenant:SetPoint("BOTTOMLEFT", playerButton.Role, "BOTTOMRIGHT")
-			playerButton.Covenant:SetWidth(0.001)
-			playerButton.Covenant.covenantID = false
-			playerButton.Covenant.Icon = playerButton.Covenant:CreateTexture(nil, 'OVERLAY')
-
-			playerButton.Covenant.DisplayCovenant = function(self, covenantID)
-				if not playerButton.bgSizeConfig.CovenantIcon_Enabled then return end
-				self.covenantID = covenantID
-				self:SetWidth(playerButton.bgSizeConfig.CovenantIcon_Size)
-				self.Icon:SetSize(playerButton.bgSizeConfig.CovenantIcon_Size, playerButton.bgSizeConfig.CovenantIcon_Size)
-				self.Icon:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -playerButton.bgSizeConfig.CovenantIcon_VerticalPosition)
-				self.Icon:SetTexture(Data.CovenantIcons[covenantID])
-				self:Show()
-			end
-
-			playerButton.Covenant.Reset = function(self)
-				self.covenantID = false
-				self:Hide()
-			end
-
-			playerButton.Covenant.ApplySettings = function(self)
-				if playerButton.bgSizeConfig.CovenantIcon_Enabled then 
-					self:SetWidth(playerButton.bgSizeConfig.CovenantIcon_Size)
-					self.Icon:SetSize(playerButton.bgSizeConfig.CovenantIcon_Size, playerButton.bgSizeConfig.CovenantIcon_Size)
-					self.Icon:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -playerButton.bgSizeConfig.CovenantIcon_VerticalPosition)
-					self:Show()
-				else
-					self:Hide()
-					self:SetSize(0.01, 0.01)
-				end
-			end
-
-			-- level
-			playerButton.Level = BattleGroundEnemies.MyCreateFontString(playerButton.healthBar)
-			playerButton.Level:SetPoint("TOPLEFT", playerButton.Covenant, "TOPRIGHT", 2, 2)
-			playerButton.Level:SetJustifyH("LEFT")
-
-
-			-- numerical target indicator
-			playerButton.NumericTargetIndicator = BattleGroundEnemies.MyCreateFontString(playerButton.healthBar)
-			playerButton.NumericTargetIndicator:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT", -5, 0)
-			playerButton.NumericTargetIndicator:SetPoint('BOTTOMRIGHT', playerButton, "BOTTOMRIGHT", -5, 0)
-			playerButton.NumericTargetIndicator:SetJustifyH("RIGHT")
-
 
 			--MyTarget, indicating the current target of the player
 			playerButton.MyTarget = CreateFrame('Frame', nil, playerButton.healthBar, BackdropTemplateMixin and "BackdropTemplate")
@@ -2118,11 +1890,6 @@ do
 		Mixin(playerButton, playerDetails)
 		
 		playerButton:SetSpecAndRole()
-		
-		
-				
-		-- level
-		if playerButton.PlayerLevel then playerButton:SetLevel(playerButton.PlayerLevel) end --for testmode
 
 		local color
 		if playerButton.PlayerSpecName then
@@ -2975,14 +2742,7 @@ BattleGroundEnemies.PLAYER_UNGHOST = BattleGroundEnemies.PlayerAlive --player is
 
 
 do	
-	do
-		local RoleIcons = {
-			HEALER = "Interface\\AddOns\\BattleGroundEnemies\\Images\\Healer",
-			TANK = "Interface\\AddOns\\BattleGroundEnemies\\Images\\Tank",
-			DAMAGER = "Interface\\AddOns\\BattleGroundEnemies\\Images\\Damager",
-		}
-		
-		
+	do		
 		do
 			local usersParent = {}
 			local usersPetParent = {}

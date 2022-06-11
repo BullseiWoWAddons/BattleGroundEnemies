@@ -8,7 +8,19 @@ local defaultSettings = {
 		Outline = "OUTLINE",
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1},
-	}	
+	},
+	Points = {
+		{
+			Point = "TOPLEFTT",
+			RelativeFrame = "Spec",
+			RelativePoint = "TOPLEFT",
+		},
+		{
+			Point = "BOTTOMRIGHT",
+			RelativeFrame = "Spec",
+			RelativePoint = "BOTTOMRIGHT",
+		}
+	},
 }
 
 local options = function(location) 

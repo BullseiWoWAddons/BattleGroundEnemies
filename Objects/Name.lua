@@ -6,11 +6,19 @@ local GetTime = GetTime
 local AddonName, Data = ...
 local L = Data.L
 
-local options = {
-
-}
-
 local defaultSettings = {
+	Points = {
+		{
+			Point = "TOPLEFT",
+			RelativeFrame = "Level",
+			RelativePoint = "TOPRIGHT",
+		},
+		{
+			Point = "BOTTOMLEFT",
+			RelativeFrame = "Button",
+			RelativePoint = "BOTTOMLEFT",
+		}
+	},
 	Text = {
 		Fontsize = 13,
 		Outline = "",
@@ -47,7 +55,7 @@ local events = {"OnNewPlayer"}
 local healthBar = BattleGroundEnemies:NewModule("Name", "Name", 3, defaultSettings, options, events)
 
 function healthBar:AttachToPlayerButton(playerButton)
-	playerButton.Name = BattleGroundEnemies.MyCreateFontString(playerButton.healthBar)
+	playerButton.Name = BattleGroundEnemies.MyCreateFontString(playerButton)
 	playerButton.Name:SetPoint('TOPLEFT', playerButton.Level, "TOPRIGHT", 5, 2)
 	playerButton.Name:SetPoint('BOTTOMRIGHT', playerButton.NumericTargetIndicator, "BOTTOMLEFT", 0, 0)
 	playerButton.Name:SetJustifyH("LEFT")

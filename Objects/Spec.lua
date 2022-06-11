@@ -1,0 +1,99 @@
+local AddonName, Data = ...
+local BattleGroundEnemies = BattleGroundEnemies
+local L = Data.L
+local C_Covenants = C_Covenants
+
+local defaultSettings = {
+	Enabled = true,
+	Width = 36,
+	Points = {
+		{
+			Point = "TOPLEFTT",
+			RelativeFrame = "Button",
+			RelativePoint = "TOPLEFT",
+		},
+		{
+			Point = "BOTTOMLEFT",
+			RelativeFrame = "Button",
+			RelativePoint = "BOTTOMLEFT",
+		}
+	},
+}
+
+local options = function(location) 
+	return {
+		Width = {
+			type = "range",
+			name = L.Width,
+			desc = L.Spec_Width_Desc,
+			min = 1,
+			max = 80,
+			step = 1,
+			order = 2
+		}
+	}
+end
+
+local events = {"SetSpecAndRole"}
+
+local spec = BattleGroundEnemies:NewModule("Spec", "Spec", 3, defaultSettings, options, events)
+
+function spec:AttachToPlayerButton(playerButton)
+	playerButton.Spec = CreateFrame("Frame", nil, playerButton) 
+			
+	playerButton.Spec:SetPoint('TOPLEFT', playerButton, 'TOPLEFT', 0, 0)
+	playerButton.Spec:SetPoint('BOTTOMLEFT' , playerButton, 'BOTTOMLEFT', 0, 0)
+
+	playerButton.Spec:SetScript("OnSizeChanged", function(self, width, height)
+		self:CropImage(width, height)
+	end)
+
+	function playerButton.Spec:CropImage(width, height)
+		if playerButton.PlayerSpecName then
+			BattleGroundEnemies.CropImage(self.Icon, width, height)
+		end
+		BattleGroundEnemies.CropImage(playerButton.Spec_HighestActivePriority.Icon, width, height)
+	end
+
+	playerButton.Spec:HookScript("OnEnter", function(self)
+		BattleGroundEnemies:ShowTooltip(self, function()
+			if not playerButton.PlayerSpecName then return end 
+			GameTooltip:SetText(playerButton.PlayerSpecName)
+		end)
+	end)
+
+	playerButton.Spec:HookScript("OnLeave", function(self)
+		if GameTooltip:IsOwned(self) then
+			GameTooltip:Hide()
+		end
+	end)
+
+	playerButton.Spec.Background = playerButton.Spec:CreateTexture(nil, 'BACKGROUND')
+	playerButton.Spec.Background:SetAllPoints()
+	playerButton.Spec.Background:SetColorTexture(0,0,0,0.8)
+
+	playerButton.Spec.Icon = playerButton.Spec:CreateTexture(nil, 'OVERLAY')
+	playerButton.Spec.Icon:SetAllPoints()
+
+	playerButton.Spec.SetSpecAndRole = function(self)
+		if playerButton.PlayerSpecName then
+			self.Icon:SetTexture(Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName].specIcon)
+		else
+			--isTBCC, TBCC
+			self.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
+			self.Icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[playerButton.PlayerClass]))
+		end
+		self.Spec:CropImage(self.Spec:GetWidth(), self.Spec:GetHeight())
+	end
+
+
+	playerButton.Spec.ApplySettings = function(self)
+		self:Show()
+		self:SetWidth(self.config.Width)
+	end
+
+	playerButton.Spec.Disable = function(self)
+		--dont SetWidth before Hide() otherwise it won't work as aimed
+		self:SetWidth(0.01) --we do that because the level is anchored right to this and the name is anhored right to the leve
+	end
+end
