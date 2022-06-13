@@ -4,10 +4,28 @@ local L = Data.L
 local C_Covenants = C_Covenants
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "healthBar",
+	Points = {
+		{
+			Point = "TOPRIGHT",
+			RelativeFrame = "healthBar",
+			RelativePoint = "TOPRIGHT",
+			OffsetX = -5,
+			OffsetY = 0
+		},
+		{
+			Point = "BOTTOMRIGHT",
+			RelativeFrame = "healthBar",
+			RelativePoint = "BOTTOMRIGHT",
+			OffsetX = -5,
+			OffsetY = 0
+		},
+	},
 	Text = {
-		Fontsize = 18,
-		Outline = "",
-		Textcolor = {1, 1, 1, 1},
+		FontSize = 18,
+		Fontoutline = "",
+		FontColor = {1, 1, 1, 1},
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1}
 	}
@@ -32,19 +50,22 @@ local options = function(location, playerType)
 	}
 end
 
+local flags = {
+	Height = "Fixed",
+	Width = "Dynamic"
+}
+
 local events = {"UpdateTargetIndicators"}
 
-local numericTargetIndicator = BattleGroundEnemies:NewModule("NumericTargetIndicator", "NumericTargetIndicator", 3, defaultSettings, options, events)
+local targetIndicatorNumeric = BattleGroundEnemies:NewModule("TargetIndicatorNumeric", "TargetIndicatorNumeric", flags, defaultSettings, options, events)
 
-function numericTargetIndicator:AttachToPlayerButton(playerButton)
+function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 
 
-	playerButton.NumericTargetIndicator = BattleGroundEnemies.MyCreateFontString(playerButton)
-	playerButton.NumericTargetIndicator:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT", -5, 0)
-	playerButton.NumericTargetIndicator:SetPoint('BOTTOMRIGHT', playerButton, "BOTTOMRIGHT", -5, 0)
-	playerButton.NumericTargetIndicator:SetJustifyH("RIGHT")
+	playerButton.TargetIndicatorNumeric = BattleGroundEnemies.MyCreateFontString(playerButton)
+	playerButton.TargetIndicatorNumeric:SetJustifyH("RIGHT")
 
-	function playerButton.NumericTargetIndicator:UpdateTargetIndicators(playerButton)
+	function playerButton.TargetIndicatorNumeric:UpdateTargetIndicators(playerButton)
 
 		local targetIndicatorConfig = self.config
 
@@ -59,12 +80,12 @@ function numericTargetIndicator:AttachToPlayerButton(playerButton)
 		self:SetText(enemyTargets)
 	end
 
-	playerButton.NumericTargetIndicator.ApplySettings = function(self)
+	playerButton.TargetIndicatorNumeric.ApplyAllSettings = function(self)
 		self:ApplyFontStringSettings(self.config.Text)
 		self:SetText(0)
 	end
 
-	playerButton.NumericTargetIndicator.Reset = function(self)
+	playerButton.TargetIndicatorNumeric.Reset = function(self)
 		--dont SetWidth before Hide() otherwise it won't work as aimed
 		self:SetText(0) --we do that because the level is anchored right to this and the name is anhored right to the leve
 	end

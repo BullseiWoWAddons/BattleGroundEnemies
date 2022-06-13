@@ -3,11 +3,11 @@ local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 local GetTime = GetTime
 
-local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "Button",
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -23,10 +23,11 @@ local defaultSettings = {
 		}
 	},
 	Width = 28,
+	Height = 28,
 	Cooldown = {
 		ShowNumbers = true,
-		Fontsize = 12,
-		Outline = "OUTLINE",
+		FontSize = 12,
+		Fontoutline = "OUTLINE",
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1},
 	}
@@ -51,9 +52,14 @@ local options = function(location)
 	}
 end
 
+local flags = {
+	Height = "Variable",
+	Width = "Variable"
+}
+
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "UnitAura", "SPELL_CAST_SUCCESS"}
 
-local trinket = BattleGroundEnemies:NewModule("Trinket", "Trinket", 2, defaultSettings, options, events)
+local trinket = BattleGroundEnemies:NewModule("Trinket", "Trinket", flags, defaultSettings, options, events)
 
 function trinket:AttachToPlayerButton(playerButton)
 
@@ -99,7 +105,7 @@ function trinket:AttachToPlayerButton(playerButton)
 		if filter == "HELPFUL" then return end
 
 		if spellID == 336139 then --adapted debuff > adaptation
-			self:DisplayTrinket(spellID, Data.TrinketData[spellID].fileID or GetSpellTexture(spellID))
+			self:DisplayTrinket(spellID, GetSpellTexture(214027))
 			self:SetTrinketCooldown(GetTime(), duration)
 			return -- we are done don't do relentless check
 		end

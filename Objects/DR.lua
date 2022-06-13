@@ -9,21 +9,29 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local DRList = LibStub("DRList-1.0")
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "Button",
+	Points = {
+		{
+			Point = "TOPRIGHT",
+			RelativeFrame = "Button",
+			RelativePoint = "TOPLEFT",
+		},
+		{
+			Point = "BOTTOMRIGHT",
+			RelativeFrame = "Button",
+			RelativePoint = "BOTTOMLEFT",
+		}
+	},
 	HorizontalSpacing = 1,
 	GrowDirection = "leftwards",
 	Container_Color = {0, 0, 1, 1},
 	Container_BorderThickness = 1,
-	BasicPosition = {
-		BasicPoint = "RIGHT",
-		RelativeTo = "Button",
-		RelativePoint = "LEFT",
-		OffsetX = 1,
-	},
 	DisplayType = "Countdowntext",
 	Cooldown = {
 		ShowNumbers = true,
-		Fontsize = 12,
-		Outline = "OUTLINE",
+		FontSize = 12,
+		FontOutline = "OUTLINE",
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1},
 	},
@@ -103,7 +111,7 @@ local options = function(location)
 					type = "multiselect",
 					name = L.Filtering_Filterlist,
 					desc = L.DrTrackingFiltering_Filterlist_Desc,
-					disabled = function() return not location.DrTrackingFiltering_Enabled end,
+					disabled = function() return not location.Filtering_Enabled end,
 					get = function(option, key)
 						return location.Filtering_Filterlist[key]
 					end,
@@ -132,10 +140,15 @@ local function drFrameUpdateStatusText(drFrame)
 	drFrame.Cooldown.Text:SetTextColor(unpack(dRstates[drFrame.status] or dRstates[3]))
 end	
 
+local flags = {
+	Height = "Fixed",
+	Width = "Dynamic"
+}
+
 
 local events = {"AuraRemoved"}
 
-local dRTracking = BattleGroundEnemies:NewModule("DRTracking", "DRTracking", 3, defaultSettings, options, events)
+local dRTracking = BattleGroundEnemies:NewModule("DRTracking", "DRTracking", flags, defaultSettings, options, events)
 
 
 function dRTracking:AttachToPlayerButton(playerButton)
@@ -150,7 +163,6 @@ function dRTracking:AttachToPlayerButton(playerButton)
 
 	function frame:ApplyAllSettings()
 		self:UpdateBackdrop(self.config.Container_BorderThickness)
-		self:SetPosition()
 		self:DrPositioning()
 		
 		for drCategory, drFrame in pairs(self.DRFrames) do
@@ -165,11 +177,6 @@ function dRTracking:AttachToPlayerButton(playerButton)
 			drFrame:Remove()
 		end	
 	end
-	
-	function frame:SetPosition()
-		BattleGroundEnemies.SetBasicPosition(self, self.config.BasicPosition.BasicPoint, self.config.BasicPosition.RelativeTo, self.config.BasicPosition.RelativePoint, self.config.BasicPosition.OffsetX)
-	end
-
 
 	function frame:SetWidthOfAuraFrames(height)
 		local borderThickness = self.config.Container_BorderThickness
@@ -185,7 +192,11 @@ function dRTracking:AttachToPlayerButton(playerButton)
 		if not drFrame then  --create a new frame for this categorie
 			
 			drFrame = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
-
+			drFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(drFrame)
+		
+			drFrame.Cooldown:SetScript("OnCooldownDone", function()
+				drFrame:Remove()
+			end)
 			drFrame:HookScript("OnEnter", function(self)
 				BattleGroundEnemies:ShowTooltip(self, function() 
 					if IsClassic then return end
@@ -202,10 +213,9 @@ function dRTracking:AttachToPlayerButton(playerButton)
 			drFrame.Container = self
 			
 			drFrame.ApplyDrFrameSettings = function(self)
-				local conf = playerButton.config
 				
-				self.Cooldown:ApplyCooldownSettings(conf.Cooldown.ShowNumbers, false, false)
-				self.Cooldown.Text:ApplyFontStringSettings(conf.Cooldown)
+				self.Cooldown:ApplyCooldownSettings(frame.config.Cooldown.ShowNumbers, false, false)
+				self.Cooldown.Text:ApplyFontStringSettings(frame.config.Cooldown)
 			end
 
 
@@ -225,14 +235,14 @@ function dRTracking:AttachToPlayerButton(playerButton)
 			end
 
 			drFrame.SetDisplayType = function(self)
-				if playerButton.config.DisplayType == "Frame" then
+				if frame.config.DisplayType == "Frame" then
 					self.SetStatus = drFrameUpdateStatusBorder
 				else
 					self.SetStatus = drFrameUpdateStatusText
 				end
 			end
 			
-			drFrame:SetWidth(playerButton.config.BarHeight - frame.config.Container_BorderThickness * 2)
+			drFrame:SetWidth(playerButton.bgSizeConfig.BarHeight - frame.config.Container_BorderThickness * 2)
 
 			drFrame:SetBackdrop({
 				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
@@ -246,11 +256,7 @@ function dRTracking:AttachToPlayerButton(playerButton)
 			drFrame.Icon = drFrame:CreateTexture(nil, "BORDER", nil, -1) -- -1 to make it behind the SetBackdrop bg
 			drFrame.Icon:SetAllPoints()
 			
-			drFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(drFrame)
 		
-			drFrame.Cooldown:SetScript("OnCooldownDone", function()
-				drFrame:Remove()
-			end)
 
 			drFrame.Remove = function()
 				drFrame:Hide()
@@ -280,16 +286,16 @@ function dRTracking:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:DrPositioning()
-		local config = playerButton.bgSizeConfig
-		local spacing = config.DrTracking_HorizontalSpacing
-		local borderThickness = config.DrTracking_Container_BorderThickness
-		local growLeft = config.DrTracking_GrowDirection == "leftwards"
-		local barHeight = config.BarHeight
+		local config = self.config
+		local spacing = config.HorizontalSpacing
+		local borderThickness = config.Container_BorderThickness
+		local growLeft = config.GrowDirection == "leftwards"
+		local barHeight = playerButton.bgSizeConfig.BarHeight
 		local anchor = self
 		local totalWidth = 0
 		local point, relativePoint, offsetX
 		self:Show()
-		
+
 		if growLeft then 
 			point = "RIGHT"
 			relativePoint = "LEFT"

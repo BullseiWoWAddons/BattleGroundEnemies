@@ -10,24 +10,32 @@ local L = Data.L
 
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "healthBar",
+	Width = 30,
+	Height = 30,
 	Points = {
 		{
 			Point = "TOP",
-			relativeTo = "Button",
-			relativePoint = "TOP"
+			RelativeFrame = "healthBar",
+			RelativePoint = "TOP"
 		},
 		{
 			Point = "BOTTOM",
-			relativeTo = "Button",
-			relativePoint = "BOTTOM"
-		},
-	},
-	Width = 30
+			RelativeFrame = "healthBar",
+			RelativePoint = "BOTTOM"
+		}
+	}
+}
+
+local flags = {
+	Height = "Variable",
+	Width = "Variable"
 }
 
 local events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"}
 
-local raidTargetIcon = BattleGroundEnemies:NewModule("RaidTargetIcon", "RaidTargetIcon", 3, defaultSettings, nil, events)
+local raidTargetIcon = BattleGroundEnemies:NewModule("RaidTargetIcon", "RaidTargetIcon", flags, defaultSettings, nil, events)
 
 function raidTargetIcon:AttachToPlayerButton(playerButton)
 	playerButton.RaidTargetIcon = CreateFrame('Frame', nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
@@ -59,8 +67,9 @@ function raidTargetIcon:AttachToPlayerButton(playerButton)
 			else
 				self:HideIcon()
 			end
+		else
+			self:HideIcon()
 		end
-
 	end
 	--	
 	function playerButton.RaidTargetIcon:HideIcon()

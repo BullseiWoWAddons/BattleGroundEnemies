@@ -10,19 +10,20 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 
 local defaultSettings = {
+	Enabled = true,
 	Texture = 'UI-StatusBar',
 	Background = {0, 0, 0, 0.66},
 	HealthPrediction_Enabled = true,
 	Points = {
 		{
 			Point = "BOTTOMLEFT",
-			relativeFrame = "Power",
-			relativePoint = "TOPLEFT",
+			RelativeFrame = "Power",
+			RelativePoint = "TOPLEFT",
 		},
 		{
 			Point = "TOPRIGHT",
-			relativeFrame = "Button",
-			relativePoint = "TOPRIGHT",
+			RelativeFrame = "Button",
+			RelativePoint = "TOPRIGHT",
 		}
 	}
 }
@@ -57,9 +58,14 @@ local options = function(location)
 	}
 end
 
+local flags = {
+	Height = "Variable",
+	Width = "Fixed"
+}
+
 local events = {"UNIT_HEALTH", "OnNewPlayer"}
 
-local healthBar = BattleGroundEnemies:NewModule("healthBar", "HealthBar", 3, defaultSettings, options, events)
+local healthBar = BattleGroundEnemies:NewModule("healthBar", "HealthBar", flags, defaultSettings, options, events)
 
 function healthBar:AttachToPlayerButton(playerButton)
 	playerButton.healthBar = CreateFrame('StatusBar', nil, playerButton)

@@ -4,13 +4,9 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local L = Data.L
 local GetTime = GetTime
 
-local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-
-
 local defaultSettings = {
 	Enabled = false,
+	Parent = "Button",
 	Height = 4,
 	Texture = 'UI-StatusBar',
 	Background = {0, 0, 0, 0.66},
@@ -61,9 +57,14 @@ local options = function(location)
 	}
 end
 
+local flags = {
+	Height = "Variable",
+	Width = "Fixed"
+}
+
 local events = {"UNIT_POWER_FREQUENT"}
 
-local power = BattleGroundEnemies:NewModule("Power", "Power", 3, defaultSettings, options, events)
+local power = BattleGroundEnemies:NewModule("Power", "Power", flags, defaultSettings, options, events)
 
 function power:AttachToPlayerButton(playerButton)
 	playerButton.Power = CreateFrame('StatusBar', nil, playerButton)
@@ -103,7 +104,7 @@ function power:AttachToPlayerButton(playerButton)
 		self.Background:SetVertexColor(unpack(self.config.Background))
 	end
 
-	function playerButton.Power:Disable()
+	function playerButton.Power:Reset()
 		-- power
 		self:SetHeight(0.01)
 	end

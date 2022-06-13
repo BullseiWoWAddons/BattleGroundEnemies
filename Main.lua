@@ -10,9 +10,10 @@ local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
+local hasSpeccs = not (IsTBCC or IsClassic)
 
 local LGIST
-if not (IsTBCC or IsClassic) then
+if hasSpeccs then
 	LGIST=LibStub:GetLibrary("LibGroupInSpecT-1.1") 
 end
 
@@ -124,24 +125,28 @@ end
 
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
 --BattleGroundEnemies.BattlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
-BattleGroundEnemies.BattleGroundDebuffs = {} --contains battleground specific enemy debbuffs to watchout for of the current active battlefield
+BattleGroundEnemies.BattleGroundDebuffs = {} --contains battleground specific debbuffs to watchout for of the current active battlefield
 BattleGroundEnemies.IsRatedBG = false
 BattleGroundEnemies.CurrentMapID = false --contains the map id of the current active battleground
 BattleGroundEnemies.Modules = {} --contains moduleFrames, key is the module name
 
 local playerFaction = UnitFactionGroup("player")
-local PlayerButton
+local PlayerButton --the button of the Player himself
 local PlayerLevel = UnitLevel("player")
 local IsInArena --wheter or not the player is in a arena map
+local specCache = {} -- key = GUID, value = specName (localized)
+
+
 --BattleGroundEnemies.EnemyFaction 
 --BattleGroundEnemies.AllyFaction
 
---each module can heave one of the different position and size settings
+--each module can heave one of the different types
+--dynamicContainer == the container is only as big as the children its made of, the container sets only 1 point
 --buttonHeightLengthVariable = a attachment that has the height of the button and a variable width (the module will set the width itself). when unused sets to 0.01 width
 --buttonHeightSquare = a attachment that has the height of the button and the same width, when unused sets to 0.01 width
+--HeightAndWidthVariable
 
-
-function BattleGroundEnemies:NewModule(moduleName, localizedModuleName, order, defaultSettings, options, events)
+function BattleGroundEnemies:NewModule(moduleName, localizedModuleName, flags, defaultSettings, options, events)
 
 	if self.Modules[moduleName] then return error("module "..moduleName.." is already registered") end
 	local moduleFrame = CreateFrame("Frame", nil, UIParent)
@@ -149,10 +154,8 @@ function BattleGroundEnemies:NewModule(moduleName, localizedModuleName, order, d
 	moduleFrame.localizedModuleName = localizedModuleName
 	moduleFrame.defaultSettings = defaultSettings or {}
 	moduleFrame.options = options or {}
-	moduleFrame.order = order
+	moduleFrame.flags = flags or {}
 	moduleFrame.events = events
-
-	moduleFrame.defaultSettings.Enabled = true -- all modules are enabled by default
 
 	local t = {"Enemies", "Allies"}
 	local BGSizes = {"5", "15", "40"}
@@ -161,7 +164,8 @@ function BattleGroundEnemies:NewModule(moduleName, localizedModuleName, order, d
 		for j = 1, #BGSizes do
 			local BGSize = BGSizes[j]
 			Data.defaultSettings.profile[tt][BGSize].Modules = Data.defaultSettings.profile[tt][BGSize].Modules or {}
-			Data.defaultSettings.profile[tt][BGSize].Modules[moduleName] = defaultSettings
+			Data.defaultSettings.profile[tt][BGSize].Modules[moduleName] = Data.defaultSettings.profile[tt][BGSize].Modules[moduleName] or {}
+			Mixin(Data.defaultSettings.profile[tt][BGSize].Modules[moduleName], defaultSettings)
 		end
 	end
 
@@ -170,18 +174,8 @@ function BattleGroundEnemies:NewModule(moduleName, localizedModuleName, order, d
 		self[event](self, ...) 
 	end)
 
-	moduleFrame.GetModuleFrameForUnitID = function(self, unitID)
-		local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
-		if not playerButton then return end
-		return playerButton.modules and playerButton.modules[moduleName]
-	end
-
 	moduleFrame.Debug = function(self, ...)
 		BattleGroundEnemies:Debug("UnitInCombat module debug", moduleName, ...)
-	end
-
-	moduleFrame.GetModuleConfig = function(self)
-		return BattleGroundEnemies.db.profile[self.moduleName]
 	end
 	
 	self.Modules[moduleName] = moduleFrame
@@ -189,7 +183,11 @@ function BattleGroundEnemies:NewModule(moduleName, localizedModuleName, order, d
 end
 
 function BattleGroundEnemies:GetBigDebuffsPriority(spellID)
-	return BattleGroundEnemies.db.profile.UseBigDebuffsPriority and BigDebuffs and BigDebuffs:GetDebuffPriority(spellID)
+	if not (BattleGroundEnemies.db.profile.UseBigDebuffsPriority and BigDebuffs) then return end
+	local priority = BigDebuffs:GetDebuffPriority(spellID)
+	if not priority then return end
+	if priority == 0 then return end
+	return priority
 end
 
 
@@ -298,7 +296,7 @@ local function CreateFakeAura(playerButton, filter)
 end
 
 
-local FakePlayerAuras = {} --key = playerbutton, value = {}
+FakePlayerAuras = {} --key = playerbutton, value = {}
 local FakePlayerDRs = {} --key = playerButtonTabe, value = {categoryname = {state = 0, expirationTime}}
 local function FakeUnitAura(playerButton, index, filter)
 	local currentTime = GetTime()
@@ -307,7 +305,7 @@ local function FakeUnitAura(playerButton, index, filter)
 	FakePlayerAuras[playerButton][filter] = FakePlayerAuras[playerButton][filter] or {} 
 	FakePlayerDRs[playerButton] = FakePlayerDRs[playerButton] or {}
 
-	local createNewAura = math_random(1, 2) == 1 -- 50% probability to create a new Aura
+	local createNewAura = math_random(1, 13) == 1 -- 1/40 probability to create a new Aura
 	if createNewAura then 
 		local newFakeAura = CreateFakeAura(playerButton, filter)
 		local dontAddNewAura
@@ -463,23 +461,21 @@ do
 	
 	function BattleGroundEnemies:FillFakePlayerData(BGSize, amount, playerType, role)
 		for i = 1, amount do
-	
-			local classTag, randomSpec, specName
-			if IsTBCC or IsClassic then
-				classTag = Data.ClassList[math_random(1, #Data.ClassList)]
-			else
+			local name, classTag, randomSpec, specName
+		
+			if hasSpeccs then
 				randomSpec = Data.RolesToSpec[role][math_random(1, #Data.RolesToSpec[role])]
 				classTag = randomSpec.classTag
 				specName = randomSpec.specName
+			else
+				classTag = Data.ClassList[math_random(1, #Data.ClassList)]
 			end
-			
-			local name = L[playerType]..counter.."-Realm"..counter
-			 
-		
+			name = L[playerType]..counter.."-Realm"..counter
+						
 			fakePlayers[name] = {
 				PlayerClass = classTag,
 				PlayerName = name,
-				PlayerSpecName = specName, --will be nil for TBCC
+				PlayerSpecName = specName, --will be nil for TBCC or Classic
 				PlayerClassColor = RAID_CLASS_COLORS[classTag],
 				PlayerLevel = math_random(PlayerLevel - 5, PlayerLevel),
 			}
@@ -490,13 +486,30 @@ do
 	function BattleGroundEnemies:FillData()
 		for number, MainFrame in pairs({self.Allies, self.Enemies}) do
 			wipe(fakePlayers)
+
+			local healerAmount = math_random(2, 3)
+			local tankAmount = math_random(1)
+			local damagerAmount = self.BGSize - healerAmount - tankAmount
+
+
+			if MainFrame == self.Allies then
+				local myRole = Data.Classes[self.PlayerDetails.PlayerClass][specCache[self.PlayerDetails.GUID]].roledID
+				
+				if myRole == "HEALER" then
+					healerAmount = healerAmount - 1
+				elseif myRole == "TANK" then
+					tankAmount = tankAmount - 1
+				else
+					damagerAmount = damagerAmount - 1
+				end
+			end
+
+			
 		
 			MainFrame:RemoveAllPlayers()
 			MainFrame:UpdatePlayerCount(self.BGSize)
 					
-			local healerAmount = math_random(1, 3)
-			local tankAmount = math_random(1, 2)
-			local damagerAmount = self.BGSize - healerAmount - tankAmount
+			
 			
 			
 			counter = 1
@@ -615,8 +628,7 @@ do
 						if health == 0 and holdsflag ~= playerButton then --don't let players die that are holding a flag at the moment
 							--BattleGroundEnemies:Debug("dead")
 							playerButton.healthBar:SetValue(0)
-							playerButton:DispatchEvent("UnitDied")
-							playerButton.ObjectiveAndRespawn:PlayerDied()
+							playerButton:PlayerDied()
 						else
 							playerButton.healthBar:SetValue(health/100) --player still alive
 							
@@ -648,14 +660,13 @@ do
 								hasFlag = true
 							
 							-- trinket simulation
-							elseif number == 2 and playerButton.Modules.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
-								local spellID = randomTrinkets[math_random(1, #randomTrinkets)] 
-								playerButton.Modules.Trinket:TrinketCheck(spellID)
-							--racial simulation
-							elseif number == 3 and playerButton.Modules.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
-								playerButton.Modules.Racial:RacialUsed(randomRacials[math_random(1, #randomRacials)])
-							elseif number == 4 or number == 5 then --Aura simulation
-								playerButton:UNIT_AURA()
+							-- elseif number == 2 and playerButton.Modules.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
+							-- 	local spellID = randomTrinkets[math_random(1, #randomTrinkets)] 
+							-- --	playerButton.Modules.Trinket:TrinketCheck(spellID)
+							-- --racial simulation
+							-- elseif number == 3 and playerButton.Modules.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
+							-- --	playerButton.Modules.Racial:RacialUsed(randomRacials[math_random(1, #randomRacials)])
+					
 							elseif number == 6 then --power simulation
 								local power = math_random(0, 100)
 								playerButton.Power:SetValue(power/100)
@@ -665,12 +676,12 @@ do
 								playerButton.Power:SetValue(math_random(0, 100))
 							end
 							
-							
+							playerButton:UNIT_AURA()
 							-- targetcounter simulation
 							if targetCounts < 15 then
 								local targetCounter = math_random(0,3)
 								if targetCounts + targetCounter <= 15 then
-									playerButton.NumericTargetIndicator:SetText(targetCounter)
+									playerButton.TargetIndicatorNumeric:SetText(targetCounter)
 								end
 							end
 
@@ -763,7 +774,7 @@ end)
 
 
 
-local specCache = {} -- key = GUID, value = specName (localized)
+
 
 
 function BattleGroundEnemies.Allies:GroupInSpecT_Update(event, GUID, unitID, info)
@@ -911,7 +922,7 @@ BattleGroundEnemies.Enemies:SetScript("OnShow", function(self)
 		self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 		self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 		self:RegisterEvent("UNIT_NAME_UPDATE")
-		if not (IsTBCC or IsClassic) then
+		if hasSpeccs then
 			self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
 		end
 		
@@ -1004,10 +1015,10 @@ local function ApplyCooldownSettings(self, showNumber, cdReverse, setDrawSwipe, 
 end
 
 local function ApplyFontStringSettings(self, settings)
-	self:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), settings.Fontsize, settings.FontOutline)
+	self:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), settings.FontSize, settings.FontOutline)
 	
-	if settings.Textcolor then
-		self:SetTextColor(unpack(settings.Textcolor))
+	if settings.FontColor then
+		self:SetTextColor(unpack(settings.FontColor))
 	end
 	
 
@@ -1072,21 +1083,13 @@ end
 
 
 local enemyButtonFunctions = {}
-do
-	function enemyButtonFunctions:HasUnitID() --Add to OnUpdate
-		local activeUnitID = self.UnitIDs.Active
-		if not UnitExists(activeUnitID) then return end
-		self:DispatchEvent("EnemyHasUnitID", activeUnitID)
-		self:UpdateRaidTargetIcon()
-		self:UpdateAll(activeUnitID)
-	end
-	
+do	
 	function enemyButtonFunctions:FetchAnAllyUnitID()
 		local unitIDs = self.UnitIDs
 		if unitIDs.Ally then 
 			unitIDs.Active = unitIDs.Ally
 			unitIDs.HasAllyUnitID = true
-			self:HasUnitID()
+			self:NewUnitID()
 		else
 			self:DeleteActiveUnitID()
 		end 
@@ -1112,7 +1115,7 @@ do
 		unitIDs.Active = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
 		if unitIDs.Active then
 			unitIDs.HasAllyUnitID = false
-			self:HasUnitID()
+			self:NewUnitID()
 		else
 			self:FetchAnAllyUnitID()
 		end
@@ -1188,6 +1191,25 @@ do
 		self:DispatchEvent("UpdateRaidTargetIcon")
 	end
 
+	function buttonFunctions:NewUnitID(unitID, targetUnitID)
+		if self.PlayerIsEnemy then
+			local activeUnitID = self.UnitIDs.Active
+			if not UnitExists(activeUnitID) then return end
+			self:UpdateRaidTargetIcon()
+			self:UpdateAll(activeUnitID)
+		else
+			self.unit = unitID
+			self.TargetUnitID = targetUnitID
+			if not InCombatLockdown() then
+				self:SetAttribute('unit', unitID)
+				BattleGroundEnemies.Allies:SortPlayers()
+			else
+				C_Timer.After(1, function() return BattleGroundEnemies:GROUP_ROSTER_UPDATE() end)
+			end
+		end
+		self:DispatchEvent("NewUnitID", unitID)
+	end
+
 	function buttonFunctions:ApplyButtonSettings()
 		self.config = self:GetParent().config
 		self.bgSizeConfig = self:GetParent().bgSizeConfig
@@ -1206,12 +1228,11 @@ do
 		--MyFocus, indicating the current focus of the player
 		self.MyFocus:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyFocus_Color))
 				
-		self.ButtonEvents = self.ButtonEvents or {}
 		wipe(self.ButtonEvents)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.Modules) do
 			local moduleConfigOnButton = self.bgSizeConfig.Modules[moduleName]
 			self[moduleName].config = moduleConfigOnButton
-			if self.bgSizeConfig.Modules[moduleName].Enabled then
+			if moduleConfigOnButton.Enabled then
 				if moduleFrame.events then
 					for i = 1, #moduleFrame.events do
 						local event = moduleFrame.events[i]
@@ -1225,8 +1246,9 @@ do
 				self[moduleName]:ApplyAllSettings()
 			else
 				self[moduleName]:Hide()
+				self:SetModulePosition(self[moduleName])
 				if self[moduleName].Disable then self[moduleName]:Disable() end
-				self[moduleName]:Reset() 
+				if self[moduleName].Reset then self[moduleName]:Reset() end
 			end
 		end
 
@@ -1292,12 +1314,17 @@ do
 		end
 	end
 
+	function buttonFunctions:PlayerDied(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
+		self.ObjectiveAndRespawn:PlayerDied()
+		self:DispatchEvent("UnitDied")
+	end
+
+
+
 	function buttonFunctions:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
 		self:DispatchEvent("UNIT_HEALTH")
 		if UnitIsDeadOrGhost(unitID) then
-			BattleGroundEnemies:Debug("UNIT_HEALTH", UnitName(unitID), "UnitIsDead")
-			self.ObjectiveAndRespawn:PlayerDied()
-			self:DispatchEvent("UnitDied")
+			self:PlayerDied()
 		end
 	end
 
@@ -1330,9 +1357,6 @@ do
 		BattleGroundEnemies.ArenaIDToPlayerButton[unitID] = self
 		if self.PlayerIsEnemy then
 			self:FetchAnotherUnitID("Arena", unitID)
-		end
-		if self.bgSizeConfig.ObjectiveAndRespawn_ObjectiveEnabled then
-			self.ObjectiveAndRespawn:ShowObjective()
 		end
 		RequestCrowdControlSpell(unitID)
 		self:DispatchEvent("ArenaOpponentShown")
@@ -1561,9 +1585,11 @@ do
 	end
 
 	function buttonFunctions:DispatchEvent(event, ...)
+		if not self.ButtonEvents then return end
+
 		local moduleFrames = self.ButtonEvents[event]
+
 		if not moduleFrames then return end
-		
 		for i = 1, #moduleFrames do
 			local moduleFrameOnButton = moduleFrames[i]
 			if moduleFrameOnButton[event] then
@@ -1601,21 +1627,23 @@ do
 			for i = 1, #config.Points do
 				local pointConfig = config.Points[i]
 
-				if pointConfig.RelativeTo == "Button" then 
+				if pointConfig.RelativeFrame == "Button" then 
 					relativeTo = self
 				else
-					relativeTo = self[pointConfig.RelativeTo]
+					relativeTo = self[pointConfig.RelativeFrame]
 					if not relativeTo then return print("error", relativeTo, "doesnt exist") end
 				end
-				moduleFrameOnButton:SetPoint(pointConfig.Piont, relativeTo, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
+				moduleFrameOnButton:SetPoint(pointConfig.Point, relativeTo, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
 			end
-
+		end
+		if config.Parent then
+			moduleFrameOnButton:SetParent(config.Parent == "Button" and self or self[config.Parent])
 		end
 		if config.Width then
 			moduleFrameOnButton:SetWidth(config.Width)
 		end
 		if config.Height then
-			moduleFrameOnButton:SetWidth(config.Height)
+			moduleFrameOnButton:SetHeight(config.Height)
 		end
 	end
 end
@@ -1631,18 +1659,6 @@ do
 	function allyButtonFunctions:NoLongerTargetedBy(enemyButton)
 		self.UnitIDs.TargetedByEnemy[enemyButton] = nil
 		self:UpdateTargetIndicators()
-	end
-
-	function allyButtonFunctions:NewUnitID(unitID, targetUnitID)
-		self.unit = unitID
-		self.TargetUnitID = targetUnitID
-		self:DispatchEvent("AllyNewUnitID", unitID)
-		if not InCombatLockdown() then
-			self:SetAttribute('unit', unitID)
-			BattleGroundEnemies.Allies:SortPlayers()
-		else
-			C_Timer.After(1, function() return BattleGroundEnemies:GROUP_ROSTER_UPDATE() end)
-		end
 	end
 end
 
@@ -1790,13 +1806,13 @@ do
 			-- self.__index = self
 
 			
-			
+			playerButton.ButtonEvents = playerButton.ButtonEvents or {}
 
 			playerButton.PlayerType = self.PlayerType
 			playerButton.PlayerIsEnemy = playerButton.PlayerType == "Enemies" and true or false
 			
 			playerButton:SetScript("OnSizeChanged", function(self, width, height)
-				self.DRContainer:SetWidthOfAuraFrames(height)
+				--self.DRContainer:SetWidthOfAuraFrames(height)
 				self:DispatchEvent("PlayerButtonSizeChanged", width, height)
 			end)
 			
@@ -1923,7 +1939,15 @@ do
 		return playerButton
 	end
 
-	function MainFrameFunctions:RemovePlayer(playerButton)	
+	function MainFrameFunctions:RemovePlayer(playerButton)
+		if playerButton == PlayerButton then return end -- dont remove the Player itself
+
+
+		local targetEnemyButton = playerButton.Target
+		if targetEnemyButton then -- if that no longer exiting ally targeted something update the button of its target
+			targetEnemyButton:NoLongerTargetedBy(playerButton)
+		end
+
 		playerButton:Hide()
 
 		table_insert(self.InactivePlayerButtons, playerButton)
@@ -2031,14 +2055,18 @@ do
 		for playerName, playerButton in pairs(self.Players) do
 			if playerButton.Status == 2 then --no longer existing
 				self:RemovePlayer(playerButton)
-				local targetEnemyButton = playerButton.Target
-				if targetEnemyButton then -- if that no longer exiting ally targeted something update the button of its target
-					targetEnemyButton:NoLongerTargetedBy(playerButton)
-				end
+				
 			else -- == 1 -- set to 2 for the next comparison
 				playerButton.Status = 2
 			end 
 		end
+
+		for name, playerDetails in pairs(self.NewPlayerDetails) do
+			local playerButton = self:SetupButtonForNewPlayer(playerDetails)
+			
+			playerButton.Status = 2
+		end
+
 		self:SortPlayers()
 	end
 
@@ -2260,7 +2288,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 		local _, classTag, specName
 				
 		local specName, classTag
-		if not (IsTBCC or IsClassic) then
+		if hasSpeccs then
 			local specID, gender = GetArenaOpponentSpec(i)
 
 
@@ -2503,10 +2531,7 @@ function CombatLogevents.UNIT_DIED(self, _, destName, _, _, _)
 	--self:Debug("subevent", destName, "UNIT_DIED")
 	local playerButton = self:GetPlayerbuttonByName(destName)
 	if playerButton then
-		playerButton:DispatchEvent("UnitDied")
-		playerButton.ObjectiveAndRespawn:PlayerDied()
-		--playerButton.BuffContainer:Reset()
-		--playerButton.DebuffContainer:Reset()
+		playerButton:PlayerDied()
 	end
 end
 
@@ -2915,11 +2940,11 @@ do
 			local foundEnemies = 0
 			for i = 1, numScores do
 				local name, faction, race, classTag, specName
-				if IsTBCC or IsClassic then
+				if hasSpeccs then
 					--name, killingBlows, honorableKills, deaths, honorGained, faction, rank, race, class, classToken, damageDone, healingDone = GetBattlefieldScore(index)
-					name, _, _, _, _, faction, _, race, _, classTag = GetBattlefieldScore(i)
-				else
 					name, _, _, _, _, faction, race, _, classTag, _, _, _, _, _, _, specName = GetBattlefieldScore(i)
+				else
+					name, _, _, _, _, faction, _, race, _, classTag = GetBattlefieldScore(i)
 				end
 				
 				--self:Debug("player", "name:", name, "faction:", faction, "race:", race, "classTag:", classTag, "specName:", specName)

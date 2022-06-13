@@ -6,18 +6,35 @@ local AddonName, Data = ...
 local L = Data.L
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "Button",
 	ObjectiveEnabled = true,
+	Width = 36,
+	Points = {
+		{
+			Point = "TOPRIGHT",
+			RelativeFrame = "TargetIndicatorNumeric",
+			RelativePoint = "TOPLEFT",
+			OffsetX = -2
+		},
+		{
+			Point = "BOTTOMRIGHT",
+			RelativeFrame = "TargetIndicatorNumeric",
+			RelativePoint = "BOTTOMLEFT",
+			OffsetX = -2
+		}
+	},
 	Cooldown = {
 		ShowNumbers = true,
-		Fontsize = 12,
-		Outline = "OUTLINE",
+		FontSize = 12,
+		Fontoutline = "OUTLINE",
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1},
 	},
 	Text = {
-		Fontsize = 17,
-		Outline = "THICKOUTLINE",
-		Textcolor = {1, 1, 1, 1},
+		FontSize = 17,
+		FontOutline = "THICKOUTLINE",
+		FontColor = {1, 1, 1, 1},
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1}
 	}
@@ -55,9 +72,14 @@ local options = function(location)
 	}
 end
 
+local flags = {
+	Height = "Fixed",
+	Width = "Variable"
+}
+
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"}
 
-local objectiveAndRespawn = BattleGroundEnemies:NewModule("ObjectiveAndRespawn", "ObjectiveAndRespawn", 3, defaultSettings, options, events)
+local objectiveAndRespawn = BattleGroundEnemies:NewModule("ObjectiveAndRespawn", "ObjectiveAndRespawn", flags, defaultSettings, options, events)
 
 function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)
@@ -96,10 +118,10 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end)
 
 	function frame:Reset()
-		frame:Hide()
-		frame.Icon:SetTexture()
-		if frame.AuraText:GetFont() then frame.AuraText:SetText("") end
-		frame.ActiveRespawnTimer = false
+		self:Hide()
+		self.Icon:SetTexture()
+		if self.AuraText:GetFont() then self.AuraText:SetText("") end
+		self.ActiveRespawnTimer = false
 	end
 	
 		
@@ -107,14 +129,12 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		if BattleGroundEnemies.BGSize == 15 then
 			local conf = self.config
 		
-			self:SetWidth(conf.ObjectiveAndRespawn_Width)		
+			self:SetWidth(conf.Width)		
 			
-			self.AuraText:ApplyFontStringSettings(conf.ObjectiveAndRespawn.Text)
+			self.AuraText:ApplyFontStringSettings(conf.Text)
 			
-			self.Cooldown:ApplyCooldownSettings(BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn_ShowNumbers, true, true, {0, 0, 0, 0.75})
-			self.Cooldown.Text:ApplyFontStringSettings(BattleGroundEnemies.db.profile.RBG.ObjectiveAndRespawn.Cooldown)
-			
-			self:SetPosition()
+			self.Cooldown:ApplyCooldownSettings(conf.Cooldown.ShowNumbers, true, true, {0, 0, 0, 0.75})
+			self.Cooldown.Text:ApplyFontStringSettings(conf.Cooldown)
 		end
 	end
 	function frame:SearchForDebuffs(name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
@@ -164,7 +184,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 			if not self.ActiveRespawnTimer then
 				self:Show()
 				self.Icon:SetTexture(GetSpellTexture(8326))
-				self.AuraText:SetText("")
+				if self.AuraText:GetFont() then self.AuraText:SetText("") end
 				self.ActiveRespawnTimer = true
 			end
 			self.Cooldown:SetCooldown(GetTime(), 26) --overwrite an already active timer

@@ -9,7 +9,10 @@ local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "Button",
 	Width = 28,
+	Height = 28,
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -26,8 +29,8 @@ local defaultSettings = {
 	},
 	Cooldown = {
 		ShowNumbers = true,
-		Fontsize = 12,
-		Outline = "OUTLINE",
+		FontSize = 12,
+		Fontoutline = "OUTLINE",
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1},
 	},
@@ -89,9 +92,14 @@ local options = function(location)
 	}
 end
 
+local flags = {
+	Height = "Variable",
+	Width = "Variable"
+}
+
 local events = {"SPELL_CAST_SUCCESS"}
 
-local racial = BattleGroundEnemies:NewModule("Racial", "Racial", 3, defaultSettings, options, events)
+local racial = BattleGroundEnemies:NewModule("Racial", "Racial", flags, defaultSettings, options, events)
 
 function racial:AttachToPlayerButton(playerButton)
 

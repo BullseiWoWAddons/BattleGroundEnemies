@@ -10,7 +10,16 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 local CTimerNewTicker = C_Timer.NewTicker
 
-function Data.AddPositionSetting(location)
+local function GetAllAnchors()
+	local t = {}
+	for moduleName, moduleFrame in pairs(BattleGroundEnemies.Modules) do
+		t[moduleName] = moduleFrame.localizedModuleName
+	end
+	t.Button = L.Button
+	return t
+end
+
+function Data.AddPositionSetting(location, moduleFrame)
 	local numPoints = 0
 	local temp = {}
 	if location.Points then
@@ -32,19 +41,19 @@ function Data.AddPositionSetting(location)
 				args = {
 					Point = {
 						type = "select",
-						name = "Point",
+						name = L.Point,
 						values = Data.AllPositions,
 						order = 1
 					},
 					RelativeFrame = {
 						type = "select",
-						name = "RelativeFrame",
-						values = {1,2,3},
+						name = L.RelativeFrame,
+						values = GetAllAnchors,
 						order = 2
 					},
 					RelativePoint = {
 						type = "select",
-						name = "RelativePoint",
+						name = L.RelativePoint,
 						values = Data.AllPositions,
 						order = 3
 					},
@@ -86,7 +95,7 @@ function Data.AddPositionSetting(location)
 	
 	temp.AddPoint = {
 		type = "execute",
-		name = "Add another point",
+		name = L.AddPoint,
 		func = function() 
 			location.Points = location.Points or {}
 			location.Points[numPoints + 1] = {}
@@ -97,33 +106,28 @@ function Data.AddPositionSetting(location)
 		width = "full",
 		order = numPoints + 1
 	}
-	temp.EnableWidth = {
-		type =  "toggle",
-		name = "Set Width",
-		order = numPoints + 2
-	}
 	temp.Width = {
 		type = "range",
-		name = "width",
+		name = L.Width,
 		min = 0,
 		max = 100,
 		step = 1,
-		disabled = function() return not location.EnableWidth end,
+		disabled = function() return moduleFrame.flags.Width == "Fixed" or moduleFrame.flags.Height == "Dynamic" end,
 		order = numPoints + 3
-	}
-	temp.EnableHeight = {
-		type =  "toggle",
-		name = "Set Height",
-		order = numPoints + 4
 	}
 	temp.Height = {
 		type = "range",
-		name = "Height",
+		name = L.Height,
 		min = 0,
 		max = 100,
 		step = 1,
-		disabled = function() return not location.EnableHeight end,
+		disabled = function() return moduleFrame.flags.Height == "Fixed" or moduleFrame.flags.Height == "Dynamic" end,
 		order = numPoints + 5
+	}
+	temp.Parent = {
+		type = "select",
+		name = L.Parent,
+		values = GetAllAnchors
 	}
 	return temp
 end
@@ -394,9 +398,9 @@ end
 
 function Data.AddNormalTextSettings(location)		
 	return {
-		Fontsize = {
+		FontSize = {
 			type = "range",
-			name = L.Fontsize,
+			name = L.FontSize,
 			desc = L.Fontsize_Desc,
 			min = 1,
 			max = 40,
@@ -404,7 +408,7 @@ function Data.AddNormalTextSettings(location)
 			width = "normal",
 			order = 1
 		},
-		Outline = {
+		FontOutline = {
 			type = "select",
 			name = L.Font_Outline,
 			desc = L.Font_Outline_Desc,
@@ -412,7 +416,7 @@ function Data.AddNormalTextSettings(location)
 			order = 2
 		},
 		Fake = Data.AddVerticalSpacing(3),
-		Textcolor = {
+		FontColor = {
 			type = "color",
 			name = L.Fontcolor,
 			desc = L.Fontcolor_Desc,
@@ -457,9 +461,9 @@ function Data.AddCooldownSettings(location)
 			inline = true,
 			order = 2,
 			args = {
-				Fontsize = {
+				FontSize = {
 					type = "range",
-					name = L.Fontsize,
+					name = L.FontSize,
 					desc = L.Fontsize_Desc,
 					min = 6,
 					max = 40,
@@ -467,7 +471,7 @@ function Data.AddCooldownSettings(location)
 					width = "normal",
 					order = 3
 				},
-				Outline = {
+				FontOutline = {
 					type = "select",
 					name = L.Font_Outline,
 					desc = L.Font_Outline_Desc,
@@ -530,7 +534,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 					set = function(option, ...) 
 						return Data.SetOption(locationn, option, ...)
 					end,
-					disabled = not locationn.Enabled,
+					disabled = not locationn.Enabled or not moduleFrame.options,
 					order = 2,
 					args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options or {}
 				},
@@ -538,19 +542,18 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 					type = "group",
 					name = "PositionSettings",
 					get =  function(option)
-						return Data.GetOption(location, option)
+						return Data.GetOption(locationn, option)
 					end,
 					set = function(option, ...) 
-						return Data.SetOption(location, option, ...)
+						return Data.SetOption(locationn, option, ...)
 					end,
-					args = Data.AddPositionSetting(location)
-
+					args = Data.AddPositionSetting(locationn, moduleFrame)
 				},
 				Reset = {
 					type = "execute",
 					name = "Reset the settings of this section",
 					func = function() 
-						location.Modules[moduleName] = copy(defaults.Modules[moduleName])
+						locationn.Modules[moduleName] = copy(defaults.Modules[moduleName])
 
 						BattleGroundEnemies:ProfileChanged()
 						AceConfigRegistry:NotifyChange("BattleGroundEnemies");
@@ -944,15 +947,15 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							max = 400,
 							step = 1,
 							order = 7
-						},
-						ModuleSettings = {
-							type = "group",
-							name = "Module Settings",
-							desc = "Module specific settings",
-							order = 3,
-							args = self:AddModuleSettings(location, defaults, playerType)
 						}
 					}
+				},
+				ModuleSettings = {
+					type = "group",
+					name = "Module Settings",
+					desc = "Module specific settings",
+					order = 6,
+					args = self:AddModuleSettings(location, defaults, playerType)
 				}
 			}
 		}

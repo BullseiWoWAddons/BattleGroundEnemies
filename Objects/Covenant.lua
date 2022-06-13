@@ -4,49 +4,25 @@ local L = Data.L
 local C_Covenants = C_Covenants
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "healthBar",
 	Points = {
 		{
-			Point = "TOPLEFTT",
+			Point = "TOPLEFT",
 			RelativeFrame = "Role",
 			RelativePoint = "TOPRIGHT",
 		},
-		{
-			Point = "BOTTOMLEFT",
-			RelativeFrame = "Role",
-			RelativePoint = "BOTTOMRIGHT",
-		}
 	},
-	Size = 20,
-	VerticalPosition = 3,
+	Width = 20,
+	Height = 20
 }
 
-local options = function(location) 
-	return {
-		Size = {
-			type = "range",
-			name = L.Size,
-			desc = L.CovenantIcon_Size_Desc,
-			min = 2,
-			max = 80,
-			step = 1,
-			width = "normal",
-			order = 2
-		},
-		VerticalPosition = {
-			type = "range",
-			name = L.VerticalPosition,
-			min = 0,
-			max = 50,
-			step = 1,
-			width = "normal",
-			order = 3,
-		}
-	}
-end
+local flags = {
+	Height = "Variable",
+	Width = "Variable"
+}
 
-local events = {"OnNewPlayer"}
-
-local covenant = BattleGroundEnemies:NewModule("Covenant", "Covenant", 3, defaultSettings, options, events)
+local covenant = BattleGroundEnemies:NewModule("Covenant", "Covenant", flags, defaultSettings, nil, nil)
 
 function covenant:AttachToPlayerButton(playerButton)
 -- Covenant Icon
@@ -65,12 +41,9 @@ function covenant:AttachToPlayerButton(playerButton)
 			GameTooltip:Hide()
 		end
 	end)
-
-	playerButton.Covenant:SetPoint("TOPLEFT", playerButton.Role, "TOPRIGHT")
-	playerButton.Covenant:SetPoint("BOTTOMLEFT", playerButton.Role, "BOTTOMRIGHT")
-	playerButton.Covenant:SetWidth(0.001)
 	playerButton.Covenant.covenantID = false
 	playerButton.Covenant.Icon = playerButton.Covenant:CreateTexture(nil, 'OVERLAY')
+	playerButton.Covenant.Icon:SetAllPoints()
 
 	playerButton.Covenant.DisplayCovenant = function(self, covenantID)
 		self.covenantID = covenantID
@@ -85,9 +58,6 @@ function covenant:AttachToPlayerButton(playerButton)
 	end
 
 	playerButton.Covenant.ApplyAllSettings = function(self)
-		self:SetWidth(self.config.Size)
-		self.Icon:SetSize(self.config.Size, self.config.Size)
-		self.Icon:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -self.config.VerticalPosition)
 		self:Show()
 	end
 end

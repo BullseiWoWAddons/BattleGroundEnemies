@@ -3,8 +3,25 @@ local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "healthBar",
 	Width = 8,
-	Height = 10
+	Height = 10,
+	Points = {
+		{
+			Point = "TOPLEFT",
+			RelativeFrame = "Button",
+			RelativePoint = "TOPRIGHT",
+			OffsetX = 1
+		},
+		{
+			Point = "BOTTOMLEFT",
+			RelativeFrame = "Button",
+			RelativePoint = "BOTTOMRIGHT",
+			OffsetX = 1
+		}
+	},
+
 }
 
 local options = function(location, playerType) 
@@ -31,9 +48,14 @@ local options = function(location, playerType)
 	}
 end
 
+local flags = {
+	Height = "Dynamic",
+	Width = "Dynamic"
+}
+
 local events = {"UpdateTargetIndicators"}
 
-local symbolicTargetIndicator = BattleGroundEnemies:NewModule("TargetIndicatorSymbolic", "TargetIndicatorSymbolic", 3, defaultSettings, options, events)
+local symbolicTargetIndicator = BattleGroundEnemies:NewModule("TargetIndicatorSymbolic", "TargetIndicatorSymbolic", flags, defaultSettings, options, events)
 
 function symbolicTargetIndicator:AttachToPlayerButton(playerButton)
 	playerButton.TargetIndicatorSymbolic = CreateFrame("frame", nil, playerButton)
@@ -42,6 +64,7 @@ function symbolicTargetIndicator:AttachToPlayerButton(playerButton)
 	function playerButton.TargetIndicatorSymbolic:UpdateTargetIndicators()
 
 		local targetIndicatorConfig = self.config
+
 
 		local i = 1
 		for enemyButton in pairs(playerButton.UnitIDs.TargetedByEnemy) do
@@ -73,12 +96,7 @@ function symbolicTargetIndicator:AttachToPlayerButton(playerButton)
 		end
 	end
 
-	playerButton.TargetIndicator.ApplySettings = function(self)
-		self:UpdateTargetIndicators()
-	end
-
-	playerButton.TargetIndicator.Reset = function(self)
-		--dont SetWidth before Hide() otherwise it won't work as aimed
+	playerButton.TargetIndicatorSymbolic.ApplyAllSettings = function(self)
 		return
 	end
 end

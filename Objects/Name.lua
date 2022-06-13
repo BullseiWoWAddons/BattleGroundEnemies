@@ -7,22 +7,26 @@ local AddonName, Data = ...
 local L = Data.L
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "healthBar",
 	Points = {
 		{
 			Point = "TOPLEFT",
 			RelativeFrame = "Level",
 			RelativePoint = "TOPRIGHT",
+			OffsetX = 5,
+			OffsetY = 2
 		},
 		{
-			Point = "BOTTOMLEFT",
-			RelativeFrame = "Button",
+			Point = "BOTTOMRIGHT",
+			RelativeFrame = "TargetIndicatorNumeric",
 			RelativePoint = "BOTTOMLEFT",
 		}
 	},
 	Text = {
-		Fontsize = 13,
-		Outline = "",
-		Textcolor = {1, 1, 1, 1}, 
+		FontSize = 13,
+		FontOutline = "",
+		FontColor = {1, 1, 1, 1}, 
 		EnableTextshadow = true,
 		TextShadowcolor = {0, 0, 0, 1},
 	},
@@ -50,16 +54,22 @@ local options = function(location)
 	}
 end
 
+local flags = {
+	Height = "Dynamic",
+	Width = "Dynamic"
+}
+
 local events = {"OnNewPlayer"}
 
-local healthBar = BattleGroundEnemies:NewModule("Name", "Name", 3, defaultSettings, options, events)
+local name = BattleGroundEnemies:NewModule("Name", "Name", flags, defaultSettings, options, events)
 
-function healthBar:AttachToPlayerButton(playerButton)
+function name:AttachToPlayerButton(playerButton)
 	playerButton.Name = BattleGroundEnemies.MyCreateFontString(playerButton)
 	playerButton.Name:SetJustifyH("LEFT")
 
-	function playerButton.Name:OnNewPlayer()
+	function playerButton.Name:SetName()
 		local playerName = playerButton.PlayerName
+		if not playerName then return end
 		
 		local name, realm = strsplit( "-", playerName, 2)
 			
@@ -92,12 +102,20 @@ function healthBar:AttachToPlayerButton(playerButton)
 		self.DisplayedName = name
 	end
 
+	function playerButton.Name:OnNewPlayer()
+		self:SetName()
+	end
+
 	function playerButton.Name:ApplyAllSettings()
 		local config = self.config
 		-- name
-		self:SetTextColor(unpack(config.Text.Textcolor))
+		self:SetTextColor(unpack(config.Text.FontColor))
 		self:ApplyFontStringSettings(config.Text)
 		self:SetName()
+	end
+
+	function playerButton.Name:Reset()
+		return
 	end
 end
 

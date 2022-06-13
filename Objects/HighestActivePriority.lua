@@ -2,16 +2,18 @@ local AddonName, Data = ...
 local L = Data.L
 
 local defaultSettings = {
+	Enabled = true,
+	Parent = "Spec",
 	Cooldown = {
 		ShowNumbers = true,
-		Fontsize = 12,
-		Outline = "OUTLINE",
+		FontSize = 12,
+		FontOutline = "OUTLINE",
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1},
 	},
 	Points = {
 		{
-			Point = "TOPLEFTT",
+			Point = "TOPLEFT",
 			RelativeFrame = "Spec",
 			RelativePoint = "TOPLEFT",
 		},
@@ -36,12 +38,25 @@ local options = function(location)
 	}
 end
 
+local flags = {
+	Height = "Fixed",
+	Width = "Fixed"
+}
+
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "GotInterrupted", "UnitDied"}
 
-local spec_HighestActivePriority = BattleGroundEnemies:NewModule("HighestPriority", "highestPriority", 3, defaultSettings, options, events)
+local spec_HighestActivePriority = BattleGroundEnemies:NewModule("HighestPriority", "HighestPriority", flags, defaultSettings, options, events)
 
 function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)
+	frame.PriorityAuras = {}
+	frame.ActiveInterrupt = false
+	frame.Icon = frame:CreateTexture(nil, 'BACKGROUND')
+	frame.Icon:SetAllPoints()
+	frame.Cooldown = BattleGroundEnemies.MyCreateCooldown(frame)
+	frame.Cooldown:SetScript("OnCooldownDone", function(self)
+		frame:Update()
+	end)
 	frame:HookScript("OnEnter", function(self)
 		BattleGroundEnemies:ShowTooltip(self, function()
 			BattleGroundEnemies:ShowAuraTooltip(playerButton, frame.DisplayedAura)
@@ -52,6 +67,10 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 		if GameTooltip:IsOwned(frame) then
 			GameTooltip:Hide()
 		end
+	end)
+
+	frame:SetScript("OnSizeChanged", function(self, width, height)
+		BattleGroundEnemies.CropImage(self.Icon, width, height)
 	end)
 
 	frame:Hide()
@@ -122,16 +141,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	end
 
 
-	frame:SetAllPoints()
-	frame:SetFrameLevel(playerButton:GetFrameLevel() + 1)
-	frame.PriorityAuras = {}
-	frame.ActiveInterrupt = false
-	frame.Icon = frame:CreateTexture(nil, 'BACKGROUND')
-	frame.Icon:SetAllPoints()
-	frame.Cooldown = BattleGroundEnemies.MyCreateCooldown(frame)
-	frame.Cooldown:SetScript("OnCooldownDone", function(self)
-		frame:Update()
-	end)
+
 
 	function frame:GotInterrupted(spellID, interruptDuration)
 		self.ActiveInterrupt = {

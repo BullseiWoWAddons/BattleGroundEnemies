@@ -61,11 +61,48 @@ Data.defaultSettings = {
 				PlayerCount = {
 					Enabled = true,
 					Text = {
-						Fontsize = 14,
-						Outline = "OUTLINE",
-						Textcolor = {1, 1, 1, 1},
+						FontSize = 14,
+						FontOutline = "OUTLINE",
+						FontColor = {1, 1, 1, 1},
 						EnableTextshadow = false,
 						TextShadowcolor = {0, 0, 0, 1},
+					}
+				},
+
+				Modules = {
+					Buffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					Debuffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Buffs",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					DRTracking= {
+						Points = {
+							{
+								Point = "TOPRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "TOPLEFT",
+							},
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "BOTTOMLEFT",
+							}
+						},
 					}
 				},
 			
@@ -90,18 +127,52 @@ Data.defaultSettings = {
 				PlayerCount = {
 					Enabled = true,
 					Text = {
-						Fontsize = 14,
-						Outline = "OUTLINE",
-						Textcolor = {1, 1, 1, 1},
+						FontSize = 14,
+						FontOutline = "OUTLINE",
+						FontColor = {1, 1, 1, 1},
 						EnableTextshadow = false,
 						TextShadowcolor = {0, 0, 0, 1},
 					}
 				},
+
+				Modules = {
+					Buffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					Debuffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Buffs",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					DRTracking= {
+						Points = {
+							{
+								Point = "TOPRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "TOPLEFT",
+							},
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "BOTTOMLEFT",
+							}
+						},
+					}
+				},
 				
 				Framescale = 1,
-				
-				Spec_Enabled = true,
-				Spec_Width = 36,
 
 				
 				
@@ -124,11 +195,48 @@ Data.defaultSettings = {
 				PlayerCount = {
 					Enabled = true,
 					Text = {
-						Fontsize = 14,
-						Outline = "OUTLINE",
-						Textcolor = {1, 1, 1, 1},
+						FontSize = 14,
+						FontOutline = "OUTLINE",
+						FontColor = {1, 1, 1, 1},
 						EnableTextshadow = false,
 						TextShadowcolor = {0, 0, 0, 1},
+					}
+				},
+
+				Modules = {
+					Buffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					Debuffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Buffs",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					DRTracking= {
+						Points = {
+							{
+								Point = "TOPRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "TOPLEFT",
+							},
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "BOTTOMLEFT",
+							}
+						},
 					}
 				},
 				
@@ -172,11 +280,48 @@ Data.defaultSettings = {
 				PlayerCount = {
 					Enabled = true,
 					Text = {
-						Fontsize = 14,
-						Outline = "OUTLINE",
-						Textcolor = {1, 1, 1, 1},
+						FontSize = 14,
+						FontOutline = "OUTLINE",
+						FontColor = {1, 1, 1, 1},
 						EnableTextshadow = false,
 						TextShadowcolor = {0, 0, 0, 1},
+					}
+				},
+
+				Modules = {
+					Buffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					Debuffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Buffs",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					DRTracking= {
+						Points = {
+							{
+								Point = "TOPRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "TOPLEFT",
+							},
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "BOTTOMLEFT",
+							}
+						},
 					}
 				},
 				
@@ -203,11 +348,48 @@ Data.defaultSettings = {
 				PlayerCount = {
 					Enabled = true,
 					Text = {
-						Fontsize = 14,
-						Outline = "OUTLINE",
-						Textcolor = {1, 1, 1, 1},
+						FontSize = 14,
+						FontOutline = "OUTLINE",
+						FontColor = {1, 1, 1, 1},
 						EnableTextshadow = false,
 						TextShadowcolor = {0, 0, 0, 1},
+					}
+				},
+
+				Modules = {
+					Buffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					Debuffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Buffs",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					DRTracking= {
+						Points = {
+							{
+								Point = "TOPRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "TOPLEFT",
+							},
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "BOTTOMLEFT",
+							}
+						},
 					}
 				},
 				
@@ -233,11 +415,48 @@ Data.defaultSettings = {
 				PlayerCount = {
 					Enabled = true,
 					Text = {
-						Fontsize = 14,
-						Outline = "OUTLINE",
-						Textcolor = {1, 1, 1, 1},
+						FontSize = 14,
+						FontOutline = "OUTLINE",
+						FontColor = {1, 1, 1, 1},
 						EnableTextshadow = false,
 						TextShadowcolor = {0, 0, 0, 1},
+					}
+				},
+
+				Modules = {
+					Buffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					Debuffs= {
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Buffs",
+								RelativePoint = "RIGHT",
+								OffsetX = 1
+							}
+						}
+					},
+					DRTracking= {
+						Points = {
+							{
+								Point = "TOPRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "TOPLEFT",
+							},
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "BOTTOMLEFT",
+							}
+						},
 					}
 				},
 				

@@ -6,9 +6,10 @@ local C_Covenants = C_Covenants
 local defaultSettings = {
 	Enabled = true,
 	Width = 36,
+	Parent = "Button",
 	Points = {
 		{
-			Point = "TOPLEFTT",
+			Point = "TOPLEFT",
 			RelativeFrame = "Button",
 			RelativePoint = "TOPLEFT",
 		},
@@ -34,9 +35,14 @@ local options = function(location)
 	}
 end
 
+local flags = {
+	Height = "Fixed",
+	Width = "Variable"
+}
+
 local events = {"SetSpecAndRole"}
 
-local spec = BattleGroundEnemies:NewModule("Spec", "Spec", 3, defaultSettings, options, events)
+local spec = BattleGroundEnemies:NewModule("Spec", "Spec", flags, defaultSettings, options, events)
 
 function spec:AttachToPlayerButton(playerButton)
 	playerButton.Spec = CreateFrame("Frame", nil, playerButton) 
@@ -52,7 +58,7 @@ function spec:AttachToPlayerButton(playerButton)
 		if playerButton.PlayerSpecName then
 			BattleGroundEnemies.CropImage(self.Icon, width, height)
 		end
-		BattleGroundEnemies.CropImage(playerButton.Spec_HighestActivePriority.Icon, width, height)
+		--BattleGroundEnemies.CropImage(playerButton.Spec_HighestActivePriority.Icon, width, height)
 	end
 
 	playerButton.Spec:HookScript("OnEnter", function(self)
@@ -83,17 +89,12 @@ function spec:AttachToPlayerButton(playerButton)
 			self.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
 			self.Icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[playerButton.PlayerClass]))
 		end
-		self.Spec:CropImage(self.Spec:GetWidth(), self.Spec:GetHeight())
+		self:CropImage(self:GetWidth(), self:GetHeight())
 	end
 
 
-	playerButton.Spec.ApplySettings = function(self)
+	playerButton.Spec.ApplyAllSettings = function(self)
 		self:Show()
 		self:SetWidth(self.config.Width)
-	end
-
-	playerButton.Spec.Disable = function(self)
-		--dont SetWidth before Hide() otherwise it won't work as aimed
-		self:SetWidth(0.01) --we do that because the level is anchored right to this and the name is anhored right to the leve
 	end
 end

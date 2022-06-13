@@ -2,16 +2,10 @@ local AddonName, Data = ...
 local L = Data.L
 local filters = {"HELPFUL", "HARMFUL"}
 
-local defaultSettings = {
-	Points = {
-		{
-			Point = "LEFT",
-			relativeFrame = "Button",
-			relativePoint = "RIGHT",
-			OffsetX = 1
-		}
-	},
+local defaults = {
 	Enabled = true,
+	Parent = "Button",
+	Coloring_Enabled = true,
 	Icons = {
 		Size = 15,
 		IconsPerRow = 8,
@@ -26,22 +20,22 @@ local defaultSettings = {
 	},
 	Container = {
 		Point = "BOTTOMRIGHT",
-		RelativeTo = "Button",
+		RelativeFrame = "Button",
 		RelativePoint = "BOTTOMLEFT",
 		OffsetX = 2,
 		OffsetY = 0,
 	},
 	StackText = {
-		Fontsize = 12,
-		Outline = "OUTLINE",
-		Textcolor = {1, 1, 1, 1},
+		FontSize = 12,
+		FontOutline = "OUTLINE",
+		FontColor = {1, 1, 1, 1},
 		EnableTextshadow = true,
 		TextShadowcolor = {0, 0, 0, 1},
 	},		
 	Cooldown = {
 		ShowNumbers = true,
-		Fontsize = 12,
-		Outline = "OUTLINE",
+		FontSize = 12,
+		FontOutline = "OUTLINE",
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1},
 	},
@@ -63,6 +57,7 @@ local defaultSettings = {
 		}
 	}
 }
+
 
 -- CompactUnitFrame_Util_IsPriorityDebuff
 local function IsPriorityDebuff(spellID)
@@ -427,11 +422,16 @@ local debuffOptions = function(location)
 	}
 end
 
+local flags = {
+	Height = "Dynamic",
+	Width = "Dynamic"
+}
 
-local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura, UnitAura, AfterUnitAura", "UnitDied"}
 
-local buffs = BattleGroundEnemies:NewModule("Buffs", "Buffs", 3, defaultSettings, buffOptions, events)
-local debuffs = BattleGroundEnemies:NewModule("Debuffs", "Debuffs", 3, defaultSettings, debuffOptions, events)
+local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "UnitDied"}
+
+local buffs = BattleGroundEnemies:NewModule("Buffs", "Buffs", flags, defaults, buffOptions, events)
+local debuffs = BattleGroundEnemies:NewModule("Debuffs", "Debuffs", flags, defaults, debuffOptions, events)
 
 local function AttachToPlayerButton(playerButton, filter)		
 	local auraContainer = CreateFrame("Frame", nil, playerButton)
@@ -445,25 +445,25 @@ local function AttachToPlayerButton(playerButton, filter)
 		self:SetWidth(0.001)
 		self:SetHeight(0.001)
 	end)
-	
-	auraContainer:Hide()
-	
+		
 	function auraContainer:Reset()
 		wipe(self.Auras)
 		self:AfterUnitAura()
 	end
 
 	function auraContainer:ShouldQueryAuras(unitID, filter)
-		if not filter == self.filter then return end
+		if filter == self.filter then return true end
 	end
 
-	function auraContainer:BeforeUnitAura()
+	function auraContainer:BeforeUnitAura(unitID, filter)
+		if not (filter == self.filter) then return end
 		wipe(self.Auras)
 	end
 
 	function auraContainer:CareAboutThisAura(unitID, auraInfo, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType)
+		if not (filter == self.filter) then return end
+
 		local config = self.config
-		local auraConfig
 		local aurasEnabled, isDebuff
 		local isMine
 		local blizzlikeFunc
@@ -482,16 +482,12 @@ local function AttachToPlayerButton(playerButton, filter)
 		if filter == "HARMFUL" then
 			isDebuff = true
 			blizzlikeFunc = ShouldDisplayDebuffBlizzLike
-			auraConfig = config.Debuffs
 		else
 			isDebuff = false
-			auraConfig = config.Buffs
 			blizzlikeFunc = ShouldDisplayBuffBlizzLike
 		end
 	
-	
-		if not auraConfig.Enabled then return false end		
-		local filteringConfig = auraConfig.Filtering
+		local filteringConfig = config.Filtering
 		if not filteringConfig.Enabled then 
 			return true
 		end
@@ -505,14 +501,14 @@ local function AttachToPlayerButton(playerButton, filter)
 			local customFilterConfig = filteringConfig.CustomFiltering
 	
 			if customFilterConfig.SourceFilter_Enabled then
-				table_insert(conditions, myAuraFiltering(auraConfig, isMine))
+				table_insert(conditions, myAuraFiltering(config, isMine))
 			end
 			
 			if customFilterConfig.SpellIDFiltering_Enabled then
-				table_insert(conditions, spellIDFiltering(auraConfig, spellID))
+				table_insert(conditions, spellIDFiltering(config, spellID))
 			end
 			if customFilterConfig.DebuffTypeFiltering_Enabled then
-				table_insert(conditions, debuffTypeFiltering(auraConfig, debuffType))
+				table_insert(conditions, debuffTypeFiltering(config, debuffType))
 			end
 	
 			if not auraInfo then
@@ -532,7 +528,7 @@ local function AttachToPlayerButton(playerButton, filter)
 	end
 
 	function auraContainer:UnitAura(unitID, filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4) 
-		if not filter == self.filter then return end
+		if not (filter == self.filter) then return end
 		if true then
 			BattleGroundEnemies.db.profile.Auras = BattleGroundEnemies.db.profile.Auras or {}
 			BattleGroundEnemies.db.profile.Auras[filter] = BattleGroundEnemies.db.profile.Auras[filter] or {}
@@ -556,7 +552,6 @@ local function AttachToPlayerButton(playerButton, filter)
 		end
 
 		if not auraContainer:CareAboutThisAura(unitID, nil, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType) then print("didnt make it through the filter") return end	
-				
 		local ID = #self.Auras + 1
 		local auraDetails = {
 			ID = ID,
@@ -572,7 +567,8 @@ local function AttachToPlayerButton(playerButton, filter)
 		self.Auras[ID] = auraDetails
 	end
 
-	function auraContainer:AfterUnitAura()	
+	function auraContainer:AfterUnitAura(unitID, filter)	
+		if not (filter == self.filter) then return end
 		local conf = self.config.Icons
 		self:DisplayAuras(conf.Size, conf.VerticalGrowdirection, conf.HorizontalGrowDirection, conf.IconsPerRow, conf.HorizontalSpacing, conf.VerticalSpacing)
 	end
@@ -678,12 +674,11 @@ local function AttachToPlayerButton(playerButton, filter)
 	
 				auraFrame.ApplyAuraFrameSettings = function(self)
 					local conf = auraContainer.config
-					local container = self:Getframe()
 				
 					self.Stacks:ApplyFontStringSettings(conf.StackText)
 					local cooldownConfig = conf.Cooldown
 					self.Cooldown:ApplyCooldownSettings(cooldownConfig.ShowNumbers, true, false)
-					self.Cooldown.Text:ApplyFontStringSettings(cooldownConfig.Cooldown_Fontsize, cooldownConfig.Cooldown_Outline, cooldownConfig.Cooldown_EnableTextshadow, cooldownConfig.Cooldown_TextShadowcolor)
+					self.Cooldown.Text:ApplyFontStringSettings(cooldownConfig)
 					self:SetSize(conf.Icons.Size, conf.Icons.Size)
 				end
 				if self.filter == "HARMFUL" then
@@ -713,7 +708,7 @@ local function AttachToPlayerButton(playerButton, filter)
 			auraFrame.AuraDetails = auraDetails
 			
 			auraFrame.Stacks:SetText(auraDetails.Stacks > 1 and auraDetails.Stacks)
-			if auraDetails.DebuffType then
+			if auraDetails.DebuffType and self.filter == "HARMFUL" then
 				if auraContainer.config.Coloring_Enabled then auraFrame:SetType() end
 			end
 			auraFrame.Icon:SetTexture(auraDetails.Icon)
@@ -773,13 +768,11 @@ end
 
 
 function buffs:AttachToPlayerButton(playerButton)
-	local auraContainer = AttachToPlayerButton(playerButton, "HELPFUL")
-	playerButton.Buffs = auraContainer
+	playerButton.Buffs = AttachToPlayerButton(playerButton, "HELPFUL")
 end
 
 function debuffs:AttachToPlayerButton(playerButton)
-	local auraContainer = AttachToPlayerButton(playerButton, "HARMFUL")
-	playerButton.Buffs = auraContainer
+	playerButton.Debuffs = AttachToPlayerButton(playerButton, "HARMFUL")
 end
 
 

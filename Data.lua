@@ -15,6 +15,8 @@ local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
+local hasSpeccs = not (IsTBCC or IsClassic)
+
 Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/Romanization_of_Russian
 	["А"] = "a",
 	["а"] = "a",
@@ -1082,9 +1084,7 @@ do
 		if classTag then
 			Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}-- for Classic, TBCC and some Brawls
 			
-			if IsTBCC or IsClassic then 
-				table.insert(Data.ClassList, classTag)
-			else
+			if hasSpeccs then 
 				for i = 1, GetNumSpecializationsForClassID(classID) do
 					local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version
 					Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
@@ -1096,6 +1096,8 @@ do
 						Data.Classes[classTag][specName] = Data.Classes[classTag][maleSpecName]
 					end
 				end
+			else
+				table.insert(Data.ClassList, classTag)
 			end
 		end
 	end
