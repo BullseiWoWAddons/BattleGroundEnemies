@@ -553,7 +553,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 					type = "execute",
 					name = "Reset the settings of this section",
 					func = function() 
-						locationn.Modules[moduleName] = copy(defaults.Modules[moduleName])
+						location.Modules[moduleName] = copy(defaults.Modules[moduleName])
 
 						BattleGroundEnemies:ProfileChanged()
 						AceConfigRegistry:NotifyChange("BattleGroundEnemies");

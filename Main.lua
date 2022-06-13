@@ -1243,7 +1243,8 @@ do
 				end
 				self[moduleName]:Show()
 				self:SetModulePosition(self[moduleName])
-				self[moduleName]:ApplyAllSettings()
+				if self[moduleName].Enable then self[moduleName]:Enable() end
+				if self[moduleName].ApplyAllSettings then self[moduleName]:ApplyAllSettings() end
 			else
 				self[moduleName]:Hide()
 				self:SetModulePosition(self[moduleName])
@@ -1807,6 +1808,8 @@ do
 
 			
 			playerButton.ButtonEvents = playerButton.ButtonEvents or {}
+			playerButton.UnitIDs = {TargetedByEnemy = {}}
+
 
 			playerButton.PlayerType = self.PlayerType
 			playerButton.PlayerIsEnemy = playerButton.PlayerType == "Enemies" and true or false

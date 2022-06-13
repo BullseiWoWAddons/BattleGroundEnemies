@@ -123,6 +123,7 @@ globals = {
 	"C_Spell",
 	"C_Timer",
 	"C_UIWidgetManager",
+	"CastingBarFrame_OnLoad",
 	"CastingBarFrame_SetUnit",
 	"ChatFrame_ImportAllListsToHash",
 	"ChatTypeInfo",

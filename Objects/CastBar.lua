@@ -1,11 +1,10 @@
 local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
-local CastingBarFrame_SetUnit = CastingBarFrame_SetUnit
 
 
 local defaultSettings = {
-	Enabled = true,
+	Enabled = false,
 	Parent = "Button",
 	Points = {
 		{
@@ -25,28 +24,32 @@ local flags = {
 
 local events = {"NewUnitID"}
 
-local castBar = BattleGroundEnemies:NewModule("CastBar", "CastBar", flags, defaultSettings, nil, nil)
+local castBar = BattleGroundEnemies:NewModule("CastBar", "CastBar", flags, defaultSettings, nil, events)
+
 
 function castBar:AttachToPlayerButton(playerButton)
 -- Covenant Icon
 	playerButton.CastBar = CreateFrame("StatusBar", nil, playerButton, "ArenaCastingBarFrameTemplate")
-
-	--when unitID changes
+	CastingBarFrame_OnLoad(playerButton.CastBar, "fake") --set a fake unit to avoid The error in the onupdate script CastingBarFrame_OnUpdate which gets set by the template
 	
+	--when unitID changes
 	playerButton.CastBar.NewUnitID = function(self, unitID)
-		CastingBarFrame_SetUnit(self, unitID, false, false);
+		CastingBarFrame_SetUnit(self, unitID);
 	end
 
 	playerButton.CastBar.Reset = function(self)
-		self:UnregisterAllEvents()
-	end
-
-	playerButton.CastBar.ApplyAllSettings = function(self)
-		self:Show()
+		CastingBarFrame_SetUnit(self, nil)
 	end
 
 	playerButton.CastBar.Disable = function(self)
-		self:UnregisterAllEvents()
+		CastingBarFrame_SetUnit(self, nil)
+	end
+
+	playerButton.CastBar.Enable = function(self)
+		self:Hide()
+
+		local unitID = playerButton:GetUnitID()
+		CastingBarFrame_SetUnit(playerButton.CastBar, unitID)
 	end
 end
 
