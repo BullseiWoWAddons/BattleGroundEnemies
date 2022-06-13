@@ -10,20 +10,22 @@ local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local defaultSettings = {
+	Enabled = false,
+	Parent = "healthBar",
 	Points = {
 		{
-			Point = "TOPLEFTT",
-			relativeFrame = "Covenant",
-			relativePoint = "TOPRIGHT",
-			offsetX = 2,
-			offsetY = 2
+			Point = "TOPLEFT",
+			RelativeFrame = "Covenant",
+			RelativePoint = "TOPRIGHT",
+			OffsetX = 2,
+			OffsetY = 2
 		}
 	},
 	OnlyShowIfNotMaxLevel = true,
 	Text = {
-		Fontsize = 18,
-		Outline = "",
-		Textcolor = {1, 1, 1, 1},
+		FontSize = 18,
+		FontOutline = "",
+		FontColor = {1, 1, 1, 1},
 		EnableTextshadow = false,
 		TextShadowcolor = {0, 0, 0, 1}
 	}
@@ -53,9 +55,14 @@ local options = function(location)
 	}
 end
 
-local events = {"AllyNewUnitID", "EnemyHasUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"}
+local flags = {
+	Height = "Dynamic",
+	Width = "Dynamic"
+}
 
-local Level = BattleGroundEnemies:NewModule("Level", "Level", 2, defaultSettings, options, events)
+local events = {"NewUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"}
+
+local Level = BattleGroundEnemies:NewModule("Level", "Level", flags, defaultSettings, options, events)
 
 function Level:AttachToPlayerButton(playerButton)
 	local fs = BattleGroundEnemies.MyCreateFontString(playerButton)
@@ -79,7 +86,7 @@ function Level:AttachToPlayerButton(playerButton)
 		if playerButton.PlayerLevel then self:SetLevel(playerButton.PlayerLevel) end --for testmode
 	end
 
-	function fs:EnemyHasUnitID(unitID)
+	function fs:NewUnitID(unitID)
 		self:SetLevel(UnitLevel(unitID))
 	end
 
@@ -94,6 +101,10 @@ function Level:AttachToPlayerButton(playerButton)
 	function fs:PlayerButtonSizeChanged(width, height)
 		fs:SetHeight(height)
 		self:DisplayLevel()
+	end
+
+	function fs:NewUnitID(unitID)
+		fs:SetLevel(UnitLevel(unitID))
 	end
 	
 	function fs:Reset()
