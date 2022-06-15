@@ -71,13 +71,10 @@ function Level:AttachToPlayerButton(playerButton)
 
 
 	function fs:DisplayLevel()
-		if self.config.Enabled and (not self.config.OnlyShowIfNotMaxLevel or (playerButton.PlayerLevel and playerButton.PlayerLevel < MaxLevel)) then
+		if (not self.config.OnlyShowIfNotMaxLevel or (playerButton.PlayerLevel and playerButton.PlayerLevel < MaxLevel)) then
 			self:SetText(MaxLevel - 1) -- to set the width of the frame (the name shoudl have the same space from the role icon/spec icon regardless of level shown)
 			self:SetWidth(0)
 			self:SetText(self.PlayerLevel)
-		else
-			self:SetWidth(0.01) --we do that because the name is anhored right to the level and with this method the name moves more towards the edge
-		end
 	end
 
 	-- Level
