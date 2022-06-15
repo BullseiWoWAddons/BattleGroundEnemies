@@ -35,7 +35,7 @@ local flags = {
 
 local events = {"SetSpecAndRole"}
 
-local role = BattleGroundEnemies:NewModule("Role", "Role", flags, defaultSettings, options, events)
+local role = BattleGroundEnemies:NewModule("Role", "Role", nil, defaultSettings, options, events)
 
 function role:AttachToPlayerButton(playerButton)
 	playerButton.Role = CreateFrame("Frame", nil, playerButton)

@@ -3,13 +3,19 @@ local AddonName, Data = ...
 Data.changelog = {
 	{
 		Version = "9.2.5.13",
+		General = "This is a massive update with many changes and new features. ",
 		Sections = {
 			{
 				Header = "New Features:",
 				Entries = {
 					"Added an option to disable target icons.",
 					"Added the option to export and import profiles to and from a string.",
-					"Added the option to reset modules individually to the default setting."
+					"Added the option to reset modules individually to the default setting.",
+					"Added an option to show priorized Auras similar to BigDebuffs",
+					"Added an option to use the priority of Auras and Interrupts from BigDebuffs",
+					"Pretty much all of the stuff is now individually movable and sizable",
+					"Added a new tab in the options menu to export your current profile as a string which can be imported by other players.",
+					"Added the ability to reset each module to the default settings individually.",
 				}
 			},
 			{
@@ -107,7 +113,8 @@ Data.changelog = {
 			{
 				Header = "New Features:",
 				Entries = {
-					"Added support for Classic"
+					"Added support for Classic",
+					"Added a Castbar module which is enabled in Arenas by default."
 				}
 			},
 			{

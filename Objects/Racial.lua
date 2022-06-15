@@ -99,7 +99,7 @@ local flags = {
 
 local events = {"SPELL_CAST_SUCCESS"}
 
-local racial = BattleGroundEnemies:NewModule("Racial", "Racial", flags, defaultSettings, options, events)
+local racial = BattleGroundEnemies:NewModule("Racial", "Racial", nil, defaultSettings, options, events)
 
 function racial:AttachToPlayerButton(playerButton)
 
@@ -120,7 +120,6 @@ function racial:AttachToPlayerButton(playerButton)
 	end)
 	
 	function frame:Reset()
-		self:SetWidth(0.01)
 		self.SpellID = false
 		self.Icon:SetTexture(nil)
 		self.Cooldown:Clear()	--reset Trinket Cooldown

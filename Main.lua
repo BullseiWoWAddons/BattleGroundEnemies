@@ -137,6 +137,10 @@ local IsInArena --wheter or not the player is in a arena map
 local specCache = {} -- key = GUID, value = specName (localized)
 
 
+
+
+
+
 --BattleGroundEnemies.EnemyFaction 
 --BattleGroundEnemies.AllyFaction
 
@@ -664,9 +668,8 @@ do
 							-- 	local spellID = randomTrinkets[math_random(1, #randomTrinkets)] 
 							-- --	playerButton.Modules.Trinket:TrinketCheck(spellID)
 							-- --racial simulation
-							-- elseif number == 3 and playerButton.Modules.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
-							-- --	playerButton.Modules.Racial:RacialUsed(randomRacials[math_random(1, #randomRacials)])
-					
+							elseif number == 3 and playerButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
+								playerButton.Racial:RacialCheck(randomRacials[math_random(1, #randomRacials)])
 							elseif number == 6 then --power simulation
 								local power = math_random(0, 100)
 								playerButton.Power:SetValue(power/100)
@@ -968,19 +971,6 @@ BattleGroundEnemies.Allies:SetScript("OnHide", BattleGroundEnemies.Allies.Unregi
 
 
 -- if lets say raid1 leaves all remaining players get shifted up, so raid2 is the new raid1, raid 3 gets raid2 etc.
-
-
-BattleGroundEnemies.SetBasicPosition = function(frame, basicPoint, relativeTo, relativePoint, space)
-	frame:ClearAllPoints()
-	if relativeTo == "Button" then 
-		relativeTo = frame:GetParent() 
-	else
-		relativeTo = frame:GetParent()[relativeTo]
-	end
-	--BattleGroundEnemies:Debug('TOP'..basicPoint, relativeTo, 'TOP'..relativePoint, space, 0)
-	frame:SetPoint('TOP'..basicPoint, relativeTo, 'TOP'..relativePoint, space, 0)
-	frame:SetPoint('BOTTOM'..basicPoint, relativeTo, 'BOTTOM'..relativePoint, space, 0)
-end
 
 
 
@@ -1617,28 +1607,29 @@ do
 		end
 	end
 
+	function buttonFunctions:GetAnchor(relativeFrame)
+		return relativeFrame == "Button" and self or self[relativeFrame]
+	end
+
 	function buttonFunctions:SetModulePosition(moduleFrameOnButton)
 		local config = moduleFrameOnButton.config
 		if not config then return print("no config exists") end
 		
-		local point, relativeTo, relativePoint, offsetX, offsetY
+		local point, relativeFrame, relativePoint, offsetX, offsetY
 		if config.Points then 
 			moduleFrameOnButton:ClearAllPoints()
 
 			for i = 1, #config.Points do
 				local pointConfig = config.Points[i]
 
-				if pointConfig.RelativeFrame == "Button" then 
-					relativeTo = self
-				else
-					relativeTo = self[pointConfig.RelativeFrame]
-					if not relativeTo then return print("error", relativeTo, "doesnt exist") end
-				end
-				moduleFrameOnButton:SetPoint(pointConfig.Point, relativeTo, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
+				relativeFrame = self:GetAnchor(pointConfig.RelativeFrame)
+
+				if not relativeFrame then return print("error", relativeFrame, "doesnt exist") end
+				moduleFrameOnButton:SetPoint(pointConfig.Point, relativeFrame, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
 			end
 		end
 		if config.Parent then
-			moduleFrameOnButton:SetParent(config.Parent == "Button" and self or self[config.Parent])
+			moduleFrameOnButton:SetParent(self:GetAnchor(config.Parent))
 		end
 		if config.Width then
 			moduleFrameOnButton:SetWidth(config.Width)
@@ -2219,6 +2210,7 @@ do
 		self:SetupOptions()
 
 		AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 709, 532)
+
 		AceConfigDialog:AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
 
 		if PVPMatchScoreboard then -- for TBCC, IsTBCC

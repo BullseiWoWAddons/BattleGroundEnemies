@@ -45,7 +45,7 @@ local flags = {
 
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "GotInterrupted", "UnitDied"}
 
-local spec_HighestActivePriority = BattleGroundEnemies:NewModule("HighestPriority", "HighestPriority", flags, defaultSettings, options, events)
+local spec_HighestActivePriority = BattleGroundEnemies:NewModule("HighestPriority", "HighestPriority", nil, defaultSettings, options, events)
 
 function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)

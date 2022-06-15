@@ -79,7 +79,7 @@ local flags = {
 
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"}
 
-local objectiveAndRespawn = BattleGroundEnemies:NewModule("ObjectiveAndRespawn", "ObjectiveAndRespawn", flags, defaultSettings, options, events)
+local objectiveAndRespawn = BattleGroundEnemies:NewModule("ObjectiveAndRespawn", "ObjectiveAndRespawn", nil, defaultSettings, options, events)
 
 function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)

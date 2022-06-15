@@ -65,7 +65,7 @@ local flags = {
 
 local events = {"UNIT_HEALTH", "OnNewPlayer"}
 
-local healthBar = BattleGroundEnemies:NewModule("healthBar", "HealthBar", flags, defaultSettings, options, events)
+local healthBar = BattleGroundEnemies:NewModule("healthBar", "HealthBar", nil, defaultSettings, options, events)
 
 function healthBar:AttachToPlayerButton(playerButton)
 	playerButton.healthBar = CreateFrame('StatusBar', nil, playerButton)

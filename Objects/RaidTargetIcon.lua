@@ -35,14 +35,13 @@ local flags = {
 
 local events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"}
 
-local raidTargetIcon = BattleGroundEnemies:NewModule("RaidTargetIcon", "RaidTargetIcon", flags, defaultSettings, nil, events)
+local raidTargetIcon = BattleGroundEnemies:NewModule("RaidTargetIcon", "RaidTargetIcon", nil, defaultSettings, nil, events)
 
 function raidTargetIcon:AttachToPlayerButton(playerButton)
 	playerButton.RaidTargetIcon = CreateFrame('Frame', nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
 	playerButton.RaidTargetIcon.Icon = playerButton.RaidTargetIcon:CreateTexture(nil, "OVERLAY")
 	playerButton.RaidTargetIcon.Icon:SetTexture("Interface/TargetingFrame/UI-RaidTargetingIcons")
 	playerButton.RaidTargetIcon.Icon:SetAllPoints()
-	playerButton.RaidTargetIcon:Hide()
 
 
 	function playerButton.RaidTargetIcon:UpdateRaidTargetIcon()

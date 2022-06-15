@@ -24,7 +24,7 @@ local flags = {
 
 local events = {"NewUnitID"}
 
-local castBar = BattleGroundEnemies:NewModule("CastBar", "CastBar", flags, defaultSettings, nil, events)
+local castBar = BattleGroundEnemies:NewModule("CastBar", "CastBar", nil, defaultSettings, nil, events)
 
 
 function castBar:AttachToPlayerButton(playerButton)

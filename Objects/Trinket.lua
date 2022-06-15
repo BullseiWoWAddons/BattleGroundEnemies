@@ -59,7 +59,7 @@ local flags = {
 
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "UnitAura", "SPELL_CAST_SUCCESS"}
 
-local trinket = BattleGroundEnemies:NewModule("Trinket", "Trinket", flags, defaultSettings, options, events)
+local trinket = BattleGroundEnemies:NewModule("Trinket", "Trinket", nil, defaultSettings, options, events)
 
 function trinket:AttachToPlayerButton(playerButton)
 

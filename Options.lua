@@ -19,9 +19,103 @@ local function GetAllAnchors()
 	return t
 end
 
-function Data.AddPositionSetting(location, moduleFrame)
+-- returns true if <frame> or one of the frames that <frame> is dependent on is anchored to <otherFrame> and nil otherwise
+-- dont ancher to otherframe is 
+local function IsFrameDependentOnFrame(frame, otherFrame)
+	if frame == nil then
+		return false
+	end
+
+	if otherFrame == nil then
+		return false
+	end
+
+	if frame == otherFrame then
+		return true
+	end
+
+	local points = frame:GetNumPoints()
+	for i = 1, points do
+		local _, relFrame = frame:GetPoint(i)
+		if relFrame and IsFrameDependentOnFrame(relFrame, otherFrame) then
+			return true
+		end
+	end
+end
+
+-- Points
+-- TOPLEFT 		TOP 		TOPRIGHT
+-- LEFT 		CENTER 		Right
+-- BOTTOMLEFT 	BOTTOM 		BOTTOMRIGHT
+
+local function isInSameHorizontal(Point1, Point2)
+    local p1 = (Point1.Point:match("(TOP)")) or (Point1.Point:match("(BOTTOM)")) or false
+    local p2 = (Point2.Point:match("(TOP)")) or (Point2.Point:match("(BOTTOM)")) or false
+    if p1=="TOP" and p2=="TOP" then
+        return true
+    elseif not (p1=="TOP" or p2=="TOP" or p1=="BOTTOM" or p2=="BOTTOM") then
+        return true
+    elseif p1=="BOTTOM" and p2=="BOTTOM" then
+        return tru
+    end
+end
+
+local function isInSameVertical(Point1, Point2)
+    local p1 = (Point1.Point:match("(LEFT)")) or (Point1.Point:match("(RIGHT)")) or false
+    local p2 = (Point2.Point:match("(LEFT)")) or (Point2.Point:match("(RIGHT)")) or false
+    if p1=="LEFT" and p2=="LEFT" then
+        return true
+    elseif not (p1=="LEFT" or p2=="LEFT" or p1=="RIGHT" or p2=="RIGHT") then
+        return true
+    elseif p1=="RIGHT" and p2=="RIGHT" then
+        return true
+    end
+end
+
+
+local function needsWidth(Point1, Point2)
+	if not Point1 and not Point2 then return end
+	if Point1 and not Point2 then return true end
+	return isInSameVertical(Point1, Point2)
+end
+
+--user wants to anchor the module to the relative frame, check if the relative frame is already anchored to that module
+local function validateAnchor(playerType, moduleName, relativeFrame)
+	local players = BattleGroundEnemies[playerType].Players
+	if players then
+		for playerName, playerButton in pairs(players) do
+			local anchor = playerButton:GetAnchor(relativeFrame)
+			local isDependant = IsFrameDependentOnFrame(anchor, playerButton[moduleName])
+			if isDependant then
+				--thats bad, dont allow this setting
+				BattleGroundEnemies:Information("You can't anchor this module's frame to this frame because this would result in looped frame anchoring because the frame or one of the frame that this frame is dependant on are already attached to this module.")
+				return false
+			else
+				return true
+			end
+		end
+	else
+		BattleGroundEnemies:Information("There are currently no players for the selected option available. You can start the testmode to add some players. Otherwise your selected frame can't be validated and there might be frame looping issues, therefore your selected frame is not saved to avoid this issue.")
+		return false
+	end
+end
+
+local function needsHeight(Point1, Point2)
+	if not Point1 and not Point2 then return end
+	if Point1 and not Point2 then return true end
+	return isInSameHorizontal(Point1, Point2)
+end
+
+function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 	local numPoints = 0
 	local temp = {}
+	temp.Parent = {
+		type = "select",
+		name = L.Parent,
+		values = GetAllAnchors,
+		order = 1
+	}
+	temp.Fake1 = Data.AddVerticalSpacing(2)
 	if location.Points then
 		numPoints = #location.Points
 		
@@ -37,18 +131,32 @@ function Data.AddPositionSetting(location, moduleFrame)
 					return Data.SetOption(location.Points[i], option, ...)
 				end,
 				inline = true,
-				order = i,
+				order = i + 2,
 				args = {
 					Point = {
 						type = "select",
 						name = L.Point,
 						values = Data.AllPositions,
+						confirm = function() 
+							return "Are you sure you want to change this value?"
+						end,
 						order = 1
 					},
 					RelativeFrame = {
 						type = "select",
 						name = L.RelativeFrame,
 						values = GetAllAnchors,
+						validate = function(option, value) 
+							
+							if validateAnchor(playerType, moduleName, value) then 
+								return true
+							else
+								--invalid anchor, there might be some looping issues
+								PlaySound(882)
+								AceConfigRegistry:NotifyChange("BattleGroundEnemies")
+								return false
+							end
+						end,
 						order = 2
 					},
 					RelativePoint = {
@@ -77,13 +185,14 @@ function Data.AddPositionSetting(location, moduleFrame)
 					},
 					DeletePoint = {
 						type = "execute",
-						name = "delete Point point",
+						name = L.DeletePoint..i,
 						func = function() 
 							location.Points[i] = nil
 			
 							BattleGroundEnemies:ProfileChanged()
 							AceConfigRegistry:NotifyChange("BattleGroundEnemies");
 						end,
+						disabled = i == 1, --dont allow to remove the first point
 						width = "full",
 						order = 6,
 					}
@@ -98,13 +207,23 @@ function Data.AddPositionSetting(location, moduleFrame)
 		name = L.AddPoint,
 		func = function() 
 			location.Points = location.Points or {}
-			location.Points[numPoints + 1] = {}
+			location.Points[numPoints + 1] = {
+				Point = "TOPLEFT",
+				RelativeFrame = "Button",
+				RelativePoint = "TOPLEFT"
+			}
 
 			BattleGroundEnemies:ProfileChanged()
 			AceConfigRegistry:NotifyChange("BattleGroundEnemies");
 		end,
+		disabled = function()
+			if not location.Points then return false end
+
+			--dynamic containers width dynamic width and height can have a maximum of 1 points
+			return (#location.Points >= 2) or (#location.Points >= 1 and moduleFrame.flags and moduleFrame.flags.Width == "Dynamic" and moduleFrame.flags.Height == "Dynamic")
+		end,
 		width = "full",
-		order = numPoints + 1
+		order = numPoints + 3
 	}
 	temp.Width = {
 		type = "range",
@@ -112,8 +231,8 @@ function Data.AddPositionSetting(location, moduleFrame)
 		min = 0,
 		max = 100,
 		step = 1,
-		disabled = function() return moduleFrame.flags.Width == "Fixed" or moduleFrame.flags.Height == "Dynamic" end,
-		order = numPoints + 3
+		disabled = function() return moduleFrame.flags and moduleFrame.flags.Width == "Dynamic" or not needsWidth(location.Points and location.Points[1], location.Points[2]) end,
+		order = numPoints + 4
 	}
 	temp.Height = {
 		type = "range",
@@ -121,41 +240,20 @@ function Data.AddPositionSetting(location, moduleFrame)
 		min = 0,
 		max = 100,
 		step = 1,
-		disabled = function() return moduleFrame.flags.Height == "Fixed" or moduleFrame.flags.Height == "Dynamic" end,
+		disabled = function() return moduleFrame.flags and moduleFrame.flags.Height == "Dynamic" or not needsHeight(location.Points and location.Points[1], location.Points[2]) end,
 		order = numPoints + 5
 	}
 	temp.Parent = {
 		type = "select",
 		name = L.Parent,
-		values = GetAllAnchors
+		values = GetAllAnchors,
+		order = numPoints + 6
 	}
 	return temp
 end
 
 
--- returns true if <frame> or one of the frames that <frame> is dependent on is anchored to <otherFrame> and nil otherwise
--- dont ancher to otherframe is 
-local function IsFrameDependentOnFrame(frame, otherFrame)
-	if frame == nil then
-		return false
-	end
 
-	if otherFrame == nil then
-		return false
-	end
-
-	if frame == otherFrame then
-		return true
-	end
-
-	local points = frame:GetNumPoints()
-	for i = 1, points do
-		local _, relFrame = frame:GetPoint(i)
-		if relFrame and IsFrameDependentOnFrame(relFrame, otherFrame) then
-			return true
-		end
-	end
-end
 
 
 local function copy(obj)
@@ -164,54 +262,6 @@ local function copy(obj)
 	for k, v in pairs(obj) do res[copy(k)] = copy(v) end
 	return res
 end
-						
-local function addStaticPopupForPlayerTypeConfigImport(playerType, oppositePlayerType)
-	StaticPopupDialogs["CONFIRM_OVERRITE_"..AddonName..playerType] = {
-	  text = L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]),
-	  button1 = YES,
-	  button2 = NO,
-	  OnAccept = function (self) 
-			BattleGroundEnemies.db.profile[playerType] = copy(BattleGroundEnemies.db.profile[oppositePlayerType])
-			BattleGroundEnemies:ProfileChanged()
-			AceConfigRegistry:NotifyChange("BattleGroundEnemies")
-	  end,
-	  OnCancel = function (self) end,
-	  OnHide = function (self) self.data = nil; self.selectedIcon = nil; end,
-	  hideOnEscape = 1,
-	  timeout = 30,
-	  exclusive = 1,
-	  whileDead = 1,
-	}
-end
-addStaticPopupForPlayerTypeConfigImport("Enemies", "Allies")
-addStaticPopupForPlayerTypeConfigImport("Allies", "Enemies")
-
-
-local function addStaticPopupBGTypeConfigImport(playerType, oppositePlayerType, BGSize)
-	StaticPopupDialogs["CONFIRM_OVERRITE_"..AddonName..playerType..BGSize] = {
-	  text = L.ConfirmProfileOverride:format(L[playerType]..": "..L["BGSize_"..BGSize], L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
-	  button1 = YES,
-	  button2 = NO,
-	  OnAccept = function (self) 
-			BattleGroundEnemies.db.profile[playerType][BGSize] = copy(BattleGroundEnemies.db.profile[oppositePlayerType][BGSize])
-			if BattleGroundEnemies.BGSize and BattleGroundEnemies.BGSize == tonumber(BGSize) then BattleGroundEnemies[playerType]:ApplyBGSizeSettings() end
-			AceConfigRegistry:NotifyChange("BattleGroundEnemies")
-	  end,
-	  OnCancel = function (self) end,
-	  OnHide = function (self) self.data = nil; self.selectedIcon = nil; end,
-	  hideOnEscape = 1,
-	  timeout = 30,
-	  exclusive = 1,
-	  whileDead = 1,
-	}
-end
-addStaticPopupBGTypeConfigImport("Enemies", "Allies", "5")
-addStaticPopupBGTypeConfigImport("Allies", "Enemies", "5")
-addStaticPopupBGTypeConfigImport("Enemies", "Allies", "15")
-addStaticPopupBGTypeConfigImport("Allies", "Enemies", "15")
-addStaticPopupBGTypeConfigImport("Enemies", "Allies", "40")
-addStaticPopupBGTypeConfigImport("Allies", "Enemies", "40")
-
 
 
 function Data.GetOption(location, option)
@@ -547,7 +597,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 					set = function(option, ...) 
 						return Data.SetOption(locationn, option, ...)
 					end,
-					args = Data.AddPositionSetting(locationn, moduleFrame)
+					args = Data.AddPositionSetting(locationn, moduleName, moduleFrame, playerType)
 				},
 				Reset = {
 					type = "execute",
@@ -603,8 +653,11 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				desc = L.CopySettings_Desc:format(L[oppositePlayerType])..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
 				func = function()
-					StaticPopup_Show("CONFIRM_OVERRITE_"..AddonName..playerType)
+					BattleGroundEnemies.db.profile[playerType] = copy(BattleGroundEnemies.db.profile[oppositePlayerType])
+					BattleGroundEnemies:ProfileChanged()
+					AceConfigRegistry:NotifyChange("BattleGroundEnemies")
 				end,
+				confirm = function() return L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]) end,
 				width = "double",
 				order = 5
 			},
@@ -812,7 +865,13 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					name = L.CopySettings:format(L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
 					desc = L.CopySettings_Desc:format(L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
 					func = function()
-						StaticPopup_Show("CONFIRM_OVERRITE_"..AddonName..playerType..BGSize)
+						print("func called")
+						BattleGroundEnemies.db.profile[playerType][BGSize] = copy(BattleGroundEnemies.db.profile[oppositePlayerType][BGSize])
+						if BattleGroundEnemies.BGSize and BattleGroundEnemies.BGSize == tonumber(BGSize) then BattleGroundEnemies[playerType]:ApplyBGSizeSettings() end
+						AceConfigRegistry:NotifyChange("BattleGroundEnemies")
+					end,
+					confirm = function() 
+						return L.ConfirmProfileOverride:format(L[playerType]..": "..L["BGSize_"..BGSize], L[oppositePlayerType]..": "..L["BGSize_"..BGSize])
 					end,
 					width = "double",
 					order = 3

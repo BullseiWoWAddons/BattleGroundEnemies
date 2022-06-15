@@ -42,7 +42,7 @@ local flags = {
 
 local events = {"SetSpecAndRole"}
 
-local spec = BattleGroundEnemies:NewModule("Spec", "Spec", flags, defaultSettings, options, events)
+local spec = BattleGroundEnemies:NewModule("Spec", "Spec", nil, defaultSettings, options, events)
 
 function spec:AttachToPlayerButton(playerButton)
 	playerButton.Spec = CreateFrame("Frame", nil, playerButton) 

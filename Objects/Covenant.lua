@@ -22,7 +22,7 @@ local flags = {
 	Width = "Variable"
 }
 
-local covenant = BattleGroundEnemies:NewModule("Covenant", "Covenant", flags, defaultSettings, nil, nil)
+local covenant = BattleGroundEnemies:NewModule("Covenant", "Covenant", nil, defaultSettings, nil, nil)
 
 function covenant:AttachToPlayerButton(playerButton)
 -- Covenant Icon
