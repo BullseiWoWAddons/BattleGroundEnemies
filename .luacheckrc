@@ -105,6 +105,7 @@ globals = {
 	"BasicMessageDialog",
 	"BattleGroundEnemies",
 	"BetterDate",
+	"BigDebuffs",
 	"BNGetFriendIndex",
 	"BNIsSelf",
 	"BNSendWhisper",

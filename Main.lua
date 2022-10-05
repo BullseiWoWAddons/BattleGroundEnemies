@@ -175,7 +175,7 @@ local function CreateFakeAura(playerButton, filter)
 end
 
 
-FakePlayerAuras = {} --key = playerbutton, value = {}
+local FakePlayerAuras = {} --key = playerbutton, value = {}
 local FakePlayerDRs = {} --key = playerButtonTabe, value = {categoryname = {state = 0, expirationTime}}
 local function FakeUnitAura(playerButton, index, filter)
 	local currentTime = GetTime()
@@ -2983,7 +2983,7 @@ do
 				if not type(scoreInfo) == "table" then return end
 				return scoreInfo.name, scoreInfo.faction, scoreInfo.raceName, scoreInfo.classToken, scoreInfo.talentSpec
 			else
-				local name, faction, race, classTag, specName
+				local _, name, faction, race, classTag, specName
 				if HasSpeccs then
 					--name, killingBlows, honorableKills, deaths, honorGained, faction, rank, race, class, classToken, damageDone, healingDone = GetBattlefieldScore(index)
 					name, _, _, _, _, faction, race, _, classTag, _, _, _, _, _, _, specName = GetBattlefieldScore(index)
