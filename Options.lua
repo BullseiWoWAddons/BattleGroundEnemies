@@ -131,11 +131,11 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 						validate = function(option, value)
 
 							if validateAnchor(playerType, moduleName, value) then
-								print("validated")
+								-- print("validated")
 								return true
 							else
 								--invalid anchor, there might be some looping issues
-								print("hier")
+							--	print("hier")
 								PlaySound(882)
 								BattleGroundEnemies:NotifyChange()
 								return false

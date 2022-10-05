@@ -53,7 +53,6 @@ function role:AttachToPlayerButton(playerButton)
 	end
 
 	playerButton.Role.SetSpecAndRole = function(self)
-		print("inside SetSpecAndRole in role", playerButton.PlayerSpecName)
 		if playerButton.PlayerSpecName then
 			self.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
 			self.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(playerButton.PlayerRoleID))

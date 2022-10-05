@@ -66,8 +66,6 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 	playerButton.TargetIndicatorNumeric = BattleGroundEnemies.MyCreateFontString(playerButton)
 
 	function playerButton.TargetIndicatorNumeric:UpdateTargetIndicators()
-		print("UpdateTargetIndicators")
-
 		local targetIndicatorConfig = self.config
 
 		local i = 0

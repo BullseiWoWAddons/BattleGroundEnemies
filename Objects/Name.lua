@@ -67,7 +67,6 @@ function name:AttachToPlayerButton(playerButton)
 	playerButton.Name = BattleGroundEnemies.MyCreateFontString(playerButton)
 
 	function playerButton.Name:SetName()
-		print("SetName")
 		local playerName = playerButton.PlayerName
 		if not playerName then return end
 

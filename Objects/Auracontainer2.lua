@@ -490,7 +490,10 @@ local function AttachToPlayerButton(playerButton, filter)
 		-- 	}
 		-- end
 
-		if not auraContainer:CareAboutThisAura(unitID, nil, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType) then print("didnt make it through the filter") return end
+		if not auraContainer:CareAboutThisAura(unitID, nil, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType) then 
+			--print("didnt make it through the filter") 
+			return
+		end
 		local ID
 		local priority = BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID]
 		local auraDetails = {

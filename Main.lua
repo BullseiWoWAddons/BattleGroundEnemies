@@ -421,7 +421,6 @@ do
 			self.PlayerRoleNumber = specData.roleNumber
 			self.PlayerRoleID = specData.roleID
 		end
-		print("SetSpecAndRole")
 		self:DispatchEvent("SetSpecAndRole")
 	end
 
@@ -468,8 +467,7 @@ do
 	end
 
 	function buttonFunctions:SetModulePositions()
-		print("SetModulePositions", self.PlayerName, self)
-		if not self:GetRect() then print(self.PlayerName, "i am not set yet") return end --the position of the button is not set yet
+		if not self:GetRect() then return end --the position of the button is not set yet
 		local i = 1
 		repeat -- we basically run this roop to get out of the anchring hell (making sure all the frames that a module is depending on is set)
 			local allModulesSet = true
@@ -479,7 +477,7 @@ do
 				moduleFrameOnButton.config = moduleConfigOnButton
 							
 				local config = moduleFrameOnButton.config
-				if not config then return print("no config exists") end
+				if not config then return end
 	
 
 				if config.Points then
@@ -1306,7 +1304,6 @@ local function PopulateMainframe(playerType)
 	end
 
 	function self:ButtonPositioning()
-		print("ButtonPositioning", self)
 		local orderedPlayers = self.CurrentPlayerOrder
 		local config = self.bgSizeConfig
 		local columns = config.BarColumns
@@ -1360,7 +1357,7 @@ local function PopulateMainframe(playerType)
 					playerNumber = playerNumber + 1
 
 
-					print("playerButton:GetRect", playerButton:GetRect(), playerButton)
+					--print("playerButton:GetRect", playerButton:GetRect(), playerButton)
 					playerButton:SetModulePositions()
 					
 
