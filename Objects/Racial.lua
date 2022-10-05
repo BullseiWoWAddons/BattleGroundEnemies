@@ -2,43 +2,30 @@ local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
+local CreateFrame = CreateFrame
 local GetTime = GetTime
+local GameTooltip = GameTooltip
+local GetSpellTexture = GetSpellTexture
 
-local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+
 
 local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
-	Width = 28,
-	Height = 28,
-	Points = {
-		{
-			Point = "TOPLEFT",
-			RelativeFrame = "Trinket",
-			RelativePoint = "TOPRIGHT",
-			OffsetX = 1
-		},
-		{
-			Point = "BOTTOMLEFT",
-			RelativeFrame = "Trinket",
-			RelativePoint = "BOTTOMRIGHT",
-			OffsetX = 1
-		}
-	},
+	UseButtonHeightAsHeight = true,
+	UseButtonHeightAsWidth = true,
 	Cooldown = {
-		ShowNumbers = true,
+		ShowNumber = true,
 		FontSize = 12,
 		Fontoutline = "OUTLINE",
-		EnableTextshadow = false,
-		TextShadowcolor = {0, 0, 0, 1},
+		EnableShadow = false,
+		ShadowColor = {0, 0, 0, 1},
 	},
 	Filtering_Enabled = false,
 	Filtering_Filterlist = {}, --key = spellID, value = spellName or false
 }
 
-local options = function(location) 
+local options = function(location)
 	return {
 		CooldownTextSettings = {
 			type = "group",
@@ -99,7 +86,7 @@ local flags = {
 
 local events = {"SPELL_CAST_SUCCESS"}
 
-local racial = BattleGroundEnemies:NewModule("Racial", "Racial", nil, defaultSettings, options, events)
+local racial = BattleGroundEnemies:NewButtonModule("Racial", L.Racial, flags, defaultSettings, options, events)
 
 function racial:AttachToPlayerButton(playerButton)
 
@@ -107,51 +94,50 @@ function racial:AttachToPlayerButton(playerButton)
 	-- trinket
 	frame:HookScript("OnEnter", function(self)
 		if self.SpellID then
-			BattleGroundEnemies:ShowTooltip(self, function() 
+			BattleGroundEnemies:ShowTooltip(self, function()
 				GameTooltip:SetSpellByID(self.SpellID)
 			end)
 		end
 	end)
-	
+
 	frame:HookScript("OnLeave", function(self)
 		if GameTooltip:IsOwned(self) then
 			GameTooltip:Hide()
 		end
 	end)
-	
+
 	function frame:Reset()
 		self.SpellID = false
 		self.Icon:SetTexture(nil)
 		self.Cooldown:Clear()	--reset Trinket Cooldown
 	end
-	
+
 	function frame:ApplyAllSettings()
 		local moduleSettings = self.config
-		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown.ShowNumbers, true, true, {0, 0, 0, 0.5})
-		self.Cooldown.Text:ApplyFontStringSettings(moduleSettings.Cooldown)
+		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, false, true, {0, 0, 0, 0.5})
 	end
 
-	
+
 	frame.Icon = frame:CreateTexture()
 	frame.Icon:SetAllPoints()
 	frame:SetScript("OnSizeChanged", function(self, width, height)
 		BattleGroundEnemies.CropImage(self.Icon, width, height)
 	end)
-	
+
 	frame.Cooldown = BattleGroundEnemies.MyCreateCooldown(frame)
-	
+
 	function frame:RacialCheck(spellID)
 		if not Data.RacialSpellIDtoCooldown[spellID] then return end
 		local config = frame.config
 		local insi = playerButton.Trinket
-		
+
 
 		if Data.RacialSpellIDtoCooldown[spellID].trinketCD and not (insi.SpellID == 336128) and insi.SpellID and insi.Cooldown:GetCooldownDuration() < Data.RacialSpellIDtoCooldown[spellID].trinketCD * 1000 then
 			insi.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID].trinketCD)
 		end
-		
+
 		if config.RacialFiltering_Enabled and not config.RacialFiltering_Filterlist[spellID] then return end
-		
+
 		self.SpellID = spellID
 		self.Icon:SetTexture(GetSpellTexture(spellID))
 		self.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID].cd)

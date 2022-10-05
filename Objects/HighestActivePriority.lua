@@ -5,11 +5,11 @@ local defaultSettings = {
 	Enabled = true,
 	Parent = "Spec",
 	Cooldown = {
-		ShowNumbers = true,
+		ShowNumber = true,
 		FontSize = 12,
 		FontOutline = "OUTLINE",
-		EnableTextshadow = false,
-		TextShadowcolor = {0, 0, 0, 1},
+		EnableShadow = false,
+		ShadowColor = {0, 0, 0, 1},
 	},
 	Points = {
 		{
@@ -25,7 +25,7 @@ local defaultSettings = {
 	},
 }
 
-local options = function(location) 
+local options = function(location)
 	return {
 		CooldownTextSettings = {
 			type = "group",
@@ -45,7 +45,7 @@ local flags = {
 
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "GotInterrupted", "UnitDied"}
 
-local spec_HighestActivePriority = BattleGroundEnemies:NewModule("HighestPriority", "HighestPriority", nil, defaultSettings, options, events)
+local spec_HighestActivePriority = BattleGroundEnemies:NewButtonModule("HighestPriority", "HighestPriority", flags, defaultSettings, options, events)
 
 function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)
@@ -62,7 +62,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 			BattleGroundEnemies:ShowAuraTooltip(playerButton, frame.DisplayedAura)
 		end)
 	end)
-	
+
 	frame:HookScript("OnLeave", function(self)
 		if GameTooltip:IsOwned(frame) then
 			GameTooltip:Hide()
@@ -92,17 +92,17 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 		self.PriorityAuras[ID] = auraDetails
 	end
 
-	function frame:Update()	
+	function frame:Update()
 		local highestPrioritySpell
 		local currentTime = GetTime()
 
 		local priorityAuras = self.PriorityAuras
 		for i = 1, #priorityAuras do
-			
+
 			local priorityAura = priorityAuras[i]
 			if priorityAura.ExpirationTime < currentTime then
-			else 
-				if not highestPrioritySpell or priorityAura.Priority > highestPrioritySpell.Priority then 
+			else
+				if not highestPrioritySpell or (priorityAura.Priority > highestPrioritySpell.Priority) then
 					highestPrioritySpell = priorityAura
 				end
 			end
@@ -111,7 +111,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 			if frame.ActiveInterrupt.ExpirationTime < currentTime then
 				frame.ActiveInterrupt = false
 			else
-				if not highestPrioritySpell or frame.ActiveInterrupt.Priority > highestPrioritySpell.Priority then 
+				if not highestPrioritySpell or (frame.ActiveInterrupt.Priority > highestPrioritySpell.Priority) then
 					highestPrioritySpell = frame.ActiveInterrupt
 				end
 			end
@@ -126,14 +126,13 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 			frame.DisplayedAura = false
 			frame:Hide()
 		end
-	end	
+	end
 
 	function frame:ApplyAllSettings()
 		local moduleSettings = self.config
-		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown.ShowNumbers, true, true, {0, 0, 0, 0.5})
-		self.Cooldown.Text:ApplyFontStringSettings(moduleSettings.Cooldown)
+		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, true, true, {0, 0, 0, 0.5})
 	end
-	
+
 	function frame:Reset()
 		self.ActiveInterrupt = false
 		wipe(self.PriorityAuras)
@@ -153,30 +152,30 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 		}
 		self:Update()
 	end
-	
+
 	function frame:CareAboutThisAura(unitID, auraInfo, filter, spellID, unitCaster, canStealOrPurge, canApplyAura, debuffType)
-	
+
 		if auraInfo then spellID = auraInfo.spellId end
-	
+
 		if Data.SpellPriorities[spellID] then return true end
 	end
-	
+
 	function frame:ShouldQueryAuras(unitID, filter)
 		return true -- we care about all auras
 	end
-	
+
 	function frame:BeforeUnitAura(filter)
 		wipe(self.PriorityAuras)
 	end
-	
+
 	function frame:UnitAura(unitID, filter, ...)
 		self:NewAura(unitID, filter, ...)
 	end
-	
+
 	function frame:AfterUnitAura(filter)
 		self:Update()
 	end
-	
+
 	function frame:UnitDied()
 		self:Reset()
 	end

@@ -22,16 +22,24 @@ local flags = {
 	Width = "Variable"
 }
 
+
+local CastingBarFrame_OnLoad = CastingBarFrame_OnLoad
+local CastingBarFrame_SetUnit = CastingBarFrame_SetUnit
+local CreateFrame = CreateFrame
+
 local events = {"NewUnitID"}
 
-local castBar = BattleGroundEnemies:NewModule("CastBar", "CastBar", nil, defaultSettings, nil, events)
+local castBar = BattleGroundEnemies:NewButtonModule("CastBar", "CastBar", flags, defaultSettings, nil, events)
 
+
+LoadAddOn("Blizzard_ArenaUI")
 
 function castBar:AttachToPlayerButton(playerButton)
 -- Covenant Icon
 	playerButton.CastBar = CreateFrame("StatusBar", nil, playerButton, "ArenaCastingBarFrameTemplate")
+	playerButton.CastBar.Icon:SetPoint("RIGHT", playerButton.CastBar, "LEFT", -5, 0)
 	CastingBarFrame_OnLoad(playerButton.CastBar, "fake") --set a fake unit to avoid The error in the onupdate script CastingBarFrame_OnUpdate which gets set by the template
-	
+
 	--when unitID changes
 	playerButton.CastBar.NewUnitID = function(self, unitID)
 		CastingBarFrame_SetUnit(self, unitID);
@@ -57,10 +65,9 @@ end
 
 
 
-		
 
 
 
-	
-		
-	
+
+
+

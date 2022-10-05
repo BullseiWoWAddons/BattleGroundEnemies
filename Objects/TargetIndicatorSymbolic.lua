@@ -2,6 +2,8 @@ local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
+local CreateFrame = CreateFrame
+
 local defaultSettings = {
 	Enabled = true,
 	Parent = "healthBar",
@@ -11,11 +13,11 @@ local defaultSettings = {
 		{
 			Point = "TOPLEFT",
 			RelativeFrame = "Button",
-			RelativePoint = "TOPRIGHT",
+			RelativePoint = "TOPLEFT",
 			OffsetX = 1
 		},
 		{
-			Point = "BOTTOMLEFT",
+			Point = "BOTTOMRIGHT",
 			RelativeFrame = "Button",
 			RelativePoint = "BOTTOMRIGHT",
 			OffsetX = 1
@@ -24,7 +26,7 @@ local defaultSettings = {
 
 }
 
-local options = function(location, playerType) 
+local options = function(location, playerType)
 	return {
 		Width = {
 			type = "range",
@@ -49,13 +51,13 @@ local options = function(location, playerType)
 end
 
 local flags = {
-	Height = "Dynamic",
-	Width = "Dynamic"
+	Height = "Variable",
+	Width = "Variable"
 }
 
 local events = {"UpdateTargetIndicators"}
 
-local symbolicTargetIndicator = BattleGroundEnemies:NewModule("TargetIndicatorSymbolic", "TargetIndicatorSymbolic", flags, defaultSettings, options, events)
+local symbolicTargetIndicator = BattleGroundEnemies:NewButtonModule("TargetIndicatorSymbolic", L.TargetIndicatorSymbolic, flags, defaultSettings, options, events)
 
 function symbolicTargetIndicator:AttachToPlayerButton(playerButton)
 	playerButton.TargetIndicatorSymbolic = CreateFrame("frame", nil, playerButton)
@@ -77,27 +79,21 @@ function symbolicTargetIndicator:AttachToPlayerButton(playerButton)
 					bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
 					edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
 					edgeSize = 1
-				}) 
+				})
 				indicator:SetBackdropBorderColor(0,0,0,1)
 				self.Symbols[i] = indicator
 			end
 			local classColor = enemyButton.PlayerClassColor
 			indicator:SetBackdropColor(classColor.r,classColor.g,classColor.b)
 			indicator:Show()
-		
+
 			i = i + 1
 		end
-
-		local enemyTargets = i - 1
 
 		while self.Symbols[i] do --hide no longer used ones
 			self.Symbols[i]:Hide()
 			i = i + 1
 		end
-	end
-
-	playerButton.TargetIndicatorSymbolic.ApplyAllSettings = function(self)
-		return
 	end
 end
 

@@ -1,7 +1,9 @@
 local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
-local C_Covenants = C_Covenants
+local CreateFrame = CreateFrame
+local GameTooltip = GameTooltip
+
 
 local defaultSettings = {
 	Enabled = true,
@@ -21,19 +23,6 @@ local defaultSettings = {
 	},
 }
 
-local options = function(location) 
-	return {
-		Width = {
-			type = "range",
-			name = L.Width,
-			desc = L.Spec_Width_Desc,
-			min = 1,
-			max = 80,
-			step = 1,
-			order = 2
-		}
-	}
-end
 
 local flags = {
 	Height = "Fixed",
@@ -42,13 +31,10 @@ local flags = {
 
 local events = {"SetSpecAndRole"}
 
-local spec = BattleGroundEnemies:NewModule("Spec", "Spec", nil, defaultSettings, options, events)
+local spec = BattleGroundEnemies:NewButtonModule("Spec", L.Spec, flags, defaultSettings, nil, events)
 
 function spec:AttachToPlayerButton(playerButton)
-	playerButton.Spec = CreateFrame("Frame", nil, playerButton) 
-			
-	playerButton.Spec:SetPoint('TOPLEFT', playerButton, 'TOPLEFT', 0, 0)
-	playerButton.Spec:SetPoint('BOTTOMLEFT' , playerButton, 'BOTTOMLEFT', 0, 0)
+	playerButton.Spec = CreateFrame("Frame", nil, playerButton)
 
 	playerButton.Spec:SetScript("OnSizeChanged", function(self, width, height)
 		self:CropImage(width, height)
@@ -63,7 +49,7 @@ function spec:AttachToPlayerButton(playerButton)
 
 	playerButton.Spec:HookScript("OnEnter", function(self)
 		BattleGroundEnemies:ShowTooltip(self, function()
-			if not playerButton.PlayerSpecName then return end 
+			if not playerButton.PlayerSpecName then return end
 			GameTooltip:SetText(playerButton.PlayerSpecName)
 		end)
 	end)
@@ -85,16 +71,19 @@ function spec:AttachToPlayerButton(playerButton)
 		if playerButton.PlayerSpecName then
 			self.Icon:SetTexture(Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName].specIcon)
 		else
-			--isTBCC, TBCC
+			--hasSpeccs
 			self.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
 			self.Icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[playerButton.PlayerClass]))
 		end
-		self:CropImage(self:GetWidth(), self:GetHeight())
+		local width = self:GetWidth()
+		local height = self:GetHeight()
+		if width and height and width > 0 and height > 0 then
+			self:CropImage(self:GetWidth(), self:GetHeight())
+		end
 	end
 
 
 	playerButton.Spec.ApplyAllSettings = function(self)
 		self:Show()
-		self:SetWidth(self.config.Width)
 	end
 end

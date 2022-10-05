@@ -1,11 +1,11 @@
 
 local BattleGroundEnemies = BattleGroundEnemies
 local AddonName, Data = ...
-local LSM = LibStub("LibSharedMedia-3.0")
 
-local GetTime = GetTime
-
-local AddonName, Data = ...
+local BackdropTemplateMixin = BackdropTemplateMixin
+local CreateFrame = CreateFrame
+local GetRaidTargetIndex = GetRaidTargetIndex
+local SetRaidTargetIconTexture = SetRaidTargetIconTexture
 local L = Data.L
 
 
@@ -35,7 +35,7 @@ local flags = {
 
 local events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"}
 
-local raidTargetIcon = BattleGroundEnemies:NewModule("RaidTargetIcon", "RaidTargetIcon", nil, defaultSettings, nil, events)
+local raidTargetIcon = BattleGroundEnemies:NewButtonModule("RaidTargetIcon", L.RaidTargetIcon, flags, defaultSettings, nil, events)
 
 function raidTargetIcon:AttachToPlayerButton(playerButton)
 	playerButton.RaidTargetIcon = CreateFrame('Frame', nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
@@ -45,35 +45,18 @@ function raidTargetIcon:AttachToPlayerButton(playerButton)
 
 
 	function playerButton.RaidTargetIcon:UpdateRaidTargetIcon()
-		local config = self.config
-
 		local unit = playerButton:GetUnitID()
 		if unit then
 			local index = GetRaidTargetIndex(unit)
 			if index then
 				SetRaidTargetIconTexture(self.Icon, index)
 				self:Show()
-				if index == 8 and (not self.HasIcon or self.HasIcon ~= 8) then
-					if BattleGroundEnemies.IsRatedBG and BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationEnable then
-						local path = LSM:Fetch("sound", BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationSound, true)
-						if path then
-							PlaySoundFile(path, "Master")
-						end
-					end 
-				end
-
-				self.HasIcon = index
 			else
-				self:HideIcon()
+				self:Hide()
 			end
 		else
-			self:HideIcon()
+			self:Hide()
 		end
-	end
-	--	
-	function playerButton.RaidTargetIcon:HideIcon()
-		self:Hide()
-		self.HasIcon = false
 	end
 
 	function playerButton.RaidTargetIcon:PlayerButtonSizeChanged(width, height)
@@ -81,11 +64,7 @@ function raidTargetIcon:AttachToPlayerButton(playerButton)
 	end
 
 	function playerButton.RaidTargetIcon:ApplyAllSettings()
-		return
-	end
-
-	function playerButton.RaidTargetIcon:Reset()
-		self:HideIcon()
+		self:UpdateRaidTargetIcon()
 	end
 end
 

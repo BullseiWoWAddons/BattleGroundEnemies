@@ -1,7 +1,6 @@
 local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
-local C_Covenants = C_Covenants
 
 local defaultSettings = {
 	Enabled = true,
@@ -23,19 +22,21 @@ local defaultSettings = {
 		},
 	},
 	Text = {
-		FontSize = 18,
-		Fontoutline = "",
+		FontSize = 13,
+		FontOutline = "",
 		FontColor = {1, 1, 1, 1},
-		EnableTextshadow = false,
-		TextShadowcolor = {0, 0, 0, 1}
+		EnableShadow = true,
+		ShadowColor = {0, 0, 0, 1},
+		JustifyH = "RIGHT",
+		JustifyV = "MIDDLE"
 	}
 }
 
-local options = function(location, playerType) 
-	return {		
+local options = function(location, playerType)
+	return {
 		TextSettings = {
 			type = "group",
-			name = "",
+			name = L.TextSettings,
 			--desc = L.TrinketSettings_Desc,
 			inline = true,
 			order = 4,
@@ -51,32 +52,32 @@ local options = function(location, playerType)
 end
 
 local flags = {
-	Height = "Fixed",
-	Width = "Dynamic"
+	Height = "Variable",
+	Width = "Variable"
 }
 
 local events = {"UpdateTargetIndicators"}
 
-local targetIndicatorNumeric = BattleGroundEnemies:NewModule("TargetIndicatorNumeric", "TargetIndicatorNumeric", flags, defaultSettings, options, events)
+local targetIndicatorNumeric = BattleGroundEnemies:NewButtonModule("TargetIndicatorNumeric", "TargetIndicatorNumeric", flags, defaultSettings, options, events)
 
 function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 
 
 	playerButton.TargetIndicatorNumeric = BattleGroundEnemies.MyCreateFontString(playerButton)
-	playerButton.TargetIndicatorNumeric:SetJustifyH("RIGHT")
 
-	function playerButton.TargetIndicatorNumeric:UpdateTargetIndicators(playerButton)
+	function playerButton.TargetIndicatorNumeric:UpdateTargetIndicators()
+		print("UpdateTargetIndicators")
 
 		local targetIndicatorConfig = self.config
 
-		local i = 1
+		local i = 0
 		for enemyButton in pairs(playerButton.UnitIDs.TargetedByEnemy) do
 			i = i + 1
 		end
 
-		local enemyTargets = i - 1
+		local enemyTargets = i
 
-
+		
 		self:SetText(enemyTargets)
 	end
 

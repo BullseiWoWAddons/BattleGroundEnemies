@@ -1,12 +1,14 @@
 local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
-local GetTime = GetTime
-local MaxLevel = GetMaxPlayerLevel()
+local GetTexCoordsForRoleSmallCircle = GetTexCoordsForRoleSmallCircle
 
-
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
+
+local HasSpeccs = not (IsClassic or IsTBCC or IsWrath)
+
 local options = {
 
 }
@@ -22,7 +24,7 @@ local defaultSettings = {
 			RelativeFrame = "healthBar",
 			RelativePoint = "TOPLEFT",
 			OffsetX = 2,
-			OffsetY = 2,
+			OffsetY = -2,
 		},
 	},
 }
@@ -35,7 +37,7 @@ local flags = {
 
 local events = {"SetSpecAndRole"}
 
-local role = BattleGroundEnemies:NewModule("Role", "Role", nil, defaultSettings, options, events)
+local role = BattleGroundEnemies:NewButtonModule("Role", L.Role, flags, defaultSettings, options, events)
 
 function role:AttachToPlayerButton(playerButton)
 	playerButton.Role = CreateFrame("Frame", nil, playerButton)
@@ -43,22 +45,19 @@ function role:AttachToPlayerButton(playerButton)
 	playerButton.Role.Icon:SetAllPoints()
 
 	playerButton.Role.ApplyAllSettings = function(self)
-		if not (IsTBCC or IsClassic) then 
+		if HasSpeccs then
 			self:Show()
 		else
-			self:Reset()
+			self:Hide()
 		end
 	end
 
 	playerButton.Role.SetSpecAndRole = function(self)
-		if playerButton.PlayerSpecName then 
+		print("inside SetSpecAndRole in role", playerButton.PlayerSpecName)
+		if playerButton.PlayerSpecName then
 			self.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
 			self.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(playerButton.PlayerRoleID))
 		end
-	end
-	playerButton.Role.Reset = function(self)
-		self:Hide()
-		self:SetSize(0.01, 0.01)
 	end
 end
 

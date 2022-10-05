@@ -12,10 +12,11 @@ local GetSpellInfo = GetSpellInfo
 local GetSpellTexture = GetSpellTexture
 
 local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
-local hasSpeccs = not (IsTBCC or IsClassic)
+local HasSpeccs = not (IsClassic or IsTBCC or IsWrath)
 
 Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/Romanization_of_Russian
 	["А"] = "a",
@@ -83,7 +84,7 @@ Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/R
 	["Ю"] = "iu",
 	["ю"] = "iu",
 	["Я"] = "ia",
-	["я"] = "ia"   
+	["я"] = "ia"
 }
 
 Data.FontOutlines = {
@@ -127,7 +128,7 @@ Data.DebuffTypes = {
 	HARMFUL = {
 		Magic = L.Magic,
 	}
-	
+
 }
 Data.RandomDebuffType =  {} -- for testmode
 
@@ -183,11 +184,11 @@ Data.BasicPositions = {
 }
 
 Data.HorizontalDirections = {
-	leftwards = L.Leftwards, 
+	leftwards = L.Leftwards,
 	rightwards = L.Rightwards
 }
 Data.VerticalDirections = {
-	upwards = L.Upwards, 
+	upwards = L.Upwards,
 	downwards = L.Downwards
 }
 
@@ -256,7 +257,7 @@ do
 	end
 end
 
-		
+
 Data.cCduration = {	-- this is basically data from DRList-1 with durations, used for Relentless check
 	--[[ INCAPACITATES ]]--
 	incapacitate = {
@@ -391,7 +392,7 @@ Data.cCduration = {	-- this is basically data from DRList-1 with durations, used
 Data.cCdurationBySpellID = {}
 for category, spellIDs in pairs(Data.cCduration) do
 	Mixin(Data.cCdurationBySpellID, spellIDs)
-end	
+end
 
 
 Data.PriorityAuras = {
@@ -406,7 +407,7 @@ Data.PriorityAuras = {
 		[194844] = 	5.1,		-- Bonestorm
 		[219809] = 	5.1,	 	-- Tombstone
 
-		--Demon Hunter	
+		--Demon Hunter
 		[187827] = 	5.1,	 	-- Metamorphosis - Vengeance
 		[205629] = 	5.1,	 	-- Demonic Trample
 		[209426] = 	5.1,	 	-- Darkness
@@ -415,7 +416,7 @@ Data.PriorityAuras = {
 		[206803] = 	5.2, 	 	-- Rain from Above (up)
 
 
-		--Druid	
+		--Druid
 		[22812] = 	5.1,	 	-- Barkskin
 		[22842] = 	5.1,	 	-- Frenzied Regeneration
 		[61336] = 	5.1,	 	-- Survival Instincts
@@ -428,7 +429,7 @@ Data.PriorityAuras = {
 		[362486] = 	5.2, 	 	-- Keeper of the Grove
 		[186265] = 	5.2, 	 	-- Aspect of the Turtle
 
-		--Hunter	
+		--Hunter
 		[136] = 	5.1,	 	-- Mend Pet
 		[5384] = 	5.1,	 	-- Feign Death
 		[53480] = 	5.1,	 	-- Roar of Sacrifice (PvP Talent)
@@ -438,14 +439,14 @@ Data.PriorityAuras = {
 		[248519] = 	5.2, 	 	-- Interlope (BM PvP Talent)
 
 
-		--Mage	
+		--Mage
 		[342246] = 	5.1,	 	-- Alter Time (Arcane)
 		[110909] = 	5.1,	 	-- Alter Time (Fire/Frost)
 		[198111] = 	5.1,	 	-- Temporal Shield (Arcane PvP Talent)
 		[198065] = 	5.1,	 	-- Prismatic Cloak (PvP Talent)
 		[45438] = 	5.2, 	 	-- Ice Block
 
-		--Monk		
+		--Monk
 		[115176] = 	5.1,	 	-- Zen Meditation
 		[120954] = 	5.1,	 	-- Fortifying Brew (Brewmaster)
 		[243435] = 	5.1,	 	-- Fortifying Brew (Windwalker/Mistweaver)
@@ -462,7 +463,7 @@ Data.PriorityAuras = {
 		[202248] = 	5.2, 	 	-- Guided Meditation (Brew PvP Talent)
 		[353319] = 	5.2, 	 	-- Peaceweaver
 
-		--Paladin		
+		--Paladin
 		[498] = 	5.1,	 	-- Divine Protection
 		[1022] = 	5.1,	 	-- Blessing of Protection
 		[204018] = 	5.1,	 	-- Blessing of Spellwarding
@@ -484,7 +485,7 @@ Data.PriorityAuras = {
 		[642] = 	5.2, 	 	-- Divine Shield
 		[228050] = 	5.2,     	-- Guardian of the Forgotten Queen (Protection PvP Talent)
 
-		--Priest		
+		--Priest
 		[337661] = 	5.1,	 	-- Translucent Image (Fade defensive Conduit)
 		[33206] = 	5.1,	 	-- Pain Suppression
 		[47536] = 	5.1,	 	-- Rapture
@@ -508,7 +509,7 @@ Data.PriorityAuras = {
 		[213602] = 	5.2, 		-- Greater Fade (Holy/Shadow PvP Talent)
 		[328530] = 	5.2, 		-- Divine Ascension (up)
 
-		--Rogue	
+		--Rogue
 		[1966] = 	5.1,	 	-- Feint
 		[5277] = 	5.1,	 	-- Evasion
 		[11327] = 	5.1,	 	-- Vanish
@@ -516,7 +517,7 @@ Data.PriorityAuras = {
 		[199027] = 	5.1,	 	-- Veil of Midnight (Subtlety PvP Talent)
 		[197003] = 	5.1,	 	-- Maneuverability (PvP Talent)
 
-		--Shaman		
+		--Shaman
 		[108281] = 	5.1,	 	-- Ancestral Guidance
 		[325174] = 	5.1,	 	-- Spirit Link Totem
 		[204293] = 	5.1,	 	-- Spirit Link (PvP Talent)
@@ -536,7 +537,7 @@ Data.PriorityAuras = {
 		[8178] = 	5.2, 		-- Grounding Totem Effect (PvP Talent)
 
 
-		--Warrior	
+		--Warrior
 		[871] = 	5.1,	 	-- Shield Wall
 		[12975] = 	5.1,	 	-- Last Stand
 		[97463] = 	5.1,	 	-- Rallying Cry
@@ -552,7 +553,7 @@ Data.PriorityAuras = {
 		[330279] = 	5.2, 		-- Overwatch (PvP Talent)
 		[335255] = 	5.2, 		-- Spell Reflection (Misshapen Mirror Legendary)
 
-		--Death Knight	
+		--Death Knight
 		[51271] = 	 4.9,	 -- Pillar of Frost
 		[63560] = 	 4.9,	 -- Dark Transformation
 		[152279] = 	 4.9,	 -- Breath of Sindragosa
@@ -668,7 +669,7 @@ Data.PriorityAuras = {
 		[223929] = 	 4.9, -- Necrotic Wound
 		[343294] = 	 4.9, -- Soul Reaper
 		[288849] = 	 4.9, -- Crypt Fever (Necromancer's Bargain Unholy PvP Talent)
-		
+
 		--Demon Hunter
 		[206649] = 	 4.9, -- Eye of Leotheras
 		[203704] = 	 4.9, -- Mana Break
@@ -693,7 +694,7 @@ Data.PriorityAuras = {
 		[322461] = 	 4.9, -- Thoughtstolen (Priest - Discipline)
 		[322458] = 	 4.9, -- Thoughtstolen (Monk)
 		[322460] = 	 4.9, -- Thoughtstolen (Priest - Shadow)
-		
+
 		--Priest
 		[323673] =	 4.9, -- Mindgames
 		[335467] =	 4.9, -- Devouring Plague
@@ -715,7 +716,7 @@ Data.PriorityAuras = {
 		[200587] =	 4.9, -- Fel Fissure (PvP Talent)
 		[80240] =	 4.9, -- Havoc
 		[200548] = 	 4.9, -- Bane of Havoc (Destro PvP Talent)
-		
+
 		--Warrior
 		[208086] =	 4.9, -- Colossus Smash
 		[198819] =	 4.9, -- Mortal Strike when applied with Sharpen Blade (50% healing reduc)
@@ -727,17 +728,17 @@ for spellID, priority in pairs(Data.PriorityAuras) do
 		Data.SpellPriorities[spellID] = priority
 	end
 end
-		
+
 
 Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = faction(0 for hode, 1 for alliance) value spellID of the flag, minecart
 	[1339] = {						-- Warsong Gulch, used to be mapID 443 before BFA
 		[0] = 156621, 					-- Alliance Flag
-		[1] = 156618 					-- Horde Flag	
-	}, 
+		[1] = 156618 					-- Horde Flag
+	},
 	[1460] = {						-- Warsong Gulch, used in Classic, TBCC
 		[0] = 301091, 					-- Alliance Flag
-		[1] = 301089 					-- Horde Flag	
-	}, 
+		[1] = 301089 					-- Horde Flag
+	},
 	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
 		[1] = 34976						-- Netherstorm Flag
@@ -745,7 +746,7 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 	[1956] = {						-- Eye of the Storm, TBCC
 		[0] = 34976,  					-- Netherstorm Flag
 		[1] = 34976						-- Netherstorm Flag
-	},	
+	},
 	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA
 		[0] = 34976,  					-- Netherstorm Flag
 		[1] = 34976						-- Netherstorm Flag
@@ -756,36 +757,36 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 	}
 }
 
-		
+
 Data.BattlegroundspezificDebuffs = { --key = mapID, value = table with key = number and value = debuff name
 	[1339] = {						-- Warsong Gulch, used to be mapID 443 before BFA
 		46392,						-- Focused Assault
-		46393						-- Brutal Assault								
+		46393						-- Brutal Assault
 	},
 	[112] = {						-- Eye of the Storm, used to be mapID 482 before BFA
 		46392,						-- Focused Assault
-		46393						-- Brutal Assault							
+		46393						-- Brutal Assault
 	},
-	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA 
+	[397] = {						-- Eye of the Storm (mapID RBG only? Not sure why there are two map IDs for Eye of the Storm), used to be mapID 813 before BFA
 		46392,						-- Focused Assault
-		46393						-- Brutal Assault							
+		46393						-- Brutal Assault
 	},
 	[1956] = {						-- Eye of the Storm, TBCC
 		46392,						-- Focused Assault
-		46393						-- Brutal Assault							
+		46393						-- Brutal Assault
 	},
-	[206] = {						-- Twin Peaks, used to be mapID 626 before BFA 
+	[206] = {						-- Twin Peaks, used to be mapID 626 before BFA
 		46392,						-- Focused Assault
-		46393						-- Brutal Assault					
-	},	
+		46393						-- Brutal Assault
+	},
 	[417] = {						-- Temple of Kotmogu, used to be mapID 856 before BFA
 		121164, 					-- Orb of Power, Blue
 		121175, 					-- Orb of Power, Purple
 		121177, 					-- Orb of Power, Orange
 		121176 						-- Orb of Power, Green
-	} 
+	}
 }
-		
+
 
 Data.TrinketData = {
 	[195710] = {cd = 180											},		-- 1: Honorable Medallion, 3. min. CD, detected by Combatlog
@@ -798,7 +799,7 @@ Data.TrinketData = {
 --	[336139] = {cd = 60, fileID = GetSpellTexture(214027)			},		-- 3: Adapted, 1 min. CD, Shadowlands Update
 	[196029] = {cd = false											}, 		-- 4: Relentless, passive, no CD
 	[336128] = {cd = false											}, 		-- 4: Relentless, passive, no CD, Shadowlands Update
-	[363117] = {cd = false											},		-- 5: Gladiator's Fastidious Resolve, Added in Shadowlands Patch 9.2  
+	[363117] = {cd = false											},		-- 5: Gladiator's Fastidious Resolve, Added in Shadowlands Patch 9.2
 }
 
 
@@ -902,9 +903,9 @@ Data.RacialSpellIDtoCooldown = {
 	[20594] = {cd = 120 				},					--Stoneform, Dwarf Racial
 	[58984] = {cd = 120 				},					--Shadowmeld, Night Elf Racial
 	[59752] = {cd = 180, trinketCD = 90 },  				--Every Man for Himself, Human Racial, 90 sec cooldown trigger on trinket
-	[28730] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Mage and Warlock, 
-	[50613] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Death Knight, 
-   [202719] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Demon Hunter, 
+	[28730] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Mage and Warlock,
+	[50613] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Death Knight,
+   [202719] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Demon Hunter,
 	[80483] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Hunter,
    [129597] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Monk,
    [155145] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Paladin,
@@ -929,22 +930,47 @@ Data.RacialSpellIDtoCooldown = {
    [107079] = {cd = 120 				},					--Quaking Palm, Pandaren Racial
 	[69041] = {cd = 90  				},					--Rocket Barrage, Goblin Racial
 	[69070] = {cd = 90  				},					--Rocket Jump, Goblin Racial
-	[20549] = {cd = 90  				}					--War Stomp, Tauren Racial 
-}				
+	[20549] = {cd = 90  				}					--War Stomp, Tauren Racial
+}
+
+if IsWrath then
+	Data.RacialSpellIDtoCooldown = {
+		[7744] = {cd = 120 				},					--Will of the Forsaken, Undead Racial, 30 sec cooldown trigger on trinket
+	   [20594] = {cd = 120 				},					--Stoneform, Dwarf Racial
+	   [58984] = {cd = 120 				},					--Shadowmeld, Night Elf Racial
+	   [20549] = {cd = 120 				},					--War Stomp, Tauren Racial
+	   [28730] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Mage and Warlock,
+	   [50613] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Death Knight,
+      [202719] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Demon Hunter,
+	   [80483] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Hunter,
+      [129597] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Monk,
+      [155145] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Paladin,
+      [232633] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Priest,
+	   [25046] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Rogue,
+	   [69179] = {cd = 120  			},					--Arcane Torrent, Blood Elf Racial, Warrior,
+	   [33702] = {cd = 120 				},					--Blood Fury, Orc Racial, Mage,  Warlock
+	   [20572] = {cd = 120 				},					--Blood Fury, Orc Racial, Warrior, Hunter, Rogue, Death Knight
+	   [33697] = {cd = 120 				},					--Blood Fury, Orc Racial, Shaman, Monk
+	   [20589] = {cd = 105  			}, 					--Escape Artist, Gnome Racial
+	}
+end
 
 
 Data.RacialNameToSpellIDs = {}
 Data.Racialnames = {}
 for spellID in pairs(Data.RacialSpellIDtoCooldown) do
+
 	local racialName = GetSpellInfo(spellID)
+
 	if racialName then
+
 		if not Data.RacialNameToSpellIDs[racialName] then
 			Data.RacialNameToSpellIDs[racialName] = {}
 			Data.Racialnames[GetSpellInfo(spellID)] = GetSpellInfo(spellID)
 		end
 		Data.RacialNameToSpellIDs[racialName][spellID] = true
 	end
-	
+
 end
 
 
@@ -994,12 +1020,12 @@ Data.AlliesRangeToItemID	= {
 for range, itemID in next, Data.EnemiesRangeToItemID do
 	Data.EnemiesRangeToRange[range] = range --for testmode
 	Data.EnemiesItemIDToRange[itemID] = range --for testmode
-end 
+end
 
 for range, itemID in next, Data.AlliesRangeToItemID do
 	Data.AlliesRangeToRange[range] = range --for testmode
 	Data.AlliesItemIDToRange[itemID] = range --for testmode
-end 
+end
 
 
 Data.Classes = {}
@@ -1020,12 +1046,15 @@ do
 		--Demon Hunter
 		[577] = "FURY",			--Havoc
 		[581] = "PAIN",			--Vengeance
-		--Druid 
+		--Druid
 		[102] = "LUNAR_POWER",	--Balance
 		[103] = "ENERGY",		--Feral Combat
 		[104] = "RAGE",			--Guardian
 		[105] = "MANA",			--Restoration
-		--Hunter 
+		--Evoker
+		[1467] = "Essence", 	--Devastation
+		[1468] = "Essence",		--Preservation
+		--Hunter
 		[253] = "FOCUS",		--Beast Mastery
 		[254] = "FOCUS",		--Marksmanship
 		[255] = "FOCUS",		--Survival
@@ -1069,29 +1098,30 @@ do
 		HUNTER = "MANA",
 		ROGUE = "ENERGY",
 		PRIEST = "MANA",
-		SHAMAN = "MANA", 
-		MAGE = "MANA", 
+		SHAMAN = "MANA",
+		MAGE = "MANA",
 		WARLOCK = "MANA",
 		DRUID = "MANA",
 		MONK = "ENERGY",
 		DEATHKNIGHT = "RUNIC_POWER",
-		DEMONHUNTER = "FURY"
+		DEMONHUNTER = "FURY",
+		EVOKER = "ESSENCE"
 	}
-	
-	
+
+
 	for classID = 1, GetNumClasses() do --example classes[EnglishClass][SpecName].
 		local _, classTag = GetClassInfo(classID)
 		if classTag then
-			Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}-- for Classic, TBCC and some Brawls
-			
-			if hasSpeccs then 
+			Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}-- for Classic, TBCC Wrath, and any other expansions without specs and some brawls
+
+			if HasSpeccs then
 				for i = 1, GetNumSpecializationsForClassID(classID) do
 					local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version
 					Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
 					table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = maleSpecName}) --for testmode
-					
+
 					--if specName == "Танцующий с ветром" then specName = "Танцующая с ветром" end -- fix for russian bug, fix added on 2017.08.27
-					local specID,specName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 3) -- female version	
+					local specID,specName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 3) -- female version
 					if not Data.Classes[classTag][specName] then --there is a female version of that specName
 						Data.Classes[classTag][specName] = Data.Classes[classTag][maleSpecName]
 					end

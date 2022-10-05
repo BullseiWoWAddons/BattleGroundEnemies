@@ -2,18 +2,34 @@ local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local LSM = LibStub("LibSharedMedia-3.0")
 local L = Data.L
-local GetTime = GetTime
 
-local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
+local HealthTextTypes = {
+	health = "health",
+	losthealth = "losthealth",
+	perc = "perc"
+}
 
 local defaultSettings = {
+	Parent = "Button",
 	Enabled = true,
 	Texture = 'UI-StatusBar',
 	Background = {0, 0, 0, 0.66},
 	HealthPrediction_Enabled = true,
+	HealthTextEnabled = false,
+	HealthTextType = "health",
+	HealthText = {
+		FontSize = 18,
+		FontOutline = "",
+		FontColor = {1, 1, 1, 1},
+		EnableShadow = false,
+		ShadowColor = {0, 0, 0, 1},
+		JustifyH = "CENTER",
+		JustifyV = "BOTTOM"
+	},
 	Points = {
 		{
 			Point = "BOTTOMLEFT",
@@ -28,7 +44,7 @@ local defaultSettings = {
 	}
 }
 
-local options = function(location) 
+local options = function(location)
 	return {
 		Texture = {
 			type = "select",
@@ -54,6 +70,35 @@ local options = function(location)
 			name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
 			width = "normal",
 			order = 5,
+		},
+		HealthTextEnabled = {
+			type = "toggle",
+			name = L.HealthTextEnabled,
+			width = "normal",
+			order = 6,
+		},
+		HealthTextType = {
+			type = "select",
+			name = L.HealthTextType,
+			width = "normal",
+			values = HealthTextTypes,
+			disabled = function() return not location.HealthTextEnabled end,
+			order = 7,
+		},
+		HealthText = {
+			type = "group",
+			name = L.HealthTextSettings,
+			--desc = L.TrinketSettings_Desc,
+			get = function(option)
+				return Data.GetOption(location.HealthText, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.HealthText, option, ...)
+			end,
+			disabled = function() return not location.HealthTextEnabled end,
+			inline = true,
+			order = 8,
+			args = Data.AddNormalTextSettings(location.HealthText)
 		}
 	}
 end
@@ -63,15 +108,17 @@ local flags = {
 	Width = "Fixed"
 }
 
-local events = {"UNIT_HEALTH", "OnNewPlayer"}
+local events = {"UpdateHealth", "OnNewPlayer"}
 
-local healthBar = BattleGroundEnemies:NewModule("healthBar", "HealthBar", nil, defaultSettings, options, events)
+local healthBar = BattleGroundEnemies:NewButtonModule("healthBar", "HealthBar", flags, defaultSettings, options, events)
 
 function healthBar:AttachToPlayerButton(playerButton)
 	playerButton.healthBar = CreateFrame('StatusBar', nil, playerButton)
-	playerButton.healthBar:SetPoint('BOTTOMLEFT', playerButton, "TOPLEFT")
-	playerButton.healthBar:SetPoint('TOPRIGHT', playerButton, "TOPRIGHT")
 	playerButton.healthBar:SetMinMaxValues(0, 1)
+
+	playerButton.healthBar.HealthText = BattleGroundEnemies.MyCreateFontString(playerButton.healthBar)
+	playerButton.healthBar.HealthText:SetPoint("BOTTOMLEFT", playerButton.healthBar, "BOTTOMLEFT", 3, 3)
+	playerButton.healthBar.HealthText:SetPoint("BOTTOMRIGHT", playerButton.healthBar, "BOTTOMRIGHT", -3, 3)
 
 	playerButton.myHealPrediction = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 5)
 	playerButton.myHealPrediction:ClearAllPoints();
@@ -126,17 +173,45 @@ function healthBar:AttachToPlayerButton(playerButton)
 	playerButton.healthBar.Background:SetTexture("Interface/Buttons/WHITE8X8")
 
 
-	--	
-	function playerButton.healthBar:UNIT_HEALTH(unitID)
-		local config = playerButton.healthBar.config
-		self:SetMinMaxValues(0, UnitHealthMax(unitID))
-		self:SetValue(UnitHealth(unitID))
+
+	playerButton.healthBar.UpdateHealthText = function(self, health, maxHealth)
+		local config = self.config
+		if not config.HealthTextEnabled then return end
+		if config.HealthTextType == "health" then
+			self.HealthText:SetText(health);
+			self.HealthText:Show()
+		elseif config.HealthTextType == "losthealth" then
+			local healthLost = maxHealth - health
+			if ( healthLost > 0 ) then
+				self.HealthText:SetFormattedText(LOST_HEALTH, healthLost)
+				self.HealthText:Show()
+			else
+				self.HealthText:Hide()
+			end
+		elseif (config.HealthTextType == "perc") and (maxHealth > 0) then
+			local perc = math.ceil(100 * (health/maxHealth))
+			self.HealthText:SetFormattedText("%d%%", perc);
+			self.HealthText:Show()
+		else
+			self.HealthText:Hide()
+		end
+	end
+	--
+	function playerButton.healthBar:UpdateHealth(unitID, health, maxHealth)
+		self:SetMinMaxValues(0, maxHealth)
+		self:SetValue(health)
 
 
 		--next wo lines are needed for CompactUnitFrame_UpdateHealPrediction()
-		self.displayedUnit = unitID
-		self.optionTable = {displayHealPrediction = config.HealthPrediction_Enabled}
-		if not (IsTBCC or IsClassic) then CompactUnitFrame_UpdateHealPrediction(playerButton) end
+
+		self:UpdateHealthText(health, maxHealth)
+		if unitID then
+			local config = self.config
+
+			playerButton.displayedUnit = unitID
+			playerButton.optionTable = {displayHealPrediction = config.HealthPrediction_Enabled}
+			if not (IsClassic or IsTBCC or IsWrath) then CompactUnitFrame_UpdateHealPrediction(playerButton) end
+		end
 	end
 
 	function playerButton.healthBar:OnNewPlayer()
@@ -144,7 +219,7 @@ function healthBar:AttachToPlayerButton(playerButton)
 		self:SetStatusBarColor(color.r,color.g,color.b)
 		self:SetMinMaxValues(0, 1)
 		self:SetValue(1)
-		
+
 		playerButton.totalAbsorbOverlay:Hide()
 		playerButton.totalAbsorb:Hide()
 	end
@@ -153,6 +228,12 @@ function healthBar:AttachToPlayerButton(playerButton)
 		local config = self.config
 		self:SetStatusBarTexture(LSM:Fetch("statusbar", config.Texture))--self.healthBar:SetStatusBarTexture(137012)
 		self.Background:SetVertexColor(unpack(config.Background))
+		if config.HealthTextEnabled then
+			self.HealthText:Show()
+		else
+			self.HealthText:Hide()
+		end
+		self.HealthText:ApplyFontStringSettings(config.HealthText)
 	end
 end
 

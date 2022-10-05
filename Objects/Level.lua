@@ -1,13 +1,8 @@
 local AddonName, Data = ...
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
-local GetTime = GetTime
 local MaxLevel = GetMaxPlayerLevel()
 
-
-local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local defaultSettings = {
 	Enabled = false,
@@ -26,12 +21,13 @@ local defaultSettings = {
 		FontSize = 18,
 		FontOutline = "",
 		FontColor = {1, 1, 1, 1},
-		EnableTextshadow = false,
-		TextShadowcolor = {0, 0, 0, 1}
+		EnableShadow = false,
+		ShadowColor = {0, 0, 0, 1},
+		JustifyH = "LEFT"
 	}
 }
 
-local options = function(location) 
+local options = function(location)
 	return {
 		OnlyShowIfNotMaxLevel = {
 			type = "toggle",
@@ -40,7 +36,7 @@ local options = function(location)
 		},
 		LevelTextTextSettings = {
 			type = "group",
-			name = "",
+			name = L.LevelTextSettings,
 			--desc = L.TrinketSettings_Desc,
 			get = function(option)
 				return Data.GetOption(location.Text, option)
@@ -62,19 +58,17 @@ local flags = {
 
 local events = {"NewUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"}
 
-local Level = BattleGroundEnemies:NewModule("Level", "Level", flags, defaultSettings, options, events)
+local Level = BattleGroundEnemies:NewButtonModule("Level", "Level", flags, defaultSettings, options, events)
 
 function Level:AttachToPlayerButton(playerButton)
 	local fs = BattleGroundEnemies.MyCreateFontString(playerButton)
-	fs:SetPoint("TOPLEFT", playerButton, "TOPRIGHT", 2, 2)
-	fs:SetJustifyH("LEFT")
-
 
 	function fs:DisplayLevel()
 		if (not self.config.OnlyShowIfNotMaxLevel or (playerButton.PlayerLevel and playerButton.PlayerLevel < MaxLevel)) then
 			self:SetText(MaxLevel - 1) -- to set the width of the frame (the name shoudl have the same space from the role icon/spec icon regardless of level shown)
 			self:SetWidth(0)
 			self:SetText(self.PlayerLevel)
+		end
 	end
 
 	-- Level
@@ -87,7 +81,7 @@ function Level:AttachToPlayerButton(playerButton)
 		self:SetLevel(UnitLevel(unitID))
 	end
 
-	
+
 	function fs:SetLevel(level)
 		if not playerButton.PlayerLevel or level ~= playerButton.PlayerLevel then
 			self.PlayerLevel = level
@@ -100,14 +94,6 @@ function Level:AttachToPlayerButton(playerButton)
 		self:DisplayLevel()
 	end
 
-	function fs:NewUnitID(unitID)
-		fs:SetLevel(UnitLevel(unitID))
-	end
-	
-	function fs:Reset()
-		return
-	end
-	
 	function fs:ApplyAllSettings()
 		-- level
 		self:ApplyFontStringSettings(self.config.Text)

@@ -1,9 +1,7 @@
 
 local BattleGroundEnemies = BattleGroundEnemies
 local AddonName, Data = ...
-local GetTime = GetTime
 
-local AddonName, Data = ...
 local L = Data.L
 
 local defaultSettings = {
@@ -26,20 +24,22 @@ local defaultSettings = {
 	Text = {
 		FontSize = 13,
 		FontOutline = "",
-		FontColor = {1, 1, 1, 1}, 
-		EnableTextshadow = true,
-		TextShadowcolor = {0, 0, 0, 1},
+		FontColor = {1, 1, 1, 1},
+		EnableShadow = true,
+		ShadowColor = {0, 0, 0, 1},
+		JustifyH = "LEFT",
+		JustifyV = "MIDDLE"
 	},
 	ConvertCyrillic = true,
 	ShowRealmnames = true
 }
 
-local options = function(location) 
+local options = function(location)
 	return {
 
 		TextSettings = {
 			type = "group",
-			name = "",
+			name = L.TextSettings,
 			--desc = L.TrinketSettings_Desc,
 			inline = true,
 			order = 4,
@@ -61,18 +61,18 @@ local flags = {
 
 local events = {"OnNewPlayer"}
 
-local name = BattleGroundEnemies:NewModule("Name", "Name", flags, defaultSettings, options, events)
+local name = BattleGroundEnemies:NewButtonModule("Name", "Name", flags, defaultSettings, options, events)
 
 function name:AttachToPlayerButton(playerButton)
 	playerButton.Name = BattleGroundEnemies.MyCreateFontString(playerButton)
-	playerButton.Name:SetJustifyH("LEFT")
 
 	function playerButton.Name:SetName()
+		print("SetName")
 		local playerName = playerButton.PlayerName
 		if not playerName then return end
-		
+
 		local name, realm = strsplit( "-", playerName, 2)
-			
+
 		if self.config.ConvertCyrillic then
 			playerName = ""
 			for i = 1, name:utf8len() do
@@ -93,11 +93,11 @@ function name:AttachToPlayerButton(playerButton)
 				playerName = playerName.."-"..realm
 			end
 		end
-		
+
 		if self.config.ShowRealmnames then
 			name = playerName
 		end
-		
+
 		self:SetText(name)
 		self.DisplayedName = name
 	end
@@ -113,27 +113,8 @@ function name:AttachToPlayerButton(playerButton)
 		self:ApplyFontStringSettings(config.Text)
 		self:SetName()
 	end
-
-	function playerButton.Name:Reset()
-		return
-	end
 end
 
 
 
 
-
-
-
-
-
-
--- on new player on unit
-
-
-
-
-		
-		
-		-- name
-		

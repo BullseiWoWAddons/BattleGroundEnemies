@@ -3,6 +3,9 @@ local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 local C_Covenants = C_Covenants
 
+local CreateFrame = CreateFrame
+local GameTooltip = GameTooltip
+
 local defaultSettings = {
 	Enabled = true,
 	Parent = "healthBar",
@@ -22,7 +25,7 @@ local flags = {
 	Width = "Variable"
 }
 
-local covenant = BattleGroundEnemies:NewModule("Covenant", "Covenant", nil, defaultSettings, nil, nil)
+local covenant = BattleGroundEnemies:NewButtonModule("Covenant", "Covenant", flags, defaultSettings, nil, nil)
 
 function covenant:AttachToPlayerButton(playerButton)
 -- Covenant Icon
