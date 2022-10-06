@@ -15,6 +15,9 @@ local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 local HasSpeccs = not (IsClassic or IsTBCC or IsWrath)
 local HasRBG = not (IsClassic or IsTBCC or IsWrath)
 
+local MaxLevel = GetMaxPlayerLevel()
+
+
 local LGIST
 if HasSpeccs then
 	LGIST=LibStub:GetLibrary("LibGroupInSpecT-1.1")
@@ -1649,7 +1652,7 @@ local FakePlayersOnUpdateFrame = CreateFrame("frame")
 FakePlayersOnUpdateFrame:Hide()
 
 
-local function SetupTestmode()
+local function SetupTrinketAndRacialData()
 	do
 		local count = 1
 		for triggerSpellID, trinketData in pairs(Data.TrinketData) do
@@ -1714,13 +1717,17 @@ do
 			end
 			name = L[playerType]..counter.."-Realm"..counter
 
-			mianFrame:CreateOrUpdatePlayer(name, nil, classTag, specName, {isFakePlayer = true})
+			mianFrame:CreateOrUpdatePlayer(name, nil, classTag, specName,
+			{
+				isFakePlayer = true,
+				PlayerLevel = i==1 and MaxLevel or math_random(MaxLevel - 10, MaxLevel -1)
+			})
 
 			counter = counter + 1
 		end
 	end
 
-	function BattleGroundEnemies:FillData(count)
+	function BattleGroundEnemies:CreateFakePlayers(count)
 		for number, mainFrame in pairs({self.Allies, self.Enemies}) do
 			local continue = true
 			if number == 1 and self.db.profile.Testmode_UseTeammates then
@@ -1790,7 +1797,7 @@ do
 		self.TestmodeActive = true
 
 		if not TestmodeRanOnce then
-			SetupTestmode()
+			SetupTrinketAndRacialData()
 			TestmodeRanOnce = true
 		end
 
@@ -1842,7 +1849,7 @@ do
 		end
 
 
-		self:FillData(BattleGroundEnemies.db.profile.Testmode_BGSize or 5)
+		self:CreateFakePlayers(BattleGroundEnemies.db.profile.Testmode_BGSize or 5)
 
 		self:Show()
 
