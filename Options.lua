@@ -265,6 +265,7 @@ end
 
 function Data.GetOption(location, option)
 	local value = location[option[#option]]
+	print("get value", value)
 
 	if type(value) == "table" then
 		--BattleGroundEnemies:Debug("is table")
@@ -278,11 +279,14 @@ end
 function Data.SetOption(location, option, ...)
 	local value
 	if option.type == "color" then
-		value = {...}   -- local r, g, b, alpha = ...
+		value = {...}  local r, g, b, alpha = ...
+		print(r, g, b, alpha)
 	else
 		value = ...
 	end
 
+	print("location[option[#option]] = value", location[option[#option]], location, value)
+	
 	location[option[#option]] = value
 	BattleGroundEnemies:ApplyAllSettings()
 

@@ -7,6 +7,7 @@ local MaxLevel = GetMaxPlayerLevel()
 local defaultSettings = {
 	Enabled = false,
 	Parent = "healthBar",
+	UseButtonHeightAsHeight = true,
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -51,9 +52,22 @@ local options = function(location)
 	}
 end
 
+local function dumppp(o)
+	if type(o) == 'table' then
+	   local s = '{ '
+	   for k,v in pairs(o) do
+		  if type(k) ~= 'number' then k = '"'..k..'"' end
+		  s = s .. '['..k..'] = ' .. dump(v) .. ','
+	   end
+	   return s .. '} '
+	else
+	   return tostring(o)
+	end
+ end
+
 local flags = {
-	Height = "Dynamic",
-	Width = "Dynamic"
+	Height = "Variable",
+	Width = "Variable"
 }
 
 local events = {"NewUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"}
@@ -67,7 +81,9 @@ function Level:AttachToPlayerButton(playerButton)
 		if (not self.config.OnlyShowIfNotMaxLevel or (playerButton.PlayerLevel and playerButton.PlayerLevel < MaxLevel)) then
 			self:SetText(MaxLevel - 1) -- to set the width of the frame (the name shoudl have the same space from the role icon/spec icon regardless of level shown)
 			self:SetWidth(0)
-			self:SetText(self.PlayerLevel)
+			self:SetText(playerButton.PlayerLevel)
+		else
+			self:SetText("")
 		end
 	end
 
@@ -84,18 +100,39 @@ function Level:AttachToPlayerButton(playerButton)
 
 	function fs:SetLevel(level)
 		if not playerButton.PlayerLevel or level ~= playerButton.PlayerLevel then
-			self.PlayerLevel = level
+			playerButton.PlayerLevel = level
 			self:DisplayLevel()
 		end
 	end
 
-	function fs:PlayerButtonSizeChanged(width, height)
-		fs:SetHeight(height)
-		self:DisplayLevel()
-	end
-
 	function fs:ApplyAllSettings()
+		print("ApplyAllSettings")
 		-- level
+		for k,v in pairs(self.config.Text) do
+			
+			print("k,v", k,v)
+			if type(v) =="table" then
+				for k,v in pairs(self.config.Text) do
+			
+					print("k,v", k,v)
+					if type(v) =="table" then
+						for k,v in pairs(self.config.Text) do
+			
+							print("k,v", k,v)
+							if type(v) =="table" then
+								for k,v in pairs(self.config.Text) do
+			
+									print("k,v", k,v)
+									if type(v) =="table" then
+										
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
 		self:ApplyFontStringSettings(self.config.Text)
 		self:DisplayLevel()
 	end

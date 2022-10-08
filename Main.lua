@@ -225,7 +225,7 @@ local function FakeUnitAura(playerButton, index, filter)
 			if not dontAddNewAura then
 				table_insert(FakePlayerAuras[playerButton][filter], newFakeAura)
 			end
-		
+
 		end
 	end
 
@@ -478,17 +478,17 @@ do
 				local moduleConfigOnButton = self.bgSizeConfig.ButtonModules[moduleName]
 				local moduleFrameOnButton = self[moduleName]
 				moduleFrameOnButton.config = moduleConfigOnButton
-							
+
 				local config = moduleFrameOnButton.config
 				if not config then return end
-	
+
 
 				if config.Points then
 					if i == 1 then moduleFrameOnButton:ClearAllPoints() end
-		
+
 					for j = 1, #config.Points do
 						local pointConfig = config.Points[j]
-		
+
 						local relativeFrame = self:GetAnchor(pointConfig.RelativeFrame)
 						if not (relativeFrame:GetNumPoints() > 0) then
 							-- the module we are depending on hasn't been set yet
@@ -498,7 +498,7 @@ do
 						else
 							if not relativeFrame then return print("error", relativeFrame, "doesnt exist") end
 							moduleFrameOnButton:SetPoint(pointConfig.Point, relativeFrame, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
-						
+
 
 						end
 						if moduleFrame.flags.Height == "Dynamic" then moduleFrameOnButton:SetHeight(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
@@ -509,7 +509,7 @@ do
 					moduleFrameOnButton:SetParent(self:GetAnchor(config.Parent))
 				end
 
-		
+
 				if not moduleFrameOnButton.Enabled and moduleFrame.flags.SetZeroWidthWhenDisabled then
 					moduleFrameOnButton:SetWidth(0.001)
 				else
@@ -816,7 +816,7 @@ do
 			skipUpdate = true
 			for i = 1, #updatedAuraInfos do
 				local auraInfo = updatedAuraInfos[i]
-		
+
 				if isRelevantFunc(self, unitID, auraInfo) then
 					skipUpdate = false
 					break
@@ -1074,13 +1074,13 @@ local function PopulateMainframe(playerType)
 		self.PlayerCount:ApplyFontStringSettings(conf.PlayerCount.Text)
 
 		self:SortPlayers()
-		
+
 		for name, playerButton in pairs(self.Players) do
 			playerButton:ApplyButtonSettings()
 
 			playerButton:SetBindings()
 		end
-		
+
 
 		for number, playerButton in pairs(self.InactivePlayerButtons) do
 			playerButton:ApplyButtonSettings()
@@ -1362,7 +1362,7 @@ local function PopulateMainframe(playerType)
 
 					--print("playerButton:GetRect", playerButton:GetRect(), playerButton)
 					playerButton:SetModulePositions()
-					
+
 
 					previousButton = playerButton
 				end
@@ -1527,7 +1527,7 @@ function BattleGroundEnemies:NewButtonModule(moduleName, localizedModuleName, fl
 	moduleFrame.options = options or {}
 	moduleFrame.flags = flags or {}
 	moduleFrame.events = events
-	
+
 
 	local t = {"Enemies", "Allies"}
 	local BGSizes = {"5", "15", "40"}
@@ -1919,7 +1919,7 @@ do
 						end
 					end
 
-					
+
 				end
 			end
 
@@ -2394,9 +2394,9 @@ do
 
 		--DBObjectLib:ResetProfile(noChildren, noCallbacks)
 
-	
+
 		self:GROUP_ROSTER_UPDATE()  --Scan again, the user could have reloaded the UI so GROUP_ROSTER_UPDATE didnt fire
-		
+
 		self:UnregisterEvent("PLAYER_LOGIN")
 	end
 end
@@ -2960,7 +2960,7 @@ do
 				C_Timer.After(0.1, self.ToggleArenaFrames)
 			end
 		end
-		
+
 
 		local numArenaOpponents
 
