@@ -1008,7 +1008,7 @@ function BattleGroundEnemies:SetupOptions()
 						get = function() return self.BGSize end,
 						set = function(option, value)
 							if self.TestmodeActive then
-								self:FillData(value)
+								self:CreateFakePlayers(value)
 							end
 						end,
 						values = {[5] = ARENA, [15] = L.BGSize_15, [40] = L.BGSize_40}
