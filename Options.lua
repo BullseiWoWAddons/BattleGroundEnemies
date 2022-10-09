@@ -8,10 +8,12 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 
 
-local function GetAllAnchors()
+local function GetAllAnchors(moduleName)
 	local t = {}
-	for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
-		t[moduleName] = moduleFrame.localizedModuleName
+	for moduleNamee, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
+		if moduleName ~= moduleNamee then --cant anchor to itself
+			t[moduleNamee] = moduleFrame.localizedModuleName
+		end
 	end
 	t.Button = L.Button
 	return t
@@ -48,6 +50,12 @@ local function isInSameVertical(Point1, Point2)
     end
 end
 
+local function needsHeight(Point1, Point2)
+	if not Point1 and not Point2 then return end
+	if Point1 and not Point2 then return true end
+	return isInSameHorizontal(Point1, Point2)
+end
+
 
 local function needsWidth(Point1, Point2)
 	if not Point1 and not Point2 then return end
@@ -71,6 +79,7 @@ local function validateAnchor(playerType, moduleName, relativeFrame)
 			else
 				return true
 			end
+			--we basically end the loop after just one player since all player frames are using same options
 		end
 		if i == 0 then
 			BattleGroundEnemies:Information("There are currently no players for the selected option available. You can start the testmode to add some players. Otherwise your selected frame can't be validated and there might be frame looping issues, therefore your selected frame is not saved to avoid this issue.")
@@ -82,11 +91,7 @@ local function validateAnchor(playerType, moduleName, relativeFrame)
 	end
 end
 
-local function needsHeight(Point1, Point2)
-	if not Point1 and not Point2 then return end
-	if Point1 and not Point2 then return true end
-	return isInSameHorizontal(Point1, Point2)
-end
+
 
 function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 	local numPoints = 0
@@ -94,7 +99,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 	temp.Parent = {
 		type = "select",
 		name = L.Parent,
-		values = GetAllAnchors,
+		values = GetAllAnchors(moduleName),
 		order = 1
 	}
 	temp.Fake1 = Data.AddVerticalSpacing(2)
@@ -127,7 +132,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 					RelativeFrame = {
 						type = "select",
 						name = L.RelativeFrame,
-						values = GetAllAnchors,
+						values = GetAllAnchors(moduleName),
 						validate = function(option, value)
 
 							if validateAnchor(playerType, moduleName, value) then
@@ -265,8 +270,6 @@ end
 
 function Data.GetOption(location, option)
 	local value = location[option[#option]]
-	print("get value", value)
-
 	if type(value) == "table" then
 		--BattleGroundEnemies:Debug("is table")
 		return unpack(value)
@@ -280,13 +283,9 @@ function Data.SetOption(location, option, ...)
 	local value
 	if option.type == "color" then
 		value = {...}  local r, g, b, alpha = ...
-		print(r, g, b, alpha)
 	else
 		value = ...
-	end
-
-	print("location[option[#option]] = value", location[option[#option]], location, value)
-	
+	end	
 	location[option[#option]] = value
 	BattleGroundEnemies:ApplyAllSettings()
 
@@ -387,6 +386,12 @@ local JustifyVValues = {
 	BOTTOM = L.BOTTOM
 }
 
+local FontOutlines = {
+	[""] = L.None,
+	["OUTLINE"] = L.Normal,
+	["THICKOUTLINE"] = L.Thick,
+}
+
 function Data.AddNormalTextSettings(location)
 	return {
 		JustifyH = {
@@ -415,7 +420,7 @@ function Data.AddNormalTextSettings(location)
 			type = "select",
 			name = L.Font_Outline,
 			desc = L.Font_Outline_Desc,
-			values = Data.FontOutlines,
+			values = FontOutlines,
 			order = 2
 		},
 		Fake = Data.AddVerticalSpacing(3),
@@ -478,7 +483,7 @@ function Data.AddCooldownSettings(location)
 					type = "select",
 					name = L.Font_Outline,
 					desc = L.Font_Outline_Desc,
-					values = Data.FontOutlines,
+					values = FontOutlines,
 					order = 4
 				},
 				Fake1 = Data.AddVerticalSpacing(5),
@@ -508,7 +513,6 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 	local temp = {}
 	for moduleName, moduleFrame in pairs(self.ButtonModules) do
 
-
 		local locationn = location.ButtonModules[moduleName]
 
 		temp[moduleName]  = {
@@ -521,6 +525,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 			set = function(option, ...)
 				return Data.SetOption(locationn, option, ...)
 			end,
+			disabled = function() return not BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) end,
 			args = {
 				Enabled = {
 					type = "toggle",
@@ -555,7 +560,8 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 				},
 				Reset = {
 					type = "execute",
-					name = "Reset the settings of this section",
+					name = L.ResetModule,
+					desc = L.ResetModule_Desc,
 					func = function()
 						location.ButtonModules[moduleName] = copy(defaults.ButtonModules[moduleName])
 						BattleGroundEnemies:NotifyChange()
@@ -1007,13 +1013,6 @@ function BattleGroundEnemies:SetupOptions()
 						end,
 						values = {[5] = ARENA, [15] = L.BGSize_15, [40] = L.BGSize_40}
 					},
-					Testmode_UseTeammates = {
-						type = "toggle",
-						name = L.Testmode_UseTeammates,
-						desc = L.Testmode_UseTeammates_Desc,
-						disabled = function() return self.TestmodeActive end,
-						order = 1
-					},
 					Testmode_Enabled = {
 						type = "execute",
 						name = L.Testmode_Toggle,
@@ -1029,7 +1028,15 @@ function BattleGroundEnemies:SetupOptions()
 						disabled = function() return InCombatLockdown() or not self.TestmodeActive end,
 						func = self.ToggleTestmodeOnUpdate,
 						order = 3
-					}
+					},
+					Testmode_UseTeammates = {
+						type = "toggle",
+						name = L.Testmode_UseTeammates,
+						desc = L.Testmode_UseTeammates_Desc,
+						disabled = function() return self.TestmodeActive end,
+						width = "full",
+						order = 4
+					},
 				}
 			},
 			GeneralSettings = {
