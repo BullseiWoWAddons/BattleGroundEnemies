@@ -15,9 +15,6 @@ Data.defaultSettings = {
 		ShowTooltips = true,
 		UseBigDebuffsPriority = true,
 
-
-
-
 		RBG = {
 			TargetCalling_SetMark = false,
 			TargetCalling_NotificationEnable = false
@@ -126,7 +123,7 @@ Data.defaultSettings = {
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
-							Border = "RothSquare",
+							Border = "Blizzard Dialog",
 							BorderThickness = 1,
 						},
 					},
@@ -251,7 +248,7 @@ Data.defaultSettings = {
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
-							Border = "RothSquare",
+							Border = "Blizzard Dialog",
 							BorderThickness = 1,
 						},
 					},
@@ -378,7 +375,7 @@ Data.defaultSettings = {
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
-							Border = "RothSquare",
+							Border = "Blizzard Dialog",
 							BorderThickness = 1,
 						},
 					},
@@ -522,7 +519,7 @@ Data.defaultSettings = {
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
-							Border = "RothSquare",
+							Border = "Blizzard Dialog",
 							BorderThickness = 1,
 						},
 					},
@@ -649,7 +646,7 @@ Data.defaultSettings = {
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
-							Border = "RothSquare",
+							Border = "Blizzard Dialog",
 							BorderThickness = 1,
 						},
 					},
@@ -775,7 +772,7 @@ Data.defaultSettings = {
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
-							Border = "RothSquare",
+							Border = "Blizzard Dialog",
 							BorderThickness = 1,
 						},
 					},
