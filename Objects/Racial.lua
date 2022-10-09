@@ -17,7 +17,7 @@ local defaultSettings = {
 	Cooldown = {
 		ShowNumber = true,
 		FontSize = 12,
-		Fontoutline = "OUTLINE",
+		FontOutline = "OUTLINE",
 		EnableShadow = false,
 		ShadowColor = {0, 0, 0, 1},
 	},
@@ -84,9 +84,15 @@ local flags = {
 	Width = "Variable"
 }
 
-local events = {"SPELL_CAST_SUCCESS"}
-
-local racial = BattleGroundEnemies:NewButtonModule("Racial", L.Racial, flags, defaultSettings, options, events)
+local racial = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Racial",
+	localizedModuleName = L.Racial,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"SPELL_CAST_SUCCESS"},
+	expansions = "All"
+})
 
 function racial:AttachToPlayerButton(playerButton)
 

@@ -3,7 +3,7 @@ local L = Data.L
 
 local defaultSettings = {
 	Enabled = true,
-	Parent = "Spec",
+	Parent = "Button",
 	Cooldown = {
 		ShowNumber = true,
 		FontSize = 12,
@@ -43,12 +43,20 @@ local flags = {
 	Width = "Fixed"
 }
 
-local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "GotInterrupted", "UnitDied"}
+local spec_HighestActivePriority = BattleGroundEnemies:NewButtonModule({
+	moduleName = "HighestPriority",
+	localizedModuleName = L.HighestPriority,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "GotInterrupted", "UnitDied"},
+	expansions = "All"
+})
 
-local spec_HighestActivePriority = BattleGroundEnemies:NewButtonModule("HighestPriority", "HighestPriority", flags, defaultSettings, options, events)
 
 function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)
+	
 	frame.PriorityAuras = {}
 	frame.ActiveInterrupt = false
 	frame.Icon = frame:CreateTexture(nil, 'BACKGROUND')
@@ -75,6 +83,21 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 
 	frame:Hide()
 
+	function frame:MakeSureWeAreOnTop()
+		local numPoints = self:GetNumPoints()
+		local highestLevel = 0
+		for i = 1, numPoints do
+			local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint(i)
+			if relativeTo then
+				local level = relativeTo:GetFrameLevel()
+				if level and level > highestLevel then
+					highestLevel = level
+				end
+			end
+		end
+		self:SetFrameLevel(highestLevel + 1)
+	end
+
 	function frame:NewAura(unitID, filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod)
 		local priority = BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID]
 		if not priority then return end
@@ -93,6 +116,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:Update()
+		self:MakeSureWeAreOnTop()
 		local highestPrioritySpell
 		local currentTime = GetTime()
 
@@ -131,6 +155,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	function frame:ApplyAllSettings()
 		local moduleSettings = self.config
 		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, true, true, {0, 0, 0, 0.5})
+		self:MakeSureWeAreOnTop()
 	end
 
 	function frame:Reset()

@@ -26,7 +26,7 @@ local defaultSettings = {
 	Cooldown = {
 		ShowNumber = true,
 		FontSize = 12,
-		Fontoutline = "OUTLINE",
+		FontOutline = "OUTLINE",
 		EnableShadow = false,
 		ShadowColor = {0, 0, 0, 1},
 	},
@@ -76,9 +76,15 @@ local flags = {
 	Width = "Variable"
 }
 
-local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"}
-
-local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule("ObjectiveAndRespawn", "ObjectiveAndRespawn", flags, defaultSettings, options, events)
+local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
+	moduleName = "ObjectiveAndRespawn",
+	localizedModuleName = L.ObjectiveAndRespawn,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},
+	expansions = "All"
+})
 
 function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)

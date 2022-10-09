@@ -36,7 +36,20 @@ local defaultSettings = {
 
 local options = function(location)
 	return {
-
+		ConvertCyrillic = {
+			type = "toggle",
+			name = L.ConvertCyrillic,
+			desc = L.ConvertCyrillic_Desc,
+			width = "normal",
+			order = 1
+		},
+		ShowRealmnames = {
+			type = "toggle",
+			name = L.ShowRealmnames,
+			desc = L.ShowRealmnames_Desc,
+			width = "normal",
+			order = 2
+		},
 		TextSettings = {
 			type = "group",
 			name = L.TextSettings,
@@ -50,18 +63,25 @@ local options = function(location)
 				return Data.SetOption(location.Text, option, ...)
 			end,
 			args = Data.AddNormalTextSettings(location.Text)
-		},
+		}
 	}
 end
 
 local flags = {
-	Height = "Dynamic",
-	Width = "Dynamic"
+	Height = "Variable",
+	Width = "Variable"
 }
 
-local events = {"OnNewPlayer"}
+local name = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Name",
+	localizedModuleName = L.Name,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"OnNewPlayer"},
+	expansions = "All"
+})
 
-local name = BattleGroundEnemies:NewButtonModule("Name", "Name", flags, defaultSettings, options, events)
 
 function name:AttachToPlayerButton(playerButton)
 	playerButton.Name = BattleGroundEnemies.MyCreateFontString(playerButton)
@@ -108,7 +128,6 @@ function name:AttachToPlayerButton(playerButton)
 	function playerButton.Name:ApplyAllSettings()
 		local config = self.config
 		-- name
-		self:SetTextColor(unpack(config.Text.FontColor))
 		self:ApplyFontStringSettings(config.Text)
 		self:SetName()
 	end

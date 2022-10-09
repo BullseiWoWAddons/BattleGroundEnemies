@@ -118,10 +118,15 @@ local flags = {
 	Width = "Dynamic"
 }
 
-
-local events = {"AuraRemoved"}
-
-local dRTracking = BattleGroundEnemies:NewButtonModule("DRTracking", "DRTracking", flags, defaultSettings, options, events)
+local dRTracking = BattleGroundEnemies:NewButtonModule({
+	moduleName = "DRTracking",
+	localizedModuleName = "DRTracking",
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"AuraRemoved"},
+	expansions = "All"
+})
 
 
 function dRTracking:AttachToPlayerButton(playerButton)

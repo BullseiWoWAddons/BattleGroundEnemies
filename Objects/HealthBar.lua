@@ -108,9 +108,16 @@ local flags = {
 	Width = "Fixed"
 }
 
-local events = {"UpdateHealth", "OnNewPlayer"}
+local healthBar = BattleGroundEnemies:NewButtonModule({
+	moduleName = "healthBar",
+	localizedModuleName = L.HealthBar,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"UpdateHealth", "OnNewPlayer"},
+	expansions = "All"
+})
 
-local healthBar = BattleGroundEnemies:NewButtonModule("healthBar", "HealthBar", flags, defaultSettings, options, events)
 
 function healthBar:AttachToPlayerButton(playerButton)
 	playerButton.healthBar = CreateFrame('StatusBar', nil, playerButton)
@@ -123,7 +130,11 @@ function healthBar:AttachToPlayerButton(playerButton)
 	playerButton.myHealPrediction = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 5)
 	playerButton.myHealPrediction:ClearAllPoints();
 	playerButton.myHealPrediction:SetColorTexture(1,1,1);
-	playerButton.myHealPrediction:SetGradient("VERTICAL", 8/255, 93/255, 72/255, 11/255, 136/255, 105/255);
+	if playerButton.myHealPrediction.SetGradientAlpha then --this only exists until Dragonflight. 10.0 In dragonflight this :SetGradientAlpha got merged into SetGradient and CreateColor is required
+		playerButton.myHealPrediction:SetGradient("VERTICAL", 8/255, 93/255, 72/255, 11/255, 136/255, 105/255);
+	else
+		playerButton.myHealPrediction:SetGradient("VERTICAL", CreateColor(8/255, 93/255, 72/255, 1), CreateColor(11/255, 136/255, 105/255, 1));
+	end
 	playerButton.myHealPrediction:SetVertexColor(0.0, 0.659, 0.608);
 
 
@@ -139,7 +150,12 @@ function healthBar:AttachToPlayerButton(playerButton)
 
 	playerButton.otherHealPrediction = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 5)
 	playerButton.otherHealPrediction:SetColorTexture(1,1,1);
-	playerButton.otherHealPrediction:SetGradient("VERTICAL", 11/255, 53/255, 43/255, 21/255, 89/255, 72/255);
+	if playerButton.otherHealPrediction.SetGradientAlpha then
+		playerButton.otherHealPrediction:SetGradient("VERTICAL", 11/255, 53/255, 43/255, 21/255, 89/255, 72/255);
+	else
+		playerButton.otherHealPrediction:SetGradient("VERTICAL", CreateColor(11/255, 53/255, 43/255, 1), CreateColor(21/255, 89/255, 72/255, 1));
+	end
+	
 
 
 	playerButton.totalAbsorbOverlay = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 6)

@@ -9,9 +9,7 @@ local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 local HasSpeccs = not (IsClassic or IsTBCC or IsWrath)
 
-local options = {
 
-}
 
 local defaultSettings = {
 	Enabled = true,
@@ -35,9 +33,15 @@ local flags = {
 	Width = "Variable"
 }
 
-local events = {"SetSpecAndRole"}
-
-local role = BattleGroundEnemies:NewButtonModule("Role", L.Role, flags, defaultSettings, options, events)
+local role = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Role",
+	localizedModuleName = L.Role,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = nil,
+	events = {"SetSpecAndRole"},
+	expansions = {WOW_PROJECT_MAINLINE}
+})
 
 function role:AttachToPlayerButton(playerButton)
 	playerButton.Role = CreateFrame("Frame", nil, playerButton)

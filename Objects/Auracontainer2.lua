@@ -292,15 +292,6 @@ end
 
 local function AddAuraSettings(location, filter)
 	return {
-		Size = {
-			type = "range",
-			name = L.DurationFilter_OnlyShowWhenDuration,
-			desc = L.DurationFilter_OnlyShowWhenDuration_Desc,
-			min = 1,
-			max = 600,
-			step = 1,
-			order = 16
-		},
 		OnlyShowPriorityAuras = {
 			type = "toggle",
 			name = L.OnlyShowPriorityAuras,
@@ -360,11 +351,26 @@ local flags = {
 	Width = "Dynamic"
 }
 
-
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "UnitDied"}
 
-local buffs = BattleGroundEnemies:NewButtonModule("Buffs", "Buffs", flags, defaults, buffOptions, events)
-local debuffs = BattleGroundEnemies:NewButtonModule("Debuffs", "Debuffs", flags, defaults, debuffOptions, events)
+local buffs = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Buffs",
+	localizedModuleName = L.Buffs,
+	flags = flags,
+	defaultSettings = defaults,
+	options = buffOptions,
+	events = events,
+	expansions = "All"
+})
+local debuffs = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Debuffs",
+	localizedModuleName = L.Debuffs,
+	flags = flags,
+	defaultSettings = defaults,
+	options = debuffOptions,
+	events = events,
+	expansions = "All"
+})
 
 
 
@@ -728,8 +734,13 @@ local function AttachToPlayerButton(playerButton, filter)
 					auraFrame.border:SetVertexColor(color.r, color.g, color.b)
 
 				end
+
+				if auraDetails.Count and auraDetails.Count > 1 then
+					auraFrame.count:SetText(auraDetails.Count)
+				else
+					auraFrame.count:SetText("")
+				end
 		
-				auraFrame.count:SetText(auraDetails.Count > 1 and auraDetails.Count)
 		
 				auraFrame.icon:SetTexture(auraDetails.Icon)
 				auraFrame.cooldown:SetCooldown(auraDetails.ExpirationTime - auraDetails.Duration, auraDetails.Duration)

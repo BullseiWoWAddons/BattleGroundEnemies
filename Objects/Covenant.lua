@@ -25,7 +25,15 @@ local flags = {
 	Width = "Variable"
 }
 
-local covenant = BattleGroundEnemies:NewButtonModule("Covenant", "Covenant", flags, defaultSettings, nil, nil)
+local covenant = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Covenant",
+	localizedModuleName = "Covenant",
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = nil,
+	events = nil,
+	expansions = {WOW_PROJECT_MAINLINE}
+})
 
 function covenant:AttachToPlayerButton(playerButton)
 -- Covenant Icon

@@ -55,9 +55,15 @@ local flags = {
 	Width = "Variable"
 }
 
-local events = {"UpdateTargetIndicators"}
-
-local symbolicTargetIndicator = BattleGroundEnemies:NewButtonModule("TargetIndicatorSymbolic", L.TargetIndicatorSymbolic, flags, defaultSettings, options, events)
+local symbolicTargetIndicator = BattleGroundEnemies:NewButtonModule({
+	moduleName = "TargetIndicatorSymbolic",
+	localizedModuleName = L.TargetIndicatorSymbolic,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"UpdateTargetIndicators"},
+	expansions = "All"
+})
 
 function symbolicTargetIndicator:AttachToPlayerButton(playerButton)
 	playerButton.TargetIndicatorSymbolic = CreateFrame("frame", nil, playerButton)

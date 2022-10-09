@@ -52,29 +52,23 @@ local options = function(location)
 	}
 end
 
-local function dumppp(o)
-	if type(o) == 'table' then
-	   local s = '{ '
-	   for k,v in pairs(o) do
-		  if type(k) ~= 'number' then k = '"'..k..'"' end
-		  s = s .. '['..k..'] = ' .. dump(v) .. ','
-	   end
-	   return s .. '} '
-	else
-	   return tostring(o)
-	end
- end
 
 local flags = {
 	Height = "Variable",
 	Width = "Variable"
 }
 
-local events = {"NewUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"}
+local level = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Level",
+	localizedModuleName = L.Level,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"NewUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"},
+	expansions = "All"
+})
 
-local Level = BattleGroundEnemies:NewButtonModule("Level", "Level", flags, defaultSettings, options, events)
-
-function Level:AttachToPlayerButton(playerButton)
+function level:AttachToPlayerButton(playerButton)
 	local fs = BattleGroundEnemies.MyCreateFontString(playerButton)
 
 	function fs:DisplayLevel()
@@ -90,10 +84,12 @@ function Level:AttachToPlayerButton(playerButton)
 	-- Level
 
 	function fs:OnNewPlayer()
+
 		if playerButton.PlayerLevel then self:SetLevel(playerButton.PlayerLevel) end --for testmode
 	end
 
 	function fs:NewUnitID(unitID)
+
 		self:SetLevel(UnitLevel(unitID))
 	end
 
@@ -101,38 +97,12 @@ function Level:AttachToPlayerButton(playerButton)
 	function fs:SetLevel(level)
 		if not playerButton.PlayerLevel or level ~= playerButton.PlayerLevel then
 			playerButton.PlayerLevel = level
-			self:DisplayLevel()
+			
 		end
+		self:DisplayLevel()
 	end
 
 	function fs:ApplyAllSettings()
-		print("ApplyAllSettings")
-		-- level
-		for k,v in pairs(self.config.Text) do
-			
-			print("k,v", k,v)
-			if type(v) =="table" then
-				for k,v in pairs(self.config.Text) do
-			
-					print("k,v", k,v)
-					if type(v) =="table" then
-						for k,v in pairs(self.config.Text) do
-			
-							print("k,v", k,v)
-							if type(v) =="table" then
-								for k,v in pairs(self.config.Text) do
-			
-									print("k,v", k,v)
-									if type(v) =="table" then
-										
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-		end
 		self:ApplyFontStringSettings(self.config.Text)
 		self:DisplayLevel()
 	end

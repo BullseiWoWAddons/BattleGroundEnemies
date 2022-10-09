@@ -16,7 +16,7 @@ local defaultSettings = {
 	Cooldown = {
 		ShowNumber = true,
 		FontSize = 12,
-		Fontoutline = "OUTLINE",
+		FontOutline = "OUTLINE",
 		EnableShadow = false,
 		ShadowColor = {0, 0, 0, 1},
 	}
@@ -46,9 +46,15 @@ local flags = {
 	Width = "Variable"
 }
 
-local events = {"ShouldQueryAuras", "CareAboutThisAura", "UnitAura", "SPELL_CAST_SUCCESS"}
-
-local trinket = BattleGroundEnemies:NewButtonModule("Trinket", L.Trinket, flags, defaultSettings, options, events)
+local trinket = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Trinket",
+	localizedModuleName = L.Trinket,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"ShouldQueryAuras", "CareAboutThisAura", "UnitAura", "SPELL_CAST_SUCCESS"},
+	expansions = "All"
+})
 
 function trinket:AttachToPlayerButton(playerButton)
 

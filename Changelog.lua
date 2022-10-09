@@ -8,6 +8,7 @@ Data.changelog = {
 			{
 				Header = "New Features:",
 				Entries = {
+					"Added a seperate module for class icons, the spec icon is stacked ontop of the class icon by default. This enables you to show the two icons side by side.",
 					"Added the ability to add health numbers (percentage, lost health and current health)",
 					"Added an option to disable target icons.",
 					"Added the option to export and import profiles to and from a string.",

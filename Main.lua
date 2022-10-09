@@ -32,6 +32,8 @@ BattleGroundEnemies.Counter = {}
 --todo, fix the testmode when the user is in a group
 --todo, maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
 --todo add priorized auras (buffs and debuffs) like BigDebuffs
+--reset saved variables when upgrading to new version
+--do localization
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -501,8 +503,10 @@ do
 
 
 						end
-						if moduleFrame.flags.Height == "Dynamic" then moduleFrameOnButton:SetHeight(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
-						if moduleFrame.flags.Width == "Dynamic" then moduleFrameOnButton:SetWidth(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
+						if moduleFrame.flags then
+							if moduleFrame.flags.Height == "Dynamic" then moduleFrameOnButton:SetHeight(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
+							if moduleFrame.flags.Width == "Dynamic" then moduleFrameOnButton:SetWidth(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
+						end
 					end
 				end
 				if config.Parent then
@@ -510,7 +514,7 @@ do
 				end
 
 
-				if not moduleFrameOnButton.Enabled and moduleFrame.flags.SetZeroWidthWhenDisabled then
+				if not moduleFrameOnButton.Enabled and moduleFrame.flags and moduleFrame.flags.SetZeroWidthWhenDisabled then
 					moduleFrameOnButton:SetWidth(0.001)
 				else
 					if config.UseButtonHeightAsWidth then
@@ -523,7 +527,7 @@ do
 				end
 
 
-				if not moduleFrameOnButton.Enabled and moduleFrame.flags.SetZeroHeightWhenDisabled then
+				if not moduleFrameOnButton.Enabled and moduleFrame.flags and moduleFrame.flags.SetZeroHeightWhenDisabled then
 					moduleFrameOnButton:SetHeight(0.001)
 				else
 					if config.UseButtonHeightAsHeight then
@@ -571,7 +575,7 @@ do
 			local moduleConfigOnButton = self.bgSizeConfig.ButtonModules[moduleName]
 			local moduleFrameOnButton = self[moduleName]
 			moduleFrameOnButton.config = moduleConfigOnButton
-			if moduleConfigOnButton.Enabled then
+			if moduleConfigOnButton.Enabled and BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) then
 				if moduleFrame.events then
 					for i = 1, #moduleFrame.events do
 						local event = moduleFrame.events[i]
@@ -1517,16 +1521,35 @@ end
 --buttonHeightSquare = a attachment that has the height of the button and the same width, when unused sets to 0.01 width
 --HeightAndWidthVariable
 
-function BattleGroundEnemies:NewButtonModule(moduleName, localizedModuleName, flags, defaultSettings, options, events)
+
+function BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName)
+	local moduleFrame = self.ButtonModules[moduleName]
+	if moduleFrame then
+		if moduleFrame.expansions == "All" then
+			return true
+		else
+			for i = 1, #moduleFrame.expansions do
+				if moduleFrame.expansions[i] == WOW_PROJECT_ID then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
+	if type(moduleSetupTable) ~= "table" then return error("Tried to register a Module but the parameter wasn't a table") end
+	if not moduleSetupTable.moduleName then return error("NewButtonModule error: No moduleName specified") end
+	local moduleName = moduleSetupTable.moduleName
+	if not moduleSetupTable.localizedModuleName then return error("NewButtonModule error for module: " .. moduleName .. " No localizedModuleName specified") end
+	if not moduleSetupTable.expansions then return error("NewButtonModule error for module: " .. moduleName .. " No expansions specified") end
+	if type(moduleSetupTable.expansions) ~= "table" and moduleSetupTable.expansions ~= "All" then return error("NewButtonModule error for module: " .. moduleName .. " expansions must be a table or 'All'") end
+
 
 	if self.ButtonModules[moduleName] then return error("module "..moduleName.." is already registered") end
 	local moduleFrame = CreateFrame("Frame", nil, UIParent)
-	moduleFrame.moduleName = moduleName
-	moduleFrame.localizedModuleName = localizedModuleName
-	moduleFrame.defaultSettings = defaultSettings or {}
-	moduleFrame.options = options or {}
-	moduleFrame.flags = flags or {}
-	moduleFrame.events = events
+	Mixin(moduleFrame, moduleSetupTable)
 
 
 	local t = {"Enemies", "Allies"}
@@ -1537,26 +1560,28 @@ function BattleGroundEnemies:NewButtonModule(moduleName, localizedModuleName, fl
 			local BGSize = BGSizes[j]
 			Data.defaultSettings.profile[tt][BGSize].ButtonModules = Data.defaultSettings.profile[tt][BGSize].ButtonModules or {}
 			Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName] = Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName] or {}
-			Mixin(Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName], defaultSettings)
+			Mixin(Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName], moduleSetupTable.defaultSettings)
 		end
 	end
 
-	moduleFrame:SetScript("OnEvent", function(self, event, ...)
+	--not used
+	--[[ moduleFrame:SetScript("OnEvent", function(self, event, ...)
 		BattleGroundEnemies:Debug("BattleGroundEnemies module event", moduleName, event, ...)
 		self[event](self, ...)
 	end)
 
 	moduleFrame.Debug = function(self, ...)
 		BattleGroundEnemies:Debug("UnitInCombat module debug", moduleName, ...)
-	end
+	end ]]
 
 	self.ButtonModules[moduleName] = moduleFrame
 	return moduleFrame
 end
 
 function BattleGroundEnemies:GetBigDebuffsPriority(spellID)
-	if not (BattleGroundEnemies.db.profile.UseBigDebuffsPriority and BigDebuffs) then return end
-	local priority = BigDebuffs:GetDebuffPriority(spellID)
+	if BattleGroundEnemies.db.profile.UseBigDebuffsPriority then return end
+	if not BigDebuffs then return end
+	local priority = BigDebuffs.GetDebuffPriority and BigDebuffs:GetDebuffPriority(spellID)
 	if not priority then return end
 	if priority == 0 then return end
 	return priority
@@ -1744,7 +1769,24 @@ do
 				if mainFrame == self.Allies then
 					local myRole
 					if HasSpeccs then
-						myRole = Data.Classes[self.PlayerDetails.PlayerClass][specCache[self.PlayerDetails.GUID]].roledID
+						print("self.PlayerDetails.PlayerClass", self.PlayerDetails.PlayerClass)
+						print("self.PlayerDetails.GUID", self.PlayerDetails.GUID)
+						for k,v in pairs(Data.Classes) do
+							print(k,v)
+							if type(v) == "table" then
+								for j,u in pairs(v) do
+									print(j,u)
+								end
+							end
+						end
+						for k,v in pairs(specCache) do
+							print('k,v', k, v)
+						end
+						if not specCache[self.PlayerDetails.GUID] then
+							BattleGroundEnemies:Information("you don't seem to have a specialization. The testmode requires one.")
+						else
+							myRole = Data.Classes[self.PlayerDetails.PlayerClass][specCache[self.PlayerDetails.GUID]].roledID
+						end
 					else
 						myRole = "DAMAGER"
 					end
@@ -2250,6 +2292,8 @@ local function ApplyFontStringSettings(self, settings)
 	end
 
 	self:EnableShadowColor(settings.EnableShadow, settings.ShadowColor)
+
+	self:SetText(self:GetText()) --otherweise it can bug out, it sets the values and for example :GetJustivyV returns the new value but the font is still aligned falsly
 end
 
 local function ApplyCooldownSettings(self, config, cdReverse, setDrawSwipe, swipeColor)

@@ -68,9 +68,15 @@ local flags = {
 	SetZeroHeightWhenDisabled = true
 }
 
-local events = {"UNIT_POWER_FREQUENT", "SetSpecAndRole"}
-
-local power = BattleGroundEnemies:NewButtonModule("Power", L.Power, flags, defaultSettings, options, events)
+local power = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Power",
+	localizedModuleName = L.Power,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"UNIT_POWER_FREQUENT", "SetSpecAndRole"},
+	expansions = "All"
+})
 
 function power:AttachToPlayerButton(playerButton)
 	playerButton.Power = CreateFrame('StatusBar', nil, playerButton)

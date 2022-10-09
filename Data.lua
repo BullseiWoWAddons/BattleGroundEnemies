@@ -87,12 +87,6 @@ Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/R
 	["я"] = "ia"
 }
 
-Data.FontOutlines = {
-	[""] = L.None,
-	["OUTLINE"] = L.Normal,
-	["THICKOUTLINE"] = L.Thick,
-}
-
 Data.Buttons = {
 	Target = TARGET,
 	Focus = SET_FOCUS,

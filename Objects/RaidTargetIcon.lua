@@ -33,9 +33,15 @@ local flags = {
 	Width = "Variable"
 }
 
-local events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"}
-
-local raidTargetIcon = BattleGroundEnemies:NewButtonModule("RaidTargetIcon", L.RaidTargetIcon, flags, defaultSettings, nil, events)
+local raidTargetIcon = BattleGroundEnemies:NewButtonModule({
+	moduleName = "RaidTargetIcon",
+	localizedModuleName = L.RaidTargetIcon,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = nil,
+	events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"},
+	expansions = "All"
+})
 
 function raidTargetIcon:AttachToPlayerButton(playerButton)
 	playerButton.RaidTargetIcon = CreateFrame('Frame', nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")

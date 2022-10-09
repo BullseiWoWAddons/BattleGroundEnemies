@@ -56,9 +56,15 @@ local flags = {
 	Width = "Variable"
 }
 
-local events = {"UpdateTargetIndicators"}
-
-local targetIndicatorNumeric = BattleGroundEnemies:NewButtonModule("TargetIndicatorNumeric", "TargetIndicatorNumeric", flags, defaultSettings, options, events)
+local targetIndicatorNumeric = BattleGroundEnemies:NewButtonModule({
+	moduleName = "TargetIndicatorNumeric",
+	localizedModuleName = L.TargetIndicatorNumeric,
+	flags = flags,
+	defaultSettings = defaultSettings,
+	options = options,
+	events = {"UpdateTargetIndicators"},
+	expansions = "All"
+})
 
 function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 

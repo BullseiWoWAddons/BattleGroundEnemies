@@ -19,12 +19,11 @@ local specDefaults = {
 			RelativeFrame = "Class",
 			RelativePoint = "BOTTOMRIGHT",
 		}
-	},
+	}
 }
 
 local classDefaults = {
 	Enabled = true,
-	OnlyShowIfNoSpec = true,
 	Width = 36,
 	Parent = "Button",
 	Points = {
@@ -38,9 +37,8 @@ local classDefaults = {
 			RelativeFrame = "Button",
 			RelativePoint = "BOTTOMLEFT",
 		}
-	},
+	}
 }
-
 
 local classFlags = {
 	Height = "Fixed",
@@ -49,8 +47,24 @@ local classFlags = {
 
 local events = {"SetSpecAndRole"}
 
-local class = BattleGroundEnemies:NewButtonModule("Class", L.Class, classFlags, classDefaults, nil, events)
-local spec = BattleGroundEnemies:NewButtonModule("Spec", L.Spec, nil, specDefaults, nil, events)
+local class = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Class",
+	localizedModuleName = L.Class,
+	flags = classFlags,
+	defaultSettings = classDefaults,
+	options = nil,
+	events = events,
+	expansions = "All"
+})
+local spec = BattleGroundEnemies:NewButtonModule({
+	moduleName = "Spec",
+	localizedModuleName = L.Spec,
+	flags = nil,
+	defaultSettings = specDefaults,
+	options = nil,
+	events = events,
+	expansions = {WOW_PROJECT_MAINLINE}
+})
 
 
 
@@ -58,14 +72,23 @@ local spec = BattleGroundEnemies:NewButtonModule("Spec", L.Spec, nil, specDefaul
 local function attachToPlayerButton(playerButton, type)
 	local frame = CreateFrame("Frame", nil, playerButton)
 	frame.type = type
+	if type == "Spec" then
+		if playerButton.Class and playerButton.Class.GetFrameLevel then
+			frame:SetFrameLevel(playerButton.Class:GetFrameLevel() + 1) -- to always make sure the level is above the spec in case they are stacked ontop of each other
+		end
+	end
 
 	frame:SetScript("OnSizeChanged", function(self, width, height)
-		self:CropImage(width, height)
+		self:CropImage()
 	end)
 
-	function frame:CropImage(width, height)
-		if playerButton.PlayerSpecName then
-			BattleGroundEnemies.CropImage(self.Icon, width, height)
+	function frame:CropImage()
+		if playerButton.PlayerSpecName and self.type == "Spec" then
+			local width = self:GetWidth()
+			local height = self:GetHeight()
+			if width and height and width > 0 and height > 0 then
+				BattleGroundEnemies.CropImage(self.Icon, width, height)
+			end
 		end
 	end
 
@@ -93,7 +116,7 @@ local function attachToPlayerButton(playerButton, type)
 		end
 	end)
 
-	frame.Background = playerButton.Spec:CreateTexture(nil, 'BACKGROUND')
+	frame.Background = frame:CreateTexture(nil, 'BACKGROUND')
 	frame.Background:SetAllPoints()
 	frame.Background:SetColorTexture(0,0,0,0.8)
 
@@ -102,9 +125,6 @@ local function attachToPlayerButton(playerButton, type)
 
 	frame.SetSpecAndRole = function(self)
 		if self.type == "Class" then
-			if playerButton.PlayerSpecName and self.config.OnlyShowIfNoSpec then
-				self.Icon:SetTexture(nil)
-			else
 				--either no spec or the player wants to always see it > display it
 				if playerButton.PlayerClass then
 					self.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
@@ -112,18 +132,14 @@ local function attachToPlayerButton(playerButton, type)
 				else
 					self.Icon:SetTexture(nil)
 				end
-			end
+			
 		else -- "Spec"
 			if playerButton.PlayerSpecName then
 				self.Icon:SetTexture(Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName].specIcon)
 			end
 		end
 
-		local width = self:GetWidth()
-		local height = self:GetHeight()
-		if width and height and width > 0 and height > 0 then
-			self:CropImage(self:GetWidth(), self:GetHeight())
-		end
+		self:CropImage()
 	end
 
 
@@ -131,6 +147,7 @@ local function attachToPlayerButton(playerButton, type)
 		self:Show()
 		self:SetSpecAndRole()
 	end
+	return frame
 end
 
 function class:AttachToPlayerButton(playerButton)
