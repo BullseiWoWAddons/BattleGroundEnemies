@@ -63,22 +63,3 @@ function role:AttachToPlayerButton(playerButton)
 		end
 	end
 end
-
-
-
-
-
-
-
-
-
-
--- on new player on unit
-
-
-
-
-		
-		
-		-- name
-		

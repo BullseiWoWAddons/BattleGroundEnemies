@@ -22,7 +22,7 @@ local defaults = {
 	OnlyShowPriorityAuras = true,
 	Cooldown = {
 		ShowNumber = true,
-		FontSize = 12,
+		FontSize = 8,
 		FontOutline = "OUTLINE",
 		EnableShadow = false,
 		ShadowColor = {0, 0, 0, 1},
@@ -556,7 +556,7 @@ local function AttachToPlayerButton(playerButton, filter)
 		local width = 0
 		local widestRow = 0
 		local height = 0
-		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRow, relativePointNewRow
+		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRowY, relativePointNewRowY
 
 		if growLeft then
 			pointX = "RIGHT"
@@ -571,16 +571,17 @@ local function AttachToPlayerButton(playerButton, filter)
 		if growUp then
 			pointY = "BOTTOM"
 			relativePointY = "BOTTOM"
-			pointNewRow = "BOTTOM"
-			relativePointNewRow = "TOP"
+			pointNewRowY = "BOTTOM"
+			relativePointNewRowY = "TOP"
 			offsetY = verticalSpacing
 		else
 			pointY = "TOP"
 			relativePointY = "TOP"
-			pointNewRow = "TOP"
-			relativePointNewRow = "BOTTOM"
+			pointNewRowY = "TOP"
+			relativePointNewRowY = "BOTTOM"
 			offsetY = -verticalSpacing
 		end
+
 
 
 		local auraFrames = self.AuraFrames
@@ -751,10 +752,10 @@ local function AttachToPlayerButton(playerButton, filter)
 		
 				if framesInRow < framesPerRow then
 					if numAuras == 1 then
-						auraFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..pointX, 0, 0)
+						auraFrame:SetPoint(pointY..pointX, previousFrame, pointY..pointX, 0, 0)
 						firstFrameInRow = auraFrame
 					else
-						auraFrame:SetPoint(pointX, previousFrame, relativePointX, offsetX, 0)
+						auraFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..relativePointX, offsetX, 0)
 					end
 					framesInRow = framesInRow + 1
 					width = width + iSize  + horizontalSpacing
@@ -763,7 +764,7 @@ local function AttachToPlayerButton(playerButton, filter)
 					end
 				else
 					width = 0
-					auraFrame:SetPoint(pointNewRow, firstFrameInRow, relativePointNewRow, 0, offsetY)
+					auraFrame:SetPoint(pointNewRowY..pointX, firstFrameInRow, relativePointNewRowY..relativePointX, 0, offsetY)
 					framesInRow = 1
 					firstFrameInRow = auraFrame
 					height = height + iSize + verticalSpacing

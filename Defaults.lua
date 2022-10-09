@@ -69,17 +69,17 @@ Data.defaultSettings = {
 					Buffs= {
 						Points = {
 							{
-								Point = "RIGHT",
+								Point = "BOTTOMRIGHT",
 								RelativeFrame = "DRTracking",
-								RelativePoint = "LEFT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -2
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -87,17 +87,17 @@ Data.defaultSettings = {
 					Debuffs= {
 						Points = {
 							{
-								Point = "RIGHT",
+								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Buffs",
-								RelativePoint = "LEFT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -8
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -119,7 +119,7 @@ Data.defaultSettings = {
 							Size = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
@@ -194,17 +194,17 @@ Data.defaultSettings = {
 					Buffs= {
 						Points = {
 							{
-								Point = "RIGHT",
+								Point = "BOTTOMRIGHT",
 								RelativeFrame = "DRTracking",
-								RelativePoint = "LEFT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -2
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -212,17 +212,17 @@ Data.defaultSettings = {
 					Debuffs= {
 						Points = {
 							{
-								Point = "RIGHT",
+								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Buffs",
-								RelativePoint = "LEFT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -8
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -244,7 +244,7 @@ Data.defaultSettings = {
 							Size = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
@@ -321,17 +321,17 @@ Data.defaultSettings = {
 					Buffs= {
 						Points = {
 							{
-								Point = "RIGHT",
+								Point = "BOTTOMRIGHT",
 								RelativeFrame = "DRTracking",
-								RelativePoint = "LEFT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -2
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -339,17 +339,17 @@ Data.defaultSettings = {
 					Debuffs= {
 						Points = {
 							{
-								Point = "RIGHT",
+								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Buffs",
-								RelativePoint = "LEFT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -8
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -371,7 +371,7 @@ Data.defaultSettings = {
 							Size = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
@@ -465,17 +465,17 @@ Data.defaultSettings = {
 					Buffs= {
 						Points = {
 							{
-								Point = "LEFT",
+								Point = "BOTTOMLEFT",
 								RelativeFrame = "DRTracking",
-								RelativePoint = "RIGHT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 2
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -483,17 +483,17 @@ Data.defaultSettings = {
 					Debuffs= {
 						Points = {
 							{
-								Point = "LEFT",
+								Point = "BOTTOMLEFT",
 								RelativeFrame = "Buffs",
-								RelativePoint = "RIGHT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 8
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -515,7 +515,7 @@ Data.defaultSettings = {
 							Size = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
@@ -592,17 +592,17 @@ Data.defaultSettings = {
 					Buffs= {
 						Points = {
 							{
-								Point = "LEFT",
+								Point = "BOTTOMLEFT",
 								RelativeFrame = "DRTracking",
-								RelativePoint = "RIGHT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 2
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -610,17 +610,17 @@ Data.defaultSettings = {
 					Debuffs= {
 						Points = {
 							{
-								Point = "LEFT",
+								Point = "BOTTOMLEFT",
 								RelativeFrame = "Buffs",
-								RelativePoint = "RIGHT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 8
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -642,7 +642,7 @@ Data.defaultSettings = {
 							Size = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
@@ -718,17 +718,17 @@ Data.defaultSettings = {
 					Buffs= {
 						Points = {
 							{
-								Point = "LEFT",
+								Point = "BOTTOMLEFT",
 								RelativeFrame = "DRTracking",
-								RelativePoint = "RIGHT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 2
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -736,17 +736,17 @@ Data.defaultSettings = {
 					Debuffs= {
 						Points = {
 							{
-								Point = "LEFT",
+								Point = "BOTTOMLEFT",
 								RelativeFrame = "Buffs",
-								RelativePoint = "RIGHT",
-								OffsetX = 1
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 8
 							}
 						},
 						Container = {
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 						},
@@ -768,7 +768,7 @@ Data.defaultSettings = {
 							Size = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 1,
+							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},

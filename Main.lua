@@ -1579,7 +1579,7 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 end
 
 function BattleGroundEnemies:GetBigDebuffsPriority(spellID)
-	if BattleGroundEnemies.db.profile.UseBigDebuffsPriority then return end
+	if not BattleGroundEnemies.db.profile.UseBigDebuffsPriority then return end
 	if not BigDebuffs then return end
 	local priority = BigDebuffs.GetDebuffPriority and BigDebuffs:GetDebuffPriority(spellID)
 	if not priority then return end
@@ -1769,19 +1769,6 @@ do
 				if mainFrame == self.Allies then
 					local myRole
 					if HasSpeccs then
-						print("self.PlayerDetails.PlayerClass", self.PlayerDetails.PlayerClass)
-						print("self.PlayerDetails.GUID", self.PlayerDetails.GUID)
-						for k,v in pairs(Data.Classes) do
-							print(k,v)
-							if type(v) == "table" then
-								for j,u in pairs(v) do
-									print(j,u)
-								end
-							end
-						end
-						for k,v in pairs(specCache) do
-							print('k,v', k, v)
-						end
 						if not specCache[self.PlayerDetails.GUID] then
 							BattleGroundEnemies:Information("you don't seem to have a specialization. The testmode requires one.")
 						else
