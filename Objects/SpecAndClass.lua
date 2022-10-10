@@ -40,17 +40,11 @@ local classDefaults = {
 	}
 }
 
-local classFlags = {
-	Height = "Fixed",
-	Width = "Variable"
-}
-
 local events = {"SetSpecAndRole"}
 
 local class = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Class",
 	localizedModuleName = L.Class,
-	flags = classFlags,
 	defaultSettings = classDefaults,
 	options = nil,
 	events = events,
@@ -59,7 +53,6 @@ local class = BattleGroundEnemies:NewButtonModule({
 local spec = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Spec",
 	localizedModuleName = L.Spec,
-	flags = nil,
 	defaultSettings = specDefaults,
 	options = nil,
 	events = events,

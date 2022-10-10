@@ -23,7 +23,7 @@ end
 
 -- Points
 -- TOPLEFT 		TOP 		TOPRIGHT
--- LEFT 		CENTER 		Right
+-- LEFT 		CENTER 		RIGHT
 -- BOTTOMLEFT 	BOTTOM 		BOTTOMRIGHT
 
 local function isInSameHorizontal(Point1, Point2)
@@ -50,14 +50,16 @@ local function isInSameVertical(Point1, Point2)
     end
 end
 
-local function needsHeight(Point1, Point2)
+local function needsHeight(moduleFrame, Point1, Point2)
+	if moduleFrame.flags.Height == "Dynamic" then return end
 	if not Point1 and not Point2 then return end
 	if Point1 and not Point2 then return true end
 	return isInSameHorizontal(Point1, Point2)
 end
 
 
-local function needsWidth(Point1, Point2)
+local function needsWidth(moduleFrame, Point1, Point2)
+	if moduleFrame.flags.Width == "Dynamic" then return end
 	if not Point1 and not Point2 then return end
 	if Point1 and not Point2 then return true end
 	return isInSameVertical(Point1, Point2)
@@ -96,13 +98,19 @@ end
 function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 	local numPoints = 0
 	local temp = {}
+	temp.DyanmicContainerInfo = {
+		type = "description",
+		name = L.DyanmicContainerInfo,
+		hidden = function() print("tstasdfadsf") return not (moduleFrame.flags.Width == "Dynamic") end,
+		order = 1
+	}
 	temp.Parent = {
 		type = "select",
 		name = L.Parent,
 		values = GetAllAnchors(moduleName),
-		order = 1
+		order = 2
 	}
-	temp.Fake1 = Data.AddVerticalSpacing(2)
+	temp.Fake1 = Data.AddVerticalSpacing(3)
 	if location.Points then
 		numPoints = #location.Points
 
@@ -118,7 +126,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 					return Data.SetOption(location.Points[i], option, ...)
 				end,
 				inline = true,
-				order = i + 2,
+				order = i + 3,
 				args = {
 					Point = {
 						type = "select",
@@ -160,7 +168,6 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 						min = -100,
 						max = 100,
 						step = 1,
-						order = 2,
 						order = 4
 					},
 					OffsetY = {
@@ -204,16 +211,16 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 			if not location.Points then return false end
 
 			--dynamic containers with dynamic width and height can have a maximum of 1 points
-			return (#location.Points >= 2) or (#location.Points >= 1 and moduleFrame.flags and moduleFrame.flags.Width == "Dynamic" and moduleFrame.flags.Height == "Dynamic")
+			return (#location.Points >= 2) or (#location.Points >= 1 and moduleFrame.flags.Width == "Dynamic" and moduleFrame.flags.Height == "Dynamic")
 		end,
 		width = "full",
-		order = numPoints + 3
+		order = numPoints + 4
 	}
 	temp.UseButtonHeightAsWidth = {
 		type = "toggle",
 		name = L.UseButtonHeight,
-		hidden = moduleFrame.flags and moduleFrame.flags.Width == "Dynamic"  or not needsWidth(location.Points and location.Points[1], location.Points[2]),
-		order = numPoints + 4
+		hidden = not needsWidth(moduleFrame, location.Points and location.Points[1], location.Points[2]),
+		order = numPoints + 5
 	}
 	temp.Width = {
 		type = "range",
@@ -222,20 +229,20 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		max = 100,
 		step = 1,
 		hidden = function()
-			local hidden =  moduleFrame.flags and moduleFrame.flags.Width == "Dynamic"  or not needsWidth(location.Points and location.Points[1], location.Points[2]) or location.UseButtonHeightAsWidth
+			local hidden = not needsWidth(moduleFrame, location.Points and location.Points[1], location.Points[2]) or location.UseButtonHeightAsWidth
 			if hidden then
 				location.Width = nil
 				BattleGroundEnemies:NotifyChange()
 				return true
 			end
 		end,
-		order = numPoints + 5
+		order = numPoints + 6
 	}
 	temp.UseButtonHeightAsHeight = {
 		type = "toggle",
 		name = L.UseButtonHeight,
-		hidden = moduleFrame.flags and moduleFrame.flags.Height == "Dynamic" or not needsHeight(location.Points and location.Points[1], location.Points[2]),
-		order = numPoints + 6
+		hidden = not needsHeight(moduleFrame, location.Points and location.Points[1], location.Points[2]),
+		order = numPoints + 7
 	}
 	temp.Height = {
 		type = "range",
@@ -244,14 +251,14 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		max = 100,
 		step = 1,
 		hidden = function()
-			local hidden = moduleFrame.flags and moduleFrame.flags.Height == "Dynamic" or not needsHeight(location.Points and location.Points[1], location.Points[2]) or location.UseButtonHeightAsHeight
+			local hidden = not needsHeight(moduleFrame, location.Points and location.Points[1], location.Points[2]) or location.UseButtonHeightAsHeight
 			if hidden then
 				location.Height = nil
 				BattleGroundEnemies:NotifyChange()
 				return true
 			end
 		end,
-		order = numPoints + 7
+		order = numPoints + 8
 	}
 	return temp
 end
@@ -1005,10 +1012,11 @@ function BattleGroundEnemies:SetupOptions()
 						type = "select",
 						name = L.BattlegroundSize,
 						order = 1,
-						get = function() return self.BGSize end,
+						get = function() return self.BGSizeTestmode end,
 						set = function(option, value)
+							self.BGSizeTestmode = value
 							if self.TestmodeActive then
-								self:CreateFakePlayers(value)
+								self:CreateFakePlayers()
 							end
 						end,
 						values = {[5] = ARENA, [15] = L.BGSize_15, [40] = L.BGSize_40}

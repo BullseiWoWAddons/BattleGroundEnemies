@@ -38,15 +38,9 @@ local options = function(location)
 	}
 end
 
-local flags = {
-	Height = "Fixed",
-	Width = "Fixed"
-}
-
 local spec_HighestActivePriority = BattleGroundEnemies:NewButtonModule({
 	moduleName = "HighestPriority",
 	localizedModuleName = L.HighestPriority,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "GotInterrupted", "UnitDied"},

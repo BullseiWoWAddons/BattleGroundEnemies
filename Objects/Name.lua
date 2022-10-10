@@ -67,15 +67,9 @@ local options = function(location)
 	}
 end
 
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
-
 local name = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Name",
 	localizedModuleName = L.Name,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"OnNewPlayer"},

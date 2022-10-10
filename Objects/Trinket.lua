@@ -41,15 +41,9 @@ local options = function(location)
 	}
 end
 
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
-
 local trinket = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Trinket",
 	localizedModuleName = L.Trinket,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"ShouldQueryAuras", "CareAboutThisAura", "UnitAura", "SPELL_CAST_SUCCESS"},

@@ -28,15 +28,10 @@ local defaultSettings = {
 	}
 }
 
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
 
 local raidTargetIcon = BattleGroundEnemies:NewButtonModule({
 	moduleName = "RaidTargetIcon",
 	localizedModuleName = L.RaidTargetIcon,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"},

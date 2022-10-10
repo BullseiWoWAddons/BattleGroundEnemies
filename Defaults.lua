@@ -17,7 +17,11 @@ Data.defaultSettings = {
 
 		RBG = {
 			TargetCalling_SetMark = false,
-			TargetCalling_NotificationEnable = false
+			TargetCalling_NotificationEnable = false,
+			EnemiesTargetingMe_Enabled = false,
+			EnemiesTargetingMe_Amount = 5,
+			EnemiesTargetingAllies_Enabled = false,
+			EnemiesTargetingAllies_Amount = 5
 		},
 
 		Enemies = {
@@ -72,7 +76,8 @@ Data.defaultSettings = {
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "DRTracking",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = -2
+								OffsetX = -2,
+								OffsetY = 1
 							}
 						},
 						Container = {
@@ -197,7 +202,8 @@ Data.defaultSettings = {
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "DRTracking",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = -2
+								OffsetX = -2,
+								OffsetY = 1
 							}
 						},
 						Container = {
@@ -324,7 +330,8 @@ Data.defaultSettings = {
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "DRTracking",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = -2
+								OffsetX = -2,
+								OffsetY = 1
 							}
 						},
 						Container = {
@@ -468,7 +475,8 @@ Data.defaultSettings = {
 								Point = "BOTTOMLEFT",
 								RelativeFrame = "DRTracking",
 								RelativePoint = "BOTTOMRIGHT",
-								OffsetX = 2
+								OffsetX = 2,
+								OffsetY = 1
 							}
 						},
 						Container = {
@@ -529,13 +537,13 @@ Data.defaultSettings = {
 								Point = "TOPRIGHT",
 								RelativeFrame = "Button",
 								RelativePoint = "TOPLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							},
 							{
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Button",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							}
 						},
 					},
@@ -545,13 +553,12 @@ Data.defaultSettings = {
 								Point = "TOPRIGHT",
 								RelativeFrame = "Trinket",
 								RelativePoint = "TOPLEFT",
-								OffsetX = 1
-							},
+								OffsetX = -1							},
 							{
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Trinket",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							}
 						},
 					}
@@ -595,7 +602,8 @@ Data.defaultSettings = {
 								Point = "BOTTOMLEFT",
 								RelativeFrame = "DRTracking",
 								RelativePoint = "BOTTOMRIGHT",
-								OffsetX = 2
+								OffsetX = 2,
+								OffsetY = 1
 							}
 						},
 						Container = {
@@ -656,13 +664,13 @@ Data.defaultSettings = {
 								Point = "TOPRIGHT",
 								RelativeFrame = "Button",
 								RelativePoint = "TOPLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							},
 							{
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Button",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							}
 						},
 					},
@@ -672,13 +680,13 @@ Data.defaultSettings = {
 								Point = "TOPRIGHT",
 								RelativeFrame = "Trinket",
 								RelativePoint = "TOPLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							},
 							{
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Trinket",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							}
 						},
 					}
@@ -721,7 +729,8 @@ Data.defaultSettings = {
 								Point = "BOTTOMLEFT",
 								RelativeFrame = "DRTracking",
 								RelativePoint = "BOTTOMRIGHT",
-								OffsetX = 2
+								OffsetX = 2,
+								OffsetY = 1
 							}
 						},
 						Container = {
@@ -782,13 +791,13 @@ Data.defaultSettings = {
 								Point = "TOPRIGHT",
 								RelativeFrame = "Button",
 								RelativePoint = "TOPLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							},
 							{
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Button",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							}
 						},
 					},
@@ -798,13 +807,13 @@ Data.defaultSettings = {
 								Point = "TOPRIGHT",
 								RelativeFrame = "Trinket",
 								RelativePoint = "TOPLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							},
 							{
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Trinket",
 								RelativePoint = "BOTTOMLEFT",
-								OffsetX = 1
+								OffsetX = -1
 							}
 						},
 					}

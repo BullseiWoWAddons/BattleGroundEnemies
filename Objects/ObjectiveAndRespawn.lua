@@ -71,15 +71,9 @@ local options = function(location)
 	}
 end
 
-local flags = {
-	Height = "Fixed",
-	Width = "Variable"
-}
-
 local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
 	moduleName = "ObjectiveAndRespawn",
 	localizedModuleName = L.ObjectiveAndRespawn,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},

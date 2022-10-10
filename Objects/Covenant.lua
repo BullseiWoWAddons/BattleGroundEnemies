@@ -20,15 +20,9 @@ local defaultSettings = {
 	Height = 20
 }
 
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
-
 local covenant = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Covenant",
 	localizedModuleName = "Covenant",
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = nil,

@@ -114,7 +114,6 @@ local function drFrameUpdateStatusText(drFrame)
 end
 
 local flags = {
-	Height = "Fixed",
 	Width = "Dynamic"
 }
 

@@ -12,7 +12,7 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
-local HasSpeccs = not (IsClassic or IsTBCC or IsWrath)
+local HasSpeccs = not (IsClassic or IsTBCC or IsWrath) or GetNumSpecializationsForClassID
 local HasRBG = not (IsClassic or IsTBCC or IsWrath)
 
 local MaxLevel = GetMaxPlayerLevel()
@@ -118,6 +118,7 @@ end
 --BattleGroundEnemies.BattlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
 BattleGroundEnemies.BattleGroundDebuffs = {} --contains battleground specific debbuffs to watchout for of the current active battlefield
 BattleGroundEnemies.IsRatedBG = false
+BattleGroundEnemies.BGSizeTestmode = 5
 BattleGroundEnemies.CurrentMapID = false --contains the map id of the current active battleground
 BattleGroundEnemies.ButtonModules = {} --contains moduleFrames, key is the module name
 
@@ -503,10 +504,9 @@ do
 
 
 						end
-						if moduleFrame.flags then
-							if moduleFrame.flags.Height == "Dynamic" then moduleFrameOnButton:SetHeight(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
-							if moduleFrame.flags.Width == "Dynamic" then moduleFrameOnButton:SetWidth(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
-						end
+						if moduleFrame.flags.Height == "Dynamic" then moduleFrameOnButton:SetHeight(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
+						if moduleFrame.flags.Width == "Dynamic" then moduleFrameOnButton:SetWidth(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
+						
 					end
 				end
 				if config.Parent then
@@ -514,7 +514,7 @@ do
 				end
 
 
-				if not moduleFrameOnButton.Enabled and moduleFrame.flags and moduleFrame.flags.SetZeroWidthWhenDisabled then
+				if not moduleFrameOnButton.Enabled and moduleFrame.flags.SetZeroWidthWhenDisabled then
 					moduleFrameOnButton:SetWidth(0.001)
 				else
 					if config.UseButtonHeightAsWidth then
@@ -527,7 +527,7 @@ do
 				end
 
 
-				if not moduleFrameOnButton.Enabled and moduleFrame.flags and moduleFrame.flags.SetZeroHeightWhenDisabled then
+				if not moduleFrameOnButton.Enabled and moduleFrame.flags.SetZeroHeightWhenDisabled then
 					moduleFrameOnButton:SetHeight(0.001)
 				else
 					if config.UseButtonHeightAsHeight then
@@ -1549,6 +1549,8 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 
 	if self.ButtonModules[moduleName] then return error("module "..moduleName.." is already registered") end
 	local moduleFrame = CreateFrame("Frame", nil, UIParent)
+
+	moduleSetupTable.flags = moduleSetupTable.flags or {}
 	Mixin(moduleFrame, moduleSetupTable)
 
 
@@ -1728,7 +1730,7 @@ end
 do
 	local counter
 
-	function BattleGroundEnemies:FillFakePlayerData(BGSize, amount, mianFrame, playerType, role)
+	function BattleGroundEnemies:FillFakePlayerData(BGSize, amount, mainFrame, playerType, role)
 		for i = 1, amount do
 			local name, classTag, specName
 
@@ -1742,7 +1744,7 @@ do
 			end
 			name = L[playerType]..counter.."-Realm"..counter
 
-			mianFrame:CreateOrUpdatePlayer(name, nil, classTag, specName,
+			mainFrame:CreateOrUpdatePlayer(name, nil, classTag, specName,
 			{
 				isFakePlayer = true,
 				PlayerLevel = i==1 and MaxLevel or math_random(MaxLevel - 10, MaxLevel -1)
@@ -1752,7 +1754,8 @@ do
 		end
 	end
 
-	function BattleGroundEnemies:CreateFakePlayers(count)
+	function BattleGroundEnemies:CreateFakePlayers()
+		local count = self.BGSizeTestmode or 5
 		for number, mainFrame in pairs({self.Allies, self.Enemies}) do
 			local continue = true
 			if number == 1 and self.db.profile.Testmode_UseTeammates then
@@ -1878,7 +1881,7 @@ do
 		end
 
 
-		self:CreateFakePlayers(BattleGroundEnemies.db.profile.Testmode_BGSize or 5)
+		self:CreateFakePlayers()
 
 		self:Show()
 
@@ -2486,11 +2489,8 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 		local name = GetUnitName(unitID, true)
 
 		local _, classTag, specName
-
-		local specName, classTag
-		if HasSpeccs then
+		if GetArenaOpponentSpec and GetSpecializationInfoByID then --HasSpeccs
 			local specID, gender = GetArenaOpponentSpec(i)
-
 
 			if (specID and specID > 0) then
 				_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
@@ -2503,7 +2503,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 
 		local raceName = UnitRace(unitID)
 
-		if (specName or not HasSpeccs) and classTag then
+		if classTag then
 			self:CreateOrUpdateArenaEnemyPlayer(unitID, name, raceName or "placeholder", classTag, specName)
 			foundEnemies = foundEnemies + 1
 		end
@@ -3182,11 +3182,8 @@ do
 		}
 
 		if name and raceName and classTag then
-			local specName
-			if HasSpeccs then
-				specName = specCache[GUID]
-			end
-
+			local specName = specCache[GUID]
+		
 			self:CreateOrUpdatePlayer(name, raceName, classTag, specName, additionalData)
 		end
 

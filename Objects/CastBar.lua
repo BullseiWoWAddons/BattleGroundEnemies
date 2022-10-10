@@ -17,11 +17,6 @@ local defaultSettings = {
 	Height = 14
 }
 
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
-
 
 local CastingBarFrame_OnLoad = CastingBarFrame_OnLoad or CastingBarMixin.OnLoad --CastingBarMixin is used in Dragonflight 10.0
 local CastingBarFrame_SetUnit = CastingBarFrame_SetUnit or CastingBarMixin.SetUnit
@@ -30,7 +25,6 @@ local CreateFrame = CreateFrame
 local castBar = BattleGroundEnemies:NewButtonModule({
 	moduleName = "CastBar",
 	localizedModuleName = L.CastBar,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = {"NewUnitID"},

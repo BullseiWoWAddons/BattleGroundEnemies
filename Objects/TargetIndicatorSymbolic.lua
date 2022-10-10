@@ -50,15 +50,9 @@ local options = function(location, playerType)
 	}
 end
 
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
-
 local symbolicTargetIndicator = BattleGroundEnemies:NewButtonModule({
 	moduleName = "TargetIndicatorSymbolic",
 	localizedModuleName = L.TargetIndicatorSymbolic,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UpdateTargetIndicators"},

@@ -195,6 +195,7 @@ globals = {
 	"GetNumTrackingTypes",
 	"GetPartyAssignment",
 	"GetPlayerFacing",
+	"GetPlayerInfoByGUID",
 	"GetProfessionInfo",
 	"GetProfessions",
 	"GetRaidRosterInfo", -- Classic/AQ40/Cthun.lua

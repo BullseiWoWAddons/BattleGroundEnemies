@@ -63,8 +63,6 @@ local options = function(location)
 end
 
 local flags = {
-	Height = "Variable",
-	Width = "Fixed",
 	SetZeroHeightWhenDisabled = true
 }
 

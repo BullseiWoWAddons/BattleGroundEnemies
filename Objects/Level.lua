@@ -52,16 +52,9 @@ local options = function(location)
 	}
 end
 
-
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
-
 local level = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Level",
 	localizedModuleName = L.Level,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"NewUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"},

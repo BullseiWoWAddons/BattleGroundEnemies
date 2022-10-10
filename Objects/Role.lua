@@ -3,14 +3,6 @@ local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 local GetTexCoordsForRoleSmallCircle = GetTexCoordsForRoleSmallCircle
 
-local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
-
-local HasSpeccs = not (IsClassic or IsTBCC or IsWrath)
-
-
-
 local defaultSettings = {
 	Enabled = true,
 	Parent = "healthBar",
@@ -27,16 +19,9 @@ local defaultSettings = {
 	},
 }
 
-
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
-
 local role = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Role",
 	localizedModuleName = L.Role,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = {"SetSpecAndRole"},
@@ -49,11 +34,7 @@ function role:AttachToPlayerButton(playerButton)
 	playerButton.Role.Icon:SetAllPoints()
 
 	playerButton.Role.ApplyAllSettings = function(self)
-		if HasSpeccs then
-			self:Show()
-		else
-			self:Hide()
-		end
+		self:SetSpecAndRole()
 	end
 
 	playerButton.Role.SetSpecAndRole = function(self)

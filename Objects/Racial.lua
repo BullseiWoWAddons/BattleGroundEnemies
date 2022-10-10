@@ -79,15 +79,9 @@ local options = function(location)
 	}
 end
 
-local flags = {
-	Height = "Variable",
-	Width = "Variable"
-}
-
 local racial = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Racial",
 	localizedModuleName = L.Racial,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"SPELL_CAST_SUCCESS"},

@@ -103,15 +103,9 @@ local options = function(location)
 	}
 end
 
-local flags = {
-	Height = "Variable",
-	Width = "Fixed"
-}
-
 local healthBar = BattleGroundEnemies:NewButtonModule({
 	moduleName = "healthBar",
 	localizedModuleName = L.HealthBar,
-	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UpdateHealth", "OnNewPlayer"},
