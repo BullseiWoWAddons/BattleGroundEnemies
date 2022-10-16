@@ -71,6 +71,7 @@ Data.defaultSettings = {
 
 				ButtonModules = {
 					Buffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -90,6 +91,7 @@ Data.defaultSettings = {
 						},
 					},
 					Debuffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -108,6 +110,7 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -121,7 +124,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							Size = 15,
+							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
 							HorizontalSpacing = 2,
@@ -133,6 +136,7 @@ Data.defaultSettings = {
 						},
 					},
 					Trinket = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -149,6 +153,7 @@ Data.defaultSettings = {
 						},
 					},
 					Racial = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -197,6 +202,7 @@ Data.defaultSettings = {
 
 				ButtonModules = {
 					Buffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -216,6 +222,7 @@ Data.defaultSettings = {
 						},
 					},
 					Debuffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -234,6 +241,7 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -247,7 +255,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							Size = 15,
+							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
 							HorizontalSpacing = 2,
@@ -259,6 +267,7 @@ Data.defaultSettings = {
 						},
 					},
 					Trinket = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -275,6 +284,7 @@ Data.defaultSettings = {
 						},
 					},
 					Racial = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -325,6 +335,7 @@ Data.defaultSettings = {
 
 				ButtonModules = {
 					Buffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -344,6 +355,7 @@ Data.defaultSettings = {
 						},
 					},
 					Debuffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -362,6 +374,7 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -375,7 +388,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							Size = 15,
+							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
 							HorizontalSpacing = 2,
@@ -387,6 +400,7 @@ Data.defaultSettings = {
 						},
 					},
 					Trinket = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -403,6 +417,7 @@ Data.defaultSettings = {
 						},
 					},
 					Racial = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -470,6 +485,7 @@ Data.defaultSettings = {
 
 				ButtonModules = {
 					Buffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -489,6 +505,7 @@ Data.defaultSettings = {
 						},
 					},
 					Debuffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -507,6 +524,7 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -520,7 +538,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							Size = 15,
+							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
 							HorizontalSpacing = 2,
@@ -532,6 +550,7 @@ Data.defaultSettings = {
 						},
 					},
 					Trinket = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -548,12 +567,14 @@ Data.defaultSettings = {
 						},
 					},
 					Racial = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",
 								RelativeFrame = "Trinket",
 								RelativePoint = "TOPLEFT",
-								OffsetX = -1							},
+								OffsetX = -1
+							},
 							{
 								Point = "BOTTOMRIGHT",
 								RelativeFrame = "Trinket",
@@ -597,6 +618,7 @@ Data.defaultSettings = {
 
 				ButtonModules = {
 					Buffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -616,6 +638,7 @@ Data.defaultSettings = {
 						},
 					},
 					Debuffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -634,6 +657,7 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -647,7 +671,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							Size = 15,
+							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
 							HorizontalSpacing = 2,
@@ -659,6 +683,7 @@ Data.defaultSettings = {
 						},
 					},
 					Trinket = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -675,6 +700,7 @@ Data.defaultSettings = {
 						},
 					},
 					Racial = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -724,6 +750,7 @@ Data.defaultSettings = {
 
 				ButtonModules = {
 					Buffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -743,6 +770,7 @@ Data.defaultSettings = {
 						},
 					},
 					Debuffs= {
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -761,6 +789,7 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -774,7 +803,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							Size = 15,
+							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
 							HorizontalSpacing = 2,
@@ -786,6 +815,7 @@ Data.defaultSettings = {
 						},
 					},
 					Trinket = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -802,6 +832,7 @@ Data.defaultSettings = {
 						},
 					},
 					Racial = {
+						ActivePoints = 2,
 						Points = {
 							{
 								Point = "TOPRIGHT",

@@ -9,6 +9,7 @@ local defaultSettings = {
 	Parent = "healthBar",
 	Width = 8,
 	Height = 10,
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "TOPLEFT",

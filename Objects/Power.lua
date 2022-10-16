@@ -12,9 +12,10 @@ local UnitPowerType = UnitPowerType
 local defaultSettings = {
 	Enabled = false,
 	Parent = "Button",
-	Height = 4,
+	Height = 5,
 	Texture = 'UI-StatusBar',
 	Background = {0, 0, 0, 0.66},
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "BOTTOMLEFT",
@@ -31,16 +32,6 @@ local defaultSettings = {
 
 local options = function(location)
 	return {
-		Height = {
-			type = "range",
-			name = L.Height,
-			desc = L.PowerBar_Height_Desc,
-			min = 1,
-			max = 10,
-			step = 1,
-			width = "normal",
-			order = 2
-		},
 		Texture = {
 			type = "select",
 			name = L.BarTexture,
@@ -68,7 +59,7 @@ local flags = {
 
 local power = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Power",
-	localizedModuleName = L.Power,
+	localizedModuleName = L.PowerBar,
 	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,

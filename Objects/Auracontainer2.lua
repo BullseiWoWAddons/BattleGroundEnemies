@@ -84,13 +84,13 @@ end
 
 local conditionFuncs = {
 	All = function (conditions) --all conditions must evaluate to true to return true
-		for k,v in pairs(conditions) do
+		for k, v in pairs(conditions) do
 			if not v then return false end
 		end
 		return true
 	end,
 	Any =  function (conditions) --only one of the conditions must evaluate to true to return true
-		for k,v in pairs(conditions) do
+		for k, v in pairs(conditions) do
 			if v then return true end
 		end
 	end
@@ -290,7 +290,7 @@ local function AddFilteringSettings(location, filter)
 	}
 end
 
-local function AddAuraSettings(location, filter)
+local function AddAuraSettings(location, filter, isPriorityContainer)
 	return {
 		PriorityAuras = {
 			type ="group",
@@ -302,16 +302,11 @@ local function AddAuraSettings(location, filter)
 			set = function(option, ...)
 				return Data.SetOption(location.PriorityAuras, option, ...)
 			end,
+			hidden = not isPriorityContainer,
 			args = {
 				Enabled = {
 					type = "toggle",
 					name = VIDEO_OPTIONS_ENABLED,
-				},
-				OnlyShowPriorityAuras = {
-					type = "toggle",
-					name = L.OnlyShowPriorityAuras,
-					desc = L.OnlyShowPriorityAuras_Desc,
-					disabled = function() return not location.PriorityAuras.Enabled end,
 				},
 				AuraAmount = {
 					type = "range",
@@ -335,7 +330,6 @@ local function AddAuraSettings(location, filter)
 				}
 			}
 		},
-	
 		ContainerSettings = {
 			type = "group",
 			name = L.ContainerIconSettings,
@@ -371,18 +365,27 @@ local function AddAuraSettings(location, filter)
 			set = function(option, ...)
 				return Data.SetOption(location.Filtering, option, ...)
 			end,
+			hidden = isPriorityContainer,
 			order = 9,
 			args = AddFilteringSettings(location.Filtering, filter)
 		}
 	}
 end
 
-local buffOptions = function(location)
-	return AddAuraSettings(location, "HELPFUL")
+local nonPriorityBuffOptions = function(location)
+	return AddAuraSettings(location, "HELPFUL", false)
 end
 
-local debuffOptions = function(location)
-	return AddAuraSettings(location, "HARMFUL")
+local nonPriorityDebuffOptions = function(location)
+	return AddAuraSettings(location, "HARMFUL", false)
+end
+
+local priorityBuffOptions = function(location)
+	return AddAuraSettings(location, "HELPFUL", true)
+end
+
+local priorityDebuffOptions = function(location)
+	return AddAuraSettings(location, "HARMFUL", true)
 end
 
 local flags = {
@@ -392,46 +395,168 @@ local flags = {
 
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "UnitDied"}
 
-local buffs = BattleGroundEnemies:NewButtonModule({
-	moduleName = "Buffs",
-	localizedModuleName = L.Buffs,
+local nonPriorityBuffs = BattleGroundEnemies:NewButtonModule({
+	moduleName = "NonPriorityBuffs",
+	localizedModuleName = L.NonPriorityBuffs,
 	flags = flags,
 	defaultSettings = defaults,
-	options = buffOptions,
+	options = nonPriorityBuffOptions,
 	events = events,
 	expansions = "All"
 })
-local debuffs = BattleGroundEnemies:NewButtonModule({
-	moduleName = "Debuffs",
-	localizedModuleName = L.Debuffs,
+local nonPriorityDebuffs = BattleGroundEnemies:NewButtonModule({
+	moduleName = "NonPriorityDebuffs",
+	localizedModuleName = L.NonPriorityDebuffs,
 	flags = flags,
 	defaultSettings = defaults,
-	options = debuffOptions,
+	options = nonPriorityDebuffOptions,
 	events = events,
 	expansions = "All"
 })
 
+local priorityBuffs = BattleGroundEnemies:NewButtonModule({
+	moduleName = "PriorityBuffs",
+	localizedModuleName = L.PriorityBuffs,
+	flags = flags,
+	defaultSettings = defaults,
+	options = priorityBuffOptions,
+	events = events,
+	expansions = "All"
+})
+local priorityDebuffs = BattleGroundEnemies:NewButtonModule({
+	moduleName = "PriorityDebuffs",
+	localizedModuleName = L.PriorityDebuffs,
+	flags = flags,
+	defaultSettings = defaults,
+	options = priorityDebuffOptions,
+	events = events,
+	expansions = "All"
+})
+
+local function createNewAuraFrame(playerButton, container)
+	local childFrame = CreateFrame('Button', nil, container, "CompactAuraTemplate")
+	BattleGroundEnemies.AttachCooldownSettings(childFrame.cooldown)
+	if container.filter == "HARMFUL" then
+		--add debufftype border
+		childFrame.border = childFrame:CreateTexture(nil, "OVERLAY")
+		childFrame.border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
+		childFrame.border:SetPoint("TOPLEFT", -1, 1)
+		childFrame.border:SetPoint("BOTTOMRIGHT", 1, -1)
+		childFrame.border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
+
+	elseif container.filter == "HELPFUL" then
+		-- add dispellable border from targetframe.xml
+	-- 	<Layer level="OVERLAY">
+	-- 	<Texture name="$parentStealable" parentKey="Stealable" file="Interface\TargetingFrame\UI-TargetingFrame-Stealable" hidden="true" alphaMode="ADD">
+	-- 		<Size x="24" y="24"/>
+	-- 		<Anchors>
+	-- 			<Anchor point="CENTER" x="0" y="0"/>
+	-- 		</Anchors>
+	-- 	</Texture>
+	-- </Layer>
+		childFrame.Stealable = childFrame:CreateTexture(nil, "OVERLAY")
+		childFrame.Stealable:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Stealable")
+		childFrame.Stealable:SetBlendMode("ADD")
+		childFrame.Stealable:SetPoint("CENTER")
+	end
+	-- childFrame:SetBackdrop({
+	-- 	bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+	-- 	edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+	-- 	edgeSize = 1
+	-- })
+
+	-- childFrame:SetBackdropColor(0, 0, 0, 0)
+	-- childFrame:SetBackdropBorderColor(0, 0, 0, 0)
+
+	childFrame:SetScript("OnClick", nil)
+	childFrame:SetFrameLevel(container:GetFrameLevel() + 5)
 
 
-local function AttachToPlayerButton(playerButton, filter)
-	local auraContainer = CreateFrame("Frame", nil, playerButton)
-
-	auraContainer.Auras = {}
-	auraContainer.AuraFrames = {}
-	auraContainer.PriorityAuras = {}
-	auraContainer.PriorityAuraFrames = {}
-	auraContainer.filter = filter
-
-	auraContainer:SetScript("OnHide", function(self)
-		self:SetWidth(0.001)
-		self:SetHeight(0.001)
+	childFrame:SetScript("OnEnter", function(self)
+		BattleGroundEnemies:ShowTooltip(self, function()
+			BattleGroundEnemies:ShowAuraTooltip(playerButton, childFrame.AuraDetails)
+		end)
 	end)
 
-	function auraContainer:Reset()
-		wipe(self.Auras)
-		wipe(self.PriorityAuras)
-		self:AfterUnitAura(self.filter)
+	childFrame:SetScript("OnLeave", function(self)
+		if GameTooltip:IsOwned(self) then
+			GameTooltip:Hide()
+		end
+	end)
+
+
+
+
+
+	--childFrame.Icon = childFrame:CreateTexture(nil, "BACKGROUND")
+	--childFrame.icon:SetAllPoints()
+
+	-- childFrame.count = BattleGroundEnemies.MyCreateFontString(childFrame)
+	-- childFrame.count:SetAllPoints()
+	-- childFrame.count:SetJustifyH("RIGHT")
+	-- childFrame.count:SetJustifyV("BOTTOM")
+
+	--childFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(childFrame)
+	childFrame.cooldown:SetScript("OnCooldownDone", function(self) -- only do this for the case that we dont get a UNIT_AURA for an ending aura, if we dont do this the aura is stuck even tho its expired
+		childFrame:Remove()
+	end)
+
+	childFrame.Container = container
+	childFrame.icon:SetDrawLayer("BORDER", -1) -- 1 to make it behind the SetBackdrop bg
+
+
+	childFrame.ApplyChildFrameSettings = function(self)
+		local conf = container.config
+
+		--self.count:ApplyFontStringSettings(conf.StackText)
+		local cooldownConfig = conf.Cooldown
+		self.cooldown:ApplyCooldownSettings(cooldownConfig, true, false)
+		if container.filter == "HELPFUL" then
+			self.Stealable:SetSize(conf.Container.IconSize + 3, conf.Container.IconSize + 3)
+		end
 	end
+	childFrame:ApplyChildFrameSettings()
+	return childFrame
+end
+
+local function setupAuraFrame(container, auraFrame, auraDetails)
+	auraFrame.AuraDetails = auraDetails
+	if container.filter == "HELPFUL" then
+		auraFrame.Stealable:SetShown(auraDetails.CanStealOrPurge)
+	else
+		--HARMFUL
+		local debuffType = auraDetails.DebuffType
+		local color
+		if debuffType then
+			color = DebuffTypeColor[debuffType] or DebuffTypeColor["none"]
+		else
+			color = DebuffTypeColor["none"]
+		end
+		auraFrame.border:SetVertexColor(color.r, color.g, color.b)
+
+	end
+
+	if auraDetails.Count and auraDetails.Count > 1 then
+		auraFrame.count:SetText(auraDetails.Count)
+	else
+		auraFrame.count:SetText("")
+	end
+
+
+	auraFrame.icon:SetTexture(auraDetails.Icon)
+	auraFrame.cooldown:SetCooldown(auraDetails.ExpirationTime - auraDetails.Duration, auraDetails.Duration)
+	--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
+
+end
+
+
+
+local function AttachToPlayerButton(playerButton, filter, isPriorityContainer)
+	local auraContainer = BattleGroundEnemies:NewContainer(playerButton, createNewAuraFrame, setupAuraFrame)
+
+	auraContainer.isPriorityContainer = isPriorityContainer
+	auraContainer.filter = filter
+
 
 	function auraContainer:ShouldQueryAuras(unitID, filter)
 		if filter == self.filter then return true end
@@ -439,16 +564,23 @@ local function AttachToPlayerButton(playerButton, filter)
 
 	function auraContainer:BeforeUnitAura(unitID, filter)
 		if not (filter == self.filter) then return end
-		wipe(self.Auras)
-		wipe(self.PriorityAuras)
+		self:ResetInputs()
 	end
 
 	function auraContainer:CareAboutThisAura(unitID, auraInfo, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType)
 		if auraInfo then filter = auraInfo.isHarmful and "HARMFUL" or "HELPFUL" end
 		if not (filter == self.filter) then return end
 
+		local priority = BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID]
+		if priority then
+			return self.isPriorityContainer -- its an important aura, we dont do any special filtering, we only care about if the container is for important auras
+		elseif self.isPriorityContainer then -- this aura is not important but we are the priority container > we dont care
+			return false
+		end
+
+		--we only do the rest of the filtering if the aura doesnt have a priority and the container is for non priority Auras
+
 		local config = self.config
-		local aurasEnabled, isDebuff
 		local isMine
 		local blizzlikeFunc
 		local filterFunc
@@ -463,10 +595,8 @@ local function AttachToPlayerButton(playerButton, filter)
 		end
 
 		if filter == "HARMFUL" then
-			isDebuff = true
 			blizzlikeFunc = ShouldDisplayDebuffBlizzLike
 		else
-			isDebuff = false
 			blizzlikeFunc = ShouldDisplayBuffBlizzLike
 		end
 
@@ -535,11 +665,10 @@ local function AttachToPlayerButton(playerButton, filter)
 		-- 	}
 		-- end
 
-		if not auraContainer:CareAboutThisAura(unitID, nil, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType) then 
-			--print("didnt make it through the filter") 
+		if not auraContainer:CareAboutThisAura(unitID, nil, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType) then
+			--print("didnt make it through the filter")
 			return
 		end
-		local ID
 		local priority = BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID]
 		local auraDetails = {
 			SpellID = spellID,
@@ -552,312 +681,37 @@ local function AttachToPlayerButton(playerButton, filter)
 			ExpirationTime = expirationTime,
 			Duration = duration
 		}
-		if priority then
-			ID = #self.PriorityAuras + 1
-			auraDetails.ID = ID
-			self.PriorityAuras[ID] = auraDetails
-		else
-			ID = #self.Auras + 1
-			auraDetails.ID = ID
-			self.Auras[ID] = auraDetails
-		end
-
-		-- ID = #self.Auras + 1
-		-- auraDetails.ID = ID
-		-- self.Auras[ID] = auraDetails
+	
+		self:NewInput(auraDetails)
 	end
 
 	function auraContainer:AfterUnitAura(filter)
 		if not (filter == self.filter) then return end
-		self:DisplayAuras()
+		self:Display()
 	end
 
 	function auraContainer:UnitDied()
 		self:Reset()
 	end
 
-	function auraContainer:Display()
-		local previousFrame = self
-		local config = self.config.Container
-		local verticalGrowdirection = config.VerticalGrowdirection
-		local horizontalGrowdirection = config.HorizontalGrowDirection
-		local framesPerRow = config.IconsPerRow
-		local horizontalSpacing = config.HorizontalSpacing
-		local verticalSpacing = config.VerticalSpacing
-		local iconSize = config.IconSize
-
-		local growLeft = horizontalGrowdirection == "leftwards"
-		local growUp = verticalGrowdirection == "upwards"
-		self:Show()
-		local framesInRow = 0
-		local firstFrameInRow
-		local width = 0
-		local widestRow = 0
-		local height = 0
-		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRowY, relativePointNewRowY
-
-		if growLeft then
-			pointX = "RIGHT"
-			relativePointX = "LEFT"
-			offsetX = -horizontalSpacing
-		else
-			pointX = "LEFT"
-			relativePointX = "RIGHT"
-			offsetX = horizontalSpacing
-		end
-
-		if growUp then
-			pointY = "BOTTOM"
-			relativePointY = "BOTTOM"
-			pointNewRowY = "BOTTOM"
-			relativePointNewRowY = "TOP"
-			offsetY = verticalSpacing
-		else
-			pointY = "TOP"
-			relativePointY = "TOP"
-			pointNewRowY = "TOP"
-			relativePointNewRowY = "BOTTOM"
-			offsetY = -verticalSpacing
-		end
-
-
-
-		local auraFrames = self.AuraFrames
-
-
-
-		local auraTables = {self.PriorityAuras, self.Auras}
-
-		local isPriorityAuras = false
-		local numAuras = 0
-		for i = 1, #auraTables do
-			
-			local auraTable = auraTables[i]
-
-			if i == 1 then
-				isPriorityAuras = true
-			else
-				isPriorityAuras = false
-			end
-
-			if self.config.PriorityAuras.OnlyShowPriorityAuras and not isPriorityAuras then break end
-			
-			for j = 1, #auraTable do
-				numAuras = numAuras + 1
-
-			
-				local auraFrame = auraFrames[numAuras]
-				if not auraFrame then
-					auraFrame = CreateFrame('Button', nil, self, "CompactAuraTemplate")
-					BattleGroundEnemies.AttachCooldownSettings(auraFrame.cooldown)
-					if auraContainer.filter == "HARMFUL" then
-						--add debufftype border
-						auraFrame.border = auraFrame:CreateTexture(nil, "OVERLAY")
-						auraFrame.border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
-						auraFrame.border:SetPoint("TOPLEFT", -1, 1)
-						auraFrame.border:SetPoint("BOTTOMRIGHT", 1, -1)
-						auraFrame.border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
-		
-					elseif auraContainer.filter == "HELPFUL" then
-						-- add dispellable border from targetframe.xml
-					-- 	<Layer level="OVERLAY">
-					-- 	<Texture name="$parentStealable" parentKey="Stealable" file="Interface\TargetingFrame\UI-TargetingFrame-Stealable" hidden="true" alphaMode="ADD">
-					-- 		<Size x="24" y="24"/>
-					-- 		<Anchors>
-					-- 			<Anchor point="CENTER" x="0" y="0"/>
-					-- 		</Anchors>
-					-- 	</Texture>
-					-- </Layer>
-						auraFrame.Stealable = auraFrame:CreateTexture(nil, "OVERLAY")
-						auraFrame.Stealable:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Stealable")
-						auraFrame.Stealable:SetBlendMode("ADD")
-						auraFrame.Stealable:SetPoint("CENTER")
-					end
-					-- auraFrame:SetBackdrop({
-					-- 	bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-					-- 	edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-					-- 	edgeSize = 1
-					-- })
-		
-					-- auraFrame:SetBackdropColor(0, 0, 0, 0)
-					-- auraFrame:SetBackdropBorderColor(0, 0, 0, 0)
-		
-					auraFrame:SetScript("OnClick", nil)
-					auraFrame:SetFrameLevel(self:GetFrameLevel() + 5)
-		
-		
-					auraFrame:SetScript("OnEnter", function(self)
-						BattleGroundEnemies:ShowTooltip(self, function()
-							BattleGroundEnemies:ShowAuraTooltip(playerButton, auraFrame.AuraDetails)
-						end)
-					end)
-		
-					auraFrame:SetScript("OnLeave", function(self)
-						if GameTooltip:IsOwned(self) then
-							GameTooltip:Hide()
-						end
-					end)
-		
-					function auraFrame:Remove()
-						table.remove(auraContainer.Auras, self.AuraDetails.ID)
-						for i = 1, #auraContainer.Auras do
-							local auraDetails = auraContainer.Auras[i]
-							auraDetails.ID = i
-						end
-						auraContainer:AfterUnitAura(auraContainer.filter)
-					end
-		
-		
-		
-					--auraFrame.Icon = auraFrame:CreateTexture(nil, "BACKGROUND")
-					--auraFrame.icon:SetAllPoints()
-		
-					-- auraFrame.count = BattleGroundEnemies.MyCreateFontString(auraFrame)
-					-- auraFrame.count:SetAllPoints()
-					-- auraFrame.count:SetJustifyH("RIGHT")
-					-- auraFrame.count:SetJustifyV("BOTTOM")
-		
-					--auraFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(auraFrame)
-					auraFrame.cooldown:SetScript("OnCooldownDone", function(self) -- only do this for the case that we dont get a UNIT_AURA for an ending aura, if we dont do this the aura is stuck even tho its expired
-						auraFrame:Remove()
-					end)
-		
-					auraFrame.Container = self
-					auraFrame.icon:SetDrawLayer("BORDER", -1) -- 1 to make it behind the SetBackdrop bg
-		
-		
-		
-					auraFrame.ApplyAuraFrameSettings = function(self)
-						local conf = auraContainer.config
-		
-						--self.count:ApplyFontStringSettings(conf.StackText)
-						local cooldownConfig = conf.Cooldown
-						self.cooldown:ApplyCooldownSettings(cooldownConfig, true, false)
-						self:SetSize(conf.Container.IconSize, conf.Container.IconSize)
-						if auraContainer.filter == "HELPFUL" then
-							self.Stealable:SetSize(conf.Container.IconSize + 3, conf.Container.IconSize + 3)
-						end
-					end
-					auraFrame:ApplyAuraFrameSettings()
-					self.AuraFrames[numAuras] = auraFrame
-				end
-		
-		
-		
-				local iSize
-				
-				if isPriorityAuras then
-					local scale = self.config.PriorityAuras.Scale or 1
-	
-					auraFrame:SetScale(scale)
-					iSize = (scale) * iconSize
-				else
-					auraFrame:SetScale(1)
-					iSize = iconSize
-				end
-		
-	
-				local auraDetails = auraTable[j]
-				auraFrame.AuraDetails = auraDetails
-				if self.filter == "HELPFUL" then
-					auraFrame.Stealable:SetShown(auraDetails.CanStealOrPurge)
-				else
-					--HARMFUL
-					local debuffType = auraDetails.DebuffType
-					local color
-					if debuffType then
-						color = DebuffTypeColor[debuffType] or DebuffTypeColor["none"]
-					else
-						color = DebuffTypeColor["none"]
-					end
-					auraFrame.border:SetVertexColor(color.r, color.g, color.b)
-
-				end
-
-				if auraDetails.Count and auraDetails.Count > 1 then
-					auraFrame.count:SetText(auraDetails.Count)
-				else
-					auraFrame.count:SetText("")
-				end
-		
-		
-				auraFrame.icon:SetTexture(auraDetails.Icon)
-				auraFrame.cooldown:SetCooldown(auraDetails.ExpirationTime - auraDetails.Duration, auraDetails.Duration)
-				--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
-		
-				auraFrame:ClearAllPoints()
-		
-		
-				if framesInRow < framesPerRow then
-					if numAuras == 1 then
-						auraFrame:SetPoint(pointY..pointX, previousFrame, pointY..pointX, 0, 0)
-						firstFrameInRow = auraFrame
-					else
-						auraFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..relativePointX, offsetX, 0)
-					end
-					framesInRow = framesInRow + 1
-					width = width + iSize  + horizontalSpacing
-					if width > widestRow then
-						widestRow = width
-					end
-				else
-					width = 0
-					auraFrame:SetPoint(pointNewRowY..pointX, firstFrameInRow, relativePointNewRowY..relativePointX, 0, offsetY)
-					framesInRow = 1
-					firstFrameInRow = auraFrame
-					height = height + iSize + verticalSpacing
-				end
-				previousFrame = auraFrame
-		--		print("previousFrame inside", previousFrame)
-				auraFrame:Show()
-			end
-		
-			
-		end
-		for i = numAuras + 1, #auraFrames do --hide all unused frames
-			local auraFrame = auraFrames[i]
-			auraFrame:Hide()
-		end
-	
-		if widestRow == 0 then
-			self:Hide()
-		else
-			self:SetWidth(widestRow - horizontalSpacing)
-			self:SetHeight(height + iconSize)
-		end
-
-
-	
-	end
-
-	function auraContainer:DisplayAuras()
-
-		local previousFrame = self:Display(self.PriorityAuras, self, true)
-	end
-
-
-
-	function auraContainer:ApplyAllSettings()
-		self:DisplayAuras()
-		for i = 1, #self.AuraFrames do
-			local auraFrame = self.AuraFrames[i]
-			auraFrame:ApplyAuraFrameSettings()
-		end
-		for i = 1, #self.PriorityAuraFrames do
-			local priorityAuraFrame = self.PriorityAuraFrames[i]
-			priorityAuraFrame:ApplyAuraFrameSettings()
-		end
-	end
 	return auraContainer
 end
 
 
-function buffs:AttachToPlayerButton(playerButton)
-	playerButton.Buffs = AttachToPlayerButton(playerButton, "HELPFUL")
+function nonPriorityBuffs:AttachToPlayerButton(playerButton)
+	playerButton.NonPriorityBuffs = AttachToPlayerButton(playerButton, "HELPFUL", false)
 end
 
-function debuffs:AttachToPlayerButton(playerButton)
-	playerButton.Debuffs = AttachToPlayerButton(playerButton, "HARMFUL")
+function nonPriorityDebuffs:AttachToPlayerButton(playerButton)
+	playerButton.NonPriorityDebuffs = AttachToPlayerButton(playerButton, "HARMFUL", false)
+end
+
+function priorityBuffs:AttachToPlayerButton(playerButton)
+	playerButton.PriorityBuffs = AttachToPlayerButton(playerButton, "HELPFUL", false)
+end
+
+function priorityDebuffs:AttachToPlayerButton(playerButton)
+	playerButton.PriorityDebuffs = AttachToPlayerButton(playerButton, "HARMFUL", false)
 end
 
 

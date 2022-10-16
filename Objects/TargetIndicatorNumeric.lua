@@ -5,6 +5,7 @@ local L = Data.L
 local defaultSettings = {
 	Enabled = true,
 	Parent = "healthBar",
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "TOPRIGHT",

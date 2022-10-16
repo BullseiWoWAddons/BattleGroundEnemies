@@ -11,6 +11,7 @@ local defaultSettings = {
 		EnableShadow = false,
 		ShadowColor = {0, 0, 0, 1},
 	},
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "TOPLEFT",

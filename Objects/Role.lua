@@ -8,6 +8,7 @@ local defaultSettings = {
 	Parent = "healthBar",
 	Width = 12,
 	Height = 12,
+	ActivePoints = 1,
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -21,7 +22,7 @@ local defaultSettings = {
 
 local role = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Role",
-	localizedModuleName = L.Role,
+	localizedModuleName = ROLE,
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = {"SetSpecAndRole"},

@@ -8,9 +8,9 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 local HealthTextTypes = {
-	health = "health",
-	losthealth = "losthealth",
-	perc = "perc"
+	health = COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_HEALTH,
+	losthealth = COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_LOSTHEALTH,
+	perc = COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_PERC
 }
 
 local defaultSettings = {
@@ -30,6 +30,7 @@ local defaultSettings = {
 		JustifyH = "CENTER",
 		JustifyV = "BOTTOM"
 	},
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "BOTTOMLEFT",

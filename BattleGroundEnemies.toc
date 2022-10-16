@@ -30,7 +30,7 @@ TargetCall.lua
 Changelog.lua
 ImportExport.lua
 
-
+Objects\ContainerTemplate.lua
 Objects\Auracontainer2.lua
 Objects\CastBar.lua
 Objects\Covenant.lua

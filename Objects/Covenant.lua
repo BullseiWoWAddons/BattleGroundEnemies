@@ -9,6 +9,7 @@ local GameTooltip = GameTooltip
 local defaultSettings = {
 	Enabled = true,
 	Parent = "healthBar",
+	ActivePoints = 1,
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -22,7 +23,7 @@ local defaultSettings = {
 
 local covenant = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Covenant",
-	localizedModuleName = "Covenant",
+	localizedModuleName = L.Covenant,
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = nil,

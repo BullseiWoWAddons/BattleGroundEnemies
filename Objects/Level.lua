@@ -8,6 +8,7 @@ local defaultSettings = {
 	Enabled = false,
 	Parent = "healthBar",
 	UseButtonHeightAsHeight = true,
+	ActivePoints = 1,
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -54,7 +55,7 @@ end
 
 local level = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Level",
-	localizedModuleName = L.Level,
+	localizedModuleName = LEVEL,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"NewUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"},

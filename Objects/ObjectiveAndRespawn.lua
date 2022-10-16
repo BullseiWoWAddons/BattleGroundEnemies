@@ -9,6 +9,7 @@ local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
 	Width = 36,
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "TOPRIGHT",
@@ -73,7 +74,7 @@ end
 
 local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
 	moduleName = "ObjectiveAndRespawn",
-	localizedModuleName = L.ObjectiveAndRespawn,
+	localizedModuleName = L.ObjectiveAndRespawnTimer,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},

@@ -51,7 +51,8 @@ local function isInSameVertical(Point1, Point2)
 end
 
 local function needsHeight(moduleFrame, Point1, Point2)
-	if moduleFrame.flags.Height == "Dynamic" then return end
+	local heightFlag = moduleFrame.flags.Height
+	if heightFlag == "Dynamic" or heightFlag == "Fixed" then return end
 	if not Point1 and not Point2 then return end
 	if Point1 and not Point2 then return true end
 	return isInSameHorizontal(Point1, Point2)
@@ -59,10 +60,23 @@ end
 
 
 local function needsWidth(moduleFrame, Point1, Point2)
-	if moduleFrame.flags.Width == "Dynamic" then return end
+	local widthFlag = moduleFrame.flags.Width
+	if widthFlag == "Dynamic" or widthFlag == "Fixed" then return end
 	if not Point1 and not Point2 then return end
 	if Point1 and not Point2 then return true end
 	return isInSameVertical(Point1, Point2)
+end
+
+local function canAddPoint(location, moduleFrame)
+	local activePoints = location.ActivePoints
+	if activePoints >1 then return false end
+	if activePoints == 0 then return true end
+
+	--if only 1 point is set
+	if moduleFrame.flags.Width == "Dynamic" and moduleFrame.flags.Height == "Dynamic" then return false end
+	if moduleFrame.flags.Width == "Fixed" and moduleFrame.flags.Height == "Fixed" then return false end
+
+	return true
 end
 
 --user wants to anchor the module to the relative frame, check if the relative frame is already anchored to that module
@@ -96,14 +110,8 @@ end
 
 
 function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
-	local numPoints = 0
+	local numPoints = location.ActivePoints
 	local temp = {}
-	temp.DyanmicContainerInfo = {
-		type = "description",
-		name = L.DyanmicContainerInfo,
-		hidden = function() print("tstasdfadsf") return not (moduleFrame.flags.Width == "Dynamic") end,
-		order = 1
-	}
 	temp.Parent = {
 		type = "select",
 		name = L.Parent,
@@ -111,8 +119,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		order = 2
 	}
 	temp.Fake1 = Data.AddVerticalSpacing(3)
-	if location.Points then
-		numPoints = #location.Points
+	if location.Points and numPoints then
 
 		for i = 1, numPoints do
 			temp["Point"..i] = {
@@ -182,10 +189,10 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 						type = "execute",
 						name = L.DeletePoint..i,
 						func = function()
-							location.Points[i] = nil
+							location.ActivePoints = i - 1
 							BattleGroundEnemies:NotifyChange()
 						end,
-						disabled = i == 1, --dont allow to remove the first point
+						disabled = i ~= numPoints or i == 1, --only allow to remove the last point, dont allow removal of all Points
 						width = "full",
 						order = 6,
 					}
@@ -199,8 +206,9 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		type = "execute",
 		name = L.AddPoint,
 		func = function()
+			location.ActivePoints = numPoints + 1
 			location.Points = location.Points or {}
-			location.Points[numPoints + 1] = {
+			location.Points[numPoints + 1] = location.Points[numPoints + 1] or {
 				Point = "TOPLEFT",
 				RelativeFrame = "Button",
 				RelativePoint = "TOPLEFT"
@@ -211,55 +219,85 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 			if not location.Points then return false end
 
 			--dynamic containers with dynamic width and height can have a maximum of 1 points
-			return (#location.Points >= 2) or (#location.Points >= 1 and moduleFrame.flags.Width == "Dynamic" and moduleFrame.flags.Height == "Dynamic")
+			return not canAddPoint(location, moduleFrame)
 		end,
 		width = "full",
 		order = numPoints + 4
 	}
-	temp.UseButtonHeightAsWidth = {
-		type = "toggle",
-		name = L.UseButtonHeight,
-		hidden = not needsWidth(moduleFrame, location.Points and location.Points[1], location.Points[2]),
-		order = numPoints + 5
-	}
-	temp.Width = {
-		type = "range",
+	temp.WidthGroup = {
+		type = "group",
 		name = L.Width,
-		min = 0,
-		max = 100,
-		step = 1,
+		order = numPoints + 5,
 		hidden = function()
-			local hidden = not needsWidth(moduleFrame, location.Points and location.Points[1], location.Points[2]) or location.UseButtonHeightAsWidth
-			if hidden then
-				location.Width = nil
-				BattleGroundEnemies:NotifyChange()
+			local widthNeeded = needsWidth(moduleFrame, location.Points and location.Points[1], location.Points[2])
+			if not widthNeeded then
+				location.Width = false
 				return true
 			end
 		end,
-		order = numPoints + 6
+		inline = true,
+		args = {
+			UseButtonHeightAsWidth = {
+				type = "toggle",
+				name = L.UseButtonHeight,
+				order = 1
+			},
+			Width = {
+				type = "range",
+				name = L.Width,
+				min = 0,
+				max = 100,
+				step = 1,
+				hidden = function()
+					local hidden = location.UseButtonHeightAsWidth
+					if hidden then
+						location.Width = false
+						BattleGroundEnemies:NotifyChange()
+						return true
+					end
+				end,
+				order = 2
+			}
+		}
 	}
-	temp.UseButtonHeightAsHeight = {
-		type = "toggle",
-		name = L.UseButtonHeight,
-		hidden = not needsHeight(moduleFrame, location.Points and location.Points[1], location.Points[2]),
-		order = numPoints + 7
-	}
-	temp.Height = {
-		type = "range",
+	temp.HeightGroup = {
+		type = "group",
 		name = L.Height,
-		min = 0,
-		max = 100,
-		step = 1,
+		order = numPoints + 6,
 		hidden = function()
-			local hidden = not needsHeight(moduleFrame, location.Points and location.Points[1], location.Points[2]) or location.UseButtonHeightAsHeight
-			if hidden then
-				location.Height = nil
-				BattleGroundEnemies:NotifyChange()
+			local heightNeeded = needsHeight(moduleFrame, location.Points and location.Points[1], location.Points[2])
+			if not heightNeeded then
+				location.Height = false
 				return true
 			end
 		end,
-		order = numPoints + 8
+		inline = true,
+		args = {
+			UseButtonHeightAsHeight = {
+				type = "toggle",
+				name = L.UseButtonHeight,
+				order = 1
+			},
+			Height = {
+				type = "range",
+				name = L.Height,
+				min = 0,
+				max = 100,
+				step = 1,
+				hidden = function()
+					local hidden = location.UseButtonHeightAsHeight
+					if hidden then
+						location.Height = false
+						BattleGroundEnemies:NotifyChange()
+						return true
+					end
+				end,
+				order = 2
+			}
+		}
 	}
+
+
 	return temp
 end
 
@@ -415,7 +453,7 @@ function Data.AddNormalTextSettings(location)
 		},
 		FontSize = {
 			type = "range",
-			name = L.Fontsize,
+			name = L.FontSize,
 			desc = L.FontSize_Desc,
 			min = 1,
 			max = 40,
@@ -479,7 +517,7 @@ function Data.AddCooldownSettings(location)
 				FontSize = {
 					type = "range",
 					name = L.FontSize,
-					desc = L.Fontsize_Desc,
+					desc = L.FontSize_Desc,
 					min = 6,
 					max = 40,
 					step = 1,
@@ -681,7 +719,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							BattleGroundEnemies:ApplyAllSettings()
 						end,
 						width = "double",
-						values = Data.RangeFrames,
+						values = function() return GetAllAnchors() end,
 						order = 7
 					}
 				}
@@ -935,7 +973,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							desc = L.VerticalSpacing..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							min = 0,
-							max = 20,
+							max = 100,
 							step = 1,
 							order = 4
 						},
@@ -1101,17 +1139,31 @@ function BattleGroundEnemies:SetupOptions()
 					UseBigDebuffsPriority = {
 						type = "toggle",
 						name = L.UseBigDebuffsPriority,
-						desc = L.UseBigDebuffsPriority_Desc,
+						desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriority),
 						order = 12
 					}
 				}
+			},
+			EnemySettings = {
+				type = "group",
+				name = L.Enemies,
+				childGroups = "tab",
+				order = 3,
+				args = addEnemyAndAllySettings(self, self.Enemies)
+			},
+			AllySettings = {
+				type = "group",
+				name = L.Allies,
+				childGroups = "tab",
+				order = 4,
+				args = addEnemyAndAllySettings(self, self.Allies)
 			},
 			RBGSettings = {
 				type = "group",
 				name = L.RBGSpecificSettings,
 				desc = L.RBGSpecificSettings_Desc,
 				--inline = true,
-				order = 14,
+				order = 5,
 				get = function(option)
 					return Data.GetOption(location.RBG, option)
 				end,
@@ -1192,12 +1244,8 @@ function BattleGroundEnemies:SetupOptions()
 										disabled = function() return not location.RBG.EnemiesTargetingAllies_Enabled end,
 										order = 3
 									}
-
 								}
-
-
 							}
-
 						}
 					},
 					-- PositiveSound = {
@@ -1263,20 +1311,6 @@ function BattleGroundEnemies:SetupOptions()
 
 					}
 				}
-			},
-			EnemySettings = {
-				type = "group",
-				name = L.Enemies,
-				childGroups = "tab",
-				order = 4,
-				args = addEnemyAndAllySettings(self, self.Enemies)
-			},
-			AllySettings = {
-				type = "group",
-				name = L.Allies,
-				childGroups = "tab",
-				order = 5,
-				args = addEnemyAndAllySettings(self, self.Allies)
 			},
 			ImportExportProfile = {
 				type = "group",

@@ -34,6 +34,7 @@ BattleGroundEnemies.Counter = {}
 --todo add priorized auras (buffs and debuffs) like BigDebuffs
 --reset saved variables when upgrading to new version
 --do localization
+--fix the default settings when a module has 2 points by default, but 1 point gets deleted via the menu, (the default second point gets added automatically again after reload ...)
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -489,24 +490,31 @@ do
 				if config.Points then
 					if i == 1 then moduleFrameOnButton:ClearAllPoints() end
 
-					for j = 1, #config.Points do
+					for j = 1, config.ActivePoints do
 						local pointConfig = config.Points[j]
-
-						local relativeFrame = self:GetAnchor(pointConfig.RelativeFrame)
-						if not (relativeFrame:GetNumPoints() > 0) then
-							-- the module we are depending on hasn't been set yet
-							allModulesSet = false
+						if pointConfig then
+							if pointConfig.RelativeFrame then
+								local relativeFrame = self:GetAnchor(pointConfig.RelativeFrame)
 
 
-						else
-							if not relativeFrame then return print("error", relativeFrame, "doesnt exist") end
-							moduleFrameOnButton:SetPoint(pointConfig.Point, relativeFrame, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
+								if relativeFrame then
+									if relativeFrame:GetNumPoints() > 0 then
+										-- the module we are depending on hasn't been set yet
+										moduleFrameOnButton:SetPoint(pointConfig.Point, relativeFrame, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
+									else
+										allModulesSet = false
+									end
+								else
+									if not relativeFrame then return print("error", relativeFrame, "for module", moduleName, "doesnt exist") end
+								end
 
-
+							
+								if moduleFrame.flags.Height == "Dynamic" then moduleFrameOnButton:SetHeight(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
+								if moduleFrame.flags.Width == "Dynamic" then moduleFrameOnButton:SetWidth(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
+							else
+								--do nothing, the point was probably deleted
+							end
 						end
-						if moduleFrame.flags.Height == "Dynamic" then moduleFrameOnButton:SetHeight(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
-						if moduleFrame.flags.Width == "Dynamic" then moduleFrameOnButton:SetWidth(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
-						
 					end
 				end
 				if config.Parent then
@@ -1077,7 +1085,7 @@ local function PopulateMainframe(playerType)
 
 		self.PlayerCount:ApplyFontStringSettings(conf.PlayerCount.Text)
 
-		self:SortPlayers()
+		self:SortPlayers(true)
 
 		for name, playerButton in pairs(self.Players) do
 			playerButton:ApplyButtonSettings()
@@ -1464,7 +1472,7 @@ local function PopulateMainframe(playerType)
 			end
 		end
 
-		function self:SortPlayers()
+		function self:SortPlayers(forceRepositioning)
 			local numShownPlayers = 0
 			local newPlayerOrder = {}
 			for playerName, playerButton in pairs(self.Players) do
@@ -1492,7 +1500,7 @@ local function PopulateMainframe(playerType)
 
 			self.NumShownPlayers = numShownPlayers
 			self:UpdatePlayerCount()
-			if orderChanged then
+			if orderChanged or forceRepositioning then
 				self.CurrentPlayerOrder = newPlayerOrder
 				self:ButtonPositioning()
 			end
@@ -2385,7 +2393,7 @@ do
 		self.PlayerDetails = {
 			PlayerName = UnitName("player"),
 			PlayerClass = select(2, UnitClass("player")),
-			IsGroupLeader = UnitIsGroupLeader("player"),
+			isGroupLeader = UnitIsGroupLeader("player"),
 			isGroupAssistant = UnitIsGroupAssistant("player"),
 			unit = "player",
 			GUID = UnitGUID("player")

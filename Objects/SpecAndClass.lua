@@ -8,6 +8,7 @@ local GameTooltip = GameTooltip
 local specDefaults = {
 	Enabled = true,
 	Parent = "Button",
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -26,6 +27,7 @@ local classDefaults = {
 	Enabled = true,
 	Width = 36,
 	Parent = "Button",
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -44,7 +46,7 @@ local events = {"SetSpecAndRole"}
 
 local class = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Class",
-	localizedModuleName = L.Class,
+	localizedModuleName = CLASS,
 	defaultSettings = classDefaults,
 	options = nil,
 	events = events,
@@ -52,7 +54,7 @@ local class = BattleGroundEnemies:NewButtonModule({
 })
 local spec = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Spec",
-	localizedModuleName = L.Spec,
+	localizedModuleName = SPECIALIZATION,
 	defaultSettings = specDefaults,
 	options = nil,
 	events = events,

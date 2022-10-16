@@ -133,32 +133,6 @@ do
 	end
 end
 
-
-Data.Frames = {
-	ObjectiveAndRespawn = L.ObjectiveAndRespawnSettings,
-	Racial = L.RacialSettings,
-	Trinket = L.TrinketSettings,
-	Power = L.HealthBarSettings.." "..L.AND.." "..L.PowerBarSettings,
-	Spec = L.SpecSettings,
-	BuffContainer = L.BuffContainer,
-	DebuffContainer = L.DebuffContainer,
-	DRContainer = L.DRContainer,
-	NumericTargetIndicator = L.NumericTargetIndicator,
-	Button = L.Button
-}
-
-Data.RangeFrames = {
-	ObjectiveAndRespawn = L.ObjectiveAndRespawnSettings,
-	Racial = L.RacialSettings,
-	Trinket = L.TrinketSettings,
-	healthBar = L.HealthBarSettings,
-	Power = L.PowerBarSettings,
-	Spec = L.SpecSettings,
-	BuffContainer = L.BuffContainer,
-	DebuffContainer = L.DebuffContainer,
-	DRContainer = L.DRContainer,
-}
-
 Data.AllPositions = {
 	TOPLEFT = L.TOPLEFT,
 	TOP = L.TOP,

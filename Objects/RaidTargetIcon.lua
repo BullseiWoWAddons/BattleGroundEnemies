@@ -14,6 +14,7 @@ local defaultSettings = {
 	Parent = "healthBar",
 	Width = 30,
 	Height = 30,
+	ActivePoints = 2,
 	Points = {
 		{
 			Point = "TOP",
@@ -31,7 +32,7 @@ local defaultSettings = {
 
 local raidTargetIcon = BattleGroundEnemies:NewButtonModule({
 	moduleName = "RaidTargetIcon",
-	localizedModuleName = L.RaidTargetIcon,
+	localizedModuleName = TARGETICONS,
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = {"UpdateRaidTargetIcon", "PlayerButtonSizeChanged"},

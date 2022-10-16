@@ -83,7 +83,7 @@ function BattleGroundEnemies:ImportExportFrameSetupForMode(mode, exportString)
 		self.ImportExportFrame.EditBox:SetText("")
 		self.ImportExportFrame.EditBox:SetAutoFocus(true)
 	else
-		self.ImportExportFrame.Button:SetText(L.Close)
+		self.ImportExportFrame.Button:SetText(CLOSE)
 		self.ImportExportFrame.EditBox:SetText(exportString)
 		self.ImportExportFrame.EditBox:HighlightText()
 	end

@@ -20,6 +20,7 @@ local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
 	DisplayType = "Frame",
+	IconSize = 20,
 	Cooldown = {
 		ShowNumber = true,
 		FontSize = 12,
@@ -119,7 +120,7 @@ local flags = {
 
 local dRTracking = BattleGroundEnemies:NewButtonModule({
 	moduleName = "DRTracking",
-	localizedModuleName = "DRTracking",
+	localizedModuleName = L.DRTracking,
 	flags = flags,
 	defaultSettings = defaultSettings,
 	options = options,
@@ -215,7 +216,8 @@ function dRTracking:AttachToPlayerButton(playerButton)
 				end
 			end
 
-			drFrame:SetWidth(playerButton.bgSizeConfig.BarHeight - frame.config.Container.BorderThickness * 2)
+			drFrame:SetWidth(self.config.IconSize)
+			drFrame:SetHeight(self.config.IconSize)
 
 			drFrame:SetBackdrop({
 				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
@@ -296,9 +298,11 @@ function dRTracking:AttachToPlayerButton(playerButton)
 		if totalWidth == 0 then
 			self:Hide()
 			self:SetWidth(0.001)
+			self:SetHeight(0.001)
 		else
 			totalWidth = totalWidth + 2 * borderThickness - spacing
 			self:SetWidth(totalWidth)
+			self:SetHeight(0.001)
 		end
 	end
 
