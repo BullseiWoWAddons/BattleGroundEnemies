@@ -70,7 +70,7 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					Buffs= {
+					PriorityBuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -90,12 +90,51 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					Debuffs= {
+					PriorityDebuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
-								RelativeFrame = "Buffs",
+								RelativeFrame = "PriorityBuffs",
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -8
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "leftwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityBuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "PriorityDebuffs",
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -2,
+								OffsetY = 1
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "leftwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityDebuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "NonPriorityBuffs",
 								RelativePoint = "BOTTOMLEFT",
 								OffsetX = -8
 							}
@@ -201,7 +240,7 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					Buffs= {
+					PriorityBuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -221,12 +260,51 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					Debuffs= {
+					PriorityDebuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
-								RelativeFrame = "Buffs",
+								RelativeFrame = "PriorityBuffs",
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -8
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "leftwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityBuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "PriorityBuffs",
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -2,
+								OffsetY = 1
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "leftwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityDebuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "NonPriorityBuffs",
 								RelativePoint = "BOTTOMLEFT",
 								OffsetX = -8
 							}
@@ -334,7 +412,7 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					Buffs= {
+					PriorityBuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -354,12 +432,51 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					Debuffs= {
+					PriorityDebuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
-								RelativeFrame = "Buffs",
+								RelativeFrame = "PriorityBuffs",
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -8
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "leftwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityBuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "PriorityDebuffs",
+								RelativePoint = "BOTTOMLEFT",
+								OffsetX = -2,
+								OffsetY = 1
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "leftwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityDebuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMRIGHT",
+								RelativeFrame = "NonPriorityBuffs",
 								RelativePoint = "BOTTOMLEFT",
 								OffsetX = -8
 							}
@@ -484,7 +601,7 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					Buffs= {
+					PriorityBuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -504,12 +621,51 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					Debuffs= {
+					PriorityDebuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
-								RelativeFrame = "Buffs",
+								RelativeFrame = "PriorityBuffs",
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 8
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "rightwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityBuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMLEFT",
+								RelativeFrame = "PriorityDebuffs",
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 2,
+								OffsetY = 1
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "rightwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityDebuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMLEFT",
+								RelativeFrame = "NonPriorityBuffs",
 								RelativePoint = "BOTTOMRIGHT",
 								OffsetX = 8
 							}
@@ -617,7 +773,7 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					Buffs= {
+					PriorityBuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -637,12 +793,51 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					Debuffs= {
+					PriorityDebuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
-								RelativeFrame = "Buffs",
+								RelativeFrame = "PriorityBuffs",
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 8
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "rightwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityBuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMLEFT",
+								RelativeFrame = "PriorityDebuffs",
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 2,
+								OffsetY = 1
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "rightwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityDebuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMLEFT",
+								RelativeFrame = "NonPriorityBuffs",
 								RelativePoint = "BOTTOMRIGHT",
 								OffsetX = 8
 							}
@@ -749,7 +944,7 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					Buffs= {
+					PriorityBuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -769,12 +964,51 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					Debuffs= {
+					PriorityDebuffs= {
 						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
-								RelativeFrame = "Buffs",
+								RelativeFrame = "PriorityBuffs",
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 8
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "rightwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityBuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMLEFT",
+								RelativeFrame = "PriorityDebuffs",
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetX = 2,
+								OffsetY = 1
+							}
+						},
+						Container = {
+							IconSize = 15,
+							IconsPerRow = 8,
+							HorizontalGrowDirection = "rightwards",
+							HorizontalSpacing = 2,
+							VerticalGrowdirection = "upwards",
+							VerticalSpacing = 1,
+						},
+					},
+					NonPriorityDebuffs= {
+						ActivePoints = 1,
+						Points = {
+							{
+								Point = "BOTTOMLEFT",
+								RelativeFrame = "NonPriorityBuffs",
 								RelativePoint = "BOTTOMRIGHT",
 								OffsetX = 8
 							}
