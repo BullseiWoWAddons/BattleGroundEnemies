@@ -8,6 +8,8 @@ Data.changelog = {
 			{
 				Header = "New Features:",
 				Entries = {
+					"Added seperate modules for important buffs and debuffs",
+					"Unified code for the containers used by the DR Tracking and Buffs, Debuffs.",
 					"Added a seperate module for class icons, the spec icon is stacked ontop of the class icon by default. This enables you to show the two icons side by side.",
 					"Added the ability to add health numbers (percentage, lost health and current health)",
 					"Added an option to disable target icons.",
