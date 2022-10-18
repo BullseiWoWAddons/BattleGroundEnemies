@@ -51,7 +51,7 @@ Data.defaultSettings = {
 				Position_X = false,
 				Position_Y = false,
 				BarWidth = 220,
-				BarHeight = 28,
+				BarHeight = 40,
 				BarVerticalGrowdirection = "downwards",
 				BarVerticalSpacing = 1,
 				BarColumns = 1,
@@ -70,6 +70,11 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
+					CastBar = {
+						Enabled = true,
+						Height = false,
+						Width = false,
+					},
 					PriorityBuffs= {
 						ActivePoints = 1,
 						Points = {
@@ -82,7 +87,8 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
+							UseButtonHeightAsSize = false,
+							IconSize = 20,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
 							HorizontalSpacing = 2,
@@ -101,7 +107,8 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
+							UseButtonHeightAsSize = false,
+							IconSize = 20,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
 							HorizontalSpacing = 2,
@@ -149,26 +156,22 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
-						ActivePoints = 2,
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPRIGHT",
 								RelativeFrame = "Button",
-								RelativePoint = "TOPLEFT",
-							},
-							{
-								Point = "BOTTOMRIGHT",
-								RelativeFrame = "Button",
-								RelativePoint = "BOTTOMLEFT",
+								RelativePoint = "BOTTOMRIGHT",
+								OffsetY = -2
 							}
 						},
 						Container = {
-							UseButtonHeightAsSize = true,
-							IconSize = 15,
+							UseButtonHeightAsSize = false,
+							IconSize = 31,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
 							HorizontalSpacing = 2,
-							VerticalGrowdirection = "upwards",
+							VerticalGrowdirection = "downwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
 							Border = "Blizzard Dialog",
@@ -320,17 +323,12 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
-						ActivePoints = 2,
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPRIGHT",
 								RelativeFrame = "Button",
 								RelativePoint = "TOPLEFT",
-							},
-							{
-								Point = "BOTTOMRIGHT",
-								RelativeFrame = "Button",
-								RelativePoint = "BOTTOMLEFT",
 							}
 						},
 						Container = {
@@ -493,17 +491,12 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
-						ActivePoints = 2,
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPRIGHT",
 								RelativeFrame = "Button",
 								RelativePoint = "TOPLEFT",
-							},
-							{
-								Point = "BOTTOMRIGHT",
-								RelativeFrame = "Button",
-								RelativePoint = "BOTTOMLEFT",
 							}
 						},
 						Container = {
@@ -616,7 +609,8 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
+							UseButtonHeightAsSize = false,
+							IconSize = 20,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
 							HorizontalSpacing = 2,
@@ -635,7 +629,8 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
+							UseButtonHeightAsSize = false,
+							IconSize = 20,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
 							HorizontalSpacing = 2,
@@ -683,22 +678,17 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
-						ActivePoints = 2,
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPLEFT",
 								RelativeFrame = "Button",
 								RelativePoint = "TOPRIGHT",
 							},
-							{
-								Point = "BOTTOMLEFT",
-								RelativeFrame = "Button",
-								RelativePoint = "BOTTOMRIGHT",
-							}
 						},
 						Container = {
-							UseButtonHeightAsSize = true,
-							IconSize = 15,
+							UseButtonHeightAsSize = false,
+							IconSize = 31,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
 							HorizontalSpacing = 2,
@@ -856,17 +846,12 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
-						ActivePoints = 2,
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPLEFT",
 								RelativeFrame = "Button",
 								RelativePoint = "TOPRIGHT",
-							},
-							{
-								Point = "BOTTOMLEFT",
-								RelativeFrame = "Button",
-								RelativePoint = "BOTTOMRIGHT",
 							}
 						},
 						Container = {
@@ -1028,17 +1013,12 @@ Data.defaultSettings = {
 						},
 					},
 					DRTracking= {
-						ActivePoints = 2,
+						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPLEFT",
 								RelativeFrame = "Button",
 								RelativePoint = "TOPRIGHT",
-							},
-							{
-								Point = "BOTTOMLEFT",
-								RelativeFrame = "Button",
-								RelativePoint = "BOTTOMRIGHT",
 							}
 						},
 						Container = {
