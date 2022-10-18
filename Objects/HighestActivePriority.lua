@@ -40,8 +40,8 @@ local options = function(location)
 end
 
 local spec_HighestActivePriority = BattleGroundEnemies:NewButtonModule({
-	moduleName = "HighestPriority",
-	localizedModuleName = L.HighestPriority,
+	moduleName = "HighestPriorityAura",
+	localizedModuleName = L.HighestPriorityAura,
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "GotInterrupted", "UnitDied"},
@@ -199,6 +199,6 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	function frame:UnitDied()
 		self:Reset()
 	end
-	playerButton.HighestPriority = frame
+	playerButton.HighestPriorityAura = frame
 end
 

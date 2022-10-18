@@ -1139,7 +1139,7 @@ function BattleGroundEnemies:SetupOptions()
 					UseBigDebuffsPriority = {
 						type = "toggle",
 						name = L.UseBigDebuffsPriority,
-						desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriority),
+						desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriorityAura),
 						order = 12
 					}
 				}
