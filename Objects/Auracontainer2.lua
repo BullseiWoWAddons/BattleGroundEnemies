@@ -340,7 +340,7 @@ local function AddAuraSettings(location, filter, isPriorityContainer)
 			set = function(option, ...)
 				return Data.SetOption(location.Container, option, ...)
 			end,
-			args = Data.AddContainerSettings(),
+			args = Data.AddContainerSettings(location.Container),
 		},
 		CooldownSettings = {
 			type = "group",
@@ -707,11 +707,11 @@ function nonPriorityDebuffs:AttachToPlayerButton(playerButton)
 end
 
 function priorityBuffs:AttachToPlayerButton(playerButton)
-	playerButton.PriorityBuffs = AttachToPlayerButton(playerButton, "HELPFUL", false)
+	playerButton.PriorityBuffs = AttachToPlayerButton(playerButton, "HELPFUL", true)
 end
 
 function priorityDebuffs:AttachToPlayerButton(playerButton)
-	playerButton.PriorityDebuffs = AttachToPlayerButton(playerButton, "HARMFUL", false)
+	playerButton.PriorityDebuffs = AttachToPlayerButton(playerButton, "HARMFUL", true)
 end
 
 

@@ -44,7 +44,7 @@ local options = function(location)
 			set = function(option, ...)
 				return Data.SetOption(location.Container, option, ...)
 			end,
-			args = Data.AddContainerSettings(),
+			args = Data.AddContainerSettings(location.Container),
 		},
 		DisplayType = {
 			type = "select",
@@ -107,11 +107,11 @@ local dRstates = {
 }
 
 local function drFrameUpdateStatusBorder(drFrame)
-	drFrame:SetBackdropBorderColor(unpack(dRstates[drFrame.status] or dRstates[3]))
+	drFrame:SetBackdropBorderColor(unpack(dRstates[drFrame:GetStatus()]))
 end
 
 local function drFrameUpdateStatusText(drFrame)
-	drFrame.Cooldown.Text:SetTextColor(unpack(dRstates[drFrame.status] or dRstates[3]))
+	drFrame.Cooldown.Text:SetTextColor(unpack(dRstates[drFrame:GetStatus()]))
 end
 
 local flags = {
@@ -128,206 +128,83 @@ local dRTracking = BattleGroundEnemies:NewButtonModule({
 	expansions = "All"
 })
 
+local function createNewDrFrame(playerButton, container)
+	local drFrame = CreateFrame("Frame", nil, container, BackdropTemplateMixin and "BackdropTemplate")
+	drFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(drFrame)
+
+	drFrame.Cooldown:SetScript("OnCooldownDone", function()
+		drFrame:Remove()
+	end)
+	drFrame:HookScript("OnEnter", function(self)
+		BattleGroundEnemies:ShowTooltip(self, function()
+			if IsClassic then return end
+			GameTooltip:SetSpellByID(self.SpellID)
+		end)
+	end)
+
+	drFrame:HookScript("OnLeave", function(self)
+		if GameTooltip:IsOwned(self) then
+			GameTooltip:Hide()
+		end
+	end)
+
+	drFrame.Container = container
+
+	drFrame.ApplyChildFrameSettings = function(self)
+		self.Cooldown:ApplyCooldownSettings(container.config.Cooldown, false, false)
+		self:SetDisplayType()
+	end
+
+	drFrame.GetStatus = function(self)
+		local status = self.input.status
+		status = (math.min(status, 3))
+		return status
+	end
+
+	drFrame.SetDisplayType = function(self)
+		if container.config.DisplayType == "Frame" then
+			self.SetStatus = drFrameUpdateStatusBorder
+		else
+			self.SetStatus = drFrameUpdateStatusText
+		end
+
+		self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
+		self:SetBackdropBorderColor(0, 0, 0, 0)
+		if self.input and self.input.status ~= 0 then self:SetStatus() end
+	end
+
+	drFrame:SetBackdrop({
+		bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
+		edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
+		edgeSize = 1
+	})
+
+	drFrame:SetBackdropColor(0, 0, 0, 0)
+	drFrame:SetBackdropBorderColor(0, 0, 0, 0)
+
+	drFrame.Icon = drFrame:CreateTexture(nil, "BORDER", nil, -1) -- -1 to make it behind the SetBackdrop bg
+	drFrame.Icon:SetAllPoints()
+
+	drFrame:ApplyChildFrameSettings()
+
+	drFrame:Hide()
+	return drFrame
+end
+
+local function setupDrFrame(container, drFrame, drDetails)
+	drFrame:SetStatus()
+
+	drFrame.SpellID = drDetails.spellID
+	drFrame.Icon:SetTexture(IsClassic and GetSpellTexture(DRList.spells[drDetails.spellName].spellID) or GetSpellTexture(drDetails.spellID))
+	local duration = DRList:GetResetTime(drDetails.drCat)
+	drFrame.Cooldown:SetCooldown(drDetails.startTime, duration)
+end
 
 function dRTracking:AttachToPlayerButton(playerButton)
-
-	local frame = CreateFrame("frame", nil, playerButton, BackdropTemplateMixin and "BackdropTemplate")
-
+	local container = BattleGroundEnemies:NewContainer(playerButton, createNewDrFrame, setupDrFrame)
 	--frame:SetBackdropColor(0, 0, 0, 0)
-	frame.DRFrames = {}
 
-	function frame:ApplyAllSettings()
-		self:UpdateBackdrop(self.config.Container.BorderThickness)
-		self:DrPositioning()
-
-		for drCategory, drFrame in pairs(self.DRFrames) do
-			drFrame:ApplyDrFrameSettings()
-			drFrame:ChangeDisplayType()
-		end
-	end
-
-	function frame:Reset()
-		for drCategory, drFrame in pairs(self.DRFrames) do
-			drFrame.Cooldown:Clear()
-			drFrame:Remove()
-		end
-	end
-
-	function frame:SetWidthOfAuraFrames(height)
-		local borderThickness = self.config.Container.BorderThickness
-		for drCategorie, drFrame in pairs(self.DRFrames) do
-			drFrame:SetWidth(height - borderThickness * 2)
-		end
-	end
-
-
-
-	function frame:DisplayDR(drCat, spellID, spellName)
-		local drFrame = self.DRFrames[drCat]
-		if not drFrame then  --create a new frame for this categorie
-
-			drFrame = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
-			drFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(drFrame)
-
-			drFrame.Cooldown:SetScript("OnCooldownDone", function()
-				drFrame:Remove()
-			end)
-			drFrame:HookScript("OnEnter", function(self)
-				BattleGroundEnemies:ShowTooltip(self, function()
-					if IsClassic then return end
-					GameTooltip:SetSpellByID(self.SpellID)
-				end)
-			end)
-
-			drFrame:HookScript("OnLeave", function(self)
-				if GameTooltip:IsOwned(self) then
-					GameTooltip:Hide()
-				end
-			end)
-
-			drFrame.Container = self
-
-			drFrame.ApplyDrFrameSettings = function(self)
-
-				self.Cooldown:ApplyCooldownSettings(frame.config.Cooldown, false, false)
-			end
-
-
-
-			drFrame.ChangeDisplayType = function(self)
-				self:SetDisplayType()
-
-				--reset settings
-				self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
-				self:SetBackdropBorderColor(0, 0, 0, 0)
-				if self.status ~= 0 then self:SetStatus() end
-			end
-
-			drFrame.IncreaseDRState = function(self)
-				self.status = self.status + 1
-				self:SetStatus()
-			end
-
-			drFrame.SetDisplayType = function(self)
-				if frame.config.DisplayType == "Frame" then
-					self.SetStatus = drFrameUpdateStatusBorder
-				else
-					self.SetStatus = drFrameUpdateStatusText
-				end
-			end
-
-			drFrame:SetWidth(self.config.IconSize)
-			drFrame:SetHeight(self.config.IconSize)
-
-			drFrame:SetBackdrop({
-				bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-				edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-				edgeSize = 1
-			})
-
-			drFrame:SetBackdropColor(0, 0, 0, 0)
-			drFrame:SetBackdropBorderColor(0, 0, 0, 0)
-
-			drFrame.Icon = drFrame:CreateTexture(nil, "BORDER", nil, -1) -- -1 to make it behind the SetBackdrop bg
-			drFrame.Icon:SetAllPoints()
-
-
-
-			drFrame.Remove = function()
-				drFrame:Hide()
-				drFrame.SpellID = false
-				drFrame.status = 0
-				self:DrPositioning() --self = DRContainer
-			end
-
-			drFrame.status = 0
-
-			drFrame:SetDisplayType()
-			drFrame:ApplyDrFrameSettings()
-
-			drFrame:Hide()
-
-			self.DRFrames[drCat] = drFrame
-		end
-
-		if not drFrame:IsShown() then
-			drFrame:Show()
-			self:DrPositioning()
-		end
-		drFrame.SpellID = spellID
-
-		drFrame.Icon:SetTexture(IsClassic and GetSpellTexture(DRList.spells[spellName].spellID) or GetSpellTexture(spellID))
-		drFrame.Cooldown:SetCooldown(GetTime(), DRList:GetResetTime(drCat))
-	end
-
-	function frame:DrPositioning()
-		local config = self.config.Container
-		local spacing = config.HorizontalSpacing
-		local borderThickness = config.BorderThickness
-		local growLeft = config.HorizontalGrowDirection == "leftwards"
-		local barHeight = playerButton.bgSizeConfig.BarHeight
-		local anchor = self
-		local totalWidth = 0
-		local point, relativePoint, offsetX
-		self:Show()
-
-		if growLeft then
-			point = "RIGHT"
-			relativePoint = "LEFT"
-			offsetX = -borderThickness
-		else
-			point = "LEFT"
-			relativePoint = "RIGHT"
-			offsetX = borderThickness
-		end
-
-		for categorie, drFrame in pairs(self.DRFrames) do
-			if drFrame:IsShown() then
-				drFrame:ClearAllPoints()
-				if totalWidth == 0 then
-					drFrame:SetPoint("TOP"..point, anchor, "TOP"..point, offsetX, -borderThickness)
-					drFrame:SetPoint("BOTTOM"..point, anchor, "BOTTOM"..point, offsetX, borderThickness)
-				else
-					drFrame:SetPoint("TOP"..point, anchor, "TOP"..relativePoint, growLeft and -spacing or spacing, 0)
-					drFrame:SetPoint("BOTTOM"..point, anchor, "BOTTOM"..relativePoint, growLeft and -spacing or spacing, 0)
-				end
-				anchor = drFrame
-				totalWidth = totalWidth + spacing + barHeight - 2 * borderThickness
-			end
-		end
-		if totalWidth == 0 then
-			self:Hide()
-			self:SetWidth(0.001)
-			self:SetHeight(0.001)
-		else
-			totalWidth = totalWidth + 2 * borderThickness - spacing
-			self:SetWidth(totalWidth)
-			self:SetHeight(0.001)
-		end
-	end
-
-	function frame:UpdateBackdrop(borderThickness)
-		--print("UpdateBackdrop")
-		-- self:SetBackdrop(nil)
-		-- self:SetBackdrop({
-		-- 	bgFile = "Interface/Buttons/WHITE8X8", --drawlayer "BACKGROUND"
-		-- 	edgeFile = 'Interface/Buttons/WHITE8X8', --drawlayer "BORDER"
-		-- 	edgeSize = borderThickness
-		-- })
-		-- self:SetBackdropColor(0, 0, 0, 0)
-		-- self:SetBackdropBorderColor(unpack(self.config.Container.Color))
-		self:SetBackdrop(nil)
-		--print("Border", self.config.Container.Border)
-		self:SetBackdrop({edgeFile = LSM:Fetch("border", self.config.Container.Border)  or 'Interface/Buttons/WHITE8X8',
-			bgFile=[[Interface\DialogFrame\UI-DialogBox-Background-Dark]],
-			tile = true, tileSize = 16, edgeSize = 16,
-			insets = { left = 0, right = 0, top = 0, bottom = 0 }})
-
-		self:SetWidthOfAuraFrames(playerButton:GetHeight())
-		self:DrPositioning()
-	end
-
-	function frame:AuraRemoved(spellID, spellName)
+	function container:AuraRemoved(spellID, spellName)
 		local config = self.config
 		--BattleGroundEnemies:Debug(operation, spellID)
 
@@ -338,11 +215,34 @@ function dRTracking:AttachToPlayerButton(playerButton)
 		local drTrackingEnabled = not config.Filtering_Enabled or config.Filtering_Filterlist[drCat]
 
 		if drTrackingEnabled then
-			self:DisplayDR(drCat, spellID, spellName)
-			local drFrame = self.DRFrames[drCat]
-				--BattleGroundEnemies:Debug("DR Problem")
-			drFrame:IncreaseDRState()
+			local input = self:FindInputByAttribute("drCat", drCat)
+			if input then
+				input = self:UpdateInput(input, {spellID = spellID})
+			else
+				input = self:NewInput({
+					drCat = drCat,
+					spellID = spellID
+				})
+			end
+			-- if playerButton.PlayerName == "Enemy2-Realm2" then
+			-- 	local newStatus = (input.status or 0) + 1
+			-- 	local fakeplayerStatus = FakePlayerDRs[playerButton][drCat].status
+			-- 	if drCat == "stun" then
+			-- 		print("drCat", drCat, spellName, "ended")
+			-- 		if newStatus ~= fakeplayerStatus then
+			-- 			print("doesnt match") 
+			-- 			print("input.status", (input.status or 0) + 1)
+			-- 			print("FakePlayerDRs[playerButton][drCat].status", FakePlayerDRs[playerButton][drCat].status)
+			-- 		end
+			-- 	end
+				
+			-- end
+
+			input.status = (input.status or 0) + 1
+			
+			input.startTime = GetTime()
+			self:Display()
 		end
 	end
-	playerButton.DRTracking = frame
+	playerButton.DRTracking = container
 end

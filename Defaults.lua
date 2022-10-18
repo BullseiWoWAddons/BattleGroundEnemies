@@ -163,6 +163,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
+							UseButtonHeightAsSize = true,
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
@@ -333,6 +334,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
+							UseButtonHeightAsSize = true,
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
@@ -505,6 +507,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
+							UseButtonHeightAsSize = true,
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
@@ -694,6 +697,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
+							UseButtonHeightAsSize = true,
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
@@ -866,6 +870,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
+							UseButtonHeightAsSize = true,
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
@@ -1037,6 +1042,7 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
+							UseButtonHeightAsSize = true,
 							IconSize = 15,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",

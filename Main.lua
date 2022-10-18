@@ -34,7 +34,7 @@ BattleGroundEnemies.Counter = {}
 --todo add priorized auras (buffs and debuffs) like BigDebuffs
 --reset saved variables when upgrading to new version
 --do localization
---fix the default settings when a module has 2 points by default, but 1 point gets deleted via the menu, (the default second point gets added automatically again after reload ...)
+--UNIT_AURA 10.0.2 changes
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -183,7 +183,7 @@ end
 
 
 local FakePlayerAuras = {} --key = playerbutton, value = {}
-local FakePlayerDRs = {} --key = playerButtonTabe, value = {categoryname = {state = 0, expirationTime}}
+FakePlayerDRs = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
 local function FakeUnitAura(playerButton, index, filter)
 	local currentTime = GetTime()
 
@@ -191,45 +191,65 @@ local function FakeUnitAura(playerButton, index, filter)
 	FakePlayerAuras[playerButton][filter] = FakePlayerAuras[playerButton][filter] or {}
 	FakePlayerDRs[playerButton] = FakePlayerDRs[playerButton] or {}
 
-	local createNewAura = math_random(1, 13) == 1 -- 1/13 probability to create a new Aura
-	if createNewAura then
-		local newFakeAura = CreateFakeAura(playerButton, filter)
-		if newFakeAura then
-			local dontAddNewAura
-			for i = 1, #FakePlayerAuras[playerButton][filter] do
-				local fakeAura = FakePlayerAuras[playerButton][filter][i]
-				if fakeAura.spellID == newFakeAura.spellID then
+	--if index == 1 then
+		local createNewAura = math_random(1, 2) == 1 -- 1/2 probability to create a new Aura
+		if createNewAura then
+			local newFakeAura = CreateFakeAura(playerButton, filter)
+			if newFakeAura then
+				local categoryNewAura = DRList:GetCategoryBySpellID(IsClassic and newFakeAura.name or newFakeAura.spellID)
 
-					local category = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellID)
-					-- we already are showing this spell, check if this spell is a DR
-					if category then
-						FakePlayerDRs[playerButton][category] = FakePlayerDRs[playerButton][category] or {}
-						FakePlayerDRs[playerButton][category].status = FakePlayerDRs[playerButton][category].status or 0
-						--remove set the expired time of the existing DR aura to the past so it will be removed
-						fakeAura.expirationTime = currentTime - 1
+				local dontAddNewAura
+				for i = 1, #FakePlayerAuras[playerButton][filter] do
+					
+					local fakeAura = FakePlayerAuras[playerButton][filter][i]
 
-						--we removed the aura so we already increased the dr state. Lets say we had a full duration sheep on us(state 0), we removed it, new one will be half duration(state 1)
-						local status = FakePlayerDRs[playerButton][category].status + 1
-						if status <= 2 then
-							local duration = newFakeAura.duration / 2^status
-							newFakeAura.duration = duration
-							fakeAura.expirationTime = currentTime + duration
-						else
-							dontAddNewAura = true -- we are at full DR and we can't apply the aura for a fourth time
-						end
+					local categoryCurrentAura = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellID)
 
+					if categoryCurrentAura and categoryNewAura and categoryCurrentAura == categoryNewAura then
+						dontAddNewAura = true
 						break
-					else
+						-- if playerButton.PlayerName == "Enemy2-Realm2" then
+						-- 	print("1")
+						-- end
+						
+						-- end
+					elseif FakePlayerDRs[playerButton][categoryNewAura] and FakePlayerDRs[playerButton][categoryNewAura].status then
+
+				
+					elseif newFakeAura.spellID == fakeAura.spellID then
 						dontAddNewAura = true --we tried to apply the same spell twice but its not a DR, dont add it, we dont wan't to clutter it
-					break
+						break
+					end
+
+					-- we already are showing this spell, check if this spell is a DR
+				end
+
+				local status = FakePlayerDRs[playerButton][categoryNewAura] and FakePlayerDRs[playerButton][categoryNewAura].status
+				--check if the aura even can be applied, the new aura can only be applied if the expirationTime of the new aura would be later than the current one
+				-- this is only the case if the aura is already 50% expired
+				if status then
+					if status <= 2 then
+						local duration = newFakeAura.duration / (2^status)
+						newFakeAura.duration = duration
+						newFakeAura.expirationTime = currentTime + duration
+					else
+						dontAddNewAura = true -- we are at full DR and we can't apply the aura for a fourth time
 					end
 				end
-			end
 
-			if not dontAddNewAura then
-				table_insert(FakePlayerAuras[playerButton][filter], newFakeAura)
+				if not dontAddNewAura then
+					table_insert(FakePlayerAuras[playerButton][filter], newFakeAura)
+				end
 			end
+		end
+	--end
 
+
+	--set all expired DRs to status 0
+	for categoryname, drData in pairs(FakePlayerDRs[playerButton]) do
+		if drData.expirationTime and drData.expirationTime <= currentTime then
+			drData.status = 0
+			drData.expirationTime = nil
 		end
 	end
 
@@ -238,18 +258,25 @@ local function FakeUnitAura(playerButton, index, filter)
 	-- remove all expired auras
 	for i = #FakePlayerAuras[playerButton][filter], 1, -1 do
 		local fakeAura = FakePlayerAuras[playerButton][filter][i]
-		if fakeAura.expirationTime < currentTime then
+		if fakeAura.expirationTime <= currentTime then
+			-- if playerButton.PlayerName == "Enemy2-Realm2" then
+			-- 	print("1")
+			-- end
+			
 			local category = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellID)
 			if category then
+				-- if playerButton.PlayerName == "Enemy2-Realm2" then
+				-- 	print("2")
+				-- end
+				
 				FakePlayerDRs[playerButton][category] = FakePlayerDRs[playerButton][category] or {}
 
 				local resetDuration = DRList:GetResetTime(category)
-				if FakePlayerDRs[playerButton][category].expirationTime and currentTime - FakePlayerDRs[playerButton][category].expirationTime > resetDuration then
-					FakePlayerDRs[playerButton][category].status = 0
-				else
-					FakePlayerDRs[playerButton][category].expirationTime = fakeAura.expirationTime + resetDuration
-					FakePlayerDRs[playerButton][category].status = (FakePlayerDRs[playerButton][category].status or 0) + 1
-				end
+				FakePlayerDRs[playerButton][category].expirationTime = fakeAura.expirationTime + resetDuration
+				FakePlayerDRs[playerButton][category].status = (FakePlayerDRs[playerButton][category].status or 0) + 1
+				-- if playerButton.PlayerName == "Enemy2-Realm2" then
+				-- 	print("3", FakePlayerDRs[playerButton][category].status)
+				-- end
 			end
 
 			table_remove(FakePlayerAuras[playerButton][filter], i)
@@ -869,7 +896,21 @@ do
 	}
 
 	]]
-	function buttonFunctions:UNIT_AURA(unitID, isFullUpdate, updatedAuraInfos)
+	function buttonFunctions:UNIT_AURA(unitID, second, third)
+
+		local isFullUpdate, updatedAuraInfos, updateInfo
+		if second and type(second) == "table" then --10.0.2 new structure, isFullupdate was removed, instead second argument is a table
+			updateInfo = second
+			isFullUpdate = true --TODO
+			--[[ 	
+			addedAuras	UnitAuraInfo[]?	List of auras added to the unit during this update.
+			updatedAuraInstanceIDs	number[]?	List of existing auras on the unit modified during this update.
+			removedAuraInstanceIDs	number[]?	List of existing auras removed from the unit during this update.
+			isFullUpdate	boolean	Wwhether or not a full update of the units' auras should be performed. If this is set, the other fields will likely be nil.
+ ]]		elseif third or type(second) == "boolean" then
+			isFullUpdate = second
+			updatedAuraInfos = third
+		end
 		--[[ local time = GetTime()
 		if time - (self.lastAuraScan or 0) < 0.1 then return end
 		self.lastAuraScan = time ]]
@@ -892,7 +933,7 @@ do
 				if AuraUtil.ForEachAura and not self.isFakePlayer then
 					AuraUtil.ForEachAura(unitID, filter, batchCount, function(...)
 						self:DispatchEvent("UnitAura", unitID, filter, ...)
-					end)
+					end, true)
 				else
 					local auraFunc = UnitAura
 					if self.isFakePlayer then

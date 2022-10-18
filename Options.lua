@@ -361,22 +361,22 @@ function Data.AddHorizontalSpacing(order)
 end
 
 
-function Data.AddContainerSettings()
+function Data.AddContainerSettings(location)
 	return {
-		Border = {
-			type = "select",
-			name = L.Font,
-			desc = L.Font_Desc,
-			dialogControl = "LSM30_Border",
-			values = AceGUIWidgetLSMlists.border,
-		},
 		IconSize = {
 			type = "range",
 			name = L.Size,
 			min = 0,
 			max = 80,
 			step = 1,
-			order = 1
+			order = 1,
+			hidden = function() return location.UseButtonHeightAsSize end,
+		},
+		UseButtonHeightAsSize = {
+			type = "toggle",
+			name = L.UseButtonHeight,
+			desc = L.UseButtonHeight_Desc,
+			order = 2
 		},
 		IconsPerRow = {
 			type = "range",
@@ -384,14 +384,14 @@ function Data.AddContainerSettings()
 			min = 4,
 			max = 30,
 			step = 1,
-			order = 2
+			order = 3
 		},
-		Fake = Data.AddVerticalSpacing(3),
+		Fake = Data.AddVerticalSpacing(4),
 		HorizontalGrowDirection = {
 			type = "select",
 			name = L.HorizontalGrowdirection,
 			values = Data.HorizontalDirections,
-			order = 4
+			order = 5
 		},
 		HorizontalSpacing = {
 			type = "range",
@@ -399,14 +399,14 @@ function Data.AddContainerSettings()
 			min = 0,
 			max = 20,
 			step = 1,
-			order = 5
+			order = 6
 		},
-		Fake1 = Data.AddVerticalSpacing(6),
+		Fake1 = Data.AddVerticalSpacing(7),
 		VerticalGrowdirection = {
 			type = "select",
 			name = L.VerticalGrowdirection,
 			values = Data.VerticalDirections,
-			order = 7
+			order = 8
 		},
 		VerticalSpacing = {
 			type = "range",
@@ -414,8 +414,16 @@ function Data.AddContainerSettings()
 			min = 0,
 			max = 20,
 			step = 1,
-			order = 8
-		}
+			order = 9
+		},
+		Border = {
+			type = "select",
+			name = L.Border,
+			desc = L.Border_Desc,
+			dialogControl = "LSM30_Border",
+			values = AceGUIWidgetLSMlists.border,
+			order = 10
+		},
 	}
 end
 

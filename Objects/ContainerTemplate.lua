@@ -8,7 +8,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 	f.inputs = {}
 
 	function f:Display()
-		local config = self.config
+		local config = self.config.Container
 		local previousFrame = self
 		local verticalGrowdirection = config.VerticalGrowdirection
 		local horizontalGrowdirection = config.HorizontalGrowDirection
@@ -16,6 +16,10 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 		local horizontalSpacing = config.HorizontalSpacing
 		local verticalSpacing = config.VerticalSpacing
 		local iconSize = config.IconSize
+		local useButtonHeightAsSize = config.UseButtonHeightAsSize
+
+
+		if useButtonHeightAsSize then iconSize = playerButton:GetHeight() end
 
 		local growLeft = horizontalGrowdirection == "leftwards"
 		local growUp = verticalGrowdirection == "upwards"
@@ -25,6 +29,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 		local width = 0
 		local widestRow = 0
 		local height = 0
+		local numInputs = #self.inputs
 		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRowY, relativePointNewRowY
 
 		if growLeft then
@@ -51,12 +56,12 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 			offsetY = -verticalSpacing
 		end
 
-		for i = 1, #self.inputs do
+		for i = 1, numInputs do
 			local childFrame = self.childFrames[i]
 			if not childFrame then
 				childFrame = createChildF(playerButton, f)
 				function childFrame:Remove()
-					table.remove(f.inputs, self.ID)
+					table.remove(f.inputs, self.key)
 					f:Display()
 				end
 			end
@@ -65,10 +70,12 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 
 
 			self.childFrames[i] = childFrame
-			childFrame.ID = i
+			childFrame.key = i
 
+
+			childFrame.input = self.inputs[i]
 			setupChildF(f, childFrame, self.inputs[i])
-
+			
 
 			childFrame:ClearAllPoints()
 
@@ -97,7 +104,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 			childFrame:Show()
 		end
 
-		for i = i + 1, #self.childFrames do --hide all unused frames
+		for i = numInputs + 1, #self.childFrames do --hide all unused frames
 			local childFrame = self.childFrames[i]
 			childFrame:Hide()
 		end
@@ -121,9 +128,23 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 	end
 
 	function f:NewInput(inputData)
-		ID = #self.inputs + 1
-		inputData.ID = ID
-		self.inputs[ID] = inputData
+		local key= #self.inputs + 1
+		inputData.key = key
+		self.inputs[key] = inputData
+		return self.inputs[key]
+	end
+
+	function f:FindInputByAttribute(attribute, value)
+		for i = 1, #self.inputs do
+			if self.inputs[i][attribute] == value then
+				return self.inputs[i]
+			end
+		end
+	end
+
+	function f:UpdateInput(input, inputData)
+		Mixin(input, inputData)
+		return input
 	end
 
 	function f:Reset()
@@ -135,7 +156,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 		self:Display()
 		for i = 1, #self.childFrames do
 			local childFrame = self.childFrames[i]
-			childFrame:ApplyChildFrameSettings()
+			if childFrame.ApplyChildFrameSettings then childFrame:ApplyChildFrameSettings() end
 		end
 	end
 	return f
