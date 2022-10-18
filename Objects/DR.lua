@@ -36,7 +36,7 @@ local options = function(location)
 	return {
 		ContainerSettings = {
 			type = "group",
-			name = L.ContainerIconSettings,
+			name = L.ContainerSettings,
 			order = 1,
 			get = function(option)
 				return Data.GetOption(location.Container, option)
