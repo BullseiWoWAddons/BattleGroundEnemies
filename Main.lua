@@ -183,7 +183,7 @@ end
 
 
 local FakePlayerAuras = {} --key = playerbutton, value = {}
-FakePlayerDRs = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
+local FakePlayerDRs = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
 local function FakeUnitAura(playerButton, index, filter)
 	local currentTime = GetTime()
 
