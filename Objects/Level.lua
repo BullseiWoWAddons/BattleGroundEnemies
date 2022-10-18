@@ -38,7 +38,7 @@ local options = function(location)
 		},
 		LevelTextTextSettings = {
 			type = "group",
-			name = L.LevelTextSettings,
+			name = L.TextSettings,
 			--desc = L.TrinketSettings_Desc,
 			get = function(option)
 				return Data.GetOption(location.Text, option)

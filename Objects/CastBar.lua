@@ -3,7 +3,7 @@ local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
 local styles = {
-	Arena = L.Arena,
+	Arena = ARENA,
 	Normal = L.NormalCastingBar,
 	Small = L.SmallCastingBar
 }

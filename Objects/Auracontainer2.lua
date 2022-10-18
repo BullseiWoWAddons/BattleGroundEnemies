@@ -13,12 +13,6 @@ local UnitName = UnitName
 local defaults = {
 	Parent = "Button",
 	Coloring_Enabled = true,
-	PriorityAuras = {
-		Enabled = true,
-		AuraAmount = 3,
-		Scale = 1.5,
-		OnlyShowPriorityAuras = true,
-	},
 	Cooldown = {
 		ShowNumber = true,
 		FontSize = 8,
@@ -291,47 +285,9 @@ end
 
 local function AddAuraSettings(location, filter, isPriorityContainer)
 	return {
-		PriorityAuras = {
-			type ="group",
-			name = L.PriorityAuras,
-			order = 1,
-			get = function(option)
-				return Data.GetOption(location.PriorityAuras, option)
-			end,
-			set = function(option, ...)
-				return Data.SetOption(location.PriorityAuras, option, ...)
-			end,
-			hidden = not isPriorityContainer,
-			args = {
-				Enabled = {
-					type = "toggle",
-					name = VIDEO_OPTIONS_ENABLED,
-				},
-				AuraAmount = {
-					type = "range",
-					name = L.PriorityAuras_AuraAmount,
-					desc = L.PriorityAuras_AuraAmount_Desc,
-					disabled = function() return not location.PriorityAuras.Enabled end,
-					min = 1,
-					max = 10,
-					step = 1,
-					order = 16
-				},
-				Scale = {
-					type = "range",
-					name = L.PriorityAuras_Scale,
-					desc = L.PriorityAuras_Scale_Desc,
-					disabled = function() return not location.PriorityAuras.Enabled end,
-					min = 1,
-					max = 3,
-					step = 0.05,
-					order = 17
-				}
-			}
-		},
 		ContainerSettings = {
 			type = "group",
-			name = L.ContainerIconSettings,
+			name = L.ContainerSettings,
 			order = 5,
 			get = function(option)
 				return Data.GetOption(location.Container, option)

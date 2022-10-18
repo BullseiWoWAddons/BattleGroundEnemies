@@ -415,15 +415,7 @@ function Data.AddContainerSettings(location)
 			max = 20,
 			step = 1,
 			order = 9
-		},
-		Border = {
-			type = "select",
-			name = L.Border,
-			desc = L.Border_Desc,
-			dialogControl = "LSM30_Border",
-			values = AceGUIWidgetLSMlists.border,
-			order = 10
-		},
+		}
 	}
 end
 
