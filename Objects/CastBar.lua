@@ -9,7 +9,6 @@ local styles = {
 }
 
 local defaultSettings = {
-	Enabled = false,
 	Parent = "Button",
 	ActivePoints = 1,
 	Points = {

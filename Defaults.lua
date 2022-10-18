@@ -47,19 +47,18 @@ Data.defaultSettings = {
 			["5"] = {
 				Enabled = true,
 
-
 				Position_X = false,
 				Position_Y = false,
 				BarWidth = 220,
 				BarHeight = 40,
 				BarVerticalGrowdirection = "downwards",
-				BarVerticalSpacing = 1,
+				BarVerticalSpacing = 40,
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
 
 				PlayerCount = {
-					Enabled = true,
+					Enabled = false,
 					Text = {
 						FontSize = 14,
 						FontOutline = "OUTLINE",
@@ -70,12 +69,16 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
+					Class = {
+						Width = 46,
+					},
 					CastBar = {
 						Enabled = true,
 						Height = false,
 						Width = false,
 					},
-					PriorityBuffs= {
+					PriorityBuffs = {
+						Enabled = true,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -96,7 +99,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					PriorityDebuffs= {
+					PriorityDebuffs = {
+						Enabled = true,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -116,7 +120,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityBuffs= {
+					NonPriorityBuffs = {
+						Enabled = false,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -136,7 +141,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityDebuffs= {
+					NonPriorityDebuffs = {
+						Enabled = false,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -155,7 +161,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					DRTracking= {
+					DRTracking = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -227,7 +233,7 @@ Data.defaultSettings = {
 				BarWidth = 220,
 				BarHeight = 28,
 				BarVerticalGrowdirection = "downwards",
-				BarVerticalSpacing = 1,
+				BarVerticalSpacing = 3,
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
@@ -244,7 +250,13 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					PriorityBuffs= {
+					CastBar = {
+						Enabled = false,
+						Height = false,
+						Width = false,
+					},
+					PriorityBuffs = {
+						Enabled = true,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -264,7 +276,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					PriorityDebuffs= {
+					PriorityDebuffs = {
+						Enabled = true,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -283,7 +296,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityBuffs= {
+					NonPriorityBuffs = {
+						Enabled = false,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -303,7 +317,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityDebuffs= {
+					NonPriorityDebuffs = {
+						Enabled = false,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -322,7 +337,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					DRTracking= {
+					DRTracking = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -412,7 +427,15 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					PriorityBuffs= {
+					CastBar = {
+						Enabled = false,
+						Height = false,
+						Width = false,
+					},
+					Power = {
+						Enabled = false
+					},
+					PriorityBuffs = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -432,7 +455,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					PriorityDebuffs= {
+					PriorityDebuffs = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -451,7 +474,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityBuffs= {
+					NonPriorityBuffs = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -471,7 +494,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityDebuffs= {
+					NonPriorityDebuffs = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -490,7 +513,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					DRTracking= {
+					DRTracking = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -578,15 +601,15 @@ Data.defaultSettings = {
 				Position_X = false,
 				Position_Y = false,
 				BarWidth = 220,
-				BarHeight = 28,
+				BarHeight = 40,
 				BarVerticalGrowdirection = "downwards",
-				BarVerticalSpacing = 1,
+				BarVerticalSpacing = 40,
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
 
 				PlayerCount = {
-					Enabled = true,
+					Enabled = false,
 					Text = {
 						FontSize = 14,
 						FontOutline = "OUTLINE",
@@ -597,7 +620,16 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					PriorityBuffs= {
+					Class = {
+						Width = 46,
+					},
+					CastBar = {
+						Enabled = true,
+						Height = false,
+						Width = false,
+					},
+					PriorityBuffs = {
+						Enabled = true,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -618,7 +650,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					PriorityDebuffs= {
+					PriorityDebuffs = {
+						Enabled = true,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -638,7 +671,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityBuffs= {
+					NonPriorityBuffs = {
+						Enabled = false,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -658,7 +692,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityDebuffs= {
+					NonPriorityDebuffs = {
+						Enabled = false,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -677,14 +712,15 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					DRTracking= {
+					DRTracking = {
 						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPLEFT",
 								RelativeFrame = "Button",
-								RelativePoint = "TOPRIGHT",
-							},
+								RelativePoint = "BOTTOMLEFT",
+								OffsetY = -2
+							}
 						},
 						Container = {
 							UseButtonHeightAsSize = false,
@@ -692,7 +728,7 @@ Data.defaultSettings = {
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
 							HorizontalSpacing = 2,
-							VerticalGrowdirection = "upwards",
+							VerticalGrowdirection = "downwards",
 							VerticalSpacing = 1,
 							Color = {0, 0, 1, 1},
 							Border = "Blizzard Dialog",
@@ -738,7 +774,7 @@ Data.defaultSettings = {
 				Framescale = 1,
 
 
-								-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
+				-- PositiveSound = [[Interface\AddOns\WeakAuras\Media\Sounds\BatmanPunch.ogg]],
 				-- NegativeSound = [[Sound\Interface\UI_BattlegroundCountdown_Timer.ogg]],
 
 			},
@@ -750,7 +786,7 @@ Data.defaultSettings = {
 				BarWidth = 220,
 				BarHeight = 28,
 				BarVerticalGrowdirection = "downwards",
-				BarVerticalSpacing = 1,
+				BarVerticalSpacing = 3,
 				BarColumns = 1,
 				BarHorizontalGrowdirection = "rightwards",
 				BarHorizontalSpacing = 100,
@@ -767,7 +803,13 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					PriorityBuffs= {
+					CastBar = {
+						Enabled = false,
+						Height = false,
+						Width = false,
+					},
+					PriorityBuffs = {
+						Enabled = true,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -787,7 +829,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					PriorityDebuffs= {
+					PriorityDebuffs = {
+						Enabled = true,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -806,7 +849,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityBuffs= {
+					NonPriorityBuffs = {
+						Enabled = false,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -826,7 +870,8 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityDebuffs= {
+					NonPriorityDebuffs = {
+						Enabled = false,
 						ActivePoints = 1,
 						Points = {
 							{
@@ -845,7 +890,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					DRTracking= {
+					DRTracking = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -934,7 +979,15 @@ Data.defaultSettings = {
 				},
 
 				ButtonModules = {
-					PriorityBuffs= {
+					CastBar = {
+						Enabled = false,
+						Height = false,
+						Width = false,
+					},
+					Power = {
+						Enabled = false
+					},
+					PriorityBuffs = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -954,7 +1007,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					PriorityDebuffs= {
+					PriorityDebuffs = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -973,7 +1026,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityBuffs= {
+					NonPriorityBuffs = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -993,7 +1046,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					NonPriorityDebuffs= {
+					NonPriorityDebuffs = {
 						ActivePoints = 1,
 						Points = {
 							{
@@ -1012,7 +1065,7 @@ Data.defaultSettings = {
 							VerticalSpacing = 1,
 						},
 					},
-					DRTracking= {
+					DRTracking = {
 						ActivePoints = 1,
 						Points = {
 							{

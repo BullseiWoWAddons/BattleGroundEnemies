@@ -10,7 +10,7 @@ local UnitPowerType = UnitPowerType
 
 
 local defaultSettings = {
-	Enabled = false,
+	Enabled = true,
 	Parent = "Button",
 	Height = 5,
 	Texture = 'UI-StatusBar',

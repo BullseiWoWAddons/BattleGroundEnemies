@@ -11,7 +11,6 @@ local UnitAffectingCombat = UnitAffectingCombat
 local UnitName = UnitName
 
 local defaults = {
-	Enabled = true,
 	Parent = "Button",
 	Coloring_Enabled = true,
 	PriorityAuras = {
