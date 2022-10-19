@@ -54,7 +54,6 @@ local options = function(location)
 		TextSettings = {
 			type = "group",
 			name = L.TextSettings,
-			--desc = L.TrinketSettings_Desc,
 			inline = true,
 			order = 4,
 			get = function(option)

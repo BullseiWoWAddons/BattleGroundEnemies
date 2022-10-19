@@ -31,7 +31,6 @@ BattleGroundEnemies.Counter = {}
 
 --todo, fix the testmode when the user is in a group
 --todo, maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
---todo add priorized auras (buffs and debuffs) like BigDebuffs
 --reset saved variables when upgrading to new version
 --do localization
 --UNIT_AURA 10.0.2 changes
@@ -941,8 +940,8 @@ do
 							return FakeUnitAura(self, i, filter)
 						end
 					end
-					for i = 1, batchCount do
-						local name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4 = auraFunc(unitID, i, filter)
+					for j = 1, batchCount do
+						local name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4 = auraFunc(unitID, j, filter)
 
 						if not name then break end
 						self:DispatchEvent("UnitAura", unitID, filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)

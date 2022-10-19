@@ -30,7 +30,6 @@ local options = function(location)
 		CooldownTextSettings = {
 			type = "group",
 			name = L.Countdowntext,
-			--desc = L.TrinketSettings_Desc,
 			inline = true,
 			get = function(option)
 				return Data.GetOption(location.Cooldown, option)

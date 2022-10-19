@@ -89,7 +89,6 @@ local options = function(location)
 		HealthText = {
 			type = "group",
 			name = L.HealthTextSettings,
-			--desc = L.TrinketSettings_Desc,
 			get = function(option)
 				return Data.GetOption(location.HealthText, option)
 			end,

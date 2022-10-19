@@ -916,7 +916,6 @@ local function addEnemyAndAllySettings(self, mainFrame)
 								PlayerCountTextSettings = {
 									type = "group",
 									name = L.TextSettings,
-									--desc = L.TrinketSettings_Desc,
 									disabled = function() return not location.PlayerCount_Enabled end,
 									get = function(option)
 										return Data.GetOption(location.PlayerCount.Text, option)

@@ -31,7 +31,6 @@ local options = function(location)
 		CooldownTextSettings = {
 			type = "group",
 			name = L.Countdowntext,
-			--desc = L.TrinketSettings_Desc,
 			inline = true,
 			order = 1,
 			args = Data.AddCooldownSettings(location.Cooldown)
