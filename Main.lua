@@ -357,9 +357,8 @@ do
 	function enemyButtonFunctions:FetchAnAllyUnitID()
 		local unitIDs = self.UnitIDs
 		if unitIDs.Ally then
-			unitIDs.Active = unitIDs.Ally
 			unitIDs.HasAllyUnitID = true
-			self:NewUnitID()
+			self:NewUnitID(unitIDs.Ally)
 		else
 			self:DeleteActiveUnitID()
 		end
@@ -372,20 +371,19 @@ do
 		unitIDs.Active = false
 		self:UpdateRange(false)
 
-
 		unitIDs.HasAllyUnitID = false
 	end
 
-	function enemyButtonFunctions:FetchAnotherUnitID(key, value)
+	function enemyButtonFunctions:UpdateEnemyUnitID(key, value)
 		local unitIDs = self.UnitIDs
 		if key then
 			unitIDs[key] = value
 		end
 
-		unitIDs.Active = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
-		if unitIDs.Active then
+		local unitID = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
+		if unitID then
 			unitIDs.HasAllyUnitID = false
-			self:NewUnitID()
+			self:NewUnitID(unitID)
 		else
 			self:FetchAnAllyUnitID()
 		end
@@ -395,7 +393,7 @@ do
 		local unitIDs = self.UnitIDs
 		if not unitIDs.Ally then
 			unitIDs.Ally = allyButton.TargetUnitID
-			self:FetchAnotherUnitID()
+			self:UpdateEnemyUnitID()
 		end
 
 		unitIDs.TargetedByEnemy[allyButton] = true
@@ -408,15 +406,15 @@ do
 
 		if allyButton.TargetUnitID == unitIDs.Ally then
 			unitIDs.Ally = false
-			for allyButton in pairs(unitIDs.TargetedByEnemy) do
-				if not allyButton.TargetUnitID == "target" then
-					unitIDs.Ally = allyButton.TargetUnitID
+			for allyBtn in pairs(unitIDs.TargetedByEnemy) do
+				if not allyBtn.TargetUnitID == "target" then
+					unitIDs.Ally = allyBtn.TargetUnitID
 					break
 				end
 			end
 		end
 
-		if allyButton.TargetUnitID == unitIDs.Active then
+		if allyButton.TargetUnitID == unitIDs.Active then --the unitID used for the player not longer targets him, fetch a new ID if possible
 			self:FetchAnAllyUnitID()
 		end
 
@@ -482,10 +480,11 @@ do
 
 	function buttonFunctions:NewUnitID(unitID, targetUnitID)
 		if self.PlayerIsEnemy then
-			local activeUnitID = self.UnitIDs.Active
-			if not UnitExists(activeUnitID) then return end
+			self.UnitIDs.Active = unitID
+			if not UnitExists(unitID) then return end
 			self:UpdateRaidTargetIcon()
-			self:UpdateAll(activeUnitID)
+			self:UpdateAll(unitID)
+			self:DispatchEvent("NewUnitID", unitID)
 		else
 			self.unit = unitID
 			self.TargetUnitID = targetUnitID
@@ -495,8 +494,8 @@ do
 			else
 				C_Timer.After(1, function() return BattleGroundEnemies:GROUP_ROSTER_UPDATE() end)
 			end
+			self:DispatchEvent("NewUnitID", unitID)
 		end
-		self:DispatchEvent("NewUnitID", unitID)
 	end
 
 	function buttonFunctions:SetModulePositions()
@@ -751,7 +750,7 @@ do
 		if unitID then
 			BattleGroundEnemies.ArenaIDToPlayerButton[unitID] = self
 			if self.PlayerIsEnemy then
-				self:FetchAnotherUnitID("Arena", unitID)
+				self:UpdateEnemyUnitID("Arena", unitID)
 			end
 			RequestCrowdControlSpell(unitID)
 		end
@@ -2571,7 +2570,7 @@ end
 function BattleGroundEnemies.Enemies:NAME_PLATE_UNIT_ADDED(unitID)
 	local enemyButton = self:GetPlayerbuttonByUnitID(unitID)
 	if enemyButton then
-		enemyButton:FetchAnotherUnitID("Nameplate", unitID)
+		enemyButton:UpdateEnemyUnitID("Nameplate", unitID)
 	end
 end
 
@@ -2579,7 +2578,7 @@ function BattleGroundEnemies.Enemies:NAME_PLATE_UNIT_REMOVED(unitID)
 	--self:Debug(unitID)
 	local enemyButton = self:GetPlayerbuttonByUnitID(unitID)
 	if enemyButton then
-		enemyButton:FetchAnotherUnitID("Nameplate", false)
+		enemyButton:UpdateEnemyUnitID("Nameplate", false)
 	end
 end
 
@@ -2670,7 +2669,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			playerButton.ObjectiveAndRespawn:Reset()
 
 			if playerButton.PlayerIsEnemy then -- then this button is an ally button
-				playerButton:FetchAnotherUnitID("Arena", false)
+				playerButton:UpdateEnemyUnitID("Arena", false)
 			end
 			playerButton:DispatchEvent("ArenaOpponentHidden")
 		end
@@ -2816,7 +2815,7 @@ do
 			if oldTarget.PlayerIsEnemy then
 				oldTarget.UnitIDs.TargetedByEnemy[PlayerButton] = nil
 				oldTarget:UpdateTargetIndicators()
-				oldTarget:FetchAnotherUnitID("Target", false)
+				oldTarget:UpdateEnemyUnitID("Target", false)
 			end
 			oldTarget.MyTarget:Hide()
 		end
@@ -2825,7 +2824,7 @@ do
 			if playerButton.PlayerIsEnemy and PlayerButton then
 				playerButton.UnitIDs.TargetedByEnemy[PlayerButton] = true
 				playerButton:UpdateTargetIndicators()
-				playerButton:FetchAnotherUnitID("Target", "target")
+				playerButton:UpdateEnemyUnitID("Target", "target")
 			end
 			playerButton.MyTarget:Show()
 			oldTarget = playerButton
@@ -2848,13 +2847,13 @@ do
 		local playerButton = self:GetPlayerbuttonByUnitID("focus")
 		if oldFocus then
 			if oldFocus.PlayerIsEnemy then
-				oldFocus:FetchAnotherUnitID("Focus", false)
+				oldFocus:UpdateEnemyUnitID("Focus", false)
 			end
 			oldFocus.MyFocus:Hide()
 		end
 		if playerButton then
 			if playerButton.PlayerIsEnemy then
-				playerButton:FetchAnotherUnitID("Focus", "focus")
+				playerButton:UpdateEnemyUnitID("Focus", "focus")
 			end
 			playerButton.MyFocus:Show()
 			oldFocus = playerButton
@@ -3266,7 +3265,7 @@ do
 								targetEnemyButton.UnitIDs.Active = targetUnitID
 							end
 							if targetEnemyButton.UnitIDs.Ally == allyButton.TargetUnitID then
-								targetEnemyButton:FetchAnotherUnitID("Ally", targetUnitID)
+								targetEnemyButton:UpdateEnemyUnitID("Ally", targetUnitID)
 							end
 						end
 
