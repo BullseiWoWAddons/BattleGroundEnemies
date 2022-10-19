@@ -302,7 +302,7 @@ Data.defaultSettings = {
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
-								RelativeFrame = "PriorityBuffs",
+								RelativeFrame = "PriorityDebuffs",
 								RelativePoint = "BOTTOMLEFT",
 								OffsetX = -2,
 								OffsetY = 1

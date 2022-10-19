@@ -24,37 +24,32 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 		local growLeft = horizontalGrowdirection == "leftwards"
 		local growUp = verticalGrowdirection == "upwards"
 		self:Show()
-		local framesInRow = 0
-		local firstFrameInRow
-		local width = 0
 		local widestRow = 0
-		local height = 0
+		local highestColumn = 0
 		local numInputs = #self.inputs
-		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, pointNewRowY, relativePointNewRowY
+		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, offsetDirectionX, offsetDirectionY
+
 
 		if growLeft then
 			pointX = "RIGHT"
-			relativePointX = "LEFT"
-			offsetX = -horizontalSpacing
+			offsetDirectionX = -1
 		else
 			pointX = "LEFT"
-			relativePointX = "RIGHT"
-			offsetX = horizontalSpacing
+			offsetDirectionX = 1
 		end
 
 		if growUp then
 			pointY = "BOTTOM"
-			relativePointY = "BOTTOM"
-			pointNewRowY = "BOTTOM"
-			relativePointNewRowY = "TOP"
-			offsetY = verticalSpacing
+			offsetDirectionY = 1
 		else
 			pointY = "TOP"
-			relativePointY = "TOP"
-			pointNewRowY = "TOP"
-			relativePointNewRowY = "BOTTOM"
-			offsetY = -verticalSpacing
+			offsetDirectionY = -1
 		end
+
+		local point = pointY..pointX
+
+		local column = 1
+		local row = 1
 
 		for i = 1, numInputs do
 			local childFrame = self.childFrames[i]
@@ -79,29 +74,41 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 
 			childFrame:ClearAllPoints()
 
+			local rowWidth
+			local columnHeight
 
-			if framesInRow < framesPerRow then
-				if i == 1 then
-					childFrame:SetPoint(pointY..pointX, previousFrame, pointY..pointX, 0, 0)
-					firstFrameInRow = childFrame
-				else
-					childFrame:SetPoint(pointY..pointX, previousFrame, relativePointY..relativePointX, offsetX, 0)
-				end
-				framesInRow = framesInRow + 1
-				width = width + iconSize  + horizontalSpacing
-				if width > widestRow then
-					widestRow = width
-				end
+			if column > 1 then
+				offsetX = (column - 1) * (iconSize + horizontalSpacing) * offsetDirectionX
+				rowWidth =  column * (iconSize + horizontalSpacing) - horizontalSpacing
 			else
-				width = 0
-				childFrame:SetPoint(pointNewRowY..pointX, firstFrameInRow, relativePointNewRowY..relativePointX, 0, offsetY)
-				framesInRow = 1
-				firstFrameInRow = childFrame
-				height = height + iconSize + verticalSpacing
+				offsetX = 0
+				rowWidth = iconSize
 			end
-			previousFrame = childFrame
-	--		print("previousFrame inside", previousFrame)
+
+			if row > 1 then
+				offsetY = (row - 1) * (iconSize + verticalSpacing) * offsetDirectionY
+				columnHeight = row * (iconSize + verticalSpacing) - verticalSpacing
+			else
+				offsetY = 0
+				columnHeight = iconSize
+			end
+
+			if rowWidth > widestRow then
+				widestRow = rowWidth
+			end
+			if columnHeight > highestColumn then
+				highestColumn = columnHeight
+			end
+
+			childFrame:SetPoint(point, self, point, offsetX, offsetY)
 			childFrame:Show()
+
+			if column <= framesPerRow then
+				column = column + 1
+			else
+				row = row + 1
+				column = 1
+			end
 		end
 
 		for i = numInputs + 1, #self.childFrames do --hide all unused frames
@@ -112,8 +119,8 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 		if widestRow == 0 then
 			self:Hide()
 		else
-			self:SetWidth(widestRow - horizontalSpacing)
-			self:SetHeight(height + iconSize)
+			self:SetWidth(widestRow)
+			self:SetHeight(highestColumn)
 		end
 	end
 
