@@ -103,7 +103,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 			childFrame:SetPoint(point, self, point, offsetX, offsetY)
 			childFrame:Show()
 
-			if column <= framesPerRow then
+			if column < framesPerRow then
 				column = column + 1
 			else
 				row = row + 1
@@ -118,7 +118,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 
 		if widestRow == 0 then
 			self:SetWidth(0.001)
-			self:SetHeight(0.001)
+			self:SetHeight(iconSize)
 			self:Hide()
 		else
 			self:SetWidth(widestRow)
