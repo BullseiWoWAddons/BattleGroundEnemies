@@ -12,6 +12,15 @@ local UnitName = UnitName
 
 local defaults = {
 	Parent = "Button",
+	ActivePoints = 1,
+	Container = {
+		IconSize = 15,
+		IconsPerRow = 8,
+		HorizontalGrowDirection = "leftwards",
+		HorizontalSpacing = 2,
+		VerticalGrowdirection = "upwards",
+		VerticalSpacing = 1,
+	},
 	Coloring_Enabled = true,
 	Cooldown = {
 		ShowNumber = true,
@@ -344,8 +353,7 @@ local priorityDebuffOptions = function(location)
 end
 
 local flags = {
-	Height = "Dynamic",
-	Width = "Dynamic"
+	HasDynamicSize = true
 }
 
 local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "UnitDied"}

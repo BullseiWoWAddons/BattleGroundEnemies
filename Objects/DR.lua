@@ -19,6 +19,7 @@ local DRList = LibStub("DRList-1.0")
 local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
+	ActivePoints = 1,
 	DisplayType = "Frame",
 	IconSize = 20,
 	Cooldown = {
@@ -27,6 +28,18 @@ local defaultSettings = {
 		FontOutline = "OUTLINE",
 		EnableShadow = false,
 		ShadowColor = {0, 0, 0, 1},
+	},
+	Container = {
+		UseButtonHeightAsSize = true,
+		IconSize = 15,
+		IconsPerRow = 10,
+		HorizontalGrowDirection = "rightwards",
+		HorizontalSpacing = 2,
+		VerticalGrowdirection = "downwards",
+		VerticalSpacing = 1,
+		Color = {0, 0, 1, 1},
+		Border = "Blizzard Dialog",
+		BorderThickness = 1,
 	},
 	Filtering_Enabled = false,
 	Filtering_Filterlist = {},
@@ -114,7 +127,7 @@ local function drFrameUpdateStatusText(drFrame)
 end
 
 local flags = {
-	Width = "Dynamic"
+	HasDynamicSize = true
 }
 
 local dRTracking = BattleGroundEnemies:NewButtonModule({
@@ -243,5 +256,6 @@ function dRTracking:AttachToPlayerButton(playerButton)
 			self:Display()
 		end
 	end
+
 	playerButton.DRTracking = container
 end

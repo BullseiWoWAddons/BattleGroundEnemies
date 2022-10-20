@@ -28,7 +28,7 @@ local defaultSettings = {
 		EnableShadow = false,
 		ShadowColor = {0, 0, 0, 1},
 		JustifyH = "CENTER",
-		JustifyV = "BOTTOM"
+		JustifyV = "TOP"
 	},
 	ActivePoints = 2,
 	Points = {
@@ -119,7 +119,7 @@ function healthBar:AttachToPlayerButton(playerButton)
 
 	playerButton.healthBar.HealthText = BattleGroundEnemies.MyCreateFontString(playerButton.healthBar)
 	playerButton.healthBar.HealthText:SetPoint("BOTTOMLEFT", playerButton.healthBar, "BOTTOMLEFT", 3, 3)
-	playerButton.healthBar.HealthText:SetPoint("BOTTOMRIGHT", playerButton.healthBar, "BOTTOMRIGHT", -3, 3)
+	playerButton.healthBar.HealthText:SetPoint("TOPRIGHT", playerButton.healthBar, "TOPRIGHT", -3, -3)
 
 	playerButton.myHealPrediction = playerButton.healthBar:CreateTexture(nil, "BORDER", nil, 5)
 	playerButton.myHealPrediction:ClearAllPoints();

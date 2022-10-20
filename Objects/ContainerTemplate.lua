@@ -4,12 +4,12 @@
 function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChildF)
 	local f = CreateFrame("Frame", nil, playerButton)
 
-	f.childFrames = {}
 	f.inputs = {}
+	f.childFrames = {}
+	
 
 	function f:Display()
 		local config = self.config.Container
-		local previousFrame = self
 		local verticalGrowdirection = config.VerticalGrowdirection
 		local horizontalGrowdirection = config.HorizontalGrowDirection
 		local framesPerRow = config.IconsPerRow
@@ -27,7 +27,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 		local widestRow = 0
 		local highestColumn = 0
 		local numInputs = #self.inputs
-		local pointX, relativePointX, offsetX, offsetY, pointY, relativePointY, offsetDirectionX, offsetDirectionY
+		local pointX, offsetX, offsetY, pointY, offsetDirectionX, offsetDirectionY
 
 
 		if growLeft then
@@ -117,6 +117,8 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 		end
 
 		if widestRow == 0 then
+			self:SetWidth(0.001)
+			self:SetHeight(0.001)
 			self:Hide()
 		else
 			self:SetWidth(widestRow)

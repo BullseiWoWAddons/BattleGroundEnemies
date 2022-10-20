@@ -50,21 +50,54 @@ local function isInSameVertical(Point1, Point2)
     end
 end
 
-local function needsHeight(moduleFrame, Point1, Point2)
-	local heightFlag = moduleFrame.flags.Height
-	if heightFlag == "Dynamic" or heightFlag == "Fixed" then return end
+function BattleGroundEnemies:GetActivePoints(config)
+	if not config.Points then return end
+	local activePoints = {}
+	for i = 1, config.ActivePoints do
+		activePoints[i] = config.Points[i]
+	end
+	return activePoints
+end
+
+function BattleGroundEnemies:FrameNeedsHeight(Point1, Point2)
 	if not Point1 and not Point2 then return end
 	if Point1 and not Point2 then return true end
 	return isInSameHorizontal(Point1, Point2)
 end
 
+function BattleGroundEnemies:ModuleFrameNeedsHeight(moduleFrame, config)
+	local flags = moduleFrame.flags
 
-local function needsWidth(moduleFrame, Point1, Point2)
-	local widthFlag = moduleFrame.flags.Width
-	if widthFlag == "Dynamic" or widthFlag == "Fixed" then return end
+	if flags.HasDynamicSize then return false end
+
+	local heightFlag = flags.Width
+
+	if heightFlag == "Fixed" then return end
+	
+	local activePoints = self:GetActivePoints(config)
+	if not activePoints then return end
+	return BattleGroundEnemies:FrameNeedsWidth(activePoints[1], activePoints[2])
+end
+
+
+function BattleGroundEnemies:FrameNeedsWidth(Point1, Point2)
 	if not Point1 and not Point2 then return end
 	if Point1 and not Point2 then return true end
 	return isInSameVertical(Point1, Point2)
+end
+
+function BattleGroundEnemies:ModuleFrameNeedsWidth(moduleFrame, config)
+	local flags = moduleFrame.flags
+
+	if flags.HasDynamicSize then return false end
+
+	local widthFlag = flags.Width
+
+	if widthFlag == "Fixed" then return end
+
+	local activePoints = self:GetActivePoints(config)
+	if not activePoints then return end
+	return BattleGroundEnemies:FrameNeedsWidth(activePoints[1], activePoints[2])
 end
 
 local function canAddPoint(location, moduleFrame)
@@ -73,7 +106,7 @@ local function canAddPoint(location, moduleFrame)
 	if activePoints == 0 then return true end
 
 	--if only 1 point is set
-	if moduleFrame.flags.Width == "Dynamic" and moduleFrame.flags.Height == "Dynamic" then return false end
+	if moduleFrame.flags.HasDynamicSize then return false end --Containers can only have 1 point
 	if moduleFrame.flags.Width == "Fixed" and moduleFrame.flags.Height == "Fixed" then return false end
 
 	return true
@@ -229,9 +262,8 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		name = L.Width,
 		order = numPoints + 5,
 		hidden = function()
-			local widthNeeded = needsWidth(moduleFrame, location.Points and location.Points[1], location.Points[2])
+			local widthNeeded = BattleGroundEnemies:ModuleFrameNeedsWidth(moduleFrame, location)
 			if not widthNeeded then
-				location.Width = false
 				return true
 			end
 		end,
@@ -251,7 +283,6 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 				hidden = function()
 					local hidden = location.UseButtonHeightAsWidth
 					if hidden then
-						location.Width = false
 						BattleGroundEnemies:NotifyChange()
 						return true
 					end
@@ -265,9 +296,8 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		name = L.Height,
 		order = numPoints + 6,
 		hidden = function()
-			local heightNeeded = needsHeight(moduleFrame, location.Points and location.Points[1], location.Points[2])
+			local heightNeeded = BattleGroundEnemies:ModuleFrameNeedsHeight(moduleFrame, location)
 			if not heightNeeded then
-				location.Height = false
 				return true
 			end
 		end,
@@ -1041,7 +1071,7 @@ function BattleGroundEnemies:SetupOptions()
 			TestmodeSettings = {
 				type = "group",
 				name = L.TestmodeSettings,
-				disabled = function() return InCombatLockdown() or (self:IsShown() and not self.TestmodeActive) end,
+				disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Testmode.Active) end,
 				inline = true,
 				order = 1,
 				args = {
@@ -1049,10 +1079,10 @@ function BattleGroundEnemies:SetupOptions()
 						type = "select",
 						name = L.BattlegroundSize,
 						order = 1,
-						get = function() return self.BGSizeTestmode end,
+						get = function() return self.Testmode.BGSizeTestmode end,
 						set = function(option, value)
-							self.BGSizeTestmode = value
-							if self.TestmodeActive then
+							self.Testmode.BGSizeTestmode = value
+							if self.Testmode.Active then
 								self:CreateFakePlayers()
 							end
 						end,
@@ -1062,7 +1092,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "execute",
 						name = L.Testmode_Toggle,
 						desc = L.Testmode_Toggle_Desc,
-						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.TestmodeActive) or not self.BGSize end,
+						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Testmode.Active) or not self.BGSize end,
 						func = self.ToggleTestmode,
 						order = 2
 					},
@@ -1070,7 +1100,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "execute",
 						name = L.Testmode_ToggleAnimation,
 						desc = L.Testmode_ToggleAnimation_Desc,
-						disabled = function() return InCombatLockdown() or not self.TestmodeActive end,
+						disabled = function() return InCombatLockdown() or not self.Testmode.Active end,
 						func = self.ToggleTestmodeOnUpdate,
 						order = 3
 					},
@@ -1078,7 +1108,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "toggle",
 						name = L.Testmode_UseTeammates,
 						desc = L.Testmode_UseTeammates_Desc,
-						disabled = function() return self.TestmodeActive end,
+						disabled = function() return self.Testmode.Active end,
 						width = "full",
 						order = 4
 					},

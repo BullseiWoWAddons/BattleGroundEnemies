@@ -117,8 +117,12 @@ end
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
 --BattleGroundEnemies.BattlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
 BattleGroundEnemies.BattleGroundDebuffs = {} --contains battleground specific debbuffs to watchout for of the current active battlefield
+BattleGroundEnemies.Testmode = {
+	BGSizeTestmode = 5,
+	Active = false
+}
+
 BattleGroundEnemies.IsRatedBG = false
-BattleGroundEnemies.BGSizeTestmode = 5
 BattleGroundEnemies.CurrentMapID = false --contains the map id of the current active battleground
 BattleGroundEnemies.ButtonModules = {} --contains moduleFrames, key is the module name
 
@@ -181,14 +185,14 @@ local function CreateFakeAura(playerButton, filter)
 end
 
 
-local FakePlayerAuras = {} --key = playerbutton, value = {}
-local FakePlayerDRs = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
+BattleGroundEnemies.FakePlayerAuras = {} --key = playerbutton, value = {}
+BattleGroundEnemies.FakePlayerDRs = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
 local function FakeUnitAura(playerButton, index, filter)
 	local currentTime = GetTime()
 
-	FakePlayerAuras[playerButton] = FakePlayerAuras[playerButton] or {}
-	FakePlayerAuras[playerButton][filter] = FakePlayerAuras[playerButton][filter] or {}
-	FakePlayerDRs[playerButton] = FakePlayerDRs[playerButton] or {}
+	BattleGroundEnemies.FakePlayerAuras[playerButton] = BattleGroundEnemies.FakePlayerAuras[playerButton] or {}
+	BattleGroundEnemies.FakePlayerAuras[playerButton][filter] = BattleGroundEnemies.FakePlayerAuras[playerButton][filter] or {}
+	BattleGroundEnemies.FakePlayerDRs[playerButton] = BattleGroundEnemies.FakePlayerDRs[playerButton] or {}
 
 	--if index == 1 then
 		local createNewAura = math_random(1, 2) == 1 -- 1/2 probability to create a new Aura
@@ -198,9 +202,9 @@ local function FakeUnitAura(playerButton, index, filter)
 				local categoryNewAura = DRList:GetCategoryBySpellID(IsClassic and newFakeAura.name or newFakeAura.spellID)
 
 				local dontAddNewAura
-				for i = 1, #FakePlayerAuras[playerButton][filter] do
+				for i = 1, #BattleGroundEnemies.FakePlayerAuras[playerButton][filter] do
 					
-					local fakeAura = FakePlayerAuras[playerButton][filter][i]
+					local fakeAura = BattleGroundEnemies.FakePlayerAuras[playerButton][filter][i]
 
 					local categoryCurrentAura = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellID)
 
@@ -212,7 +216,7 @@ local function FakeUnitAura(playerButton, index, filter)
 						-- end
 						
 						-- end
-					elseif FakePlayerDRs[playerButton][categoryNewAura] and FakePlayerDRs[playerButton][categoryNewAura].status then
+					elseif BattleGroundEnemies.FakePlayerDRs[playerButton][categoryNewAura] and BattleGroundEnemies.FakePlayerDRs[playerButton][categoryNewAura].status then
 
 				
 					elseif newFakeAura.spellID == fakeAura.spellID then
@@ -223,7 +227,7 @@ local function FakeUnitAura(playerButton, index, filter)
 					-- we already are showing this spell, check if this spell is a DR
 				end
 
-				local status = FakePlayerDRs[playerButton][categoryNewAura] and FakePlayerDRs[playerButton][categoryNewAura].status
+				local status = BattleGroundEnemies.FakePlayerDRs[playerButton][categoryNewAura] and BattleGroundEnemies.FakePlayerDRs[playerButton][categoryNewAura].status
 				--check if the aura even can be applied, the new aura can only be applied if the expirationTime of the new aura would be later than the current one
 				-- this is only the case if the aura is already 50% expired
 				if status then
@@ -237,7 +241,7 @@ local function FakeUnitAura(playerButton, index, filter)
 				end
 
 				if not dontAddNewAura then
-					table_insert(FakePlayerAuras[playerButton][filter], newFakeAura)
+					table_insert(BattleGroundEnemies.FakePlayerAuras[playerButton][filter], newFakeAura)
 				end
 			end
 		end
@@ -245,7 +249,7 @@ local function FakeUnitAura(playerButton, index, filter)
 
 
 	--set all expired DRs to status 0
-	for categoryname, drData in pairs(FakePlayerDRs[playerButton]) do
+	for categoryname, drData in pairs(BattleGroundEnemies.FakePlayerDRs[playerButton]) do
 		if drData.expirationTime and drData.expirationTime <= currentTime then
 			drData.status = 0
 			drData.expirationTime = nil
@@ -255,8 +259,8 @@ local function FakeUnitAura(playerButton, index, filter)
 
 
 	-- remove all expired auras
-	for i = #FakePlayerAuras[playerButton][filter], 1, -1 do
-		local fakeAura = FakePlayerAuras[playerButton][filter][i]
+	for i = #BattleGroundEnemies.FakePlayerAuras[playerButton][filter], 1, -1 do
+		local fakeAura = BattleGroundEnemies.FakePlayerAuras[playerButton][filter][i]
 		if fakeAura.expirationTime <= currentTime then
 			-- if playerButton.PlayerName == "Enemy2-Realm2" then
 			-- 	print("1")
@@ -268,24 +272,24 @@ local function FakeUnitAura(playerButton, index, filter)
 				-- 	print("2")
 				-- end
 				
-				FakePlayerDRs[playerButton][category] = FakePlayerDRs[playerButton][category] or {}
+				BattleGroundEnemies.FakePlayerDRs[playerButton][category] = BattleGroundEnemies.FakePlayerDRs[playerButton][category] or {}
 
 				local resetDuration = DRList:GetResetTime(category)
-				FakePlayerDRs[playerButton][category].expirationTime = fakeAura.expirationTime + resetDuration
-				FakePlayerDRs[playerButton][category].status = (FakePlayerDRs[playerButton][category].status or 0) + 1
+				BattleGroundEnemies.FakePlayerDRs[playerButton][category].expirationTime = fakeAura.expirationTime + resetDuration
+				BattleGroundEnemies.FakePlayerDRs[playerButton][category].status = (BattleGroundEnemies.FakePlayerDRs[playerButton][category].status or 0) + 1
 				-- if playerButton.PlayerName == "Enemy2-Realm2" then
 				-- 	print("3", FakePlayerDRs[playerButton][category].status)
 				-- end
 			end
 
-			table_remove(FakePlayerAuras[playerButton][filter], i)
+			table_remove(BattleGroundEnemies.FakePlayerAuras[playerButton][filter], i)
 			playerButton:AuraRemoved(fakeAura.spellID, fakeAura.name)
 		end
 	end
 
 
 
-	local aura = FakePlayerAuras[playerButton][filter][index]
+	local aura = BattleGroundEnemies.FakePlayerAuras[playerButton][filter][index]
 	if not aura then return end
 
 	return aura.name, aura.icon, aura.count, aura.debuffType, aura.duration, aura.expirationTime, aura.unitCaster, aura.canStealOrPurge, aura.nameplateShowPersonal, aura.spellID, aura.canApplyAura, aura.isBossAura, aura.castByPlayer, aura.nameplateShowAll, aura.timeMod
@@ -533,9 +537,6 @@ do
 									if not relativeFrame then return print("error", relativeFrame, "for module", moduleName, "doesnt exist") end
 								end
 
-							
-								if moduleFrame.flags.Height == "Dynamic" then moduleFrameOnButton:SetHeight(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
-								if moduleFrame.flags.Width == "Dynamic" then moduleFrameOnButton:SetWidth(0.001) end --set a dummy, otherweise other modules attached to this module wont get set correctly
 							else
 								--do nothing, the point was probably deleted
 							end
@@ -546,6 +547,10 @@ do
 					moduleFrameOnButton:SetParent(self:GetAnchor(config.Parent))
 				end
 
+				if moduleFrame.flags.HasDynamicSize then
+					moduleFrameOnButton:SetHeight(0.001)
+					moduleFrameOnButton:SetWidth(0.001)
+				end
 
 				if not moduleFrameOnButton.Enabled and moduleFrame.flags.SetZeroWidthWhenDisabled then
 					moduleFrameOnButton:SetWidth(0.001)
@@ -553,7 +558,7 @@ do
 					if config.UseButtonHeightAsWidth then
 						moduleFrameOnButton:SetWidth(self:GetHeight())
 					else
-						if config.Width then
+						if config.Width and BattleGroundEnemies:ModuleFrameNeedsWidth(moduleFrame, config) then
 							moduleFrameOnButton:SetWidth(config.Width)
 						end
 					end
@@ -566,7 +571,7 @@ do
 					if config.UseButtonHeightAsHeight then
 						moduleFrameOnButton:SetHeight(self:GetHeight())
 					else
-						if config.Height then
+						if config.Height and BattleGroundEnemies:ModuleFrameNeedsHeight(moduleFrame, config) then
 							moduleFrameOnButton:SetHeight(config.Height)
 						end
 					end
@@ -603,6 +608,8 @@ do
 		--MyFocus, indicating the current focus of the player
 		self.MyFocus:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyFocus_Color))
 
+		self:SetModulePositions()
+
 		wipe(self.ButtonEvents)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			local moduleConfigOnButton = self.bgSizeConfig.ButtonModules[moduleName]
@@ -629,7 +636,6 @@ do
 			end
 		end
 
-		self:SetModulePositions()
 
 		--Auras
 		--self.DebuffContainer:ApplySettings()
@@ -1585,6 +1591,21 @@ function BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName)
 	return false
 end
 
+local function copySettingsWithoutOverwrite(src, dest)
+	if not src or type(src) ~="table" then return end
+    if type(dest) ~= "table" then dest = {} end
+
+    for k, v in pairs(src) do
+        if type(v) == "table" then
+            dest[k] = copySettingsWithoutOverwrite(v, dest[k])
+        elseif type(v) ~= type(dest[k]) then -- only overwrite if tht type in dest is different
+            dest[k] = v
+        end
+    end
+
+    return dest
+end
+
 function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 	if type(moduleSetupTable) ~= "table" then return error("Tried to register a Module but the parameter wasn't a table") end
 	if not moduleSetupTable.moduleName then return error("NewButtonModule error: No moduleName specified") end
@@ -1609,7 +1630,7 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 			local BGSize = BGSizes[j]
 			Data.defaultSettings.profile[tt][BGSize].ButtonModules = Data.defaultSettings.profile[tt][BGSize].ButtonModules or {}
 			Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName] = Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName] or {}
-			Mixin(Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName], moduleSetupTable.defaultSettings)
+			copySettingsWithoutOverwrite(moduleSetupTable.defaultSettings, Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName])
 		end
 	end
 
@@ -1758,7 +1779,7 @@ function BattleGroundEnemies.ToggleTestmodeOnUpdate()
 end
 
 function BattleGroundEnemies.ToggleTestmode()
-	if BattleGroundEnemies.TestmodeActive then --disable testmode
+	if BattleGroundEnemies.Testmode.Active then --disable testmode
 		BattleGroundEnemies:DisableTestMode()
 	else --enable Testmode
 		BattleGroundEnemies:EnableTestMode()
@@ -1770,7 +1791,7 @@ function BattleGroundEnemies:DisableTestMode()
 	self.Enemies:RemoveAllPlayers()
 	FakePlayersOnUpdateFrame:Hide()
 	self:Hide()
-	self.TestmodeActive = false
+	self.Testmode.Active = false
 	self:GROUP_ROSTER_UPDATE() -- to build up the players with the real allies
 end
 
@@ -1802,7 +1823,7 @@ do
 	end
 
 	function BattleGroundEnemies:CreateFakePlayers()
-		local count = self.BGSizeTestmode or 5
+		local count = self.Testmode.BGSizeTestmode or 5
 		for number, mainFrame in pairs({self.Allies, self.Enemies}) do
 			local continue = true
 			if number == 1 and self.db.profile.Testmode_UseTeammates then
@@ -1873,15 +1894,15 @@ do
 
 	local TestmodeRanOnce = false
 	function BattleGroundEnemies:EnableTestMode()
-		self.TestmodeActive = true
+		self.Testmode.Active = true
 
 		if not TestmodeRanOnce then
 			SetupTrinketAndRacialData()
 			TestmodeRanOnce = true
 		end
 
-		wipe(FakePlayerAuras)
-		wipe(FakePlayerDRs)
+		wipe(self.FakePlayerAuras)
+		wipe(self.FakePlayerDRs)
 
 		local mapIDs = {}
 		for mapID, data in pairs(Data.BattlegroundspezificBuffs) do
@@ -2192,7 +2213,7 @@ end
 
 BattleGroundEnemies:SetScript("OnShow", function(self)
 	self:RegisterEvents()
-	if self.TestmodeActive then
+	if self.Testmode.Active then
 		RequestFrame:Hide()
 	else
 		RequestFrame:Show()
@@ -2237,7 +2258,7 @@ do
 end
 
 BattleGroundEnemies.Enemies:SetScript("OnShow", function(self)
-	if not BattleGroundEnemies.TestmodeActive then
+	if not BattleGroundEnemies.Testmode.Active then
 		self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 		self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 		self:RegisterEvent("UNIT_NAME_UPDATE")
@@ -2276,7 +2297,7 @@ do
 end
 
 BattleGroundEnemies.Allies:SetScript("OnShow", function(self)
-	if not BattleGroundEnemies.TestmodeActive then
+	if not BattleGroundEnemies.Testmode.Active then
 		self:SetScript("OnUpdate", self.RealPlayersOnUpdate)
 	else
 		self:SetScript("OnUpdate", nil)
@@ -2313,24 +2334,28 @@ function BattleGroundEnemies.CropImage(texture, width, height, hasTexcoords)
 	end
 end
 
-local function ApplyFontStringSettings(self, settings)
-	self:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), settings.FontSize, settings.FontOutline)
+local function ApplyFontStringSettings(fs, settings)
+	fs:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), settings.FontSize, settings.FontOutline)
 
-	if settings.FontColor then
-		self:SetTextColor(unpack(settings.FontColor))
-	end
+
+	--idk why, but without this the SetJustifyH and SetJustifyV dont seem to work sometimes even tho GetJustifyH returns the new, correct value
+	fs:GetRect()
+	fs:GetStringHeight()
+	fs:GetStringWidth()
 
 	if settings.JustifyH then
-		self:SetJustifyH(settings.JustifyH)
+		fs:SetJustifyH(settings.JustifyH)
 	end
 
 	if settings.JustifyV then
-		self:SetJustifyV(settings.JustifyV)
+		fs:SetJustifyV(settings.JustifyV)
 	end
 
-	self:EnableShadowColor(settings.EnableShadow, settings.ShadowColor)
+	if settings.FontColor then
+		fs:SetTextColor(unpack(settings.FontColor))
+	end
 
-	self:SetText(self:GetText()) --otherweise it can bug out, it sets the values and for example :GetJustivyV returns the new value but the font is still aligned falsly
+	fs:EnableShadowColor(settings.EnableShadow, settings.ShadowColor)
 end
 
 local function ApplyCooldownSettings(self, config, cdReverse, setDrawSwipe, swipeColor)
@@ -3291,7 +3316,7 @@ do
 
 		self:RequestEverythingFromGroupmembers()
 
-		if self.TestmodeActive then return end
+		if self.Testmode.Active then return end
 
 		-- GetRaidRosterInfo also works when in a party (not raid) but i am not 100% sure how the party unitID maps to the index in GetRaidRosterInfo()
 
@@ -3341,7 +3366,7 @@ do
 
 
 	function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
-		if self.TestmodeActive then --disable testmode
+		if self.Testmode.Active then --disable testmode
 			self:DisableTestMode()
 		end
 

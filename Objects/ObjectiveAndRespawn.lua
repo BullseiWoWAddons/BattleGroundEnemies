@@ -206,7 +206,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:UnitDied()
-		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.TestmodeActive and BattleGroundEnemies.BGSize == 15)) then
+		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.Testmode.Active and BattleGroundEnemies.BGSize == 15)) then
 		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
 				self:Show()

@@ -11,15 +11,8 @@ local styles = {
 local defaultSettings = {
 	Parent = "Button",
 	ActivePoints = 1,
-	Points = {
-		{
-			Point = "TOPRIGHT",
-			RelativeFrame = "Button",
-			RelativePoint = "TOPLEFT",
-		},
-	},
 	Style = "Arena",
-	Scale = 1
+	Scale = 1.5
 }
 
 local options = function(location)
@@ -63,6 +56,7 @@ local settingToTemplate = {
 	Normal = function(self)
 		self:SetWidth(195)
 		self:SetHeight(13)
+		
 		local f = CreateFrame("statusbar", nil, self, "CastingBarFrameTemplate")
 		f:SetAllPoints()
 		return f
@@ -70,6 +64,7 @@ local settingToTemplate = {
 	Arena = function(self)
 		self:SetWidth(80)
 		self:SetHeight(14)
+
 		local f = CreateFrame("statusbar", nil, self, "ArenaCastingBarFrameTemplate")
 		f:SetAllPoints()
 		f.Icon:SetPoint("RIGHT", f, "LEFT", -5, 0)
@@ -78,6 +73,7 @@ local settingToTemplate = {
 	Small = function(self)
 		self:SetWidth(150)
 		self:SetHeight(10)
+
 		local f = CreateFrame("statusbar", nil, self, "SmallCastingBarFrameTemplate")
 		f:SetAllPoints()
 		return f

@@ -13,7 +13,6 @@ local defaultSettings = {
 	Enabled = true,
 	Parent = "healthBar",
 	Width = 30,
-	Height = 30,
 	ActivePoints = 2,
 	Points = {
 		{
