@@ -14,7 +14,6 @@ local CreateFrame = CreateFrame
 
 
 local function CreateImportExportFrame()
-
 	local frame = CreateFrame("Frame", "dsafsdafdsafdsafsdaf", UIParent, "ButtonFrameTemplate")
 	frame:SetFrameStrata("TOOLTIP") -- to make it appear above the options panel
 
@@ -48,7 +47,12 @@ local function CreateImportExportFrame()
 
 	frame.scrollBar:SetScrollChild(frame.EditBox)
 
-	frame.Button = CreateFrame("Button", nil, frame, "SharedButtonSmallTemplate")
+	if DoesTemplateExist("SharedButtonSmallTemplate") then
+		frame.Button = CreateFrame("Button", nil, frame, "SharedButtonSmallTemplate")
+	else
+		frame.Button = CreateFrame("Button", nil, frame, "MagicButtonTemplate")
+	end
+
 	frame.Button:SetSize(80, 22)
 	frame.Button:SetPoint("BOTTOMRIGHT", -4, 4)
 	frame.Button:SetScript("OnClick", function(self)
