@@ -34,7 +34,7 @@ Data.defaultSettings = {
 			RangeIndicator_Enabled = true,
 			RangeIndicator_Range = 28767,
 			RangeIndicator_Alpha = 0.55,
-			RangeIndicator_Everything = false,
+			RangeIndicator_Everything = true,
 			RangeIndicator_Frames = {},
 
 			LeftButtonType = "Target",
@@ -74,12 +74,17 @@ Data.defaultSettings = {
 					},
 					CastBar = {
 						Enabled = true,
-						Height = false,
-						Width = false,
+						Points = {
+							{
+								Point = "RIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "LEFT",
+								OffsetX = -3
+							},
+						},
 					},
 					PriorityBuffs = {
 						Enabled = true,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -94,14 +99,11 @@ Data.defaultSettings = {
 							IconSize = 20,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					PriorityDebuffs = {
 						Enabled = true,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -115,14 +117,16 @@ Data.defaultSettings = {
 							IconSize = 20,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
+					},
+					Name = {
+						Text = {
+							JustifyV = "BOTTOM"
+						}
 					},
 					NonPriorityBuffs = {
 						Enabled = false,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -133,17 +137,12 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityDebuffs = {
 						Enabled = false,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -153,16 +152,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					DRTracking = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -174,14 +168,21 @@ Data.defaultSettings = {
 						Container = {
 							UseButtonHeightAsSize = false,
 							IconSize = 31,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "downwards",
-							VerticalSpacing = 1,
-							Color = {0, 0, 1, 1},
-							Border = "Blizzard Dialog",
-							BorderThickness = 1,
+						},
+					},
+					healthBar = {
+						HealthTextEnabled = true,
+						HealthTextType = "health",
+						HealthText = {
+							FontSize = 18,
+							FontOutline = "",
+							FontColor = {1, 1, 1, 1},
+							EnableShadow = false,
+							ShadowColor = {0, 0, 0, 1},
+							JustifyH = "CENTER",
+							JustifyV = "TOP"
 						},
 					},
 					Trinket = {
@@ -252,12 +253,17 @@ Data.defaultSettings = {
 				ButtonModules = {
 					CastBar = {
 						Enabled = false,
-						Height = false,
-						Width = false,
+						Points = {
+							{
+								Point = "RIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "LEFT",
+								OffsetX = -3
+							},
+						},
 					},
 					PriorityBuffs = {
 						Enabled = true,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -268,17 +274,12 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					PriorityDebuffs = {
 						Enabled = true,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -288,17 +289,12 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityBuffs = {
 						Enabled = false,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -309,17 +305,12 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityDebuffs = {
 						Enabled = false,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -329,16 +320,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					DRTracking = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -347,16 +333,8 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							UseButtonHeightAsSize = true,
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
-							Color = {0, 0, 1, 1},
-							Border = "Blizzard Dialog",
-							BorderThickness = 1,
 						},
 					},
 					Trinket = {
@@ -429,14 +407,19 @@ Data.defaultSettings = {
 				ButtonModules = {
 					CastBar = {
 						Enabled = false,
-						Height = false,
-						Width = false,
+						Points = {
+							{
+								Point = "RIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "LEFT",
+								OffsetX = -3
+							},
+						},
 					},
 					Power = {
 						Enabled = false
 					},
 					PriorityBuffs = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -447,16 +430,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					PriorityDebuffs = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -466,16 +444,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityBuffs = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -486,16 +459,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityDebuffs = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMRIGHT",
@@ -505,16 +473,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					DRTracking = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPRIGHT",
@@ -523,16 +486,8 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							UseButtonHeightAsSize = true,
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
-							Color = {0, 0, 1, 1},
-							Border = "Blizzard Dialog",
-							BorderThickness = 1,
 						},
 					},
 					Trinket = {
@@ -585,7 +540,7 @@ Data.defaultSettings = {
 			RangeIndicator_Enabled = true,
 			RangeIndicator_Range = 34471,
 			RangeIndicator_Alpha = 0.55,
-			RangeIndicator_Everything = false,
+			RangeIndicator_Everything = true,
 			RangeIndicator_Frames = {},
 
 			LeftButtonType = "Target",
@@ -625,12 +580,35 @@ Data.defaultSettings = {
 					},
 					CastBar = {
 						Enabled = true,
-						Height = false,
-						Width = false,
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 28,
+							},
+						},
+					},
+					healthBar = {
+						HealthTextEnabled = true,
+						HealthTextType = "health",
+						HealthText = {
+							FontSize = 18,
+							FontOutline = "",
+							FontColor = {1, 1, 1, 1},
+							EnableShadow = false,
+							ShadowColor = {0, 0, 0, 1},
+							JustifyH = "CENTER",
+							JustifyV = "TOP"
+						},
+					},
+					Name = {
+						Text = {
+							JustifyV = "BOTTOM"
+						}
 					},
 					PriorityBuffs = {
 						Enabled = true,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -643,16 +621,12 @@ Data.defaultSettings = {
 						Container = {
 							UseButtonHeightAsSize = false,
 							IconSize = 20,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					PriorityDebuffs = {
 						Enabled = true,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -664,16 +638,12 @@ Data.defaultSettings = {
 						Container = {
 							UseButtonHeightAsSize = false,
 							IconSize = 20,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityBuffs = {
 						Enabled = false,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -684,17 +654,12 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityDebuffs = {
 						Enabled = false,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -704,16 +669,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					DRTracking = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -725,14 +685,8 @@ Data.defaultSettings = {
 						Container = {
 							UseButtonHeightAsSize = false,
 							IconSize = 31,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "downwards",
-							VerticalSpacing = 1,
-							Color = {0, 0, 1, 1},
-							Border = "Blizzard Dialog",
-							BorderThickness = 1,
 						},
 					},
 					Trinket = {
@@ -805,12 +759,17 @@ Data.defaultSettings = {
 				ButtonModules = {
 					CastBar = {
 						Enabled = false,
-						Height = false,
-						Width = false,
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 28,
+							},
+						},
 					},
 					PriorityBuffs = {
 						Enabled = true,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -821,17 +780,12 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					PriorityDebuffs = {
 						Enabled = true,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -841,17 +795,12 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityBuffs = {
 						Enabled = false,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -862,17 +811,12 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityDebuffs = {
 						Enabled = false,
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -882,16 +826,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					DRTracking = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -900,16 +839,8 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							UseButtonHeightAsSize = true,
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
-							Color = {0, 0, 1, 1},
-							Border = "Blizzard Dialog",
-							BorderThickness = 1,
 						},
 					},
 					Trinket = {
@@ -981,14 +912,19 @@ Data.defaultSettings = {
 				ButtonModules = {
 					CastBar = {
 						Enabled = false,
-						Height = false,
-						Width = false,
+						Points = {
+							{
+								Point = "LEFT",
+								RelativeFrame = "Button",
+								RelativePoint = "RIGHT",
+								OffsetX = 28,
+							},
+						},
 					},
 					Power = {
 						Enabled = false
 					},
 					PriorityBuffs = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -999,16 +935,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					PriorityDebuffs = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -1018,16 +949,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityBuffs = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -1038,16 +964,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					NonPriorityDebuffs = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "BOTTOMLEFT",
@@ -1057,16 +978,11 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
 						},
 					},
 					DRTracking = {
-						ActivePoints = 1,
 						Points = {
 							{
 								Point = "TOPLEFT",
@@ -1075,16 +991,8 @@ Data.defaultSettings = {
 							}
 						},
 						Container = {
-							UseButtonHeightAsSize = true,
-							IconSize = 15,
-							IconsPerRow = 8,
 							HorizontalGrowDirection = "rightwards",
-							HorizontalSpacing = 2,
 							VerticalGrowdirection = "upwards",
-							VerticalSpacing = 1,
-							Color = {0, 0, 1, 1},
-							Border = "Blizzard Dialog",
-							BorderThickness = 1,
 						},
 					},
 					Trinket = {
