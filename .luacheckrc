@@ -142,6 +142,7 @@ globals = {
 	"CreateColor",
 	"CreateFrame",
 	"DebuffTypeColor",
+	"DoesTemplateExist",
 	"EJ_GetCreatureInfo",
 	"EJ_GetEncounterInfo",
 	"EJ_GetTierInfo",
