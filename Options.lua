@@ -19,6 +19,12 @@ local function GetAllAnchors(moduleName)
 	return t
 end
 
+local BGSizeToLocale = {
+	[5] = ARENA,
+	[15] = L.BGSize_15,
+	[40] = L.BGSize_40
+}
+
 
 
 -- Points
@@ -147,7 +153,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 	local temp = {}
 	temp.Parent = {
 		type = "select",
-		name = L.Parent,
+		name = "Parent",
 		values = GetAllAnchors(moduleName),
 		order = 2
 	}
@@ -157,7 +163,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		for i = 1, numPoints do
 			temp["Point"..i] = {
 				type = "group",
-				name = L.Point..i,
+				name = "Point"..i,
 				desc = "",
 				get =  function(option)
 					return Data.GetOption(location.Points[i], option)
@@ -179,7 +185,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 					},
 					RelativeFrame = {
 						type = "select",
-						name = L.RelativeFrame,
+						name = "RelativeFrame",
 						values = GetAllAnchors(moduleName),
 						validate = function(option, value)
 
@@ -198,7 +204,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 					},
 					RelativePoint = {
 						type = "select",
-						name = L.RelativePoint,
+						name = "Relative Point",
 						values = Data.AllPositions,
 						order = 3
 					},
@@ -583,7 +589,7 @@ function Data.AddCooldownSettings(location)
 	}
 end
 
-function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
+function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType, BGSize)
 	local i = 1
 	local temp = {}
 	for moduleName, moduleFrame in pairs(self.ButtonModules) do
@@ -638,7 +644,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 				Reset = {
 					type = "execute",
 					name = L.ResetModule,
-					desc = L.ResetModule_Desc,
+					desc = L.ResetModule_Desc:format(L[playerType], BGSizeToLocale[tonumber(BGSize)]),
 					func = function()
 						location.ButtonModules[moduleName] = copy(defaults.ButtonModules[moduleName])
 						BattleGroundEnemies:NotifyChange()
@@ -1042,7 +1048,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							type = "group",
 							name = L.ModuleSettings,
 							order = 8,
-							args = self:AddModuleSettings(location, defaults, playerType)
+							args = self:AddModuleSettings(location, defaults, playerType, BGSize)
 						}
 					}
 				}
@@ -1088,7 +1094,7 @@ function BattleGroundEnemies:SetupOptions()
 								self:CreateFakePlayers()
 							end
 						end,
-						values = {[5] = ARENA, [15] = L.BGSize_15, [40] = L.BGSize_40}
+						values = BGSizeToLocale
 					},
 					Testmode_Enabled = {
 						type = "execute",
@@ -1343,9 +1349,9 @@ function BattleGroundEnemies:SetupOptions()
 					}
 				}
 			},
-			ImportExportProfile = {
+			MoreProfileOptions = {
 				type = "group",
-				name = L.ImportExportProfile,
+				name = L.MoreProfileOptions,
 				childGroups = "tab",
 				order = 6,
 				args = {
