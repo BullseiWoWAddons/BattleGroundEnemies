@@ -14,7 +14,7 @@ local defaults = {
 	Parent = "Button",
 	ActivePoints = 1,
 	Container = {
-		IconSize = 15,
+		IconSize = 22,
 		IconsPerRow = 8,
 		HorizontalGrowDirection = "leftwards",
 		HorizontalSpacing = 2,
@@ -272,7 +272,6 @@ local function AddFilteringSettings(location, filter)
 						DurationFilter_Enabled = {
 							type = "toggle",
 							name = L.DurationFilter,
-							desc = L.DurationFilter_desc,
 							order = 15
 						},
 						DurationFilter_CustomMaxDuration = {
@@ -525,7 +524,7 @@ local function AttachToPlayerButton(playerButton, filterr, isPriorityContainer)
 		if filter == self.filter then return true end
 	end
 
-	function auraContainer:BeforeFullAuraUpdate(unitID, filter)
+	function auraContainer:BeforeFullAuraUpdate(filter)
 		if not (filter == self.filter) then return end
 		self:ResetInputs()
 	end
@@ -658,13 +657,4 @@ end
 function priorityDebuffs:AttachToPlayerButton(playerButton)
 	playerButton.PriorityDebuffs = AttachToPlayerButton(playerButton, "HARMFUL", true)
 end
-
-
-
-
-
-
-
-
-
 

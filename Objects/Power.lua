@@ -7,6 +7,7 @@ local PowerBarColor = PowerBarColor --table
 local UnitPower = UnitPower
 local UnitPowerMax = UnitPowerMax
 local UnitPowerType = UnitPowerType
+local math_random = math.random
 
 
 local defaultSettings = {
@@ -103,15 +104,19 @@ function power:AttachToPlayerButton(playerButton)
 	
 	
 	function playerButton.Power:UNIT_POWER_FREQUENT(unitID, powerToken)
-		
-		if powerToken then
-			self:CheckForNewPowerColor(powerToken)
+		if unitID then
+			if powerToken then
+				self:CheckForNewPowerColor(powerToken)
+			else
+				local powerType, altR, altG, altB
+				powerType, powerToken, altR, altG, altB = UnitPowerType(unitID)
+				self:CheckForNewPowerColor(powerToken)
+			end
+			self:SetValue(UnitPower(unitID)/UnitPowerMax(unitID))
 		else
-			local powerType, altR, altG, altB
-			powerType, powerToken, altR, altG, altB = UnitPowerType(unitID)
-			self:CheckForNewPowerColor(powerToken)
+			--for testmode
+			self:SetValue(math_random(0, 100)/100)
 		end
-		self:SetValue(UnitPower(unitID)/UnitPowerMax(unitID))
 	end
 
 

@@ -50,7 +50,7 @@ local spec_HighestActivePriority = BattleGroundEnemies:NewButtonModule({
 
 function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)
-	
+
 	frame.PriorityAuras = {}
 	frame.ActiveInterrupt = false
 	frame.Icon = frame:CreateTexture(nil, 'BACKGROUND')
@@ -90,14 +90,6 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 			end
 		end
 		self:SetFrameLevel(highestLevel + 1)
-	end
-
-	function frame:NewAura(unitID, filter, aura)
-		if not aura.Priority then return end
-		local ID = #self.PriorityAuras + 1
-
-		aura.ID = ID
-		self.PriorityAuras[ID] = aura
 	end
 
 	function frame:Update()
@@ -150,8 +142,6 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	end
 
 
-
-
 	function frame:GotInterrupted(spellId, interruptDuration)
 		self.ActiveInterrupt = {
 			spellId = spellId,
@@ -164,8 +154,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:CareAboutThisAura(unitID, filter, aura)
-
-		if Data.SpellPriorities[aura.spellId] then return true end
+		return aura.Priority
 	end
 
 	function frame:ShouldQueryAuras(unitID, filter)
@@ -173,15 +162,26 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:BeforeFullAuraUpdate(filter)
-		wipe(self.PriorityAuras)
+		--only wipe before the auras for the first filter come in, otherwise we wipe our buffs away ...
+		if filter == "HELPFUL" then
+			wipe(self.PriorityAuras)
+		end
 	end
 
 	function frame:UnitAura(unitID, filter, aura)
-		self:NewAura(unitID, filter, aura)
+		if not aura.Priority then return end
+
+		local ID = #self.PriorityAuras + 1
+
+		aura.ID = ID
+		self.PriorityAuras[ID] = aura
 	end
 
 	function frame:AfterFullAuraUpdate(filter)
-		self:Update()
+		-- only update after the last filter is done
+		if filter == "HARMFUL" then
+			self:Update()
+		end
 	end
 
 	function frame:UnitDied()

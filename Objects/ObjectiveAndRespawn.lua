@@ -189,7 +189,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		end
 	end
 
-	function frame:BeforeFullAuraUpdate(unitID, filter)
+	function frame:BeforeFullAuraUpdate(filter)
 		if filter == "HARMFUL" then
 			self.continue = true
 		end
@@ -235,4 +235,3 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 	playerButton.ObjectiveAndRespawn = frame
 end
-

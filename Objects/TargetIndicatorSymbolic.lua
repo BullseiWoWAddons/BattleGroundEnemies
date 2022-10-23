@@ -14,15 +14,15 @@ local defaultSettings = {
 	Points = {
 		{
 			Point = "TOPLEFT",
-			RelativeFrame = "Button",
+			RelativeFrame = "healthBar",
 			RelativePoint = "TOPLEFT",
-			OffsetX = 1
+			OffsetX = 0
 		},
 		{
 			Point = "BOTTOMRIGHT",
-			RelativeFrame = "Button",
+			RelativeFrame = "healthBar",
 			RelativePoint = "BOTTOMRIGHT",
-			OffsetX = 1
+			OffsetX = 0
 		}
 	},
 
@@ -119,4 +119,3 @@ function symbolicTargetIndicator:AttachToPlayerButton(playerButton)
 		end
 	end
 end
-
