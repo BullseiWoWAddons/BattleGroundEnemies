@@ -191,7 +191,7 @@ local function CreateFakeAura(playerButton, filter)
 		maxCharges = nil,
 		nameplateShowAll = auraToSend.nameplateShowAll,
 		nameplateShowPersonal = auraToSend.nameplateShowPersonal,
-		points = nil, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.	
+		points = nil, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.
 		sourceUnit = unitCaster or auraToSend.sourceUnit,
 		spellId	= auraToSend.spellId,
 		timeMod	= auraToSend.timeMod
@@ -220,7 +220,7 @@ local function FakeUnitAura(playerButton, index, filter)
 
 				local dontAddNewAura
 				for i = 1, #fakePlayerAuras[playerButton][filter] do
-					
+
 					local fakeAura = fakePlayerAuras[playerButton][filter][i]
 
 					local categoryCurrentAura = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellId)
@@ -231,11 +231,11 @@ local function FakeUnitAura(playerButton, index, filter)
 						-- if playerButton.PlayerName == "Enemy2-Realm2" then
 						-- 	print("1")
 						-- end
-						
+
 						-- end
 					elseif fakePlayerDRs[playerButton][categoryNewAura] and fakePlayerDRs[playerButton][categoryNewAura].status then
 
-				
+
 					elseif newFakeAura.spellId == fakeAura.spellId then
 						dontAddNewAura = true --we tried to apply the same spell twice but its not a DR, dont add it, we dont wan't to clutter it
 						break
@@ -282,13 +282,13 @@ local function FakeUnitAura(playerButton, index, filter)
 			-- if playerButton.PlayerName == "Enemy2-Realm2" then
 			-- 	print("1")
 			-- end
-			
+
 			local category = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellId)
 			if category then
 				-- if playerButton.PlayerName == "Enemy2-Realm2" then
 				-- 	print("2")
 				-- end
-				
+
 				fakePlayerDRs[playerButton][category] = fakePlayerDRs[playerButton][category] or {}
 
 				local resetDuration = DRList:GetResetTime(category)
@@ -306,40 +306,6 @@ local function FakeUnitAura(playerButton, index, filter)
 
 	local aura = fakePlayerAuras[playerButton][filter][index]
 	return aura
-end
-
-local maxHealths = {}  --key = playerbutton, value = {}
-local deadPlayers = {}
-local function FakeUnitHealthMax(playerButton)
-	if not maxHealths[playerButton] then
-		local myMaxHealth = UnitHealthMax("player")
-		local playerMaxHealthDifference = math_random(-15, 15) -- the player has the same health as me +/- 15%
-		local playerMaxHealth = myMaxHealth * (1 + (playerMaxHealthDifference/100))
-		maxHealths[playerButton] = playerMaxHealth
-	end
-	return maxHealths[playerButton]
-end
-
-local function FakeUnitHealth(playerButton)
-	local now = GetTime()
-	if deadPlayers[playerButton] then
-		--this player is dead, check if we can revive him
-		if deadPlayers[playerButton] + 26 < now then -- he died more than 26 seconds ago
-			deadPlayers[playerButton] = nil
-		else
-			return 0-- let the player be dead
-		end
-	end
-	local maxHealth = FakeUnitHealthMax(playerButton)
-
-	local health = math_random(0, 100)
-	if health == 0 then
-		deadPlayers[playerButton] = now
-		playerButton:PlayerDied()
-		return 0
-	else
-		return math_floor((health/100) * maxHealth)
-	end
 end
 
 -- returns true if <frame> or one of the frames that <frame> is dependent on is anchored to <otherFrame> and nil otherwise
@@ -371,15 +337,6 @@ end
 
 local enemyButtonFunctions = {}
 do
-	function enemyButtonFunctions:FetchAnAllyUnitID()
-		local unitIDs = self.UnitIDs
-		if unitIDs.Ally then
-			unitIDs.HasAllyUnitID = true
-			self:NewUnitID(unitIDs.Ally)
-		else
-			self:DeleteActiveUnitID()
-		end
-	end
 
 	--Remove from OnUpdate
 	function enemyButtonFunctions:DeleteActiveUnitID() --Delete from OnUpdate
@@ -389,6 +346,25 @@ do
 		self:UpdateRange(false)
 
 		unitIDs.HasAllyUnitID = false
+	end
+
+	function enemyButtonFunctions:FetchAnAllyUnitID()
+		local unitIDs = self.UnitIDs
+		unitIDs.Ally = false
+
+		for allyBtn in pairs(unitIDs.TargetedByEnemy) do
+			if not allyBtn.TargetUnitID == "target" then
+				unitIDs.Ally = allyBtn.TargetUnitID
+				break
+			end
+		end
+
+		if unitIDs.Ally then
+			unitIDs.HasAllyUnitID = true
+			self:NewUnitID(unitIDs.Ally)
+		else
+			self:DeleteActiveUnitID()
+		end
 	end
 
 	function enemyButtonFunctions:UpdateEnemyUnitID(key, value)
@@ -401,51 +377,19 @@ do
 		if unitID then
 			unitIDs.HasAllyUnitID = false
 			self:NewUnitID(unitID)
+		elseif unitIDs.Ally then
+			unitIDs.HasAllyUnitID = true
+			self:NewUnitID(unitIDs.Ally)
 		else
 			self:FetchAnAllyUnitID()
 		end
 	end
-
-	function enemyButtonFunctions:NowTargetedBy(allyButton)
-		local unitIDs = self.UnitIDs
-		if not unitIDs.Ally then
-			unitIDs.Ally = allyButton.TargetUnitID
-			self:UpdateEnemyUnitID()
-		end
-
-		unitIDs.TargetedByEnemy[allyButton] = true
-		self:UpdateTargetIndicators()
-	end
-
-	function enemyButtonFunctions:NoLongerTargetedBy(allyButton)
-		local unitIDs = self.UnitIDs
-
-
-		if allyButton.TargetUnitID == unitIDs.Ally then
-			unitIDs.Ally = false
-			for allyBtn in pairs(unitIDs.TargetedByEnemy) do
-				if not allyBtn.TargetUnitID == "target" then
-					unitIDs.Ally = allyBtn.TargetUnitID
-					break
-				end
-			end
-		end
-
-		if allyButton.TargetUnitID == unitIDs.Active then --the unitID used for the player not longer targets him, fetch a new ID if possible
-			self:FetchAnAllyUnitID()
-		end
-
-		unitIDs.TargetedByEnemy[allyButton] = nil
-		self:UpdateTargetIndicators()
-	end
-
 end
 
 
 local buttonFunctions = {}
 
 do
-
 
 	function buttonFunctions:OnDragStart()
 		return BattleGroundEnemies.db.profile.Locked or self:GetParent():StartMoving()
@@ -541,7 +485,7 @@ do
 
 								if relativeFrame then
 									if relativeFrame:GetNumPoints() > 0 then
-										
+
 										moduleFrameOnButton:SetPoint(pointConfig.Point, relativeFrame, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
 									else
 										-- the module we are depending on hasn't been set yet
@@ -707,27 +651,59 @@ do
 			if BattleGroundEnemies.Testmode.FakePlayerAuras[self] then wipe(BattleGroundEnemies.Testmode.FakePlayerAuras[self]) end
 			if BattleGroundEnemies.Testmode.FakePlayerDRs[self] then wipe(BattleGroundEnemies.Testmode.FakePlayerDRs[self]) end
 		end
-		
+
 		self:DispatchEvent("UnitDied")
 		self.isDead = true
+	end
+
+	local maxHealths = {}  --key = playerbutton, value = {}
+	local deadPlayers = {}
+
+	function buttonFunctions:FakeUnitHealth()
+		local now = GetTime()
+		if deadPlayers[self] then
+			--this player is dead, check if we can revive him
+			if deadPlayers[self] + 26 < now then -- he died more than 26 seconds ago
+				deadPlayers[self] = nil
+			else
+				return 0-- let the player be dead
+			end
+		end
+		local maxHealth = self:FakeUnitHealthMax()
+	
+		local health = math_random(0, 100)
+		if health == 0 then
+			deadPlayers[self] = now
+			self:PlayerDied()
+			return 0
+		else
+			return math_floor((health/100) * maxHealth)
+		end
+	end
+
+	function buttonFunctions:FakeUnitHealthMax()
+		if not maxHealths[self] then
+			local myMaxHealth = UnitHealthMax("player")
+			local playerMaxHealthDifference = math_random(-15, 15) -- the player has the same health as me +/- 15%
+			local playerMaxHealth = myMaxHealth * (1 + (playerMaxHealthDifference/100))
+			maxHealths[self] = playerMaxHealth
+		end
+		return maxHealths[self]
 	end
 
 
 
 	function buttonFunctions:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
-		local healthFunc = UnitHealth
-		local healthMaxFunc = UnitHealthMax
+		local health 
+		local maxHealth
 		if self.isFakePlayer then
-			healthFunc = function(unitID)
-				return FakeUnitHealth(self)
-			end
-			healthMaxFunc = function(unitID)
-				return FakeUnitHealthMax(self)
-			end
+			health = self:FakeUnitHealth()
+			maxHealth = self:FakeUnitHealthMax()
+		else
+			health = UnitHealth(unitID)
+			maxHealth = UnitHealthMax(unitID)
 		end
 
-		local health = healthFunc(unitID)
-		local maxHealth = healthMaxFunc(unitID)
 		self:DispatchEvent("UpdateHealth", unitID, health, maxHealth)
 		if unitID then
 			if UnitIsDeadOrGhost(unitID) then
@@ -943,7 +919,7 @@ do
 			name = name,
 			nameplateShowAll = nameplateShowAll	,
 			nameplateShowPersonal = nameplateShowPersonal,
-			points = {value1, value2, value3, value4}, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.	
+			points = {value1, value2, value3, value4}, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.
 			sourceUnit = unitCaster,
 			spellId	= spellId,
 			timeMod	= timeMod,
@@ -1001,9 +977,9 @@ do
 				end
 			end
 		end
-					
-		--[[ 		
-				
+
+		--[[
+
 				third arg until patch 9.x (changed in 10.0)
 				canApplyAura	boolean	Whether or not the player can apply this aura.
 				debuffType	string	Type of debuff this aura applies. May be an empty string.
@@ -1017,41 +993,41 @@ do
 				nameplateShowAll	boolean	Whether or not this aura should be shown on all nameplates, instead of just the personal one.
 				sourceUnit	UnitId	Token of the unit that applied the aura.
 				spellId	number	The spell ID of the aura.
-			
-		
-		
+
+
+
 			10.0 second argument:
-		
+
 			addedAuras	UnitAuraInfo[]?	List of auras added to the unit during this update.
 			updatedAuraInstanceIDs	number[]?	List of existing auras on the unit modified during this update.
 			removedAuraInstanceIDs	number[]?	List of existing auras removed from the unit during this update.
 			isFullUpdate	boolean	Wwhether or not a full update of the units' auras should be performed. If this is set, the other fields will likely be nil.
 
-			
+
 			structure UnitAuraInfo
-			applications	number	
-			auraInstanceID	number	
-			canApplyAura	boolean	
-			charges	number	
-			dispelName	string?	
-			duration	number	
-			expirationTime	number	
-			icon	number	
-			isBossAura	boolean	
-			isFromPlayerOrPlayerPet	boolean	
-			isHarmful	boolean	
-			isHelpful	boolean	
-			isNameplateOnly	boolean	
-			isRaid	boolean	
-			isStealable	boolean	
-			maxCharges	number	
-			name	string	
-			nameplateShowAll	boolean	
-			nameplateShowPersonal	boolean	
-			points	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.	
-			sourceUnit	string?	
-			spellId	number	
-			timeMod	number	
+			applications	number
+			auraInstanceID	number
+			canApplyAura	boolean
+			charges	number
+			dispelName	string?
+			duration	number
+			expirationTime	number
+			icon	number
+			isBossAura	boolean
+			isFromPlayerOrPlayerPet	boolean
+			isHarmful	boolean
+			isHelpful	boolean
+			isNameplateOnly	boolean
+			isRaid	boolean
+			isStealable	boolean
+			maxCharges	number
+			name	string
+			nameplateShowAll	boolean
+			nameplateShowPersonal	boolean
+			points	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.
+			sourceUnit	string?
+			spellId	number
+			timeMod	number
 		]]
 
 		local filters = {"HELPFUL", "HARMFUL"}
@@ -1085,9 +1061,9 @@ do
 						end
 						for j = 1, batchCount do
 							local name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4 = auraFunc(unitID, j, filter)
-	
+
 							if not name then break end
-	
+
 							local aura = UnitAuraToUnitAuraInfo(filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
 							if aura.auraInstanceID then
 								self.Auras[filter][aura.auraInstanceID] = aura
@@ -1097,9 +1073,9 @@ do
 						end
 					end
 				end
-				
 
-				self:DispatchEvent("BeforeFullAuraUpdate", unitID, filter)
+
+				self:DispatchEvent("BeforeFullAuraUpdate", filter)
 				for _, aura in pairs(self.Auras[filter]) do
 					self:DispatchEvent("UnitAura", unitID, filter, aura)
 				end
@@ -1120,12 +1096,67 @@ do
 		self:DispatchEvent("UNIT_POWER_FREQUENT", unitID, powerToken)
 	end
 
+	-- returns true if the other button is a enemy from the point of view of the button. True if button is ally and other button is enemy, and vice versa
+	function buttonFunctions:IsEnemyToMe(playerButton)
+		return self.PlayerIsEnemy ~= playerButton.PlayerIsEnemy
+	end
+
+	function buttonFunctions:NowTargetedBy(playerButton)
+		local unitIDs = self.UnitIDs
+
+		unitIDs.TargetedByEnemy[playerButton] = true
+		self:UpdateTargetIndicators()
+
+
+		if self:IsEnemyToMe(playerButton) then --the player now targeting me is of opposite faction
+			if self.PlayerIsEnemy then --i am a enemy, and the player who is now targeting me is an ally
+				if playerButton ~= PlayerButton and not playerButton.isFakePlayer then
+					if not unitIDs.Active then
+						self:FetchAnAllyUnitID()
+					end
+				end
+			end
+		end
+	end
+
+	function buttonFunctions:NoLongerTargetedBy(playerButton)
+		local unitIDs = self.UnitIDs
+
+		unitIDs.TargetedByEnemy[playerButton] = nil
+		self:UpdateTargetIndicators()
+
+		if self:IsEnemyToMe(playerButton) then --the player who was targeting me was of opposite faction
+			if self.PlayerIsEnemy then --i am a enemy, and the player who is no longer targeting me was an ally
+				if playerButton ~= PlayerButton and not playerButton.isFakePlayer then
+					if playerButton.TargetUnitID == unitIDs.Active then
+						self:FetchAnAllyUnitID()
+					end
+				end
+			end
+		end
+	end
+
+	function buttonFunctions:IsNowTargeting(playerButton)
+		self.Target = playerButton
+
+		if self:IsEnemyToMe(playerButton) then
+			playerButton:NowTargetedBy(self)
+		end
+	end
+
+	function buttonFunctions:IsNoLongerTarging(playerButton)
+		self.Target = nil
+
+		if self:IsEnemyToMe(playerButton) then
+			playerButton:NoLongerTargetedBy(self)
+		end
+	end
+
 	function buttonFunctions:UpdateTargets()
 		BattleGroundEnemies.Counter.UpdateTargets = (BattleGroundEnemies.Counter.UpdateTargets or 0) + 1
 
 		local oldTargetPlayerButton = self.Target
 		local newTargetPlayerButton
-
 
 
 		if self.PlayerIsEnemy then
@@ -1134,17 +1165,18 @@ do
 			newTargetPlayerButton = BattleGroundEnemies.Enemies:GetPlayerbuttonByUnitID(self.TargetUnitID or "")
 		end
 
-		if newTargetPlayerButton and oldTargetPlayerButton == newTargetPlayerButton then return end
-
+	
 		if oldTargetPlayerButton then
-			oldTargetPlayerButton:NoLongerTargetedBy(self)
+			if newTargetPlayerButton and oldTargetPlayerButton == newTargetPlayerButton then return end --nothing changed so do nothing :D
+		
+			self:IsNoLongerTarging(oldTargetPlayerButton)
 		end
+		
+
+		--player Changed target
 
 		if newTargetPlayerButton then --player targets an existing player and not for example a pet or a NPC
-			newTargetPlayerButton:NowTargetedBy(self)
-			self.Target = newTargetPlayerButton
-		else
-			self.Target = false
+			self:IsNowTargeting(newTargetPlayerButton)
 		end
 	end
 
@@ -1184,21 +1216,6 @@ do
 		return relativeFrame == "Button" and self or self[relativeFrame]
 	end
 end
-
-local allyButtonFunctions = {}
-do
-
-	function allyButtonFunctions:NowTargetedBy(enemyButton)
-		self.UnitIDs.TargetedByEnemy[enemyButton] = true
-		self:UpdateTargetIndicators()
-	end
-
-	function allyButtonFunctions:NoLongerTargetedBy(enemyButton)
-		self.UnitIDs.TargetedByEnemy[enemyButton] = nil
-		self:UpdateTargetIndicators()
-	end
-end
-
 
 local function PopulateMainframe(playerType)
 	local self = BattleGroundEnemies[playerType]
@@ -1296,6 +1313,17 @@ local function PopulateMainframe(playerType)
 		return self.Players[uName]
 	end
 
+	function self:GetRandomPlayer()
+		local t = {}
+		for playerName, playerButton in pairs(self.Players) do
+			table_insert(t, playerButton)
+		end
+		local numPlayers = #t
+		if numPlayers > 0 then
+			return t[math_random(1, numPlayers)]
+		end
+	end
+
 
 	function self:SetPlayerCountJustifyV(direction)
 		if direction == "downwards" then
@@ -1364,7 +1392,6 @@ local function PopulateMainframe(playerType)
 			if playerButton.PlayerIsEnemy then
 				Mixin(playerButton, enemyButtonFunctions)
 			else
-				Mixin(playerButton, allyButtonFunctions)
 				RegisterUnitWatch(playerButton, true)
 			end
 
@@ -1434,6 +1461,8 @@ local function PopulateMainframe(playerType)
 		playerButton:SetSpecAndRole()
 
 		self.UnitIDs = {TargetedByEnemy = {}}
+		self.Target = nil
+
 		if playerButton.PlayerIsEnemy then
 			playerButton:UpdateRange(false)
 		else
@@ -1544,6 +1573,7 @@ local function PopulateMainframe(playerType)
 					playerButton:SetSpecAndRole()
 				end
 			end
+			playerButton.isFakePlayer = false
 			if additionalData then
 				Mixin(playerButton, additionalData)
 			end
@@ -1900,11 +1930,12 @@ end
 
 
 function BattleGroundEnemies:DisableTestMode()
+	self.Testmode.Active = false
 	self.Enemies:RemoveAllPlayers()
 	FakePlayersOnUpdateFrame:Hide()
 	self:Hide()
-	self.Testmode.Active = false
 	self:GROUP_ROSTER_UPDATE() -- to build up the players with the real allies
+	self:Information(L.TestmodeDisabled)
 end
 
 do
@@ -2066,6 +2097,7 @@ do
 		self:Show()
 
 		FakePlayersOnUpdateFrame:Show()
+		self:Information(L.TestmodeEnabled)
 	end
 end
 
@@ -2079,13 +2111,13 @@ do
 		TimeSinceLastOnUpdate = TimeSinceLastOnUpdate + elapsed
 		if TimeSinceLastOnUpdate > UpdatePeroid then
 
-			for number, playerType in pairs({BattleGroundEnemies.Allies, BattleGroundEnemies.Enemies}) do
+			for number, mainFrame in pairs({BattleGroundEnemies.Allies, BattleGroundEnemies.Enemies}) do
 
-				local settings = playerType.bgSizeConfig
+				local settings = mainFrame.bgSizeConfig
 
 				local targetCounts = 0
 				local hasFlag = false
-				for name, playerButton in pairs(playerType.Players) do
+				for name, playerButton in pairs(mainFrame.Players) do
 					if playerButton.isFakePlayer then
 						local n = math_random(1,10)
 						--self:Debug("number", number)
@@ -2106,32 +2138,35 @@ do
 								hasFlag = true
 
 							elseif n == 3 and playerButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
-								playerButton.Racial:RacialCheck(randomRacials[math_random(1, #randomRacials)])
+								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, playerButton.PlayerName, nil, randomRacials[math_random(1, #randomRacials)])
 							elseif n == 4 and playerButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
 								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, playerButton.PlayerName, nil, randomTrinkets[math_random(1, #randomTrinkets)])
 							elseif n == 6 then --power simulation
-								playerButton.Power:SetValue(math_random(0, 100)/100)
+								playerButton:UNIT_POWER_FREQUENT()
+							elseif n == 7 then
+
+								--let the player changed target or target someone if he didnt have a target before
+								if playerButton.Target then
+									playerButton:IsNoLongerTarging(playerButton.Target)
+								end
+
+								local oppositePlayerType = playerButton.PlayerType == "Enemies" and "Allies" or "Enemies"
+								local randomPlayer = BattleGroundEnemies[oppositePlayerType]:GetRandomPlayer()
+								
+								playerButton:IsNowTargeting(randomPlayer)
 							end
 
 							playerButton:UNIT_AURA()
 							-- targetcounter simulation
-							if targetCounts < 15 then
-								local targetCounter = math_random(0,3)
-								if targetCounts + targetCounter <= 15 then
-									playerButton.TargetIndicatorNumeric:SetText(targetCounter)
-								end
-							end
 						end
 						playerButton:UNIT_HEALTH()
 
 						if n == 6 then --toggle range
-							if playerType.config.RangeIndicator_Enabled then
+							if mainFrame.config.RangeIndicator_Enabled then
 								playerButton:UpdateRange((playerButton.oldAlpha ~= 1) and true or false)
 							end
 						end
 					end
-
-
 				end
 			end
 
@@ -2355,7 +2390,7 @@ do
 						if unitIDs.HasAllyUnitID then
 							enemyButton:UNIT_POWER_FREQUENT(activeUnitID)
 							enemyButton:UNIT_HEALTH(activeUnitID)
-							--enemyButton:UNIT_AURA(activeUnitID, true) todo probably overkill
+							--enemyButton:UNIT_AURA(activeUnitID) todo probably overkill
 						end
 
 						--Updates stuff that doesn't have events
@@ -2949,19 +2984,19 @@ do
 		local playerButton = self:GetPlayerbuttonByUnitID("target")
 
 		if oldTarget then
+			PlayerButton:IsNoLongerTarging(oldTarget)
 			if oldTarget.PlayerIsEnemy then
-				oldTarget.UnitIDs.TargetedByEnemy[PlayerButton] = nil
-				oldTarget:UpdateTargetIndicators()
 				oldTarget:UpdateEnemyUnitID("Target", false)
 			end
 			oldTarget.MyTarget:Hide()
 		end
 
-		if playerButton then --ally targets an existing enemy
-			if playerButton.PlayerIsEnemy and PlayerButton then
-				playerButton.UnitIDs.TargetedByEnemy[PlayerButton] = true
-				playerButton:UpdateTargetIndicators()
-				playerButton:UpdateEnemyUnitID("Target", "target")
+		if playerButton then --i target an existing enemy
+			if PlayerButton then
+				PlayerButton:IsNowTargeting(playerButton)
+				if playerButton.PlayerIsEnemy then
+					playerButton:UpdateEnemyUnitID("Target", "target")
+				end
 			end
 			playerButton.MyTarget:Show()
 			oldTarget = playerButton
@@ -3367,7 +3402,7 @@ do
 
 		if name and raceName and classTag then
 			local specName = specCache[GUID]
-		
+
 			self:CreateOrUpdatePlayer(name, raceName, classTag, specName, additionalData)
 		end
 
