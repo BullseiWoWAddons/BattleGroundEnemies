@@ -130,14 +130,3 @@ function castBar:AttachToPlayerButton(playerButton)
 		end
 	end
 end
-
-
-
-
-
-
-
-
-
-
-

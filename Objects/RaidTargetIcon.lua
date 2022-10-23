@@ -68,19 +68,3 @@ function raidTargetIcon:AttachToPlayerButton(playerButton)
 		self:UpdateRaidTargetIcon()
 	end
 end
-
-
-
-
-
-
-
-
-
-
--- on new player on unit
-
-
-
-
-

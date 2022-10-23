@@ -67,22 +67,3 @@ function covenant:AttachToPlayerButton(playerButton)
 		self:Show()
 	end
 end
-
-
-
-
-
-
-
-
-
-
--- on new player on unit
-
-
-
-
-		
-		
-		-- name
-		

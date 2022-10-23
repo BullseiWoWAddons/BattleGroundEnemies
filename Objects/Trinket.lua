@@ -166,4 +166,3 @@ function trinket:AttachToPlayerButton(playerButton)
 	end
 	playerButton.Trinket = frame
 end
-

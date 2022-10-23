@@ -247,16 +247,3 @@ function healthBar:AttachToPlayerButton(playerButton)
 	end
 end
 
-
-
-
-
-
-
-
-
-
--- on new player on unit
-
-
-

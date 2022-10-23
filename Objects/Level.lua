@@ -101,4 +101,3 @@ function level:AttachToPlayerButton(playerButton)
 	end
 	playerButton.Level = fs
 end
-

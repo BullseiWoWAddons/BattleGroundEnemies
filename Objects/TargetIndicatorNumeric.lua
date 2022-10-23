@@ -61,8 +61,6 @@ local targetIndicatorNumeric = BattleGroundEnemies:NewButtonModule({
 })
 
 function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
-
-
 	playerButton.TargetIndicatorNumeric = BattleGroundEnemies.MyCreateFontString(playerButton)
 
 	function playerButton.TargetIndicatorNumeric:UpdateTargetIndicators()
@@ -88,4 +86,3 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 		self:SetText(0) --we do that because the level is anchored right to this and the name is anhored right to the level
 	end
 end
-

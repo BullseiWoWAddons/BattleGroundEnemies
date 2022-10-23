@@ -126,8 +126,3 @@ function name:AttachToPlayerButton(playerButton)
 		self:SetName()
 	end
 end
-
-
-
-
-

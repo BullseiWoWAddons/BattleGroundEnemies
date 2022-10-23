@@ -147,5 +147,3 @@ function racial:AttachToPlayerButton(playerButton)
 	end
 	playerButton.Racial = frame
 end
-
-
