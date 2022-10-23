@@ -126,6 +126,7 @@ globals = {
 	"C_Spell",
 	"C_Timer",
 	"C_UIWidgetManager",
+	"C_UnitAuras",
 	"CastingBarFrame_OnLoad",
 	"CastingBarFrame_SetUnit",
 	"CastingBarMixin",

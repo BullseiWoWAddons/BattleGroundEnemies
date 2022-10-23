@@ -33,7 +33,6 @@ BattleGroundEnemies.Counter = {}
 --todo, maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
 --reset saved variables when upgrading to new version
 --do localization
---UNIT_AURA 10.0.2 changes
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -1074,7 +1073,7 @@ do
 							if aura.auraInstanceID then
 								self.Auras[filter][aura.auraInstanceID] = aura
 							else
-								tinsert(self.Auras[filter], aura)
+								table_insert(self.Auras[filter], aura)
 							end
 						end, usePackedAura)
 					else
@@ -1093,7 +1092,7 @@ do
 							if aura.auraInstanceID then
 								self.Auras[filter][aura.auraInstanceID] = aura
 							else
-								tinsert(self.Auras[filter], aura)
+								table_insert(self.Auras[filter], aura)
 							end
 						end
 					end
