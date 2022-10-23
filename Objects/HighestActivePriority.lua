@@ -43,7 +43,7 @@ local spec_HighestActivePriority = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.HighestPriorityAura,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "GotInterrupted", "UnitDied"},
+	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeFullAuraUpdate", "UnitAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
 	expansions = "All"
 })
 
@@ -92,21 +92,12 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 		self:SetFrameLevel(highestLevel + 1)
 	end
 
-	function frame:NewAura(unitID, filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod)
-		local priority = BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID]
-		if not priority then return end
+	function frame:NewAura(unitID, filter, aura)
+		if not aura.Priority then return end
 		local ID = #self.PriorityAuras + 1
-		local auraDetails = {
-			ID = ID,
-			SpellID = spellID,
-			Icon = icon,
-			DebuffType = debuffType,
-			Priority = priority,
-			Stacks = count,
-			ExpirationTime = expirationTime,
-			Duration = duration
-		}
-		self.PriorityAuras[ID] = auraDetails
+
+		aura.ID = ID
+		self.PriorityAuras[ID] = aura
 	end
 
 	function frame:Update()
@@ -118,7 +109,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 		for i = 1, #priorityAuras do
 
 			local priorityAura = priorityAuras[i]
-			if priorityAura.ExpirationTime < currentTime then
+			if priorityAura.expirationTime < currentTime then
 			else
 				if not highestPrioritySpell or (priorityAura.Priority > highestPrioritySpell.Priority) then
 					highestPrioritySpell = priorityAura
@@ -126,7 +117,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 			end
 		end
 		if frame.ActiveInterrupt then
-			if frame.ActiveInterrupt.ExpirationTime < currentTime then
+			if frame.ActiveInterrupt.expirationTime < currentTime then
 				frame.ActiveInterrupt = false
 			else
 				if not highestPrioritySpell or (frame.ActiveInterrupt.Priority > highestPrioritySpell.Priority) then
@@ -138,8 +129,8 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 		if highestPrioritySpell then
 			frame.DisplayedAura = highestPrioritySpell
 			frame:Show()
-			frame.Icon:SetTexture(highestPrioritySpell.Icon)
-			frame.Cooldown:SetCooldown(highestPrioritySpell.ExpirationTime - highestPrioritySpell.Duration, highestPrioritySpell.Duration)
+			frame.Icon:SetTexture(highestPrioritySpell.icon)
+			frame.Cooldown:SetCooldown(highestPrioritySpell.expirationTime - highestPrioritySpell.duration, highestPrioritySpell.duration)
 		else
 			frame.DisplayedAura = false
 			frame:Hide()
@@ -161,37 +152,35 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 
 
 
-	function frame:GotInterrupted(spellID, interruptDuration)
+	function frame:GotInterrupted(spellId, interruptDuration)
 		self.ActiveInterrupt = {
-			SpellID = spellID,
-			Icon = GetSpellTexture(spellID),
-			ExpirationTime = GetTime() + interruptDuration,
-			Duration = interruptDuration,
-			Priority = BattleGroundEnemies:GetBigDebuffsPriority(spellID) or 4
+			spellId = spellId,
+			icon = GetSpellTexture(spellId),
+			expirationTime = GetTime() + interruptDuration,
+			duration = interruptDuration,
+			Priority = BattleGroundEnemies:GetSpellPriority(spellId) or 4
 		}
 		self:Update()
 	end
 
-	function frame:CareAboutThisAura(unitID, auraInfo, filter, spellID, unitCaster, canStealOrPurge, canApplyAura, debuffType)
+	function frame:CareAboutThisAura(unitID, filter, aura)
 
-		if auraInfo then spellID = auraInfo.spellId end
-
-		if Data.SpellPriorities[spellID] then return true end
+		if Data.SpellPriorities[aura.spellId] then return true end
 	end
 
 	function frame:ShouldQueryAuras(unitID, filter)
 		return true -- we care about all auras
 	end
 
-	function frame:BeforeUnitAura(filter)
+	function frame:BeforeFullAuraUpdate(filter)
 		wipe(self.PriorityAuras)
 	end
 
-	function frame:UnitAura(unitID, filter, ...)
-		self:NewAura(unitID, filter, ...)
+	function frame:UnitAura(unitID, filter, aura)
+		self:NewAura(unitID, filter, aura)
 	end
 
-	function frame:AfterUnitAura(filter)
+	function frame:AfterFullAuraUpdate(filter)
 		self:Update()
 	end
 

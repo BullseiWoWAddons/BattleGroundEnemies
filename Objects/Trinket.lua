@@ -54,10 +54,10 @@ function trinket:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)
 	-- trinket
 	frame:HookScript("OnEnter", function(self)
-		if self.SpellID then
+		if self.spellId then
 			BattleGroundEnemies:ShowTooltip(self, function()
 				if IsClassic then return end
-				GameTooltip:SetSpellByID(self.SpellID)
+				GameTooltip:SetSpellByID(self.spellId)
 			end)
 		end
 	end)
@@ -76,16 +76,18 @@ function trinket:AttachToPlayerButton(playerButton)
 	end)
 
 	frame.Cooldown = BattleGroundEnemies.MyCreateCooldown(frame)
-	function frame:TrinketCheck(spellID)
-		if not Data.TrinketData[spellID] then return end
-		self:DisplayTrinket(spellID, Data.TrinketData[spellID].fileID or GetSpellTexture(spellID))
-		if Data.TrinketData[spellID].cd then
-			self:SetTrinketCooldown(GetTime(), Data.TrinketData[spellID].cd or 0)
+
+
+	function frame:TrinketCheck(spellId)
+		if not Data.TrinketData[spellId] then return end
+		self:DisplayTrinket(spellId, Data.TrinketData[spellId].fileID or GetSpellTexture(spellId))
+		if Data.TrinketData[spellId].cd then
+			self:SetTrinketCooldown(GetTime(), Data.TrinketData[spellId].cd or 0)
 		end
 	end
 
-	function frame:DisplayTrinket(spellID, texture)
-		self.SpellID = spellID
+	function frame:DisplayTrinket(spellId, texture)
+		self.spellId = spellId
 		self.Icon:SetTexture(texture)
 	end
 
@@ -102,26 +104,28 @@ function trinket:AttachToPlayerButton(playerButton)
 	end
 
 
-	function frame:CareAboutThisAura(unitID, auraInfo, filter, spellID, unitCaster, canStealOrPurge, canApplyAura, debuffType)
-		if spellID == 336139 then return true end
+	function frame:CareAboutThisAura(unitID, filter, aura)
+		local spellId = aura.spellId
+		if spellId == 336139 then return true end
 
-		return not self.SpellID and Data.cCdurationBySpellID[spellID]
+		return not self.spellId and Data.cCdurationBySpellID[spellId]
 	end
 
 
-	function frame:UnitAura(unitID, filter, spellName, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod)
+	function frame:UnitAura(unitID, filter, aura)
 		if filter == "HELPFUL" then return end
 
-		if spellID == 336139 then --adapted debuff > adaptation
+		local spellId = aura.spellId
+		if spellId == 336139 then --adapted debuff > adaptation
 			local currentTime = GetTime()
-			self:DisplayTrinket(spellID, GetSpellTexture(214027))
-			self:SetTrinketCooldown(currentTime, expirationTime - currentTime)
+			self:DisplayTrinket(spellId, GetSpellTexture(214027))
+			self:SetTrinketCooldown(currentTime, aura.expirationTime - currentTime)
 			return -- we are done don't do relentless check
 		end
 
 
-		--BattleGroundEnemies:Debug(operation, spellID)
-		local continue = not self.SpellID and Data.cCdurationBySpellID[spellID]
+		--BattleGroundEnemies:Debug(operation, spellId)
+		local continue = not self.spellId and Data.cCdurationBySpellID[spellId]
 		if not continue then return end
 
 		local Racefaktor = 1
@@ -136,22 +140,21 @@ function trinket:AttachToPlayerButton(playerButton)
 		--trinketTimesDiminish = trinketFaktor * diminish
 		--trinketTimesDiminish = without relentless : 1, 0.5, 0.25, with relentless: 0.8, 0.4, 0.2
 
-		local trinketTimesDiminish = duration/(Racefaktor * Data.cCdurationBySpellID[spellID])
+		local trinketTimesDiminish = aura.duration/(Racefaktor * Data.cCdurationBySpellID[spellId])
 
 		if trinketTimesDiminish == 0.8 or trinketTimesDiminish == 0.4 or trinketTimesDiminish == 0.2 then --Relentless
-			self.SpellID = 336128
+			self.spellId = 336128
 			self.Icon:SetTexture(GetSpellTexture(196029))
 		end
-	
 	end
 
-	function frame:SPELL_CAST_SUCCESS(srcName, destName, spellID)
-		self:TrinketCheck(spellID)
+	function frame:SPELL_CAST_SUCCESS(srcName, destName, spellId)
+		self:TrinketCheck(spellId)
 	end
 
 
 	function frame:Reset()
-		self.SpellID = false
+		self.spellId = false
 		self.Icon:SetTexture(nil)
 		self.Cooldown:Clear()	--reset Trinket Cooldown
 	end

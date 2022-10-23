@@ -50,33 +50,33 @@ local defaults = {
 
 
 -- CompactUnitFrame_Util_IsPriorityDebuff
-local function IsPriorityDebuff(spellID)
+local function IsPriorityDebuff(spellId)
 	if BattleGroundEnemies.PlayerDetails.PlayerClass == "PALADIN" then
-		local isForbearance = (spellID == 25771)
-		return isForbearance or SpellIsPriorityAura(spellID);
+		local isForbearance = (spellId == 25771)
+		return isForbearance or SpellIsPriorityAura(spellId);
 	else
-		return SpellIsPriorityAura(spellID)
+		return SpellIsPriorityAura(spellId)
 	end
 end
 
 --Utility Functions copy from CompactUnitFrame_UtilShouldDisplayBuff and mofified
-local function ShouldDisplayBuffBlizzLike(unitCaster, spellID, canApplyAura)
+local function ShouldDisplayBuffBlizzLike(unitCaster, spellId, canApplyAura)
 
-	local hasCustom, alwaysShowMine, showForMySpec = SpellGetVisibilityInfo(spellID, UnitAffectingCombat("player") and "RAID_INCOMBAT" or "RAID_OUTOFCOMBAT");
+	local hasCustom, alwaysShowMine, showForMySpec = SpellGetVisibilityInfo(spellId, UnitAffectingCombat("player") and "RAID_INCOMBAT" or "RAID_OUTOFCOMBAT");
 
 	if ( hasCustom ) then
 		return showForMySpec or (alwaysShowMine and (unitCaster == "player" or unitCaster == "pet" or unitCaster == "vehicle"));
 	else
-		return (unitCaster == "player" or unitCaster == "pet" or unitCaster == "vehicle") and canApplyAura and not SpellIsSelfBuff(spellID);
+		return (unitCaster == "player" or unitCaster == "pet" or unitCaster == "vehicle") and canApplyAura and not SpellIsSelfBuff(spellId);
 	end
 end
 
 -- CompactUnitFrame_Util_ShouldDisplayDebuff
-local function ShouldDisplayDebuffBlizzLike(unitCaster, spellID, canApplyAura)
+local function ShouldDisplayDebuffBlizzLike(unitCaster, spellId, canApplyAura)
 
-	if IsPriorityDebuff(spellID) then return true end
+	if IsPriorityDebuff(spellId) then return true end
 
-	local hasCustom, alwaysShowMine, showForMySpec = SpellGetVisibilityInfo(spellID, UnitAffectingCombat("player") and "RAID_INCOMBAT" or "RAID_OUTOFCOMBAT");
+	local hasCustom, alwaysShowMine, showForMySpec = SpellGetVisibilityInfo(spellId, UnitAffectingCombat("player") and "RAID_INCOMBAT" or "RAID_OUTOFCOMBAT");
 	if ( hasCustom ) then
 		return showForMySpec or (alwaysShowMine and (unitCaster == "player" or unitCaster == "pet" or unitCaster == "vehicle") );	--Would only be "mine" in the case of something like forbearance.
 	else
@@ -106,8 +106,8 @@ local function debuffTypeFiltering(config, debuffType)
 	return config.DebuffTypeFiltering_Filterlist[debuffType]
 end
 
-local function spellIDFiltering(config, spellID)
-	return not not config.SpellIDFiltering_Filterlist[spellID] -- the not not is necessary for the loop in conditionFuncs, otherwise the for loop does not loop thorugh the item since its nil
+local function spellIDFiltering(config, spellId)
+	return not not config.SpellIDFiltering_Filterlist[spellId] -- the not not is necessary for the loop in conditionFuncs, otherwise the for loop does not loop thorugh the item since its nil
 end
 
 local function canStealorPurgeFiltering(config, canStealOrPurge)
@@ -241,8 +241,8 @@ local function AddFilteringSettings(location, filter)
 							set = function(option, value, state)
 								local spellIDs = {strsplit(",", value)}
 								for i = 1, #spellIDs do
-									local spellID = tonumber(spellIDs[i])
-									location.CustomFiltering.SpellIDFiltering_Filterlist[spellID] = true
+									local spellId = tonumber(spellIDs[i])
+									location.CustomFiltering.SpellIDFiltering_Filterlist[spellId] = true
 								end
 							end,
 							width = 'double',
@@ -262,8 +262,8 @@ local function AddFilteringSettings(location, filter)
 							end,
 							values = function()
 								local valueTable = {}
-								for spellID in pairs(location.CustomFiltering.SpellIDFiltering_Filterlist) do
-									valueTable[spellID] = spellID..": "..(GetSpellInfo(spellID) or "")
+								for spellId in pairs(location.CustomFiltering.SpellIDFiltering_Filterlist) do
+									valueTable[spellId] = spellId..": "..(GetSpellInfo(spellId) or "")
 								end
 								return valueTable
 							end,
@@ -356,7 +356,7 @@ local flags = {
 	HasDynamicSize = true
 }
 
-local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "AfterUnitAura", "UnitDied"}
+local events = {"ShouldQueryAuras", "CareAboutThisAura", "FetchAllAuras", "BeforeFullAuraUpdate", "UnitAura", "AfterFullAuraUpdate", "UnitDied"}
 
 local nonPriorityBuffs = BattleGroundEnemies:NewButtonModule({
 	moduleName = "NonPriorityBuffs",
@@ -485,10 +485,10 @@ end
 local function setupAuraFrame(container, auraFrame, auraDetails)
 	auraFrame.AuraDetails = auraDetails
 	if container.filter == "HELPFUL" then
-		auraFrame.Stealable:SetShown(auraDetails.CanStealOrPurge)
+		auraFrame.Stealable:SetShown(auraDetails.isStealable)
 	else
 		--HARMFUL
-		local debuffType = auraDetails.DebuffType
+		local debuffType = auraDetails.dispelName
 		local color
 		if debuffType then
 			color = DebuffTypeColor[debuffType] or DebuffTypeColor["none"]
@@ -499,43 +499,47 @@ local function setupAuraFrame(container, auraFrame, auraDetails)
 
 	end
 
-	if auraDetails.Count and auraDetails.Count > 1 then
-		auraFrame.count:SetText(auraDetails.Count)
+	if auraDetails.applications and auraDetails.applications > 1 then
+		auraFrame.count:SetText(auraDetails.applications)
 	else
 		auraFrame.count:SetText("")
 	end
 
 
-	auraFrame.icon:SetTexture(auraDetails.Icon)
-	auraFrame.cooldown:SetCooldown(auraDetails.ExpirationTime - auraDetails.Duration, auraDetails.Duration)
+	auraFrame.icon:SetTexture(auraDetails.icon)
+	auraFrame.cooldown:SetCooldown(auraDetails.expirationTime - auraDetails.duration, auraDetails.duration)
 	--BattleGroundEnemies:Debug("SetCooldown", expirationTime - duration, duration)
 
 end
 
 
 
-local function AttachToPlayerButton(playerButton, filter, isPriorityContainer)
+local function AttachToPlayerButton(playerButton, filterr, isPriorityContainer)
 	local auraContainer = BattleGroundEnemies:NewContainer(playerButton, createNewAuraFrame, setupAuraFrame)
 
 	auraContainer.isPriorityContainer = isPriorityContainer
-	auraContainer.filter = filter
+	auraContainer.filter = filterr
 
 
 	function auraContainer:ShouldQueryAuras(unitID, filter)
 		if filter == self.filter then return true end
 	end
 
-	function auraContainer:BeforeUnitAura(unitID, filter)
+	function auraContainer:BeforeFullAuraUpdate(unitID, filter)
 		if not (filter == self.filter) then return end
 		self:ResetInputs()
 	end
 
-	function auraContainer:CareAboutThisAura(unitID, auraInfo, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType)
-		if auraInfo then filter = auraInfo.isHarmful and "HARMFUL" or "HELPFUL" end
+	function auraContainer:CareAboutThisAura(unitID, filter, aura)
 		if not (filter == self.filter) then return end
 
-		local priority = BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID]
-		if priority then
+		local spellId = aura.spellId
+		local canApplyAura = aura.canApplyAura
+		local debuffType = aura.dispelName
+		local unitCaster = aura.sourceUnit
+		local isMine = unitCaster and UnitName(unitCaster) == BattleGroundEnemies.PlayerDetails.PlayerName
+
+		if aura.Priority then
 			return self.isPriorityContainer -- its an important aura, we dont do any special filtering, we only care about if the container is for important auras
 		elseif self.isPriorityContainer then -- this aura is not important but we are the priority container > we dont care
 			return false
@@ -544,18 +548,8 @@ local function AttachToPlayerButton(playerButton, filter, isPriorityContainer)
 		--we only do the rest of the filtering if the aura doesnt have a priority and the container is for non priority Auras
 
 		local config = self.config
-		local isMine
 		local blizzlikeFunc
 		local filterFunc
-
-		if auraInfo then
-			spellID = auraInfo.spellId
-			canApplyAura = auraInfo.canApplyAura
-			isMine = auraInfo.isFromPlayerOrPlayerPet
-			debuffType = auraInfo.debuffType
-		else
-			isMine = unitCaster and UnitName(unitCaster) == BattleGroundEnemies.PlayerDetails.PlayerName
-		end
 
 		if filter == "HARMFUL" then
 			blizzlikeFunc = ShouldDisplayDebuffBlizzLike
@@ -567,8 +561,8 @@ local function AttachToPlayerButton(playerButton, filter, isPriorityContainer)
 		if not filteringConfig.Enabled then
 			return true
 		end
-		if filteringConfig.Mode == "Blizz" then
-			if blizzlikeFunc(unitCaster, spellID, canApplyAura) then
+		if filteringConfig.Mode == "Blizzlike" then
+			if blizzlikeFunc(unitCaster, spellId, canApplyAura) then
 				return true
 			end
 		else --custom filtering
@@ -581,19 +575,20 @@ local function AttachToPlayerButton(playerButton, filter, isPriorityContainer)
 			end
 
 			if customFilterConfig.SpellIDFiltering_Enabled then
-				table_insert(conditions, spellIDFiltering(customFilterConfig, spellID))
+				table_insert(conditions, spellIDFiltering(customFilterConfig, spellId))
 			end
 			if customFilterConfig.DebuffTypeFiltering_Enabled then
 				table_insert(conditions, debuffTypeFiltering(customFilterConfig, debuffType))
 			end
 
-			if not auraInfo then
+			if aura.isStealable ~= nil then
 				if customFilterConfig.DispelFilter_Enabled then
-					table_insert(conditions, canStealorPurgeFiltering(customFilterConfig, canStealOrPurge))
+					table_insert(conditions, canStealorPurgeFiltering(customFilterConfig, aura.isStealable))
 				end
-
+			end
+			if aura.duration ~= nil then
 				if customFilterConfig.DurationFilter_Enabled then
-					table_insert(conditions, maxDurationFiltering(customFilterConfig, duration))
+					table_insert(conditions, maxDurationFiltering(customFilterConfig, aura.duration))
 				end
 			end
 
@@ -603,13 +598,13 @@ local function AttachToPlayerButton(playerButton, filter, isPriorityContainer)
 		end
 	end
 
-	function auraContainer:UnitAura(unitID, filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
+	function auraContainer:UnitAura(unitID, filter, aura)
 		if not (filter == self.filter) then return end
 		-- only used to gather new auras for the testmode and for testing :)
 		-- if true then
 		-- 	BattleGroundEnemies.db.profile.Auras = BattleGroundEnemies.db.profile.Auras or {}
 		-- 	BattleGroundEnemies.db.profile.Auras[filter] = BattleGroundEnemies.db.profile.Auras[filter] or {}
-		-- 	BattleGroundEnemies.db.profile.Auras[filter][spellID] = BattleGroundEnemies.db.profile.Auras[filter][spellID] or {
+		-- 	BattleGroundEnemies.db.profile.Auras[filter][spellId] = BattleGroundEnemies.db.profile.Auras[filter][spellId] or {
 		-- 		name = name,
 		-- 		icon = icon,
 		-- 		count = count,
@@ -619,7 +614,7 @@ local function AttachToPlayerButton(playerButton, filter, isPriorityContainer)
 		-- 		unitCaster = unitCaster,
 		-- 		canStealOrPurge = canStealOrPurge,
 		-- 		nameplateShowPersonal = nameplateShowPersonal,
-		-- 		spellID = spellID,
+		-- 		spellId = spellId,
 		-- 		canApplyAura = canApplyAura,
 		-- 		isBossAura = isBossAura,
 		-- 		castByPlayer = castByPlayer,
@@ -628,27 +623,14 @@ local function AttachToPlayerButton(playerButton, filter, isPriorityContainer)
 		-- 	}
 		-- end
 
-		if not auraContainer:CareAboutThisAura(unitID, nil, filter, spellID, duration, unitCaster, canStealOrPurge, canApplyAura, debuffType) then
-			--print("didnt make it through the filter")
+		if not auraContainer:CareAboutThisAura(unitID, filter, aura) then
 			return
 		end
-		local priority = BattleGroundEnemies:GetBigDebuffsPriority(spellID) or Data.SpellPriorities[spellID]
-		local auraDetails = {
-			SpellID = spellID,
-			Icon = icon,
-			DebuffType = debuffType,
-			Filter = filter,
-			Priority =  priority,
-			CanStealOrPurge = canStealOrPurge,
-			Count = count,
-			ExpirationTime = expirationTime,
-			Duration = duration
-		}
 	
-		self:NewInput(auraDetails)
+		self:NewInput(aura)
 	end
 
-	function auraContainer:AfterUnitAura(filter)
+	function auraContainer:AfterFullAuraUpdate(filter)
 		if not (filter == self.filter) then return end
 		self:Display()
 	end

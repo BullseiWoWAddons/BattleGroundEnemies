@@ -150,7 +150,7 @@ local function createNewDrFrame(playerButton, container)
 	drFrame:HookScript("OnEnter", function(self)
 		BattleGroundEnemies:ShowTooltip(self, function()
 			if IsClassic then return end
-			GameTooltip:SetSpellByID(self.SpellID)
+			GameTooltip:SetSpellByID(self.spellId)
 		end)
 	end)
 
@@ -206,8 +206,8 @@ end
 local function setupDrFrame(container, drFrame, drDetails)
 	drFrame:SetStatus()
 
-	drFrame.SpellID = drDetails.spellID
-	drFrame.Icon:SetTexture(IsClassic and GetSpellTexture(DRList.spells[drDetails.spellName].spellID) or GetSpellTexture(drDetails.spellID))
+	drFrame.spellId = drDetails.spellId
+	drFrame.Icon:SetTexture(IsClassic and GetSpellTexture(DRList.spells[drDetails.spellName].spellId) or GetSpellTexture(drDetails.spellId))
 	local duration = DRList:GetResetTime(drDetails.drCat)
 	drFrame.Cooldown:SetCooldown(drDetails.startTime, duration)
 end
@@ -216,11 +216,11 @@ function dRTracking:AttachToPlayerButton(playerButton)
 	local container = BattleGroundEnemies:NewContainer(playerButton, createNewDrFrame, setupDrFrame)
 	--frame:SetBackdropColor(0, 0, 0, 0)
 
-	function container:AuraRemoved(spellID, spellName)
+	function container:AuraRemoved(spellId, spellName)
 		local config = self.config
-		--BattleGroundEnemies:Debug(operation, spellID)
+		--BattleGroundEnemies:Debug(operation, spellId)
 
-		local drCat = DRList:GetCategoryBySpellID(IsClassic and spellName or spellID)
+		local drCat = DRList:GetCategoryBySpellID(IsClassic and spellName or spellId)
 
 		if not drCat then return end
 
@@ -229,26 +229,13 @@ function dRTracking:AttachToPlayerButton(playerButton)
 		if drTrackingEnabled then
 			local input = self:FindInputByAttribute("drCat", drCat)
 			if input then
-				input = self:UpdateInput(input, {spellID = spellID})
+				input = self:UpdateInput(input, {spellId = spellId})
 			else
 				input = self:NewInput({
 					drCat = drCat,
-					spellID = spellID
+					spellId = spellId
 				})
 			end
-			-- if playerButton.PlayerName == "Enemy2-Realm2" then
-			-- 	local newStatus = (input.status or 0) + 1
-			-- 	local fakeplayerStatus = FakePlayerDRs[playerButton][drCat].status
-			-- 	if drCat == "stun" then
-			-- 		print("drCat", drCat, spellName, "ended")
-			-- 		if newStatus ~= fakeplayerStatus then
-			-- 			print("doesnt match") 
-			-- 			print("input.status", (input.status or 0) + 1)
-			-- 			print("FakePlayerDRs[playerButton][drCat].status", FakePlayerDRs[playerButton][drCat].status)
-			-- 		end
-			-- 	end
-				
-			-- end
 
 			input.status = (input.status or 0) + 1
 			

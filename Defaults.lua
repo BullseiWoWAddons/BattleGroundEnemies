@@ -122,7 +122,7 @@ Data.defaultSettings = {
 					},
 					Name = {
 						Text = {
-							JustifyV = "BOTTOM"
+							JustifyV = "TOP"
 						}
 					},
 					NonPriorityBuffs = {
@@ -177,12 +177,7 @@ Data.defaultSettings = {
 						HealthTextType = "health",
 						HealthText = {
 							FontSize = 18,
-							FontOutline = "",
-							FontColor = {1, 1, 1, 1},
-							EnableShadow = false,
-							ShadowColor = {0, 0, 0, 1},
-							JustifyH = "CENTER",
-							JustifyV = "TOP"
+							JustifyV = "BOTTOM"
 						},
 					},
 					Trinket = {
@@ -594,17 +589,12 @@ Data.defaultSettings = {
 						HealthTextType = "health",
 						HealthText = {
 							FontSize = 18,
-							FontOutline = "",
-							FontColor = {1, 1, 1, 1},
-							EnableShadow = false,
-							ShadowColor = {0, 0, 0, 1},
-							JustifyH = "CENTER",
-							JustifyV = "TOP"
+							JustifyV = "BOTTOM"
 						},
 					},
 					Name = {
 						Text = {
-							JustifyV = "BOTTOM"
+							JustifyV = "TOP"
 						}
 					},
 					PriorityBuffs = {

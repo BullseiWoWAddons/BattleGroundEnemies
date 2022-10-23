@@ -114,12 +114,18 @@ if not GetUnitName then
 	end
 end
 
+local function getFilterFromAuraInfo(aura)
+	return aura.isHarmful and "HARMFUL" or "HELPFUL"
+end
+
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
 --BattleGroundEnemies.BattlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
 BattleGroundEnemies.BattleGroundDebuffs = {} --contains battleground specific debbuffs to watchout for of the current active battlefield
 BattleGroundEnemies.Testmode = {
 	BGSizeTestmode = 5,
-	Active = false
+	Active = false,
+	FakePlayerAuras = {},--key = playerbutton, value = {}
+	FakePlayerDRs = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
 }
 
 BattleGroundEnemies.IsRatedBG = false
@@ -163,50 +169,62 @@ local function CreateFakeAura(playerButton, filter)
 	local whichAura = math_random(1, #auraTable)
 	local auraToSend = auraTable[whichAura]
 
+
+	if not GetSpellInfo(auraToSend.spellId) then return end --this spellID is probably not existing in this version of the game
+
 	local newAura = {
-		name 					= GetSpellInfo(auraToSend.spellID),
-		icon 					= auraToSend.icon,
-		count 					= auraToSend.count,
-		debuffType 				= auraToSend.debuffType,
-		duration 				= auraToSend.duration,
-		expirationTime 			= GetTime() + auraToSend.duration,
-		unitCaster 				= unitCaster or auraToSend.unitCaster,
-		canStealOrPurge 		= auraToSend.canStealOrPurge,
-		nameplateShowPersonal	= auraToSend.nameplateShowPersonal,
-		spellID 				= auraToSend.spellID,
-		canApplyAura 			= canApplyAura or auraToSend.canApplyAura,
-		isBossAura 				= auraToSend.isBossAura,
-		castByPlayer 			= castByPlayer or auraToSend.castByPlayer,
-		nameplateShowAll 		= auraToSend.nameplateShowAll,
-		timeMod					= auraToSend.timeMod,
+		applications = auraToSend.applications,
+		name = GetSpellInfo(auraToSend.spellId),
+		auraInstanceID = nil,
+		canApplyAura = canApplyAura or auraToSend.canApplyAura,
+		charges	= nil,
+		dispelName = auraToSend.dispelName,
+		duration = auraToSend.duration,
+		expirationTime = GetTime() + auraToSend.duration,
+		icon = auraToSend.icon,
+		isBossAura = auraToSend.isBossAura,
+		isFromPlayerOrPlayerPet	= castByPlayer or auraToSend.isFromPlayerOrPlayerPet,
+		isHarmful = filter == "HARMFUL",
+		isHelpful = filter == "HELPFUL",
+		isNameplateOnly	= nil,
+		isRaid = nil,
+		isStealable	= auraToSend.isStealable,
+		maxCharges = nil,
+		nameplateShowAll = auraToSend.nameplateShowAll,
+		nameplateShowPersonal = auraToSend.nameplateShowPersonal,
+		points = nil, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.	
+		sourceUnit = unitCaster or auraToSend.sourceUnit,
+		spellId	= auraToSend.spellId,
+		timeMod	= auraToSend.timeMod
 	}
 
 	return newAura
 end
 
 
-BattleGroundEnemies.FakePlayerAuras = {} --key = playerbutton, value = {}
-BattleGroundEnemies.FakePlayerDRs = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
 local function FakeUnitAura(playerButton, index, filter)
 	local currentTime = GetTime()
 
-	BattleGroundEnemies.FakePlayerAuras[playerButton] = BattleGroundEnemies.FakePlayerAuras[playerButton] or {}
-	BattleGroundEnemies.FakePlayerAuras[playerButton][filter] = BattleGroundEnemies.FakePlayerAuras[playerButton][filter] or {}
-	BattleGroundEnemies.FakePlayerDRs[playerButton] = BattleGroundEnemies.FakePlayerDRs[playerButton] or {}
+	local testmode = BattleGroundEnemies.Testmode
+	local fakePlayerAuras = testmode.FakePlayerAuras
+	local fakePlayerDRs = testmode.FakePlayerDRs
+	fakePlayerAuras[playerButton] = fakePlayerAuras[playerButton] or {}
+	fakePlayerAuras[playerButton][filter] = fakePlayerAuras[playerButton][filter] or {}
+	fakePlayerDRs[playerButton] = fakePlayerDRs[playerButton] or {}
 
 	--if index == 1 then
-		local createNewAura = math_random(1, 2) == 1 -- 1/2 probability to create a new Aura
+		local createNewAura = not playerButton.isDead and math_random(1, 2) == 1 -- 1/2 probability to create a new Aura
 		if createNewAura then
 			local newFakeAura = CreateFakeAura(playerButton, filter)
 			if newFakeAura then
-				local categoryNewAura = DRList:GetCategoryBySpellID(IsClassic and newFakeAura.name or newFakeAura.spellID)
+				local categoryNewAura = DRList:GetCategoryBySpellID(IsClassic and newFakeAura.name or newFakeAura.spellId)
 
 				local dontAddNewAura
-				for i = 1, #BattleGroundEnemies.FakePlayerAuras[playerButton][filter] do
+				for i = 1, #fakePlayerAuras[playerButton][filter] do
 					
-					local fakeAura = BattleGroundEnemies.FakePlayerAuras[playerButton][filter][i]
+					local fakeAura = fakePlayerAuras[playerButton][filter][i]
 
-					local categoryCurrentAura = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellID)
+					local categoryCurrentAura = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellId)
 
 					if categoryCurrentAura and categoryNewAura and categoryCurrentAura == categoryNewAura then
 						dontAddNewAura = true
@@ -216,10 +234,10 @@ local function FakeUnitAura(playerButton, index, filter)
 						-- end
 						
 						-- end
-					elseif BattleGroundEnemies.FakePlayerDRs[playerButton][categoryNewAura] and BattleGroundEnemies.FakePlayerDRs[playerButton][categoryNewAura].status then
+					elseif fakePlayerDRs[playerButton][categoryNewAura] and fakePlayerDRs[playerButton][categoryNewAura].status then
 
 				
-					elseif newFakeAura.spellID == fakeAura.spellID then
+					elseif newFakeAura.spellId == fakeAura.spellId then
 						dontAddNewAura = true --we tried to apply the same spell twice but its not a DR, dont add it, we dont wan't to clutter it
 						break
 					end
@@ -227,7 +245,7 @@ local function FakeUnitAura(playerButton, index, filter)
 					-- we already are showing this spell, check if this spell is a DR
 				end
 
-				local status = BattleGroundEnemies.FakePlayerDRs[playerButton][categoryNewAura] and BattleGroundEnemies.FakePlayerDRs[playerButton][categoryNewAura].status
+				local status = fakePlayerDRs[playerButton][categoryNewAura] and fakePlayerDRs[playerButton][categoryNewAura].status
 				--check if the aura even can be applied, the new aura can only be applied if the expirationTime of the new aura would be later than the current one
 				-- this is only the case if the aura is already 50% expired
 				if status then
@@ -241,7 +259,7 @@ local function FakeUnitAura(playerButton, index, filter)
 				end
 
 				if not dontAddNewAura then
-					table_insert(BattleGroundEnemies.FakePlayerAuras[playerButton][filter], newFakeAura)
+					table_insert(fakePlayerAuras[playerButton][filter], newFakeAura)
 				end
 			end
 		end
@@ -249,7 +267,7 @@ local function FakeUnitAura(playerButton, index, filter)
 
 
 	--set all expired DRs to status 0
-	for categoryname, drData in pairs(BattleGroundEnemies.FakePlayerDRs[playerButton]) do
+	for categoryname, drData in pairs(fakePlayerDRs[playerButton]) do
 		if drData.expirationTime and drData.expirationTime <= currentTime then
 			drData.status = 0
 			drData.expirationTime = nil
@@ -259,40 +277,36 @@ local function FakeUnitAura(playerButton, index, filter)
 
 
 	-- remove all expired auras
-	for i = #BattleGroundEnemies.FakePlayerAuras[playerButton][filter], 1, -1 do
-		local fakeAura = BattleGroundEnemies.FakePlayerAuras[playerButton][filter][i]
+	for i = #fakePlayerAuras[playerButton][filter], 1, -1 do
+		local fakeAura = fakePlayerAuras[playerButton][filter][i]
 		if fakeAura.expirationTime <= currentTime then
 			-- if playerButton.PlayerName == "Enemy2-Realm2" then
 			-- 	print("1")
 			-- end
 			
-			local category = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellID)
+			local category = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellId)
 			if category then
 				-- if playerButton.PlayerName == "Enemy2-Realm2" then
 				-- 	print("2")
 				-- end
 				
-				BattleGroundEnemies.FakePlayerDRs[playerButton][category] = BattleGroundEnemies.FakePlayerDRs[playerButton][category] or {}
+				fakePlayerDRs[playerButton][category] = fakePlayerDRs[playerButton][category] or {}
 
 				local resetDuration = DRList:GetResetTime(category)
-				BattleGroundEnemies.FakePlayerDRs[playerButton][category].expirationTime = fakeAura.expirationTime + resetDuration
-				BattleGroundEnemies.FakePlayerDRs[playerButton][category].status = (BattleGroundEnemies.FakePlayerDRs[playerButton][category].status or 0) + 1
+				fakePlayerDRs[playerButton][category].expirationTime = fakeAura.expirationTime + resetDuration
+				fakePlayerDRs[playerButton][category].status = (fakePlayerDRs[playerButton][category].status or 0) + 1
 				-- if playerButton.PlayerName == "Enemy2-Realm2" then
 				-- 	print("3", FakePlayerDRs[playerButton][category].status)
 				-- end
 			end
 
-			table_remove(BattleGroundEnemies.FakePlayerAuras[playerButton][filter], i)
-			playerButton:AuraRemoved(fakeAura.spellID, fakeAura.name)
+			table_remove(fakePlayerAuras[playerButton][filter], i)
+			playerButton:AuraRemoved(fakeAura.spellId, fakeAura.name)
 		end
 	end
 
-
-
-	local aura = BattleGroundEnemies.FakePlayerAuras[playerButton][filter][index]
-	if not aura then return end
-
-	return aura.name, aura.icon, aura.count, aura.debuffType, aura.duration, aura.expirationTime, aura.unitCaster, aura.canStealOrPurge, aura.nameplateShowPersonal, aura.spellID, aura.canApplyAura, aura.isBossAura, aura.castByPlayer, aura.nameplateShowAll, aura.timeMod
+	local aura = fakePlayerAuras[playerButton][filter][index]
+	return aura
 end
 
 local maxHealths = {}  --key = playerbutton, value = {}
@@ -528,9 +542,10 @@ do
 
 								if relativeFrame then
 									if relativeFrame:GetNumPoints() > 0 then
-										-- the module we are depending on hasn't been set yet
+										
 										moduleFrameOnButton:SetPoint(pointConfig.Point, relativeFrame, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
 									else
+										-- the module we are depending on hasn't been set yet
 										allModulesSet = false
 									end
 								else
@@ -547,13 +562,8 @@ do
 					moduleFrameOnButton:SetParent(self:GetAnchor(config.Parent))
 				end
 
-				if moduleFrame.flags.HasDynamicSize then
-					moduleFrameOnButton:SetHeight(0.001)
-					moduleFrameOnButton:SetWidth(0.001)
-				end
-
 				if not moduleFrameOnButton.Enabled and moduleFrame.flags.SetZeroWidthWhenDisabled then
-					moduleFrameOnButton:SetWidth(0.001)
+					moduleFrameOnButton:SetWidth(0.01)
 				else
 					if config.UseButtonHeightAsWidth then
 						moduleFrameOnButton:SetWidth(self:GetHeight())
@@ -693,7 +703,12 @@ do
 		end
 	end
 
-	function buttonFunctions:PlayerDied(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
+	function buttonFunctions:PlayerDied()
+		if self.isFakePlayer then
+			if BattleGroundEnemies.Testmode.FakePlayerAuras[self] then wipe(BattleGroundEnemies.Testmode.FakePlayerAuras[self]) end
+			if BattleGroundEnemies.Testmode.FakePlayerDRs[self] then wipe(BattleGroundEnemies.Testmode.FakePlayerDRs[self]) end
+		end
+		
 		self:DispatchEvent("UnitDied")
 		self.isDead = true
 	end
@@ -842,11 +857,11 @@ do
 	end
 
 
-	function buttonFunctions:AuraRemoved(spellID, spellName)
+	function buttonFunctions:AuraRemoved(spellId, spellName)
 		BattleGroundEnemies.Counter.AuraRemoved = (BattleGroundEnemies.Counter.AuraRemoved or 0) + 1
 
-		self:DispatchEvent("AuraRemoved", spellID, spellName)
-		--BattleGroundEnemies:Debug(operation, spellID)
+		self:DispatchEvent("AuraRemoved", spellId, spellName)
+		--BattleGroundEnemies:Debug(operation, spellId)
 	end
 
 
@@ -869,11 +884,11 @@ do
 		return skipUpdate
 	end
 
-	function buttonFunctions:ShouldDisplayAura(unitID, auraInfo, filter, spellID, unitCaster, canStealOrPurge, canApplyAura, debuffType)
+	function buttonFunctions:ShouldDisplayAura(unitID, filter, aura)
 		BattleGroundEnemies.Counter.ShouldDisplayAura = (BattleGroundEnemies.Counter.ShouldDisplayAura or 0) + 1
 
 
-		if self:DispatchUntilTrue("CareAboutThisAura", unitID, auraInfo, filter, spellID, unitCaster, canStealOrPurge, canApplyAura, debuffType) then return true end
+		if self:DispatchUntilTrue("CareAboutThisAura", unitID, filter, aura) then return true end
 		return false --nobody cares about this aura
 	end
 
@@ -900,31 +915,148 @@ do
 	}
 
 	]]
-	function buttonFunctions:UNIT_AURA(unitID, second, third)
 
-		local isFullUpdate, updatedAuraInfos, updateInfo
-		if second and type(second) == "table" then --10.0.2 new structure, isFullupdate was removed, instead second argument is a table
-			updateInfo = second
-			isFullUpdate = true --TODO
-			--[[ 	
+
+
+	local function UnitAuraToUnitAuraInfo(filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
+		if type(name) == "table" then  --seems alrady packaged
+			name.Priority = BattleGroundEnemies:GetSpellPriority(name.spellId)
+			return name
+		end
+		local isDebuff = filter == "HARMFUL" or "HELPFUL"
+		return {
+			applications = count,
+			auraInstanceID = nil,
+			canApplyAura = canApplyAura,
+			charges	= nil,
+			dispelName = debuffType,
+			duration = duration,
+			expirationTime = expirationTime,
+			icon = icon,
+			isBossAura = isBossAura,
+			isFromPlayerOrPlayerPet	= castByPlayer,
+			isHarmful = isDebuff,
+			isHelpful = not isDebuff,
+			isNameplateOnly	= nil,
+			isRaid = nil,
+			isStealable	= canStealOrPurge,
+			maxCharges = nil,
+			name = name,
+			nameplateShowAll = nameplateShowAll	,
+			nameplateShowPersonal = nameplateShowPersonal,
+			points = {value1, value2, value3, value4}, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.	
+			sourceUnit = unitCaster,
+			spellId	= spellId,
+			timeMod	= timeMod,
+			Priority = BattleGroundEnemies:GetSpellPriority(spellId)
+		}
+	end
+
+	function buttonFunctions:UNIT_AURA(unitID, second, third)
+		local updatedAuraInfos = {
+			addedAuras = {},
+			isFullUpdate = true
+		}
+
+		if not second then
+			updatedAuraInfos.isFullUpdate = true
+		else
+			if type(second) == "table" then --new 10.0 UNIT_AURA
+				updatedAuraInfos = second
+				if not updatedAuraInfos.isFullUpdate then
+
+					local addedAuras = updatedAuraInfos.addedAuras
+					if addedAuras ~= nil then
+						for i = 1, #addedAuras do
+							local addedAura = addedAuras[i]
+							self.Auras[getFilterFromAuraInfo(addedAura)][addedAura.auraInstanceID] = addedAura
+						end
+					end
+
+					local updatedAuraInstanceIDs = updatedAuraInfos.updatedAuraInstanceIDs
+					if updatedAuraInstanceIDs ~= nil then
+						for i = 1, #updatedAuraInstanceIDs do
+							local auraInstanceID = updatedAuraInstanceIDs[i]
+							if self.Auras.HELPFUL[auraInstanceID] then
+								local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unitID, auraInstanceID)
+								self.Auras.HELPFUL[auraInstanceID] = newAura
+							elseif self.Auras.HARMFUL[auraInstanceID] then
+								local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unitID, auraInstanceID)
+								self.Auras.HARMFUL[auraInstanceID] = newAura
+							end
+						end
+					end
+
+					local removedAuraInstanceIDs = updatedAuraInfos.removedAuraInstanceIDs
+					if removedAuraInstanceIDs ~= nil then
+						for i = 1, #removedAuraInstanceIDs do
+							local auraInstanceID = removedAuraInstanceIDs[i]
+							if self.Auras.HELPFUL[auraInstanceID] ~= nil then
+								self.Auras.HELPFUL[auraInstanceID] = nil
+							end
+							if self.Auras.HARMFUL[auraInstanceID] ~= nil then
+								self.Auras.HARMFUL[auraInstanceID] = nil
+							end
+						end
+					end
+				end
+			end
+		end
+					
+		--[[ 		
+				
+				third arg until patch 9.x (changed in 10.0)
+				canApplyAura	boolean	Whether or not the player can apply this aura.
+				debuffType	string	Type of debuff this aura applies. May be an empty string.
+				isBossAura	boolean	Whether or not this aura was applied by a boss.
+				isFromPlayerOrPlayerPet	boolean	Whether or not this aura was applied by the player or their pet.
+				isHarmful	boolean	Whether or not this aura is a debuff.
+				isHelpful	boolean	Whether or not this aura is a buff.
+				isNameplateOnly	boolean	Whether or not this aura should appear on nameplates.
+				isRaid	boolean	Whether or not this aura meets the conditions of the RAID aura filter.
+				name	string	The name of the aura.
+				nameplateShowAll	boolean	Whether or not this aura should be shown on all nameplates, instead of just the personal one.
+				sourceUnit	UnitId	Token of the unit that applied the aura.
+				spellId	number	The spell ID of the aura.
+			
+		
+		
+			10.0 second argument:
+		
 			addedAuras	UnitAuraInfo[]?	List of auras added to the unit during this update.
 			updatedAuraInstanceIDs	number[]?	List of existing auras on the unit modified during this update.
 			removedAuraInstanceIDs	number[]?	List of existing auras removed from the unit during this update.
 			isFullUpdate	boolean	Wwhether or not a full update of the units' auras should be performed. If this is set, the other fields will likely be nil.
- ]]		elseif third or type(second) == "boolean" then
-			isFullUpdate = second
-			updatedAuraInfos = third
-		end
-		--[[ local time = GetTime()
-		if time - (self.lastAuraScan or 0) < 0.1 then return end
-		self.lastAuraScan = time ]]
 
-		if self:ShouldSkipAuraUpdate(isFullUpdate, updatedAuraInfos, self.ShouldDisplayAura, unitID) then
-			return
-		end
+			
+			structure UnitAuraInfo
+			applications	number	
+			auraInstanceID	number	
+			canApplyAura	boolean	
+			charges	number	
+			dispelName	string?	
+			duration	number	
+			expirationTime	number	
+			icon	number	
+			isBossAura	boolean	
+			isFromPlayerOrPlayerPet	boolean	
+			isHarmful	boolean	
+			isHelpful	boolean	
+			isNameplateOnly	boolean	
+			isRaid	boolean	
+			isStealable	boolean	
+			maxCharges	number	
+			name	string	
+			nameplateShowAll	boolean	
+			nameplateShowPersonal	boolean	
+			points	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.	
+			sourceUnit	string?	
+			spellId	number	
+			timeMod	number	
+		]]
 
 		local filters = {"HELPFUL", "HARMFUL"}
-		local batchCount = 20 -- TODO make this a option the player can choose, maximum amount of buffs / debuffs
+		local batchCount = 40 -- TODO make this a option the player can choose, maximum amount of buffs / debuffs
 		local shouldQueryAuras
 
 		for i = 1, #filters do
@@ -932,27 +1064,47 @@ do
 
 			shouldQueryAuras = self:DispatchUntilTrue("ShouldQueryAuras", unitID, filter) --ask all subscribers/modules if Aura Scanning is necessary for this filter
 			if shouldQueryAuras then
-				self:DispatchEvent("BeforeUnitAura", unitID, filter)
+				if updatedAuraInfos.isFullUpdate then
+					wipe(self.Auras[filter])
 
-				if AuraUtil.ForEachAura and not self.isFakePlayer then
-					AuraUtil.ForEachAura(unitID, filter, batchCount, function(...)
-						self:DispatchEvent("UnitAura", unitID, filter, ...)
-					end, true)
-				else
-					local auraFunc = UnitAura
-					if self.isFakePlayer then
-						auraFunc = function(unitID, i, filter)
-							return FakeUnitAura(self, i, filter)
+					if AuraUtil.ForEachAura and not self.isFakePlayer then
+						local usePackedAura = true --this will make the function return a aura info table instead of many returns, added in 10.0
+						AuraUtil.ForEachAura(unitID, filter, batchCount, function(...)
+							local aura = UnitAuraToUnitAuraInfo(filter, ...)
+							if aura.auraInstanceID then
+								self.Auras[filter][aura.auraInstanceID] = aura
+							else
+								tinsert(self.Auras[filter], aura)
+							end
+						end, usePackedAura)
+					else
+						local auraFunc = UnitAura
+						if self.isFakePlayer then
+							auraFunc = function(unitID, i, filter)
+								return FakeUnitAura(self, i, filter)
+							end
+						end
+						for j = 1, batchCount do
+							local name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4 = auraFunc(unitID, j, filter)
+	
+							if not name then break end
+	
+							local aura = UnitAuraToUnitAuraInfo(filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
+							if aura.auraInstanceID then
+								self.Auras[filter][aura.auraInstanceID] = aura
+							else
+								tinsert(self.Auras[filter], aura)
+							end
 						end
 					end
-					for j = 1, batchCount do
-						local name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4 = auraFunc(unitID, j, filter)
-
-						if not name then break end
-						self:DispatchEvent("UnitAura", unitID, filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
-					end
 				end
-				self:DispatchEvent("AfterUnitAura", filter)
+				
+
+				self:DispatchEvent("BeforeFullAuraUpdate", unitID, filter)
+				for _, aura in pairs(self.Auras[filter]) do
+					self:DispatchEvent("UnitAura", unitID, filter, aura)
+				end
+				self:DispatchEvent("AfterFullAuraUpdate", filter)
 			end
 		end
 	end
@@ -992,7 +1144,6 @@ do
 		if newTargetPlayerButton then --player targets an existing player and not for example a pet or a NPC
 			newTargetPlayerButton:NowTargetedBy(self)
 			self.Target = newTargetPlayerButton
-			--print(newTargetPlayerButton.DisplayedName, "is now targeted by", self.PlayerName)
 		else
 			self.Target = false
 		end
@@ -1033,46 +1184,6 @@ do
 	function buttonFunctions:GetAnchor(relativeFrame)
 		return relativeFrame == "Button" and self or self[relativeFrame]
 	end
-
-	-- function buttonFunctions:SetModulePosition(moduleFrameOnButton)
-	-- 	local config = moduleFrameOnButton.config
-	-- 	if not config then return print("no config exists") end
-
-	-- 	local point, relativeFrame, relativePoint, offsetX, offsetY
-	-- 	if config.Points then
-	-- 		moduleFrameOnButton:ClearAllPoints()
-
-	-- 		for i = 1, #config.Points do
-	-- 			local pointConfig = config.Points[i]
-
-	-- 			relativeFrame = self:GetAnchor(pointConfig.RelativeFrame)
-	-- 			if not relativeFrame:GetRect() then
-	-- 				-- the module we are depending on hasn't been set yet
-
-	-- 			else
-	-- 				if not relativeFrame then return print("error", relativeFrame, "doesnt exist") end
-	-- 				moduleFrameOnButton:SetPoint(pointConfig.Point, relativeFrame, pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
-	-- 			end
-	-- 		end
-	-- 	end
-	-- 	if config.Parent then
-	-- 		moduleFrameOnButton:SetParent(self:GetAnchor(config.Parent))
-	-- 	end
-	-- 	if config.UseButtonHeightAsWidth then
-	-- 		moduleFrameOnButton:SetWidth(self:GetHeight())
-	-- 	else
-	-- 		if config.Width then
-	-- 			moduleFrameOnButton:SetWidth(config.Width)
-	-- 		end
-	-- 	end
-	-- 	if config.UseButtonHeightAsHeight then
-	-- 		moduleFrameOnButton:SetHeight(self:GetHeight())
-	-- 	else
-	-- 		if config.Height then
-	-- 			moduleFrameOnButton:SetHeight(config.Height)
-	-- 		end
-	-- 	end
-	-- end
 end
 
 local allyButtonFunctions = {}
@@ -1235,6 +1346,10 @@ local function PopulateMainframe(playerType)
 
 			playerButton.ButtonEvents = playerButton.ButtonEvents or {}
 			playerButton.UnitIDs = {TargetedByEnemy = {}}
+			playerButton.Auras = {
+				HELPFUL = {},
+				HARMFUL = {}
+			}
 
 
 			playerButton.PlayerType = self.PlayerType
@@ -1311,9 +1426,6 @@ local function PopulateMainframe(playerType)
 					playerButton[moduleName].moduleName = moduleName
 				end
 			end
-
-			--playerButton.BuffContainer = BattleGroundEnemies.Objects.AuraContainer.New(playerButton, "buff")
-			--playerButton.DebuffContainer = BattleGroundEnemies.Objects.AuraContainer.New(playerButton, "debuff")
 
 			playerButton:ApplyButtonSettings()
 		end
@@ -1416,10 +1528,7 @@ local function PopulateMainframe(playerType)
 
 					playerNumber = playerNumber + 1
 
-
-					--print("playerButton:GetRect", playerButton:GetRect(), playerButton)
 					playerButton:SetModulePositions()
-
 
 					previousButton = playerButton
 				end
@@ -1648,13 +1757,17 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 	return moduleFrame
 end
 
-function BattleGroundEnemies:GetBigDebuffsPriority(spellID)
+function BattleGroundEnemies:GetBigDebuffsPriority(spellId)
 	if not BattleGroundEnemies.db.profile.UseBigDebuffsPriority then return end
 	if not BigDebuffs then return end
-	local priority = BigDebuffs.GetDebuffPriority and BigDebuffs:GetDebuffPriority(spellID)
+	local priority = BigDebuffs.GetDebuffPriority and BigDebuffs:GetDebuffPriority(spellId)
 	if not priority then return end
 	if priority == 0 then return end
 	return priority
+end
+
+function BattleGroundEnemies:GetSpellPriority(spellId)
+	return self:GetBigDebuffsPriority(spellId) or Data.SpellPriorities[spellId]
 end
 
 
@@ -1683,14 +1796,14 @@ function BattleGroundEnemies:GetColoredName(playerDetails)
 	return ("|cFF%02x%02x%02x%s|r"):format(tbl.r*255, tbl.g*255, tbl.b*255, name)
 end
 
-local function FindAuraBySpellID(unitID, spellID, filter)
-	if not unitID or not spellID then return end
+local function FindAuraBySpellID(unitID, spellId, filter)
+	if not unitID or not spellId then return end
 
 	for i = 1, 40 do
 		local name, _, amount, debuffType, duration, expirationTime, unitCaster, _, _, id, _, _, _, _, _, value2, value3, value4 = UnitAura(unitID, i, filter)
 		if not id then return end -- no more auras
 
-		if spellID == id then
+		if spellId == id then
 			return i, name, _, amount, debuffType, duration, expirationTime, unitCaster, _, _, id, _, _, _, _, _, value2, value3, value4
 		end
 	end
@@ -1720,29 +1833,29 @@ end
 function BattleGroundEnemies:ShowAuraTooltip(playerButton, displayedAura)
 	if not displayedAura then return end
 
-	local spellID = displayedAura.SpellID
-	if not spellID then return end
+	local spellId = displayedAura.spellId
+	if not spellId then return end
 
 	local filter = displayedAura.Filter
 	local unitID = playerButton:GetUnitID()
 
 	if unitID and filter then
-		local index = FindAuraBySpellID(unitID, spellID, filter)
+		local index = FindAuraBySpellID(unitID, spellId, filter)
 		if index then
 			return GameTooltip:SetUnitAura(unitID, index, filter)
 		else
-			GameTooltip:SetSpellByID(spellID)
+			GameTooltip:SetSpellByID(spellId)
 		end
 	else
-		GameTooltip:SetSpellByID(spellID)
+		GameTooltip:SetSpellByID(spellId)
 	end
 end
 
 
 
 
-local randomTrinkets = {} -- key = number, value = spellID
-local randomRacials = {} -- key = number, value = spellID
+local randomTrinkets = {} -- key = number, value = spellId
+local randomRacials = {} -- key = number, value = spellId
 local FakePlayersOnUpdateFrame = CreateFrame("frame")
 FakePlayersOnUpdateFrame:Hide()
 
@@ -1901,8 +2014,8 @@ do
 			TestmodeRanOnce = true
 		end
 
-		wipe(self.FakePlayerAuras)
-		wipe(self.FakePlayerDRs)
+		wipe(self.Testmode.FakePlayerAuras)
+		wipe(self.Testmode.FakePlayerDRs)
 
 		local mapIDs = {}
 		for mapID, data in pairs(Data.BattlegroundspezificBuffs) do
@@ -2723,51 +2836,51 @@ end
 local CombatLogevents = {}
 BattleGroundEnemies.CombatLogevents = CombatLogevents
 
---[[ function CombatLogevents.SPELL_AURA_APPLIED(self, srcName, destName, spellID, spellName, auraType, amount)
+--[[ function CombatLogevents.SPELL_AURA_APPLIED(self, srcName, destName, spellId, spellName, auraType, amount)
 	local playerButton = self:GetPlayerbuttonByName(destName)
 	if playerButton and playerButton.isShown then
-		playerButton:AuraApplied(spellID, spellName, srcName, auraType, amount)
+		playerButton:AuraApplied(spellId, spellName, srcName, auraType, amount)
 	end
 end ]]
 
 -- fires when the stack of a aura increases
---[[ function CombatLogevents.SPELL_AURA_APPLIED_DOSE(self, srcName, destName, spellID, spellName, auraType, amount)
+--[[ function CombatLogevents.SPELL_AURA_APPLIED_DOSE(self, srcName, destName, spellId, spellName, auraType, amount)
 	local playerButton = self:GetPlayerbuttonByName(destName)
 	if playerButton and playerButton.isShown then
-		playerButton:AuraApplied(spellID, spellName, srcName, auraType, amount)
+		playerButton:AuraApplied(spellId, spellName, srcName, auraType, amount)
 	end
 end ]]
 -- fires when the stack of a aura decreases
---[[ function CombatLogevents.SPELL_AURA_REMOVED_DOSE(self, srcName, destName, spellID, spellName, auraType, amount)
+--[[ function CombatLogevents.SPELL_AURA_REMOVED_DOSE(self, srcName, destName, spellId, spellName, auraType, amount)
 	local playerButton = self:GetPlayerbuttonByName(destName)
 	if playerButton and playerButton.isShown then
-		playerButton:AuraApplied(spellID, spellName, srcName, auraType, amount)
+		playerButton:AuraApplied(spellId, spellName, srcName, auraType, amount)
 	end
 end ]]
 
 
-function CombatLogevents.SPELL_AURA_REFRESH(self, srcName, destName, spellID, spellName, auraType, amount)
+function CombatLogevents.SPELL_AURA_REFRESH(self, srcName, destName, spellId, spellName, auraType, amount)
 	local playerButton = self:GetPlayerbuttonByName(destName)
 	if playerButton and playerButton.isShown then
-		playerButton:AuraRemoved(spellID, spellName)
+		playerButton:AuraRemoved(spellId, spellName)
 	end
 end
 
-function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellID, spellName, auraType)
+function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellId, spellName, auraType)
 	local playerButton = self:GetPlayerbuttonByName(destName)
 	if playerButton and playerButton.isShown then
-		playerButton:AuraRemoved(spellID, spellName)
+		playerButton:AuraRemoved(spellId, spellName)
 	end
 end
 
 --CombatLogevents.SPELL_DISPEL = CombatLogevents.SPELL_AURA_REMOVED
 
-function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellID)
+function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellId)
 	local playerButton = self:GetPlayerbuttonByName(srcName)
 	if playerButton and playerButton.isShown then
-		playerButton:DispatchEvent("SPELL_CAST_SUCCESS", srcName, destName, spellID)
+		playerButton:DispatchEvent("SPELL_CAST_SUCCESS", srcName, destName, spellId)
 
-		local defaultInterruptDuration = Data.Interruptdurations[spellID]
+		local defaultInterruptDuration = Data.Interruptdurations[spellId]
 		if defaultInterruptDuration then -- check if enemy got interupted
 			if playerButton.PlayerIsEnemy then
 				local activeUnitID = playerButton.UnitIDs.Active
@@ -2775,26 +2888,26 @@ function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellID)
 					if UnitExists(activeUnitID) then
 						local _,_,_,_,_,_,_, notInterruptible = UnitChannelInfo(activeUnitID)  --This guy was channeling something and we casted a interrupt on him
 						if notInterruptible == false then --spell is interruptable
-							playerButton:DispatchEvent("GotInterrupted", spellID, defaultInterruptDuration)
+							playerButton:DispatchEvent("GotInterrupted", spellId, defaultInterruptDuration)
 						end
 					end
 				end
 			elseif playerButton.unit then -- its an ally, check if it has an unitID assigned
 				local _,_,_,_,_,_,_, notInterruptible = UnitChannelInfo(playerButton.unit) --This guy was channeling something and we casted a interrupt on him
 				if notInterruptible == false then --spell is interruptable
-					playerButton:DispatchEvent("GotInterrupted", spellID, defaultInterruptDuration)
+					playerButton:DispatchEvent("GotInterrupted", spellId, defaultInterruptDuration)
 				end
 			end
 		end
 	end
 end
 
-function CombatLogevents.SPELL_INTERRUPT(self, _, destName, spellID, _, _)
+function CombatLogevents.SPELL_INTERRUPT(self, _, destName, spellId, _, _)
 	local playerButton = self:GetPlayerbuttonByName(destName)
 	if playerButton and playerButton.isShown then
-		local defaultInterruptDuration = Data.Interruptdurations[spellID]
+		local defaultInterruptDuration = Data.Interruptdurations[spellId]
 		if defaultInterruptDuration then
-			playerButton:DispatchEvent("GotInterrupted", spellID, defaultInterruptDuration)
+			playerButton:DispatchEvent("GotInterrupted", spellId, defaultInterruptDuration)
 		end
 	end
 end
@@ -2810,9 +2923,9 @@ end
 
 
 function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
-	local timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType = CombatLogGetCurrentEventInfo()
-	--self:Debug(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellID,spellName,spellSchool, auraType)
-	local covenantID = Data.CovenantSpells[spellID]
+	local timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellId,spellName,spellSchool, auraType = CombatLogGetCurrentEventInfo()
+	--self:Debug(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellId,spellName,spellSchool, auraType)
+	local covenantID = Data.CovenantSpells[spellId]
 	if covenantID then
 		local playerButton = self:GetPlayerbuttonByName(srcName)
 		if playerButton then
@@ -2821,9 +2934,9 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
 		end
 	end
 	if CombatLogevents[subevent] then
-		-- IsClassic: spellID is always 0, so we have to work with the spellname :( but at least UnitAura() shows spellIDs
+		-- IsClassic: spellId is always 0, so we have to work with the spellname :( but at least UnitAura() shows spellIDs
 		CombatLogevents.Counter[subevent] = (CombatLogevents.Counter[subevent] or 0) + 1
-		return CombatLogevents[subevent](self, srcName, destName, spellID, spellName, auraType)
+		return CombatLogevents[subevent](self, srcName, destName, spellId, spellName, auraType)
 	end
 end
 
@@ -2902,10 +3015,10 @@ end
 -- function BattleGroundEnemies:LOSS_OF_CONTROL_ADDED()
 	-- local numEvents = C_LossOfControl.GetNumEvents()
 	-- for i = 1, numEvents do
-		-- local locType, spellID, text, iconTexture, startTime, timeRemaining, duration, lockoutSchool, priority, displayType = C_LossOfControl.GetEventInfo(i)
+		-- local locType, spellId, text, iconTexture, startTime, timeRemaining, duration, lockoutSchool, priority, displayType = C_LossOfControl.GetEventInfo(i)
 		-- --self:Debug(C_LossOfControl.GetEventInfo(i))
 		-- if not self.LOSS_OF_CONTROL then self.LOSS_OF_CONTROL = {} end
-		-- self.LOSS_OF_CONTROL[spellID] = locType
+		-- self.LOSS_OF_CONTROL[spellId] = locType
 	-- end
 -- end
 
@@ -2916,22 +3029,22 @@ function BattleGroundEnemies:ARENA_CROWD_CONTROL_SPELL_UPDATE(unitID, ...)
 	if not playerButton then playerButton = self:GetPlayerbuttonByName(unitID) end -- the event fires before the name is set on the frame, so at this point the name is still the unitID
 	if playerButton then
 		if IsClassic or IsTBCC or IsWrath then
-			local spellID, itemID = ...
+			local spellId, itemID = ...
 			if(itemID ~= 0) then
 				local itemTexture = GetItemIcon(itemID);
-				playerButton.Trinket:DisplayTrinket(spellID, itemTexture)
+				playerButton.Trinket:DisplayTrinket(spellId, itemTexture)
 			else
-				local spellTexture, spellTextureNoOverride = GetSpellTexture(spellID);
-				playerButton.Trinket:DisplayTrinket(spellID, spellTextureNoOverride)
+				local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId);
+				playerButton.Trinket:DisplayTrinket(spellId, spellTextureNoOverride)
 			end
 		else
-			local spellID = ...
-			local spellTexture, spellTextureNoOverride = GetSpellTexture(spellID);
-			playerButton.Trinket:DisplayTrinket(spellID, spellTextureNoOverride)
+			local spellId = ...
+			local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId);
+			playerButton.Trinket:DisplayTrinket(spellId, spellTextureNoOverride)
 		end
 	end
 
-	--if spellID ~= 72757 then --cogwheel (30 sec cooldown trigger by racial)
+	--if spellId ~= 72757 then --cogwheel (30 sec cooldown trigger by racial)
 	--end
 end
 
@@ -2948,24 +3061,24 @@ function BattleGroundEnemies:ARENA_COOLDOWNS_UPDATE()
 
 
 			if IsClassic or IsTBCC or IsWrath then
-				local spellID, itemID, startTime, duration = GetArenaCrowdControlInfo(unitID)
-				if spellID then
+				local spellId, itemID, startTime, duration = GetArenaCrowdControlInfo(unitID)
+				if spellId then
 
 					if(itemID ~= 0) then
 						local itemTexture = GetItemIcon(itemID)
-						playerButton.Trinket:DisplayTrinket(spellID, itemTexture)
+						playerButton.Trinket:DisplayTrinket(spellId, itemTexture)
 					else
-						local spellTexture, spellTextureNoOverride = GetSpellTexture(spellID)
-						playerButton.Trinket:DisplayTrinket(spellID, spellTextureNoOverride)
+						local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId)
+						playerButton.Trinket:DisplayTrinket(spellId, spellTextureNoOverride)
 					end
 
 					playerButton.Trinket:SetTrinketCooldown(startTime/1000.0, duration/1000.0)
 				end
 			else
-				local spellID, startTime, duration = C_PvP.GetArenaCrowdControlInfo(unitID)
-				if spellID then
-					local spellTexture, spellTextureNoOverride = GetSpellTexture(spellID)
-					playerButton.Trinket:DisplayTrinket(spellID, spellTextureNoOverride)
+				local spellId, startTime, duration = C_PvP.GetArenaCrowdControlInfo(unitID)
+				if spellId then
+					local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId)
+					playerButton.Trinket:DisplayTrinket(spellId, spellTextureNoOverride)
 					playerButton.Trinket:SetTrinketCooldown(startTime/1000.0, duration/1000.0)
 				end
 			end

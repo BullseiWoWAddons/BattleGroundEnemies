@@ -76,7 +76,7 @@ local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.ObjectiveAndRespawnTimer,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeUnitAura", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},
+	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeFullAuraUpdate", "UnitAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},
 	expansions = "All"
 })
 
@@ -123,36 +123,38 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 			self.Cooldown:ApplyCooldownSettings(conf.Cooldown, true, true, {0, 0, 0, 0.75})
 		end
 	end
-	function frame:SearchForDebuffs(name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellID, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
+	function frame:SearchForDebuffs(aura)
 		--BattleGroundEnemies:Debug("Läüft")
 		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
 		local value
 		for i = 1, #battleGroundDebuffs do
-			if spellID == battleGroundDebuffs[i] then
+			if aura.spellId == battleGroundDebuffs[i] then
 				if BattleGroundEnemies.CurrentMapID == 417 then -- 417 is Kotmogu, we scan for orb debuffs
 
-					--kotmogu
-					if value2 then
-						if not self.Value then
-							--BattleGroundEnemies:Debug("hier")
-							--player just got the debuff
-							self.Icon:SetTexture(GetSpellTexture(spellID))
-							self:Show()
-							--BattleGroundEnemies:Debug("Texture set")
-						end
-						value = value2
-
+					if aura.points and type(aura.points) == "table" then
+						if aura.points[2] then
+							if not self.Value then
+								--BattleGroundEnemies:Debug("hier")
+								--player just got the debuff
+								self.Icon:SetTexture(GetSpellTexture(aura.spellId))
+								self:Show()
+								--BattleGroundEnemies:Debug("Texture set")
+							end
+							value = aura.points[2]
 								--values for orb debuff:
 								--BattleGroundEnemies:Debug(value1, value2, value3, value4)
 								-- value1 = Reduces healing received by value1
 								-- value2 = Increases damage taken by value2
 								-- value3 = Increases damage done by value3
+						end
 					end
+					--kotmogu
+					
 					--end of kotmogu
 
 				else
 					-- not kotmogu
-					value = count
+					value = aura.applications
 				end
 				if value ~= self.Value then
 					self.AuraText:SetText(value)
@@ -173,14 +175,13 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 
-	function frame:CareAboutThisAura(unitID, auraInfo, filter, spellID, unitCaster, canStealOrPurge, canApplyAura, debuffType)
+	function frame:CareAboutThisAura(unitID, filter, aura)
 		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then -- this player is shown on the arena frame and is carrying a flag, orb, etc..
 			local bgDebuffs = BattleGroundEnemies.BattleGroundDebuffs
 			if bgDebuffs then
-				if auraInfo then spellID = auraInfo.spellId end
 
 				for i = 1, #bgDebuffs do
-					if spellID == bgDebuffs[i] then
+					if aura.spellId == bgDebuffs[i] then
 						return true
 					end
 				end
@@ -188,19 +189,19 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		end
 	end
 
-	function frame:BeforeUnitAura(unitID, filter)
+	function frame:BeforeFullAuraUpdate(unitID, filter)
 		if filter == "HARMFUL" then
 			self.continue = true
 		end
 	end
 
-	function frame:UnitAura(unitID, filter, ...)
+	function frame:UnitAura(unitID, filter, aura)
 		if filter ~= "HARMFUL" then return end
 		if not self.continue then return end
 
 		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then -- This player is shown on arena enemy frames because he holds a objective
 			if BattleGroundEnemies.BattleGroundDebuffs then
-				self:SearchForDebuffs(...)
+				self:SearchForDebuffs(aura)
 			end
 		end
 	end

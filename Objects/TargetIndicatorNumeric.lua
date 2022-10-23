@@ -66,8 +66,6 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 	playerButton.TargetIndicatorNumeric = BattleGroundEnemies.MyCreateFontString(playerButton)
 
 	function playerButton.TargetIndicatorNumeric:UpdateTargetIndicators()
-		local targetIndicatorConfig = self.config
-
 		local i = 0
 		for enemyButton in pairs(playerButton.UnitIDs.TargetedByEnemy) do
 			i = i + 1
@@ -86,7 +84,8 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 
 	playerButton.TargetIndicatorNumeric.Reset = function(self)
 		--dont SetWidth before Hide() otherwise it won't work as aimed
-		self:SetText(0) --we do that because the level is anchored right to this and the name is anhored right to the leve
+		if not self:GetFont() then return end
+		self:SetText(0) --we do that because the level is anchored right to this and the name is anhored right to the level
 	end
 end
 

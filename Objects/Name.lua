@@ -14,7 +14,7 @@ local defaultSettings = {
 			RelativeFrame = "Level",
 			RelativePoint = "TOPRIGHT",
 			OffsetX = 5,
-			OffsetY = 2
+			OffsetY = -2
 		},
 		{
 			Point = "BOTTOMRIGHT",

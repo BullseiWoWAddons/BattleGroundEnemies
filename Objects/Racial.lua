@@ -22,7 +22,7 @@ local defaultSettings = {
 		ShadowColor = {0, 0, 0, 1},
 	},
 	Filtering_Enabled = false,
-	Filtering_Filterlist = {}, --key = spellID, value = spellName or false
+	Filtering_Filterlist = {}, --key = spellId, value = spellName or false
 }
 
 local options = function(location)
@@ -61,13 +61,13 @@ local options = function(location)
 					desc = L.RacialFiltering_Filterlist_Desc,
 					disabled = function() return not location.Filtering_Enabled end,
 					get = function(option, key)
-						for spellID in pairs(Data.RacialNameToSpellIDs[key]) do
-							return location.Filtering_Filterlist[spellID]
+						for spellId in pairs(Data.RacialNameToSpellIDs[key]) do
+							return location.Filtering_Filterlist[spellId]
 						end
 					end,
 					set = function(option, key, state) -- value = spellname
-						for spellID in pairs(Data.RacialNameToSpellIDs[key]) do
-							location.Filtering_Filterlist[spellID] = state or nil
+						for spellId in pairs(Data.RacialNameToSpellIDs[key]) do
+							location.Filtering_Filterlist[spellId] = state or nil
 						end
 					end,
 					values = Data.Racialnames,
@@ -92,9 +92,9 @@ function racial:AttachToPlayerButton(playerButton)
 	local frame = CreateFrame("frame", nil, playerButton)
 	-- trinket
 	frame:HookScript("OnEnter", function(self)
-		if self.SpellID then
+		if self.spellId then
 			BattleGroundEnemies:ShowTooltip(self, function()
-				GameTooltip:SetSpellByID(self.SpellID)
+				GameTooltip:SetSpellByID(self.spellId)
 			end)
 		end
 	end)
@@ -106,7 +106,7 @@ function racial:AttachToPlayerButton(playerButton)
 	end)
 
 	function frame:Reset()
-		self.SpellID = false
+		self.spellId = false
 		self.Icon:SetTexture(nil)
 		self.Cooldown:Clear()	--reset Trinket Cooldown
 	end
@@ -125,25 +125,25 @@ function racial:AttachToPlayerButton(playerButton)
 
 	frame.Cooldown = BattleGroundEnemies.MyCreateCooldown(frame)
 
-	function frame:RacialCheck(spellID)
-		if not Data.RacialSpellIDtoCooldown[spellID] then return end
+	function frame:RacialCheck(spellId)
+		if not Data.RacialSpellIDtoCooldown[spellId] then return end
 		local config = frame.config
 		local insi = playerButton.Trinket
 
 
-		if Data.RacialSpellIDtoCooldown[spellID].trinketCD and not (insi.SpellID == 336128) and insi.SpellID and insi.Cooldown:GetCooldownDuration() < Data.RacialSpellIDtoCooldown[spellID].trinketCD * 1000 then
-			insi.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID].trinketCD)
+		if Data.RacialSpellIDtoCooldown[spellId].trinketCD and not (insi.spellId == 336128) and insi.spellId and insi.Cooldown:GetCooldownDuration() < Data.RacialSpellIDtoCooldown[spellId].trinketCD * 1000 then
+			insi.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellId].trinketCD)
 		end
 
-		if config.RacialFiltering_Enabled and not config.RacialFiltering_Filterlist[spellID] then return end
+		if config.RacialFiltering_Enabled and not config.RacialFiltering_Filterlist[spellId] then return end
 
-		self.SpellID = spellID
-		self.Icon:SetTexture(GetSpellTexture(spellID))
-		self.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellID].cd)
+		self.spellId = spellId
+		self.Icon:SetTexture(GetSpellTexture(spellId))
+		self.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellId].cd)
 	end
 
-	function frame:SPELL_CAST_SUCCESS(srcName, destName, spellID)
-		self:RacialCheck(spellID)
+	function frame:SPELL_CAST_SUCCESS(srcName, destName, spellId)
+		self:RacialCheck(spellId)
 	end
 	playerButton.Racial = frame
 end

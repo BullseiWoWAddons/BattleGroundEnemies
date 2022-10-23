@@ -251,7 +251,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		disabled = function()
 			if not location.Points then return false end
 
-			--dynamic containers with dynamic width and height can have a maximum of 1 points
+			--dynamic containers with dynamic width and height can have a maximum of 1 point
 			return not canAddPoint(location, moduleFrame)
 		end,
 		width = "full",
@@ -601,25 +601,13 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 				return Data.SetOption(locationn, option, ...)
 			end,
 			disabled = function() return not BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) end,
+			childGroups = "tab",
 			args = {
 				Enabled = {
 					type = "toggle",
 					name = VIDEO_OPTIONS_ENABLED,
 					width = "normal",
 					order = 1
-				},
-				ModuleSettings = {
-					type = "group",
-					name = L.ModuleSpecificSettings,
-					get =  function(option)
-						return Data.GetOption(locationn, option)
-					end,
-					set = function(option, ...)
-						return Data.SetOption(locationn, option, ...)
-					end,
-					disabled  = function() return not locationn.Enabled or not moduleFrame.options end,
-					order = 2,
-					args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options or {}
 				},
 				PositionSetting = {
 					type = "group",
@@ -631,7 +619,21 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 						return Data.SetOption(locationn, option, ...)
 					end,
 					disabled  = function() return not locationn.Enabled end,
+					order = 2,
 					args = Data.AddPositionSetting(locationn, moduleName, moduleFrame, playerType)
+				},
+				ModuleSettings = {
+					type = "group",
+					name = L.ModuleSpecificSettings,
+					get =  function(option)
+						return Data.GetOption(locationn, option)
+					end,
+					set = function(option, ...)
+						return Data.SetOption(locationn, option, ...)
+					end,
+					disabled  = function() return not locationn.Enabled or not moduleFrame.options end,
+					order = 3,
+					args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options or {}
 				},
 				Reset = {
 					type = "execute",
@@ -642,7 +644,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 						BattleGroundEnemies:NotifyChange()
 					end,
 					width = "full",
-					order = 3,
+					order = 4,
 				}
 			}
 		}

@@ -6,7 +6,6 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 
 	f.inputs = {}
 	f.childFrames = {}
-	
 
 	function f:Display()
 		local config = self.config.Container
@@ -116,21 +115,25 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 			childFrame:Hide()
 		end
 
-		if widestRow == 0 then
-			self:SetWidth(0.001)
+
+		if numInputs == 0 then --This same as widestRow == 0 and highestColumn == 0
+			self:SetWidth(0.01)
 			self:SetHeight(iconSize)
 			self:Hide()
 		else
-			self:SetWidth(widestRow)
-			self:SetHeight(highestColumn)
+			if widestRow == 0 then
+				self:SetWidth(0.01)
+			else
+				self:SetWidth(widestRow)
+			end
+
+			if highestColumn == 0 then
+				self:SetHeight(iconSize)
+			else
+				self:SetHeight(highestColumn)
+			end
 		end
 	end
-
-
-	f:SetScript("OnHide", function(self)
-		self:SetWidth(0.001)
-		self:SetHeight(0.001)
-	end)
 
 	function f:ResetInputs()
 		wipe(self.inputs)
@@ -157,7 +160,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 	end
 
 	function f:Reset()
-		f:ResetInputs()
+		self:ResetInputs()
 		self:Display()
 	end
 
