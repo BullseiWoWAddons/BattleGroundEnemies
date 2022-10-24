@@ -32,7 +32,6 @@ BattleGroundEnemies.Counter = {}
 --todo, fix the testmode when the user is in a group
 --todo, maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
 --reset saved variables when upgrading to new version
---do localization
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -344,6 +343,10 @@ do
 		local unitIDs = self.UnitIDs
 		unitIDs.Active = false
 		self:UpdateRange(false)
+
+		if self.Target then
+			self:IsNoLongerTarging(self.Target)
+		end
 
 		unitIDs.HasAllyUnitID = false
 	end
@@ -1101,34 +1104,21 @@ do
 		return self.PlayerIsEnemy ~= playerButton.PlayerIsEnemy
 	end
 
-	function buttonFunctions:NowTargetedBy(playerButton)
+	function buttonFunctions:UpdateTargetedByEnemy(playerButton, targeted)
 		local unitIDs = self.UnitIDs
-
-		unitIDs.TargetedByEnemy[playerButton] = true
+		unitIDs.TargetedByEnemy[playerButton] = targeted
 		self:UpdateTargetIndicators()
 
-
-		if self:IsEnemyToMe(playerButton) then --the player now targeting me is of opposite faction
-			if self.PlayerIsEnemy then --i am a enemy, and the player who is now targeting me is an ally
-				if playerButton ~= PlayerButton and not playerButton.isFakePlayer then
+		if self.PlayerIsEnemy then
+			if playerButton ~= PlayerButton and not playerButton.isFakePlayer then
+				if targeted then -- we are a enemy and we are now targeted by a new ally
 					if not unitIDs.Active then
-						self:FetchAnAllyUnitID()
+						-- this enemy didnt have a unitID before, its his lucky day, he has one now
+						self:UpdateEnemyUnitID("Ally", playerButton.TargetUnitID)
 					end
-				end
-			end
-		end
-	end
-
-	function buttonFunctions:NoLongerTargetedBy(playerButton)
-		local unitIDs = self.UnitIDs
-
-		unitIDs.TargetedByEnemy[playerButton] = nil
-		self:UpdateTargetIndicators()
-
-		if self:IsEnemyToMe(playerButton) then --the player who was targeting me was of opposite faction
-			if self.PlayerIsEnemy then --i am a enemy, and the player who is no longer targeting me was an ally
-				if playerButton ~= PlayerButton and not playerButton.isFakePlayer then
+				else --we are a enemy and we are no longer targeted by that ally, see if we were depending on that  target unitID of that ally
 					if playerButton.TargetUnitID == unitIDs.Active then
+						--we were depending on it, check if i am targeted by some other ally (enemy from my point of view)
 						self:FetchAnAllyUnitID()
 					end
 				end
@@ -1139,17 +1129,17 @@ do
 	function buttonFunctions:IsNowTargeting(playerButton)
 		self.Target = playerButton
 
-		if self:IsEnemyToMe(playerButton) then
-			playerButton:NowTargetedBy(self)
-		end
+		if not self:IsEnemyToMe(playerButton) then return end --we only care of the other player is of opposite faction
+
+		playerButton:UpdateTargetedByEnemy(self, true)
 	end
 
 	function buttonFunctions:IsNoLongerTarging(playerButton)
 		self.Target = nil
 
-		if self:IsEnemyToMe(playerButton) then
-			playerButton:NoLongerTargetedBy(self)
-		end
+		if not self:IsEnemyToMe(playerButton) then return end --we only care of the other player is of opposite faction
+		
+		playerButton:UpdateTargetedByEnemy(self, nil)
 	end
 
 	function buttonFunctions:UpdateTargets()
@@ -1164,16 +1154,14 @@ do
 		else
 			newTargetPlayerButton = BattleGroundEnemies.Enemies:GetPlayerbuttonByUnitID(self.TargetUnitID or "")
 		end
-
 	
+
 		if oldTargetPlayerButton then
-			if newTargetPlayerButton and oldTargetPlayerButton == newTargetPlayerButton then return end --nothing changed so do nothing :D
-		
+			if newTargetPlayerButton and oldTargetPlayerButton == newTargetPlayerButton then return end
 			self:IsNoLongerTarging(oldTargetPlayerButton)
 		end
-		
 
-		--player Changed target
+		--player didnt have a target before or the player targets a new player
 
 		if newTargetPlayerButton then --player targets an existing player and not for example a pet or a NPC
 			self:IsNowTargeting(newTargetPlayerButton)
@@ -1341,8 +1329,6 @@ local function PopulateMainframe(playerType)
 			--Cleanup previous shown stuff of another player
 			playerButton.MyTarget:Hide()	--reset possible shown target indicator frame
 			playerButton.MyFocus:Hide()	--reset possible shown target indicator frame
-			--playerButton.BuffContainer:Reset()
-			--playerButton.DebuffContainer:Reset()
 
 			for moduleName, moduleFrameOnButton in pairs(BattleGroundEnemies.ButtonModules) do
 				if playerButton[moduleName] and playerButton[moduleName].Reset then
@@ -1359,11 +1345,17 @@ local function PopulateMainframe(playerType)
 				end
 			end
 
+			if playerButton.Auras then
+				if playerButton.Auras.HELPFUL then
+					wipe(playerButton.Auras.HELPFUL)
+				end
+				if playerButton.Auras.HARMFUL then
+					wipe(playerButton.Auras.HARMFUL)
+				end
+			end
+
 			playerButton.unitID = nil
 			playerButton.unit = nil
-			playerButton.PlayerArenaUnitID = nil
-
-
 		else --no recycleable buttons remaining => create a new one
 			playerButton = CreateFrame('Button', nil, self, 'SecureUnitButtonTemplate')
 			playerButton:Hide()
@@ -1440,10 +1432,6 @@ local function PopulateMainframe(playerType)
 			playerButton.MyFocus:SetBackdropColor(0, 0, 0, 0)
 			playerButton.MyFocus:Hide()
 
-			-- symbolic target indicator
-			playerButton.TargetIndicators = {}
-
-			-- Auras
 			playerButton.ButtonModules = {}
 			for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 				if moduleFrame.AttachToPlayerButton then
@@ -1460,7 +1448,6 @@ local function PopulateMainframe(playerType)
 
 		playerButton:SetSpecAndRole()
 
-		self.UnitIDs = {TargetedByEnemy = {}}
 		self.Target = nil
 
 		if playerButton.PlayerIsEnemy then
@@ -1486,7 +1473,7 @@ local function PopulateMainframe(playerType)
 
 		local targetEnemyButton = playerButton.Target
 		if targetEnemyButton then -- if that no longer exiting ally targeted something update the button of its target
-			targetEnemyButton:NoLongerTargetedBy(playerButton)
+			playerButton:IsNoLongerTarging(targetEnemyButton)
 		end
 
 		playerButton:Hide()
@@ -1566,6 +1553,7 @@ local function PopulateMainframe(playerType)
 
 	function self:CreateOrUpdatePlayer(name, race, classTag, specName, additionalData)
 		local playerButton = self.Players[name]
+		local t
 		if playerButton then	--already existing
 			if specName and specName ~= "" then --  hasSpeccs --only update if a specname exists, this way we dont remove the spec if we update via GROUP_ROSTER_UPDATE and the spec has not been cached yet
 				if playerButton.PlayerSpecName ~= specName then--its possible to change specName in battleground
@@ -1573,12 +1561,10 @@ local function PopulateMainframe(playerType)
 					playerButton:SetSpecAndRole()
 				end
 			end
-			playerButton.isFakePlayer = false
-			if additionalData then
-				Mixin(playerButton, additionalData)
-			end
 
 			playerButton.Status = 1 --1 means found, already existing
+
+			t = playerButton
 		else
 			self.NewPlayerDetails[name] = { -- details of this new player
 				PlayerClass = string.upper(classTag), --apparently it can happen that we get a lowercase "druid" from GetBattlefieldScore() in TBCC, IsTBCC
@@ -1588,9 +1574,13 @@ local function PopulateMainframe(playerType)
 				PlayerClassColor = RAID_CLASS_COLORS[classTag],
 				PlayerLevel = false,
 			}
-			if additionalData then
-				Mixin(self.NewPlayerDetails[name], additionalData)
-			end
+			t = self.NewPlayerDetails[name]
+		end
+		--to set a base value, might be overwritten by mixin
+		t.isFakePlayer = false
+		t.PlayerArenaUnitID = nil
+		if additionalData then
+			Mixin(t, additionalData)
 		end
 	end
 
@@ -3179,7 +3169,7 @@ function BattleGroundEnemies:UNIT_TARGET(unitID)
 	--self:Debug("unitID:", unitID, "unitname:", UnitName(unitID), "unittarget:", UnitName(unitID.."target"))
 
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton ~= PlayerButton then
+	if playerButton and playerButton ~= PlayerButton then --we use Player_target_changed for the player
 		playerButton:UpdateTargets()
 	end
 end
@@ -3431,11 +3421,6 @@ do
 
 						local targetEnemyButton = allyButton.Target
 						if targetEnemyButton then
-
-							--self:Debug("player", groupMember.PlayerName, "has a new unit and targeted something")
-							if targetEnemyButton.UnitIDs.Active == allyButton.TargetUnitID then
-								targetEnemyButton.UnitIDs.Active = targetUnitID
-							end
 							if targetEnemyButton.UnitIDs.Ally == allyButton.TargetUnitID then
 								targetEnemyButton:UpdateEnemyUnitID("Ally", targetUnitID)
 							end

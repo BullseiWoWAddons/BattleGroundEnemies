@@ -31,19 +31,11 @@ local defaultSettings = {
 		JustifyH = "LEFT",
 		JustifyV = "MIDDLE"
 	},
-	ConvertCyrillic = true,
 	ShowRealmnames = true
 }
 
 local options = function(location)
 	return {
-		ConvertCyrillic = {
-			type = "toggle",
-			name = L.ConvertCyrillic,
-			desc = L.ConvertCyrillic_Desc,
-			width = "normal",
-			order = 1
-		},
 		ShowRealmnames = {
 			type = "toggle",
 			name = L.ShowRealmnames,
@@ -86,7 +78,7 @@ function name:AttachToPlayerButton(playerButton)
 
 		local name, realm = strsplit( "-", playerName, 2)
 
-		if self.config.ConvertCyrillic then
+		if BattleGroundEnemies.db.profile.ConvertCyrillic then
 			playerName = ""
 			for i = 1, name:utf8len() do
 				local c = name:utf8sub(i,i)

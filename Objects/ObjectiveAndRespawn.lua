@@ -199,11 +199,8 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		if filter ~= "HARMFUL" then return end
 		if not self.continue then return end
 
-		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then -- This player is shown on arena enemy frames because he holds a objective
-			if BattleGroundEnemies.BattleGroundDebuffs then
-				self:SearchForDebuffs(aura)
-			end
-		end
+		if not BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then return end -- This player is not shown on arena enemy so we dont care
+		if BattleGroundEnemies.BattleGroundDebuffs then self:SearchForDebuffs(aura) end
 	end
 
 	function frame:UnitDied()

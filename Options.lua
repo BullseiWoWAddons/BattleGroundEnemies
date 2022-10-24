@@ -762,35 +762,13 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					}
 				}
 			},
-			Name = {
-				type = "group",
-				name = L.Name,
-				desc = L.Name_Desc,
-				order = 7,
-				args = {
-					ConvertCyrillic = {
-						type = "toggle",
-						name = L.ConvertCyrillic,
-						desc = L.ConvertCyrillic_Desc,
-						width = "normal",
-						order = 1
-					},
-					ShowRealmnames = {
-						type = "toggle",
-						name = L.ShowRealmnames,
-						desc = L.ShowRealmnames_Desc,
-						width = "normal",
-						order = 2
-					}
-				}
-			},
 			KeybindSettings = {
 				type = "group",
 				name = KEY_BINDINGS,
 				desc = L.KeybindSettings_Desc..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
 				--childGroups = "tab",
-				order = 9,
+				order = 7,
 				args = {
 					UseClique = {
 						type = "toggle",
@@ -1173,11 +1151,18 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.ShowTooltips_Desc,
 						order = 11
 					},
+					ConvertCyrillic = {
+						type = "toggle",
+						name = L.ConvertCyrillic,
+						desc = L.ConvertCyrillic_Desc,
+						width = "normal",
+						order = 12
+					},
 					UseBigDebuffsPriority = {
 						type = "toggle",
 						name = L.UseBigDebuffsPriority,
 						desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriorityAura),
-						order = 12
+						order = 13
 					}
 				}
 			},

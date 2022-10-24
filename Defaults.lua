@@ -14,6 +14,7 @@ Data.defaultSettings = {
 		Highlight_Color = {1, 1, 0.5, 1},
 		ShowTooltips = true,
 		UseBigDebuffsPriority = true,
+		ConvertCyrillic = true,
 
 		RBG = {
 			TargetCalling_SetMark = false,
@@ -26,10 +27,6 @@ Data.defaultSettings = {
 
 		Enemies = {
 			Enabled = true,
-
-			ShowRealmnames = true,
-			ConvertCyrillic = true,
-
 
 			RangeIndicator_Enabled = true,
 			RangeIndicator_Range = 28767,
@@ -528,9 +525,6 @@ Data.defaultSettings = {
 		},
 		Allies = {
 			Enabled = true,
-
-			ShowRealmnames = true,
-			ConvertCyrillic = true,
 
 			RangeIndicator_Enabled = true,
 			RangeIndicator_Range = 34471,
