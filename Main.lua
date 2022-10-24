@@ -1907,7 +1907,13 @@ local function SetupTrinketAndRacialData()
 end
 
 function BattleGroundEnemies.ToggleTestmodeOnUpdate()
-	FakePlayersOnUpdateFrame:SetShown(not FakePlayersOnUpdateFrame:IsShown())
+	local enabled = not FakePlayersOnUpdateFrame:IsShown()
+	FakePlayersOnUpdateFrame:SetShown(enabled)
+	if enabled then
+		BattleGroundEnemies:Information(L.FakeEventsEnabled)
+	else
+		BattleGroundEnemies:Information(L.FakeEventsDisabled)
+	end
 end
 
 function BattleGroundEnemies.ToggleTestmode()
