@@ -2,7 +2,7 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
-		Version = "9.2.7.0",
+		Version = "9.2.7.1",
 		General = "This is the long awaited update with many changes and new features. It is recommended to reset the settings of the addon in the profile tab, especially when you didnt use the default settings. This is due to the fact that the saved variables format changed. So please take a few minutes and check out the testmode :)",
 		Sections = {
 			{

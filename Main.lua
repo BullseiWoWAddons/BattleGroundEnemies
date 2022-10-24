@@ -463,6 +463,7 @@ do
 	end
 
 	function buttonFunctions:SetModulePositions()
+		self:ApplyConfigs()
 		if not self:GetRect() then return end --the position of the button is not set yet
 		local i = 1
 		repeat -- we basically run this roop to get out of the anchring hell (making sure all the frames that a module is depending on is set)
@@ -546,9 +547,13 @@ do
 		until allModulesSet or i > 5
 	end
 
-	function buttonFunctions:ApplyButtonSettings()
+	function buttonFunctions:ApplyConfigs()
 		self.config = self:GetParent().config
 		self.bgSizeConfig = self:GetParent().bgSizeConfig
+	end
+
+	function buttonFunctions:ApplyButtonSettings()
+		self:ApplyConfigs()
 		local conf = self.bgSizeConfig
 
 		self:SetWidth(conf.BarWidth)
@@ -1227,7 +1232,9 @@ local function PopulateMainframe(playerType)
 		if InCombatLockdown() then
 			return C_Timer.After(1, function() self:ApplyBGSizeSettings() end)
 		end
+	
 		self.bgSizeConfig = self.config[tostring(BattleGroundEnemies.BGSize)]
+
 
 		local conf = self.bgSizeConfig
 
