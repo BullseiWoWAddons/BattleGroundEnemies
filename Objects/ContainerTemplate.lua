@@ -8,7 +8,10 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 	f.childFrames = {}
 
 	function f:Display()
+		if not self.config then return end
 		local config = self.config.Container
+		if not config then return end
+		
 		local verticalGrowdirection = config.VerticalGrowdirection
 		local horizontalGrowdirection = config.HorizontalGrowDirection
 		local framesPerRow = config.IconsPerRow

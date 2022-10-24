@@ -469,8 +469,11 @@ do
 		repeat -- we basically run this roop to get out of the anchring hell (making sure all the frames that a module is depending on is set)
 			local allModulesSet = true
 			for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
-				local moduleConfigOnButton = self.bgSizeConfig.ButtonModules[moduleName]
+				
 				local moduleFrameOnButton = self[moduleName]
+
+				
+				local moduleConfigOnButton = self.bgSizeConfig.ButtonModules[moduleName]
 				moduleFrameOnButton.config = moduleConfigOnButton
 
 				local config = moduleFrameOnButton.config
@@ -1443,7 +1446,13 @@ local function PopulateMainframe(playerType)
 			for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 				if moduleFrame.AttachToPlayerButton then
 					moduleFrame:AttachToPlayerButton(playerButton)
+				
 					if not playerButton[moduleName] then print("something went wrong here after AttachToPlayerButton", moduleName) end
+					
+					playerButton[moduleName].GetConfig = function(self)
+						self.config = playerButton.bgSizeConfig.ButtonModules[moduleName]
+						return self.config
+					end
 					playerButton[moduleName].moduleName = moduleName
 				end
 			end
