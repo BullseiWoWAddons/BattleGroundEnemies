@@ -57,7 +57,7 @@ local level = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = LEVEL,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"NewUnitID", "OnNewPlayer", "PlayerButtonSizeChanged"},
+	events = {"NewUnitID", "OnNewPlayer"},
 	expansions = "All"
 })
 
@@ -82,7 +82,6 @@ function level:AttachToPlayerButton(playerButton)
 	end
 
 	function fs:NewUnitID(unitID)
-
 		self:SetLevel(UnitLevel(unitID))
 	end
 
