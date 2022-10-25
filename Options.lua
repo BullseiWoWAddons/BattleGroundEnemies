@@ -7,15 +7,23 @@ local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 
-
-local function GetAllAnchors(moduleName)
-	local t = {}
+local function GetAllModuleAnchors(moduleName)
+	local moduleAnchors = {}
 	for moduleNamee, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 		if moduleName ~= moduleNamee then --cant anchor to itself
-			t[moduleNamee] = moduleFrame.localizedModuleName
+			moduleAnchors[moduleNamee] = moduleFrame.localizedModuleName
 		end
 	end
-	t.Button = L.Button
+	moduleAnchors.Button = L.Button
+	return moduleAnchors
+end
+
+
+local function GetAllModuleFrames()
+	local t = {}
+	for moduleNamee, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
+		t[moduleNamee] = moduleFrame.localizedModuleName
+	end
 	return t
 end
 
@@ -154,7 +162,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 	temp.Parent = {
 		type = "select",
 		name = "Parent",
-		values = GetAllAnchors(moduleName),
+		values = GetAllModuleAnchors(moduleName),
 		order = 2
 	}
 	temp.Fake1 = Data.AddVerticalSpacing(3)
@@ -163,7 +171,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		for i = 1, numPoints do
 			temp["Point"..i] = {
 				type = "group",
-				name = "Point"..i,
+				name = L.Point.." "..i,
 				desc = "",
 				get =  function(option)
 					return Data.GetOption(location.Points[i], option)
@@ -186,7 +194,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 					RelativeFrame = {
 						type = "select",
 						name = "RelativeFrame",
-						values = GetAllAnchors(moduleName),
+						values = GetAllModuleAnchors(moduleName),
 						validate = function(option, value)
 
 							if validateAnchor(playerType, moduleName, value) then
@@ -226,7 +234,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 					},
 					DeletePoint = {
 						type = "execute",
-						name = L.DeletePoint..i,
+						name = L.DeletePoint:format(i),
 						func = function()
 							location.ActivePoints = i - 1
 							BattleGroundEnemies:NotifyChange()
@@ -757,7 +765,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							BattleGroundEnemies:ApplyAllSettings()
 						end,
 						width = "double",
-						values = function() return GetAllAnchors() end,
+						values = function() return GetAllModuleFrames() end,
 						order = 7
 					}
 				}

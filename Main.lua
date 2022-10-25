@@ -729,28 +729,13 @@ do
 	end
 
 	function buttonFunctions:ApplyRangeIndicatorSettings()
-		if self.config.RangeIndicator_Enabled then
-			if self.config.RangeIndicator_Everything then
-				for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
-					self[frameName]:SetAlpha(1)
-				end
-				self:SetAlpha(self.wasInRange and 1 or self.config.RangeIndicator_Alpha)
-			else
-				for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
-					if enableRange then
-						self[frameName]:SetAlpha(self.wasInRange and 1 or self.config.RangeIndicator_Alpha)
-					else
-						self[frameName]:SetAlpha(1)
-					end
-				end
-				self:SetAlpha(1)
-			end
-		else
-			for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
-				self[frameName]:SetAlpha(1)
-			end
-			self:SetAlpha(1)
+			
+		--set everything to default
+		for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
+			self[frameName]:SetAlpha(1)
 		end
+		self:SetAlpha(1)
+		self:UpdateRange(self.wasInRange)
 	end
 
 	function buttonFunctions:ArenaOpponentShown(unitID)
@@ -815,14 +800,13 @@ do
 		if not self.config.RangeIndicator_Enabled then return end
 
 		if inRange ~= self.wasInRange then
+			local alpha = inRange and 1 or self.config.RangeIndicator_Alpha
 			if self.config.RangeIndicator_Everything then
-				self:SetAlpha(inRange and 1 or self.config.RangeIndicator_Alpha)
+				self:SetAlpha(alpha)
 			else
 				for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
 					if enableRange then
-						self[frameName]:SetAlpha(inRange and 1 or self.config.RangeIndicator_Alpha)
-					else
-						self[frameName]:SetAlpha(1)
+						self[frameName]:SetAlpha(alpha)
 					end
 				end
 			end
@@ -2124,10 +2108,6 @@ do
 		if TimeSinceLastOnUpdate > UpdatePeroid then
 
 			for number, mainFrame in pairs({BattleGroundEnemies.Allies, BattleGroundEnemies.Enemies}) do
-
-				local settings = mainFrame.bgSizeConfig
-
-				local targetCounts = 0
 				local hasFlag = false
 				for name, playerButton in pairs(mainFrame.Players) do
 					if playerButton.isFakePlayer then
@@ -2164,8 +2144,9 @@ do
 
 								local oppositePlayerType = playerButton.PlayerType == "Enemies" and "Allies" or "Enemies"
 								local randomPlayer = BattleGroundEnemies[oppositePlayerType]:GetRandomPlayer()
-								
-								playerButton:IsNowTargeting(randomPlayer)
+								if randomPlayer then
+									playerButton:IsNowTargeting(randomPlayer)
+								end
 							end
 
 							playerButton:UNIT_AURA()
@@ -2174,9 +2155,7 @@ do
 						playerButton:UNIT_HEALTH()
 
 						if n == 6 then --toggle range
-							if mainFrame.config.RangeIndicator_Enabled then
-								playerButton:UpdateRange((playerButton.oldAlpha ~= 1) and true or false)
-							end
+							playerButton:UpdateRange(not playerButton.wasInRange)
 						end
 					end
 				end
@@ -3209,14 +3188,28 @@ do
 			if not self then self = BattleGroundEnemies end
 
 			if not InCombatLockdown() then
-				if self.db.profile.DisableArenaFrames then
-					if self.CurrentMapID then
-						return ArenaEnemyFrames_Disable and ArenaEnemyFrames_Disable(ArenaEnemyFrames)
+				if ArenaEnemyFrames then
+					if self.db.profile.DisableArenaFrames then
+						if self.CurrentMapID then
+							return ArenaEnemyFrames_Disable and ArenaEnemyFrames_Disable(ArenaEnemyFrames)
+						else
+							if ArenaEnemyFrames_CheckEffectiveEnableState then ArenaEnemyFrames_CheckEffectiveEnableState(ArenaEnemyFrames) end
+						end
 					else
 						if ArenaEnemyFrames_CheckEffectiveEnableState then ArenaEnemyFrames_CheckEffectiveEnableState(ArenaEnemyFrames) end
 					end
 				else
-					if ArenaEnemyFrames_CheckEffectiveEnableState then ArenaEnemyFrames_CheckEffectiveEnableState(ArenaEnemyFrames) end
+					if ArenaEnemyMatchFramesContainer then
+						if self.db.profile.DisableArenaFrames then
+							if self.CurrentMapID then
+								return ArenaEnemyMatchFramesContainer.Disable and ArenaEnemyMatchFramesContainer:Disable()
+							else
+								if ArenaEnemyMatchFramesContainer.CheckEffectiveEnableState then ArenaEnemyMatchFramesContainer:CheckEffectiveEnableState() end
+							end
+						else
+							if ArenaEnemyMatchFramesContainer.CheckEffectiveEnableState then ArenaEnemyMatchFramesContainer:CheckEffectiveEnableState() end
+						end
+					end
 				end
 			else
 				C_Timer.After(0.1, self.ToggleArenaFrames)
