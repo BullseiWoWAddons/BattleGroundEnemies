@@ -1072,7 +1072,7 @@ do
 
 				self:DispatchEvent("BeforeFullAuraUpdate", filter)
 				for _, aura in pairs(self.Auras[filter]) do
-					self:DispatchEvent("UnitAura", unitID, filter, aura)
+					self:DispatchEvent("NewAura", unitID, filter, aura)
 				end
 				self:DispatchEvent("AfterFullAuraUpdate", filter)
 			end

@@ -33,6 +33,7 @@ ImportExport.lua
 Objects\ContainerTemplate.lua
 Objects\Auracontainer2.lua
 Objects\CastBar.lua
+Objects\CombatIndicator.lua
 Objects\Covenant.lua
 Objects\DR.lua
 Objects\HealthBar.lua
