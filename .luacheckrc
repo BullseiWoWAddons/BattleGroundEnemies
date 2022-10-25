@@ -100,6 +100,7 @@ globals = {
 	"ArenaEnemyFrames_CheckEffectiveEnableState",
 	"ArenaEnemyFrames_Disable",
 	"ArenaEnemyFrames",
+	"ArenaEnemyMatchFramesContainer",
 	"AuraUtil",
 	"BackdropTemplateMixin",
 	"BasicMessageDialog",
