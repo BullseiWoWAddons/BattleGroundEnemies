@@ -29,9 +29,8 @@ LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusB
 local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies")
 BattleGroundEnemies.Counter = {}
 
---todo, fix the testmode when the user is in a group
---todo, maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
---reset saved variables when upgrading to new version
+--todo: maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
+--todo: add icon selector for combat indicator and add the module to testmode
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
