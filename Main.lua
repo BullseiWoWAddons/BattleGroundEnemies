@@ -886,40 +886,47 @@ do
 
 	]]
 
+	local function addPriority(aura)
+		aura.Priority = BattleGroundEnemies:GetSpellPriority(aura.spellId)
+		return aura
+	end
 
-
+	--packaged the aura into the new UnitAura packaged format (structure UnitAuraInfo)
 	local function UnitAuraToUnitAuraInfo(filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
+		local aura
 		if type(name) == "table" then  --seems alrady packaged
-			name.Priority = BattleGroundEnemies:GetSpellPriority(name.spellId)
-			return name
+			aura = name
+		else
+			local isDebuff = filter == "HARMFUL" or "HELPFUL"
+			--package that stuff up
+			aura = {
+				applications = count,
+				auraInstanceID = nil,
+				canApplyAura = canApplyAura,
+				charges	= nil,
+				dispelName = debuffType,
+				duration = duration,
+				expirationTime = expirationTime,
+				icon = icon,
+				isBossAura = isBossAura,
+				isFromPlayerOrPlayerPet	= castByPlayer,
+				isHarmful = isDebuff,
+				isHelpful = not isDebuff,
+				isNameplateOnly	= nil,
+				isRaid = nil,
+				isStealable	= canStealOrPurge,
+				maxCharges = nil,
+				name = name,
+				nameplateShowAll = nameplateShowAll	,
+				nameplateShowPersonal = nameplateShowPersonal,
+				points = {value1, value2, value3, value4}, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.
+				sourceUnit = unitCaster,
+				spellId	= spellId,
+				timeMod	= timeMod,
+			}
 		end
-		local isDebuff = filter == "HARMFUL" or "HELPFUL"
-		return {
-			applications = count,
-			auraInstanceID = nil,
-			canApplyAura = canApplyAura,
-			charges	= nil,
-			dispelName = debuffType,
-			duration = duration,
-			expirationTime = expirationTime,
-			icon = icon,
-			isBossAura = isBossAura,
-			isFromPlayerOrPlayerPet	= castByPlayer,
-			isHarmful = isDebuff,
-			isHelpful = not isDebuff,
-			isNameplateOnly	= nil,
-			isRaid = nil,
-			isStealable	= canStealOrPurge,
-			maxCharges = nil,
-			name = name,
-			nameplateShowAll = nameplateShowAll	,
-			nameplateShowPersonal = nameplateShowPersonal,
-			points = {value1, value2, value3, value4}, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.
-			sourceUnit = unitCaster,
-			spellId	= spellId,
-			timeMod	= timeMod,
-			Priority = BattleGroundEnemies:GetSpellPriority(spellId)
-		}
+		aura = addPriority(aura)
+		return aura
 	end
 
 	function buttonFunctions:UNIT_AURA(unitID, second, third)
@@ -939,7 +946,7 @@ do
 					if addedAuras ~= nil then
 						for i = 1, #addedAuras do
 							local addedAura = addedAuras[i]
-							self.Auras[getFilterFromAuraInfo(addedAura)][addedAura.auraInstanceID] = addedAura
+							self.Auras[getFilterFromAuraInfo(addedAura)][addedAura.auraInstanceID] = addPriority(addedAura)
 						end
 					end
 
@@ -949,10 +956,10 @@ do
 							local auraInstanceID = updatedAuraInstanceIDs[i]
 							if self.Auras.HELPFUL[auraInstanceID] then
 								local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unitID, auraInstanceID)
-								self.Auras.HELPFUL[auraInstanceID] = newAura
+								self.Auras.HELPFUL[auraInstanceID] = addPriority(newAura)
 							elseif self.Auras.HARMFUL[auraInstanceID] then
 								local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unitID, auraInstanceID)
-								self.Auras.HARMFUL[auraInstanceID] = newAura
+								self.Auras.HARMFUL[auraInstanceID] = newAura(newAura)
 							end
 						end
 					end
