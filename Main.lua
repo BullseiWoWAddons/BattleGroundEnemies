@@ -956,10 +956,14 @@ do
 							local auraInstanceID = updatedAuraInstanceIDs[i]
 							if self.Auras.HELPFUL[auraInstanceID] then
 								local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unitID, auraInstanceID)
-								self.Auras.HELPFUL[auraInstanceID] = addPriority(newAura)
+								if newAura then
+									self.Auras.HELPFUL[auraInstanceID] = addPriority(newAura)
+								end
 							elseif self.Auras.HARMFUL[auraInstanceID] then
 								local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unitID, auraInstanceID)
-								self.Auras.HARMFUL[auraInstanceID] = newAura(newAura)
+								if newAura then
+									self.Auras.HARMFUL[auraInstanceID] = newAura(newAura)
+								end
 							end
 						end
 					end
