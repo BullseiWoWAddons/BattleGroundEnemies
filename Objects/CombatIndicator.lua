@@ -4,12 +4,17 @@ local AddonName, Data = ...
 
 local L = Data.L
 
+local CTimerNewTicker = C_Timer.NewTicker
+
+
 
 
 local defaultSettings = {
 	Enabled = false,
 	Parent = "healthBar",
-	ActivePoints = 2,
+	ActivePoints = 1,
+	Width = 26,
+	Height = 26,
 	Points = {
 		{
 			Point = "TOPLEFT",
@@ -17,44 +22,61 @@ local defaultSettings = {
 			RelativePoint = "TOPRIGHT",
 			OffsetX = 5,
 			OffsetY = -2
-		},
-		{
-			Point = "BOTTOMRIGHT",
-			RelativeFrame = "TargetIndicatorNumeric",
-			RelativePoint = "BOTTOMLEFT",
 		}
 	},
-	CombatIconEnabled = true,
-	OutOfCombatIconEnabled = true,
+	Combat = {
+		Enabled = true,
+		Icon = 132147
+	},
+	OutOfCombat = {
+		Enabled = true,
+		Icon = 132310
+	},
 	UpdatePeriod = 0.1
 }
 
+local Icons = { --one of the two (or both) must be enabled, otherwise u won't see an icon
+	"Combat",
+	"OutOfCombat"
+}
+
 local options = function(location)
-	return {
-		CombatIconEnabled = {
-			type = "toggle",
-			name = L.CombatIconEnabled,
-			width = "normal",
-			order = 1
-		},
-		OutOfCombatIconEnabled = {
-			type = "toggle",
-			name = L.OutOfCombatIconEnabled,
-			order = 2
-		},
-		UpdatePeriod = {
-			type = "range",
-			name = L.UpdatePeriod,
-			desc = L.UpdatePeriod_Desc,
-			min = 0.05,
-			max = 2,
-			step = 0.05,
-			order = 3
+	local t = {}
+	for i = 1, #Icons do
+		t[Icons[i]] = {
+			type = "group",
+			name = L[Icons[i]],
+			inline = true,
+			order = 4,
+			get = function(option)
+				return Data.GetOption(location[Icons[i]], option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location[Icons[i]], option, ...)
+			end,
+			args = {
+				Enabled = {
+					type = "toggle",
+					name = VIDEO_OPTIONS_ENABLED,
+					order = 1
+				},
+				-- TODO Add icon selection
+			}
 		}
+	end
+	t.UpdatePeroid = {
+		type = "range",
+		name = L.UpdatePeriod,
+		desc = L.UpdatePeriod_Desc,
+		min = 0.01,
+		max = 2,
+		step = 0.05,
+		order = 3
 	}
+	return t
 end
 
-local name = BattleGroundEnemies:NewButtonModule({
+local combatIndicator = BattleGroundEnemies:NewButtonModule({
 	moduleName = "CombatIndicator",
 	localizedModuleName = L.CombatIndicator,
 	defaultSettings = defaultSettings,
@@ -62,31 +84,48 @@ local name = BattleGroundEnemies:NewButtonModule({
 	expansions = "All"
 })
 
-local Icons = { --one of the two (or both) must be enabled, otherwise u won't see an icon
-	"Combat",
-	"OutOfCombat"
+
+
+local states = {
+	Unknown = 0,
+	Combat = 1,
+	OutOfCombat = 2
 }
 
-local Textures = {
-	Combat = 132147, --"Interface/Icons/Ability_DualWield",
-	OutOfCombat = 132310, -- Interface/Icons/ABILITY_SAP",
+local stateStateToIcon = {
+	Unknown = {
+		Combat = false,
+		OutOfCombat = false
+	},
+	Combat = {
+		Combat = true,
+		OutOfCombat = false
+	},
+	OutOfCombat = {
+		Combat = false,
+		OutOfCombat = true
+	},
 }
 
+local function getState(inCombat)
+	if inCombat == nil then
+		return 0
+	elseif inCombat then
+		return 1
+	else return 2
+	end
+end
 
-function name:AttachToPlayerButton(playerButton)
+
+function combatIndicator:AttachToPlayerButton(playerButton)
 	playerButton.CombatIndicator = CreateFrame("Frame", nil, playerButton)
 	playerButton.CombatIndicator.Ticker = false
+	playerButton.CombatIndicator.currentState = nil
 
 	for i = 1, #Icons do
-		local type = #Icons[i]
+		local type = Icons[i]
 
 		local iconFrame = CreateFrame("Frame", nil, playerButton.CombatIndicator)
-		iconFrame:SetScript("OnShow", function(self)
-			self.isVisible = true
-		end)
-		iconFrame:SetScript("OnHide", function(self)
-			self.isVisible = false
-		end)
 		iconFrame:SetAllPoints()
 		iconFrame:Hide()
 
@@ -99,55 +138,51 @@ function name:AttachToPlayerButton(playerButton)
 		playerButton.CombatIndicator[type] = iconFrame
 	end
 
-	function playerButton.CombatIndicator:Update()
-		local unitID = playerButton:GetUnitID()
+	function playerButton.CombatIndicator:ShowIconForState(newState)
 		local showCombat = false
 		local showOutOfCombat = false
-		if unitID then
-			local inCombat = UnitAffectingCombat(unitID)
-			
-			if inCombat then
-				if self.config.CombatIconEnabled then
+		if newState ~= 0 then
+			if newState == 1 then
+				if self.config.Combat.Enabled then
 					showCombat = true
-					showOutOfCombat = false
-				else
-					showCombat = false
-					showOutOfCombat = false
 				end
 			else
-				if self.config.OutOfCombatIconEnabled then
-					showCombat = false
+				if self.config.OutOfCombat.Enabled then
 					showOutOfCombat = true
-				else
-					showCombat = false
-					showOutOfCombat = false
 				end
-			end
-		end
-		if showCombat then
-			if self.Combat and not self.Combat.isVisible then
-				self.Combat:Show()
-			end
-		else
-			if self.Combat and self.Combat.isVisible then
-				self.Combat:Hide()
 			end
 		end
 
-		if showOutOfCombat then
-			if self.OutOfCombat and not self.OutOfCombat.isVisible then
-				self.OutOfCombat:Show()
-			end
+		self.Combat:SetShown(showCombat)
+		self.OutOfCombat:SetShown(showOutOfCombat)
+
+		self.currentState = newState
+	end
+
+	function playerButton.CombatIndicator:Update(forceState, applyConfig)
+		local inCombat
+		local newState
+
+		--set showCombat and showOutOfCombat to false (this takes effect when the player doesnt have a unitID)
+
+		if forceState ~= nil then
+			newState = forceState
 		else
-			if self.OutOfCombat and self.OutOfCombat.isVisible then
-				self.OutOfCombat:Hide()
+			local unitID = playerButton:GetUnitID()
+			if unitID then
+				inCombat = UnitAffectingCombat(unitID)
 			end
+			newState = getState(inCombat)
+		end
+
+		if applyConfig or self.currentState ~= newState then
+			self:ShowIconForState(newState)
 		end
 	end
 
 	function playerButton.CombatIndicator:CallFuncOnAllIconFrames(func)
 		for i = 1, #Icons do
-			local type = #Icons[i]
+			local type = Icons[i]
 			local iconFrame = self[type]
 			func(iconFrame)
 		end
@@ -160,16 +195,17 @@ function name:AttachToPlayerButton(playerButton)
 	end
 
 	function playerButton.CombatIndicator:ApplyAllSettings()
-
 		self:CallFuncOnAllIconFrames(function(iconFrame)
-			iconFrame.texture:SetTexture(Textures[iconFrame.type])
+			iconFrame.texture:SetTexture(self.config[iconFrame.type].Icon)
 		end)
+
+		self:Update(nil, true)
 
 		if self.Ticker then
 			self.Ticker:Cancel()
 		end
 		if self.config.UpdatePeriod then
-			self.Ticker = CTimerNewTicker(self.config.UpdatePeriod, function ()
+			self.Ticker = CTimerNewTicker(self.config.UpdatePeriod, function()
 				self:Update()
 			end)
 		end
