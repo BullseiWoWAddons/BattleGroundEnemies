@@ -7,7 +7,7 @@
 ## Version: @project-version@
 ## Author: Bullsei
 ## SavedVariables: BattleGroundEnemiesDB
-## OptionalDeps: Ace3, LibStub, LibRaces-1.0, UTF8, DRList-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, LibPlayerSpells-1.0
+## OptionalDeps: Ace3, LibStub, LibRaces-1.0, UTF8, DRList-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets
 
 ## X-Curse-Project-ID: 274066
 ## X-Wago-ID: nQN5aoNB
