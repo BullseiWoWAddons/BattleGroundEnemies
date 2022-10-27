@@ -975,7 +975,7 @@ do
 							elseif self.Auras.HARMFUL[auraInstanceID] then
 								local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unitID, auraInstanceID)
 								if newAura then
-									self.Auras.HARMFUL[auraInstanceID] = newAura(newAura)
+									self.Auras.HARMFUL[auraInstanceID] = addPriority(newAura)
 								end
 							end
 						end
