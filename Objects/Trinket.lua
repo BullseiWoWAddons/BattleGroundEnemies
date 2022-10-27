@@ -91,9 +91,12 @@ function trinket:AttachToPlayerButton(playerButton)
 		if(itemID and itemID ~= 0) then
 			texture = GetItemIcon(itemID)
 		else
-			--if spellId == 336139 then texture = GetSpellTexture(214027) end
-			local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId)
-			texture = spellTextureNoOverride
+			if spellId == 336139 then --adapted
+				texture = GetSpellTexture(214027) --Adaptation
+			else
+				local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId)
+				texture = spellTextureNoOverride
+			end
 		end
 
 		self.spellId = spellId
