@@ -718,6 +718,7 @@ do
 
 
 	function buttonFunctions:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
+		if not self.isShown then return end
 		local health 
 		local maxHealth
 		if self.isFakePlayer then
@@ -841,6 +842,7 @@ do
 
 
 	function buttonFunctions:AuraRemoved(spellId, spellName)
+		if not self.isShown then return end
 		BattleGroundEnemies.Counter.AuraRemoved = (BattleGroundEnemies.Counter.AuraRemoved or 0) + 1
 
 		self:DispatchEvent("AuraRemoved", spellId, spellName)
@@ -943,6 +945,7 @@ do
 	end
 
 	function buttonFunctions:UNIT_AURA(unitID, second, third)
+		if not self.isShown then return end
 		local updatedAuraInfos = {
 			addedAuras = {},
 			isFullUpdate = true
@@ -1112,6 +1115,7 @@ do
 
 
 	function buttonFunctions:UNIT_POWER_FREQUENT(unitID, powerToken) --gets power of nameplates, player, target, focus, raid1 to raid40, partymember
+		if not self.isShown then return end
 		self:DispatchEvent("UNIT_POWER_FREQUENT", unitID, powerToken)
 	end
 
@@ -2401,11 +2405,11 @@ do
 
 					if activeUnitID and UnitExists(activeUnitID) then
 
-						-- we don't get health update events of targets of allies, so we have to use a onUpdate for that
+						-- we don't get events for targets of allies, so we have to use a onUpdate for that
 						if unitIDs.HasAllyUnitID then
 							enemyButton:UNIT_POWER_FREQUENT(activeUnitID)
 							enemyButton:UNIT_HEALTH(activeUnitID)
-							--enemyButton:UNIT_AURA(activeUnitID) todo probably overkill
+							enemyButton:UNIT_AURA(activeUnitID) --todo probably overkill
 						end
 
 						--Updates stuff that doesn't have events
@@ -2910,14 +2914,14 @@ end ]]
 
 function CombatLogevents.SPELL_AURA_REFRESH(self, srcName, destName, spellId, spellName, auraType, amount)
 	local playerButton = self:GetPlayerbuttonByName(destName)
-	if playerButton and playerButton.isShown then
+	if playerButton then
 		playerButton:AuraRemoved(spellId, spellName)
 	end
 end
 
 function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellId, spellName, auraType)
 	local playerButton = self:GetPlayerbuttonByName(destName)
-	if playerButton and playerButton.isShown then
+	if playerButton then
 		playerButton:AuraRemoved(spellId, spellName)
 	end
 end
@@ -3118,14 +3122,14 @@ end
 
 function BattleGroundEnemies:UNIT_AURA(unitID, isFullUpdate, updatedAuraInfos)
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then
+	if playerButton then
 		playerButton:UNIT_AURA(unitID, isFullUpdate, updatedAuraInfos)
 	end
 end
 
 function BattleGroundEnemies:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown player
+	if playerButton then --unit is a shown player
 		playerButton:UNIT_HEALTH(unitID)
 	end
 end
@@ -3139,7 +3143,7 @@ BattleGroundEnemies.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = BattleGroundEnemies.UNIT_H
 
 function BattleGroundEnemies:UNIT_POWER_FREQUENT(unitID, powerToken) --gets power of nameplates, player, target, focus, raid1 to raid40, partymember
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
-	if playerButton and playerButton.isShown then --unit is a shown enemy
+	if playerButton then --unit is a shown enemy
 		playerButton:UNIT_POWER_FREQUENT(unitID, powerToken)
 	end
 end
