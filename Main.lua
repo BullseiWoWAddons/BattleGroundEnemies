@@ -441,6 +441,20 @@ do
 		self:DispatchEvent("UpdateRaidTargetIcon")
 	end
 
+	function buttonFunctions:UpdateCrowdControl(unitID)
+		local spellId, itemID, startTime, duration
+		if IsClassic or IsTBCC or IsWrath then
+			spellId, itemID, startTime, duration = C_PvP.GetArenaCrowdControlInfo(unitID)
+		else
+			spellId, startTime, duration = C_PvP.GetArenaCrowdControlInfo(unitID)
+		end
+
+		if spellId then
+			self.Trinket:DisplayTrinket(spellId, itemID)
+			self.Trinket:SetTrinketCooldown(startTime/1000.0, duration/1000.0)
+		end
+	end
+
 	function buttonFunctions:NewUnitID(unitID, targetUnitID)
 		if self.PlayerIsEnemy then
 			self.UnitIDs.Active = unitID
@@ -3063,20 +3077,8 @@ function BattleGroundEnemies:ARENA_CROWD_CONTROL_SPELL_UPDATE(unitID, ...)
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 	if not playerButton then playerButton = self:GetPlayerbuttonByName(unitID) end -- the event fires before the name is set on the frame, so at this point the name is still the unitID
 	if playerButton then
-		if IsClassic or IsTBCC or IsWrath then
-			local spellId, itemID = ...
-			if(itemID ~= 0) then
-				local itemTexture = GetItemIcon(itemID);
-				playerButton.Trinket:DisplayTrinket(spellId, itemTexture)
-			else
-				local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId);
-				playerButton.Trinket:DisplayTrinket(spellId, spellTextureNoOverride)
-			end
-		else
-			local spellId = ...
-			local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId);
-			playerButton.Trinket:DisplayTrinket(spellId, spellTextureNoOverride)
-		end
+		local spellId, itemID = ... --itemID only exists in classic, tbc, wrath isClassic, isTBCC, IsWrath
+		playerButton.Trinket:DisplayTrinket(spellId, itemID)
 	end
 
 	--if spellId ~= 72757 then --cogwheel (30 sec cooldown trigger by racial)
@@ -3084,38 +3086,21 @@ function BattleGroundEnemies:ARENA_CROWD_CONTROL_SPELL_UPDATE(unitID, ...)
 end
 
 
+
 --fires when a arenaX enemy used a trinket or racial to break cc, C_PvP.GetArenaCrowdControlInfo(unitID) shoudl be called afterwards to get used CCs
 --this event is kinda stupid, it doesn't say which unit used which cooldown, it justs says that somebody used some sort of trinket
-function BattleGroundEnemies:ARENA_COOLDOWNS_UPDATE()
-
-	--if not self.db.profile.Trinket then return end
-	for i = 1, 5 do
-		local unitID = "arena"..i
+function BattleGroundEnemies:ARENA_COOLDOWNS_UPDATE(unitID)
+	if unitID then
 		local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 		if playerButton then
-
-
-			if IsClassic or IsTBCC or IsWrath then
-				local spellId, itemID, startTime, duration = GetArenaCrowdControlInfo(unitID)
-				if spellId then
-
-					if(itemID ~= 0) then
-						local itemTexture = GetItemIcon(itemID)
-						playerButton.Trinket:DisplayTrinket(spellId, itemTexture)
-					else
-						local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId)
-						playerButton.Trinket:DisplayTrinket(spellId, spellTextureNoOverride)
-					end
-
-					playerButton.Trinket:SetTrinketCooldown(startTime/1000.0, duration/1000.0)
-				end
-			else
-				local spellId, startTime, duration = C_PvP.GetArenaCrowdControlInfo(unitID)
-				if spellId then
-					local spellTexture, spellTextureNoOverride = GetSpellTexture(spellId)
-					playerButton.Trinket:DisplayTrinket(spellId, spellTextureNoOverride)
-					playerButton.Trinket:SetTrinketCooldown(startTime/1000.0, duration/1000.0)
-				end
+			playerButton:UpdateCrowdControl(unitID)
+		end
+	else --for backwards compability, i am not sure if unitID was always given by ARENA_COOLDOWNS_UPDATE
+		for i = 1, 5 do
+			unitID = "arena"..i
+			local playerButton = self:GetPlayerbuttonByUnitID(unitID)
+			if playerButton then
+				playerButton:UpdateCrowdControl(unitID)
 			end
 		end
 	end
