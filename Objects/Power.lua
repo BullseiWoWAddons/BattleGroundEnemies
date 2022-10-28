@@ -112,7 +112,8 @@ function power:AttachToPlayerButton(playerButton)
 				powerType, powerToken, altR, altG, altB = UnitPowerType(unitID)
 				self:CheckForNewPowerColor(powerToken)
 			end
-			self:SetValue(UnitPower(unitID)/UnitPowerMax(unitID))
+			local value = UnitPower(unitID)/UnitPowerMax(unitID)
+			self:SetValue(value)
 		else
 			--for testmode
 			self:SetValue(math_random(0, 100)/100)
