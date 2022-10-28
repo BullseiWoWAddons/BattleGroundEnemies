@@ -105,13 +105,11 @@ function power:AttachToPlayerButton(playerButton)
 	
 	function playerButton.Power:UNIT_POWER_FREQUENT(unitID, powerToken)
 		if unitID then
-			if powerToken then
-				self:CheckForNewPowerColor(powerToken)
-			else
+			if not powerToken then
 				local powerType, altR, altG, altB
 				powerType, powerToken, altR, altG, altB = UnitPowerType(unitID)
-				self:CheckForNewPowerColor(powerToken)
 			end
+			self:CheckForNewPowerColor(powerToken)
 			local value = UnitPower(unitID)/UnitPowerMax(unitID)
 			self:SetValue(value)
 		else
