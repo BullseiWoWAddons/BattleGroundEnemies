@@ -212,11 +212,12 @@ function healthBar:AttachToPlayerButton(playerButton)
 
 		self:UpdateHealthText(health, maxHealth)
 		if unitID then
-			local config = self.config
-
-			playerButton.displayedUnit = unitID
-			playerButton.optionTable = {displayHealPrediction = config.HealthPrediction_Enabled}
-			if CompactUnitFrame_UpdateHealPrediction then CompactUnitFrame_UpdateHealPrediction(playerButton) end
+			if CompactUnitFrame_UpdateHealPrediction then
+				local config = self.config
+				playerButton.displayedUnit = unitID
+				playerButton.optionTable = {displayHealPrediction = config.HealthPrediction_Enabled}
+				CompactUnitFrame_UpdateHealPrediction(playerButton)
+			end
 		end
 	end
 
