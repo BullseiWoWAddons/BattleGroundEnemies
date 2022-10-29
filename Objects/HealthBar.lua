@@ -3,6 +3,8 @@ local BattleGroundEnemies = BattleGroundEnemies
 local LSM = LibStub("LibSharedMedia-3.0")
 local L = Data.L
 
+local CompactUnitFrame_UpdateHealPrediction = CompactUnitFrame_UpdateHealPrediction
+
 local HealthTextTypes = {
 	health = COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_HEALTH,
 	losthealth = COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_LOSTHEALTH,
