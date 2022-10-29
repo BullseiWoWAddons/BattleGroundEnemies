@@ -337,6 +337,7 @@ local enemyButtonFunctions = {}
 do
 
 	function enemyButtonFunctions:UpdateAll(temporaryUnitID)
+
 		local updateStuffWithEvents = false --only update health, power, etc for players that dont get events for that or that dont have a unitID assigned
 		local unitID
 		if temporaryUnitID then
@@ -350,11 +351,24 @@ do
 				end
 			end
 		end
+		--BattleGroundEnemies:LogToSavedVariables("UpdateAll", unitID, updateStuffWithEvents)
 		if not unitID then return end
+		--BattleGroundEnemies:LogToSavedVariables("UpdateAll", 1)
+
 		if not UnitExists(unitID) then return end
+
+		--this further checks dont seem necessary since they dont seem to rule out any other unitiDs (all unit ids that exist also are a button and are also this frame)
+
+
+		--[[ BattleGroundEnemies:LogToSavedVariables("UpdateAll", 2)
+
 		local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
+
 		if not playerButton then return end
+		BattleGroundEnemies:LogToSavedVariables("UpdateAll", 3)
 		if playerButton ~= self then return	end
+		BattleGroundEnemies:LogToSavedVariables("UpdateAll", 4) ]]
+
 
 		if updateStuffWithEvents then
 			self:UNIT_POWER_FREQUENT(unitID)
@@ -3225,7 +3239,7 @@ do
 			if not InCombatLockdown() then
 				if IsInArena and self.db.profile.DisableArenaFramesInArena then
 					return disableArenaFrames()
-				elseif IsInBattleground and self.db.profile.DisableArenaFramesInBattlegrounds then
+				elseif IsInBattleground and self.db.profile.DisableArenaFramesInBattleground then
 					return disableArenaFrames()
 				end
 				checkEffectiveEnableStateForArenaFrames()
