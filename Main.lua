@@ -2836,6 +2836,23 @@ function BattleGroundEnemies:ApplyAllSettings()
 end
 
 BattleGroundEnemies.DebugText = BattleGroundEnemies.DebugText or ""
+
+
+local function stringifyMultitArgs(...)
+	local args = {...}
+	local text = ""
+
+	for i = 1, #args do
+		text = text.. " ".. tostring(args[i])
+	end
+end
+
+local function addTimestamp()
+	local timestampFormat = "[%I:%M:%S] " --timestamp format
+	local stamp = BetterDate(timestampFormat, time())
+	return stamp
+end
+
 function BattleGroundEnemies:Debug(...)
 	if self.db and self.db.profile.Debug then
 
@@ -2843,16 +2860,7 @@ function BattleGroundEnemies:Debug(...)
 			self.debugFrame = CreatedebugFrame()
 		end
 
-		local args = {...}
-		local text = ""
-
-		local timestampFormat = "[%I:%M:%S] " --timestamp format
-		local stamp = BetterDate(timestampFormat, time())
-		text = stamp
-
-		for i = 1, #args do
-			text = text.. " ".. tostring(args[i])
-		end
+		local text = stringifyMultitArgs(addTimestamp(), ...)
 
 		self.debugFrame:AddMessage(text)
 	end
@@ -2861,19 +2869,12 @@ end
 function BattleGroundEnemies:LogToSavedVariables(...)
 	self.db.profile.log = self.db.profile.log or {}
 
-	local timestampFormat = "[%I:%M:%S] " --timestamp format
-	local stamp = BetterDate(timestampFormat, time())
-	local text = ""
-	local args = {...}
-	for i = 1, #args do
-		text = text.. " ".. tostring(args[i])
-	end
+	local text = stringifyMultitArgs(addTimestamp(), ...)
 
-	table_insert(self.db.profile.log, stamp .. ": "..text)
+	table_insert(self.db.profile.log, text)
 end
 
 local sentMessages = {}
-
 function BattleGroundEnemies:OnetimeInformation(...)
 	local message = table.concat({...}, ", ")
 	if sentMessages[message] then return end
