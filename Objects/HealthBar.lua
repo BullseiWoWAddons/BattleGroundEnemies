@@ -3,10 +3,6 @@ local BattleGroundEnemies = BattleGroundEnemies
 local LSM = LibStub("LibSharedMedia-3.0")
 local L = Data.L
 
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
-
 local HealthTextTypes = {
 	health = COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_HEALTH,
 	losthealth = COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_LOSTHEALTH,
@@ -220,7 +216,7 @@ function healthBar:AttachToPlayerButton(playerButton)
 
 			playerButton.displayedUnit = unitID
 			playerButton.optionTable = {displayHealPrediction = config.HealthPrediction_Enabled}
-			if not (IsClassic or IsTBCC or IsWrath) then CompactUnitFrame_UpdateHealPrediction(playerButton) end
+			if CompactUnitFrame_UpdateHealPrediction then CompactUnitFrame_UpdateHealPrediction(playerButton) end
 		end
 	end
 
