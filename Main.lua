@@ -32,7 +32,7 @@ BattleGroundEnemies.Counter = {}
 --todo: maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
 --todo: add icon selector for combat indicator and add the module to testmode
 -- add castbars to testmode
--- abbreaviate numbers for healthbar text, also add second fontstring for secon dhealthtext to show value and percentage ant same time. 
+-- abbreaviate numbers for healthbar text, also add second fontstring for secon dhealthtext to show value and percentage ant same time.
 --add word wrap option for name text
 
 -- for Clique Support
@@ -124,7 +124,8 @@ BattleGroundEnemies.Testmode = {
 	BGSizeTestmode = 5,
 	Active = false,
 	FakePlayerAuras = {},--key = playerbutton, value = {}
-	FakePlayerDRs = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
+	FakePlayerDRs = {}, --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}
+	FakeRaidTargetIcons = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
 }
 
 BattleGroundEnemies.IsRatedBG = false
@@ -138,7 +139,54 @@ local IsInArena --wheter or not the player is in a arena map
 local IsInBattleground
 local specCache = {} -- key = GUID, value = specName (localized)
 
-local function CreateFakeAura(playerButton, filter)
+--[[  from wowpedia
+1	IconSmall RaidStar.png 		Yellow 4-point Star
+2	IconSmall RaidCircle.png 	Orange Circle
+3	IconSmall RaidDiamond.png 	Purple Diamond
+4	IconSmall RaidTriangle.png 	Green Triangle
+5	IconSmall RaidMoon.png 		White Crescent Moon
+6	IconSmall RaidSquare.png 	Blue Square
+7	IconSmall RaidCross.png 	Red "X" Cross
+8	IconSmall RaidSkull.png 	White Skull
+ ]]
+
+
+local function UpdateFakeRaidTargetIcons(playerButton)
+	local testmode = BattleGroundEnemies.Testmode
+	local fakeRaidTargetIcons = testmode.FakeRaidTargetIcons
+	local somethingChanged = false
+
+	if fakeRaidTargetIcons[playerButton] then
+		fakeRaidTargetIcons[playerButton] = nil --player lost the raidtargeticon
+		somethingChanged = true
+	else
+		local randomIndex = math_random(1, 8)
+		local indexAlreadyUsed = false
+		for playerBtn, targetIcon in pairs(testmode.FakeRaidTargetIcons) do
+			if targetIcon == randomIndex then
+				indexAlreadyUsed = true
+				--can't asign this one, another player already has it
+				break -- move on to the next index
+			end
+		end
+
+		if not indexAlreadyUsed then
+			fakeRaidTargetIcons[playerButton] = randomIndex
+			somethingChanged = true
+		end
+		
+		--see which icons arent used yet
+	end
+	if somethingChanged then
+		playerButton:UpdateRaidTargetIcon(fakeRaidTargetIcons[playerButton])
+	end
+end
+
+
+
+local auraFilters = {"HELPFUL", "HARMFUL"}
+
+local function CreateFakeAura(filter)
 	local foundA = Data.FoundAuras[filter]
 
 	local auraTable
@@ -201,28 +249,29 @@ local function CreateFakeAura(playerButton, filter)
 	return newAura
 end
 
-
-local function FakeUnitAura(playerButton, index, filter)
+local function UpdateFakeAuras(playerButton)
 	local currentTime = GetTime()
 
 	local testmode = BattleGroundEnemies.Testmode
 	local fakePlayerAuras = testmode.FakePlayerAuras
 	local fakePlayerDRs = testmode.FakePlayerDRs
 	fakePlayerAuras[playerButton] = fakePlayerAuras[playerButton] or {}
-	fakePlayerAuras[playerButton][filter] = fakePlayerAuras[playerButton][filter] or {}
-	fakePlayerDRs[playerButton] = fakePlayerDRs[playerButton] or {}
 
-	--if index == 1 then
-		local createNewAura = not playerButton.isDead and math_random(1, 2) == 1 -- 1/2 probability to create a new Aura
+	for i = 1, #auraFilters do
+		local filter = auraFilters[i]
+		fakePlayerAuras[playerButton][filter] = fakePlayerAuras[playerButton][filter] or {}
+		fakePlayerDRs[playerButton] = fakePlayerDRs[playerButton] or {}
+
+		local createNewAura = not playerButton.isDead
 		if createNewAura then
-			local newFakeAura = CreateFakeAura(playerButton, filter)
+			local newFakeAura = CreateFakeAura(filter)
 			if newFakeAura then
 				local categoryNewAura = DRList:GetCategoryBySpellID(IsClassic and newFakeAura.name or newFakeAura.spellId)
 
 				local dontAddNewAura
-				for i = 1, #fakePlayerAuras[playerButton][filter] do
+				for j = 1, #fakePlayerAuras[playerButton][filter] do
 
-					local fakeAura = fakePlayerAuras[playerButton][filter][i]
+					local fakeAura = fakePlayerAuras[playerButton][filter][j]
 
 					local categoryCurrentAura = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellId)
 
@@ -263,7 +312,37 @@ local function FakeUnitAura(playerButton, index, filter)
 				end
 			end
 		end
-	--end
+
+		-- remove all expired auras
+		for j = #fakePlayerAuras[playerButton][filter], 1, -1 do
+			local fakeAura = fakePlayerAuras[playerButton][filter][j]
+			if fakeAura.expirationTime <= currentTime then
+				-- if playerButton.PlayerName == "Enemy2-Realm2" then
+				-- 	print("1")
+				-- end
+
+				local category = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellId)
+				if category then
+					-- if playerButton.PlayerName == "Enemy2-Realm2" then
+					-- 	print("2")
+					-- end
+
+					fakePlayerDRs[playerButton][category] = fakePlayerDRs[playerButton][category] or {}
+
+					local resetDuration = DRList:GetResetTime(category)
+					fakePlayerDRs[playerButton][category].expirationTime = fakeAura.expirationTime + resetDuration
+					fakePlayerDRs[playerButton][category].status = (fakePlayerDRs[playerButton][category].status or 0) + 1
+					-- if playerButton.PlayerName == "Enemy2-Realm2" then
+					-- 	print("3", FakePlayerDRs[playerButton][category].status)
+					-- end
+				end
+
+				table_remove(fakePlayerAuras[playerButton][filter], j)
+				playerButton:AuraRemoved(fakeAura.spellId, fakeAura.name)
+			end
+		end
+	end
+
 
 
 	--set all expired DRs to status 0
@@ -273,38 +352,11 @@ local function FakeUnitAura(playerButton, index, filter)
 			drData.expirationTime = nil
 		end
 	end
+	playerButton:UNIT_AURA()
+end
 
-
-
-	-- remove all expired auras
-	for i = #fakePlayerAuras[playerButton][filter], 1, -1 do
-		local fakeAura = fakePlayerAuras[playerButton][filter][i]
-		if fakeAura.expirationTime <= currentTime then
-			-- if playerButton.PlayerName == "Enemy2-Realm2" then
-			-- 	print("1")
-			-- end
-
-			local category = DRList:GetCategoryBySpellID(IsClassic and fakeAura.name or fakeAura.spellId)
-			if category then
-				-- if playerButton.PlayerName == "Enemy2-Realm2" then
-				-- 	print("2")
-				-- end
-
-				fakePlayerDRs[playerButton][category] = fakePlayerDRs[playerButton][category] or {}
-
-				local resetDuration = DRList:GetResetTime(category)
-				fakePlayerDRs[playerButton][category].expirationTime = fakeAura.expirationTime + resetDuration
-				fakePlayerDRs[playerButton][category].status = (fakePlayerDRs[playerButton][category].status or 0) + 1
-				-- if playerButton.PlayerName == "Enemy2-Realm2" then
-				-- 	print("3", FakePlayerDRs[playerButton][category].status)
-				-- end
-			end
-
-			table_remove(fakePlayerAuras[playerButton][filter], i)
-			playerButton:AuraRemoved(fakeAura.spellId, fakeAura.name)
-		end
-	end
-
+local function FakeUnitAura(playerButton, index, filter)
+	local fakePlayerAuras = BattleGroundEnemies.Testmode.FakePlayerAuras
 	local aura = fakePlayerAuras[playerButton][filter][index]
 	return aura
 end
@@ -338,49 +390,6 @@ end
 
 local enemyButtonFunctions = {}
 do
-
-	function enemyButtonFunctions:UpdateAll(temporaryUnitID)
-
-		local updateStuffWithEvents = false --only update health, power, etc for players that dont get events for that or that dont have a unitID assigned
-		local unitID
-		if temporaryUnitID then
-			updateStuffWithEvents = true
-			unitID = temporaryUnitID
-		else
-			if self.unitID then
-				unitID = self.unitID
-				if self.UnitIDs.HasAllyUnitID then
-					updateStuffWithEvents = true
-				end
-			end
-		end
-		--BattleGroundEnemies:LogToSavedVariables("UpdateAll", unitID, updateStuffWithEvents)
-		if not unitID then return end
-		--BattleGroundEnemies:LogToSavedVariables("UpdateAll", 1)
-
-		if not UnitExists(unitID) then return end
-
-		--this further checks dont seem necessary since they dont seem to rule out any other unitiDs (all unit ids that exist also are a button and are also this frame)
-
-
-		--[[ BattleGroundEnemies:LogToSavedVariables("UpdateAll", 2)
-
-		local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
-
-		if not playerButton then return end
-		BattleGroundEnemies:LogToSavedVariables("UpdateAll", 3)
-		if playerButton ~= self then return	end
-		BattleGroundEnemies:LogToSavedVariables("UpdateAll", 4) ]]
-
-
-		if updateStuffWithEvents then
-			self:UNIT_POWER_FREQUENT(unitID)
-			self:UNIT_HEALTH(unitID)
-			self:UNIT_AURA(unitID) --todo probably overkill
-		end
-		self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID))
-		self:UpdateTarget()
-	end
 
 	--Remove from OnUpdate
 	function enemyButtonFunctions:DeleteActiveUnitID() --Delete from OnUpdate
@@ -446,6 +455,50 @@ do
 		end
 	end
 
+	function buttonFunctions:UpdateAll(temporaryUnitID)
+		print("UpdateAll", temporaryUnitID)
+
+		local updateStuffWithEvents = false --only update health, power, etc for players that dont get events for that or that dont have a unitID assigned
+		local unitID
+		if temporaryUnitID then
+			updateStuffWithEvents = true
+			unitID = temporaryUnitID
+		else
+			if self.unitID then
+				unitID = self.unitID
+				if self.UnitIDs.HasAllyUnitID then
+					updateStuffWithEvents = true
+				end
+			end
+		end
+		--BattleGroundEnemies:LogToSavedVariables("UpdateAll", unitID, updateStuffWithEvents)
+		if not unitID then return end
+		--BattleGroundEnemies:LogToSavedVariables("UpdateAll", 1)
+
+		if not UnitExists(unitID) then return end
+
+		--this further checks dont seem necessary since they dont seem to rule out any other unitiDs (all unit ids that exist also are a button and are also this frame)
+
+
+		--[[ BattleGroundEnemies:LogToSavedVariables("UpdateAll", 2)
+
+		local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
+
+		if not playerButton then return end
+		BattleGroundEnemies:LogToSavedVariables("UpdateAll", 3)
+		if playerButton ~= self then return	end
+		BattleGroundEnemies:LogToSavedVariables("UpdateAll", 4) ]]
+
+
+		if updateStuffWithEvents then
+			self:UNIT_POWER_FREQUENT(unitID)
+			self:UNIT_HEALTH(unitID)
+			self:UNIT_AURA(unitID) --todo probably overkill
+		end
+		self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID))
+		self:UpdateTarget()
+	end
+
 	function buttonFunctions:SetSpecAndRole()
 		if self.PlayerSpecName then
 			local specData = Data.Classes[self.PlayerClass][self.PlayerSpecName]
@@ -456,12 +509,13 @@ do
 		self:DispatchEvent("SetSpecAndRole")
 	end
 
-	function buttonFunctions:UpdateRaidTargetIcon()
+	function buttonFunctions:UpdateRaidTargetIcon(forceIndex)
 		local unit = self:GetUnitID()
+		local newIndex = forceIndex --used for testmode, otherwise it will just be nil and overwritten when one actually exists
 		if unit then
-			local index = GetRaidTargetIndex(unit)
-			if index then
-				if index == 8 and (not self.HasIcon or self.HasIcon ~= 8) then
+			newIndex = GetRaidTargetIndex(unit)
+			if newIndex then
+				if newIndex == 8 and (not self.RaidTargetIconIndex or self.RaidTargetIconIndex ~= 8) then
 					if BattleGroundEnemies.IsRatedBG and BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationEnable then
 						local path = LSM:Fetch("sound", BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationSound, true)
 						if path then
@@ -469,14 +523,10 @@ do
 						end
 					end
 				end
-				self.HasIcon = index
-			else
-				self.HasIcon = nil
 			end
-		else
-			self.HasIcon = nil
 		end
-		self:DispatchEvent("UpdateRaidTargetIcon")
+		self.RaidTargetIconIndex = newIndex
+		self:DispatchEvent("UpdateRaidTargetIcon", self.RaidTargetIconIndex)
 	end
 
 	function buttonFunctions:UpdateCrowdControl(unitID)
@@ -504,6 +554,7 @@ do
 			self:DispatchEvent("UnitIdUpdate", unitID)
 		else
 			self.TargetUnitID = targetUnitID
+			self:UpdateAll(unitID)
 			if self.unit ~= unitID then
 				--ally has a new unitID now
 				--self:Debug("player", groupMember.PlayerName, "has a new unit and targeted something")
@@ -1094,12 +1145,12 @@ do
 			timeMod	number
 		]]
 
-		local filters = {"HELPFUL", "HARMFUL"}
+
 		local batchCount = 40 -- TODO make this a option the player can choose, maximum amount of buffs / debuffs
 		local shouldQueryAuras
 
-		for i = 1, #filters do
-			local filter = filters[i]
+		for i = 1, #auraFilters do
+			local filter = auraFilters[i]
 
 			shouldQueryAuras = self:DispatchUntilTrue("ShouldQueryAuras", unitID, filter) --ask all subscribers/modules if Aura Scanning is necessary for this filter
 			if shouldQueryAuras then
@@ -2198,13 +2249,13 @@ do
 								holdsflag = playerButton
 								hasFlag = true
 
-							elseif n == 3 and playerButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
+							elseif n == 2 and playerButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
 								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, playerButton.PlayerName, nil, randomRacials[math_random(1, #randomRacials)])
-							elseif n == 4 and playerButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
+							elseif n == 3 and playerButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
 								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, playerButton.PlayerName, nil, randomTrinkets[math_random(1, #randomTrinkets)])
-							elseif n == 6 then --power simulation
+							elseif n == 4 then --power simulation
 								playerButton:UNIT_POWER_FREQUENT()
-							elseif n == 7 then
+							elseif n == 5 then
 
 								--let the player changed target or target someone if he didnt have a target before
 								if playerButton.Target then
@@ -2219,10 +2270,10 @@ do
 										playerButton:IsNowTargeting(randomPlayer)
 									end
 								end
+							elseif n == 6 then
+								UpdateFakeRaidTargetIcons(playerButton)
 							end
-
-							playerButton:UNIT_AURA()
-							-- targetcounter simulation
+							UpdateFakeAuras(playerButton)
 						end
 						playerButton:UNIT_HEALTH()
 
@@ -2546,8 +2597,8 @@ local function ApplyFontStringSettings(fs, settings)
 		fs:SetJustifyV(settings.JustifyV)
 	end
 
-	if settings.NonSpaceWrap ~= nil then
-		fs:SetNonSpaceWrap(settings.NonSpaceWrap)
+	if settings.WordWrap ~= nil then
+		fs:SetWordWrap(settings.WordWrap)
 	end
 
 	if settings.FontColor then
