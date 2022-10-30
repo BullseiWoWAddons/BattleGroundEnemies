@@ -159,7 +159,7 @@ Data.defaultSettings = {
 						},
 						Container = {
 							UseButtonHeightAsSize = false,
-							IconSize = 20,
+							IconSize = 25,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
 							VerticalGrowdirection = "upwards",
@@ -177,7 +177,7 @@ Data.defaultSettings = {
 						},
 						Container = {
 							UseButtonHeightAsSize = false,
-							IconSize = 20,
+							IconSize = 25,
 							IconsPerRow = 8,
 							HorizontalGrowDirection = "leftwards",
 							VerticalGrowdirection = "upwards",
@@ -666,7 +666,7 @@ Data.defaultSettings = {
 						},
 						Container = {
 							UseButtonHeightAsSize = false,
-							IconSize = 20,
+							IconSize = 25,
 							HorizontalGrowDirection = "rightwards",
 							VerticalGrowdirection = "upwards",
 						}
@@ -683,7 +683,7 @@ Data.defaultSettings = {
 						},
 						Container = {
 							UseButtonHeightAsSize = false,
-							IconSize = 20,
+							IconSize = 25,
 							HorizontalGrowDirection = "rightwards",
 							VerticalGrowdirection = "upwards",
 						}
