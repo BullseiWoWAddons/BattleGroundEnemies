@@ -454,8 +454,6 @@ do
 	end
 
 	function buttonFunctions:UpdateAll(temporaryUnitID)
-		print("UpdateAll", temporaryUnitID)
-
 		local updateStuffWithEvents = false --only update health, power, etc for players that dont get events for that or that dont have a unitID assigned
 		local unitID
 		if temporaryUnitID then
@@ -498,11 +496,13 @@ do
 	end
 
 	function buttonFunctions:SetSpecAndRole()
-		if self.PlayerSpecName then
+		if self.PlayerClass and self.PlayerSpecName then
 			local specData = Data.Classes[self.PlayerClass][self.PlayerSpecName]
-			self.PlayerSpecID = specData.specID
-			self.PlayerRoleNumber = specData.roleNumber
-			self.PlayerRoleID = specData.roleID
+			if specData then
+				self.PlayerSpecID = specData.specID
+				self.PlayerRoleNumber = specData.roleNumber
+				self.PlayerRoleID = specData.roleID
+			end
 		end
 		self:DispatchEvent("SetSpecAndRole")
 	end
@@ -577,6 +577,24 @@ do
 		end
 	end
 
+	function buttonFunctions:SetModuleConfig(moduleName)
+		local moduleFrameOnButton = self[moduleName]
+		local moduleConfigOnButton = self.bgSizeConfig.ButtonModules[moduleName]
+
+		moduleFrameOnButton.config = moduleConfigOnButton
+		if moduleConfigOnButton.Enabled and BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) then
+			moduleFrameOnButton.Enabled = true
+		else
+			moduleFrameOnButton.Enabled = false
+		end
+	end
+
+	function buttonFunctions:SetAllModuleConfigs()
+		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
+			self:SetModuleConfig(moduleName)
+		end
+	end
+
 	function buttonFunctions:SetModulePositions()
 		self:ApplyConfigs()
 		if not self:GetRect() then return end --the position of the button is not set yet
@@ -584,12 +602,8 @@ do
 		repeat -- we basically run this roop to get out of the anchring hell (making sure all the frames that a module is depending on is set)
 			local allModulesSet = true
 			for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
-
+				self:SetModuleConfig(moduleName)
 				local moduleFrameOnButton = self[moduleName]
-
-
-				local moduleConfigOnButton = self.bgSizeConfig.ButtonModules[moduleName]
-				moduleFrameOnButton.config = moduleConfigOnButton
 
 				local config = moduleFrameOnButton.config
 				if not config then return end
@@ -687,14 +701,17 @@ do
 		--MyFocus, indicating the current focus of the player
 		self.MyFocus:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyFocus_Color))
 
-		self:SetModulePositions()
+	
+		
 
 		wipe(self.ButtonEvents)
+		self:SetAllModuleConfigs()
+		self:SetModulePositions()
+
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
-			local moduleConfigOnButton = self.bgSizeConfig.ButtonModules[moduleName]
 			local moduleFrameOnButton = self[moduleName]
-			moduleFrameOnButton.config = moduleConfigOnButton
-			if moduleConfigOnButton.Enabled and BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) then
+	
+			if moduleFrameOnButton.Enabled then
 				if moduleFrame.events then
 					for i = 1, #moduleFrame.events do
 						local event = moduleFrame.events[i]
@@ -714,11 +731,6 @@ do
 				if moduleFrameOnButton.Reset then moduleFrameOnButton:Reset() end
 			end
 		end
-
-
-		--Auras
-		--self.DebuffContainer:ApplySettings()
-		--self.BuffContainer:ApplySettings()
 	end
 
 
@@ -2130,7 +2142,7 @@ do
 
 				for name, playerButton in pairs(mainFrame.Players) do
 					if IsRetail then
-						playerButton.Covenant:DisplayCovenant(math_random(1, #Data.CovenantIcons))
+						playerButton.Covenant:UpdateCovenant(math_random(1, #Data.CovenantIcons))
 					end
 				end
 			end
@@ -3073,7 +3085,7 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
 		local playerButton = self:GetPlayerbuttonByName(srcName)
 		if playerButton then
 			-- this player used a covenant ability show an icon for that
-			playerButton.Covenant:DisplayCovenant(covenantID)
+			playerButton.Covenant:UpdateCovenant(covenantID)
 		end
 	end
 	if CombatLogevents[subevent] then
