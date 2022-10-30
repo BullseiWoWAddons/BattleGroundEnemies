@@ -65,7 +65,6 @@ Data.defaultSettings = {
 						ShadowColor = {0, 0, 0, 1},
 					}
 				},
-
 				ButtonModules = {
 					Class = {
 						Width = 52,
@@ -80,6 +79,9 @@ Data.defaultSettings = {
 								OffsetX = -3
 							}
 						}
+					},
+					Covenant = {
+						Enabled = false
 					},
 					DRTracking = {
 						Points = {
@@ -584,6 +586,9 @@ Data.defaultSettings = {
 					},
 					Class = {
 						Width = 52,
+					},
+					Covenant = {
+						Enabled = false
 					},
 					DRTracking = {
 						Points = {
