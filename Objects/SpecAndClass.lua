@@ -129,7 +129,7 @@ local function attachToPlayerButton(playerButton, type)
 				end
 			
 		else -- "Spec"
-			if playerButton.PlayerSpecName then
+			if playerButton.PlayerClass and playerButton.PlayerSpecName then
 				self.Icon:SetTexture(Data.Classes[playerButton.PlayerClass][playerButton.PlayerSpecName].specIcon)
 			end
 		end
