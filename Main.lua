@@ -32,8 +32,6 @@ BattleGroundEnemies.Counter = {}
 --todo: maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
 --todo: add icon selector for combat indicator and add the module to testmode
 -- add castbars to testmode
--- abbreaviate numbers for healthbar text, also add second fontstring for secon dhealthtext to show value and percentage ant same time.
---add word wrap option for name text
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -2162,6 +2160,7 @@ do
 
 		wipe(self.Testmode.FakePlayerAuras)
 		wipe(self.Testmode.FakePlayerDRs)
+		wipe(self.Testmode.FakeRaidTargetIcons)
 
 		local mapIDs = {}
 		for mapID, data in pairs(Data.BattlegroundspezificBuffs) do
