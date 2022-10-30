@@ -48,9 +48,9 @@ function raidTargetIcon:AttachToPlayerButton(playerButton)
 	function playerButton.RaidTargetIcon:UpdateRaidTargetIcon(raidTargetIconIndex)
 		if raidTargetIconIndex then
 			SetRaidTargetIconTexture(self.Icon, raidTargetIconIndex)
-			self:Show()
+			self.Icon:Show()
 		else
-			self:Hide()
+			self.Icon:Hide()
 		end
 	end
 
