@@ -31,6 +31,9 @@ BattleGroundEnemies.Counter = {}
 
 --todo: maybe get rid of all the onhide scripts and anchor BGE frame to UIParent
 --todo: add icon selector for combat indicator and add the module to testmode
+-- add castbars to testmode
+-- abbreaviate numbers for healthbar text, also add second fontstring for secon dhealthtext to show value and percentage ant same time. 
+--add word wrap option for name text
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -2543,6 +2546,10 @@ local function ApplyFontStringSettings(fs, settings)
 		fs:SetJustifyV(settings.JustifyV)
 	end
 
+	if settings.NonSpaceWrap ~= nil then
+		fs:SetNonSpaceWrap(settings.NonSpaceWrap)
+	end
+
 	if settings.FontColor then
 		fs:SetTextColor(unpack(settings.FontColor))
 	end
@@ -3039,7 +3046,9 @@ do
 			if oldTarget.PlayerIsEnemy then
 				oldTarget:UpdateEnemyUnitID("Target", false)
 			end
-			PlayerButton:IsNoLongerTarging(oldTarget)
+			if PlayerButton then
+				PlayerButton:IsNoLongerTarging(oldTarget)
+			end
 			oldTarget.MyTarget:Hide()
 		end
 
