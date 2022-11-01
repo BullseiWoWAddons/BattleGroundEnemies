@@ -79,8 +79,6 @@ BattleGroundEnemies.Counter = {}
 
 --todo: add icon selector for combat indicator and add the module to testmode
 -- add castbars to testmode
--- re enable in update battlfield score : self.Enemies:CreateOrUpdatePlayer()
--- filter (any works, all doesnt)
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -3599,8 +3597,8 @@ do
 						return
 					end
 					if faction == self.EnemyFaction then
-						--self.Enemies:CreateOrUpdatePlayer(name, race, classTag, specName)
-						--foundEnemies = foundEnemies + 1
+						self.Enemies:CreateOrUpdatePlayer(name, race, classTag, specName)
+						foundEnemies = foundEnemies + 1
 					else
 						self.Allies:CreateOrUpdatePlayer(name, race, classTag, specName)
 						foundAllies = foundAllies + 1
