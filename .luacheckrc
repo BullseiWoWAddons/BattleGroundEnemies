@@ -93,6 +93,7 @@ globals = {
 
 	-- everything else
 	-- Legion/TombOfSargeras/Kiljaeden.lua
+	"AbbreviateLargeNumbers",
 	"AceGUIWidgetLSMlists",
 	"AlertFrame",
 	"Ambiguate",
