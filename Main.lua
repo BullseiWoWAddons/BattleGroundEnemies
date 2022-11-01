@@ -3406,7 +3406,7 @@ end
 
 function BattleGroundEnemies:EnableFallbacktoCombatlogScanning()
 	if not self.combatlogScanningEnabled then
-		self:Information("Falling back to combat log scanning to detect enemies because there are no ")
+		self:Information(L.CombatLogScanningForEnemiesEnabled)
 
 		self.SearchedGUIDs = {}
 		self.PlayerGUIDs = {}
@@ -3416,7 +3416,7 @@ end
 
 function BattleGroundEnemies:DisableFallbacktoCombatlogScanning()
 	if self.combatlogScanningEnabled then
-		self:Information("Disabled combat log scanning for enemies")
+		self:Information(L.CombatLogScanningForEnemiesDisabled)
 		self.SearchedGUIDs = nil
 		self.PlayerGUIDs = nil
 	end
