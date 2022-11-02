@@ -577,8 +577,6 @@ do
 					self.unit = unitID
 					self:SetAttribute('unit', unitID)
 					BattleGroundEnemies.Allies:SortPlayers()
-				else
-					C_Timer.After(1, function() return BattleGroundEnemies:GROUP_ROSTER_UPDATE() end)
 				end
 			end
 
