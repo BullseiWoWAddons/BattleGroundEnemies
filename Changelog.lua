@@ -2,6 +2,18 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.0.0.3",
+		General = "This version fixed a code loop.. Please read the notes from version 9.2.7.2 below if you haven't been using a version 9.2.7.X before",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed a code loop which potentially can result in a game freeze. Thanks to everyone contributing and reporting :)",
+				}
+			}
+		}
+	},
+	{
 		Version = "10.0.0.2",
 		General = "This version brings a new features and fixes reported errors and issues. Please read the notes from version 9.2.7.2 below if you haven't been using a version 9.2.7.X before",
 		Sections = {
