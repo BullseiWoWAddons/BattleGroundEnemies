@@ -1056,6 +1056,8 @@ do
 
 	function buttonFunctions:UNIT_AURA(unitID, second, third)
 		if not self.isShown then return end
+		local now = GetTime()
+		if self.lastAuraUpdate and self.lastAuraUpdate == now then return end --this event will fire for the same player multiple times if lets say he is shown on nameplate and on target frame
 		local updatedAuraInfos = {
 			addedAuras = {},
 			isFullUpdate = true
@@ -1214,6 +1216,7 @@ do
 				self:DispatchEvent("AfterFullAuraUpdate", filter)
 			end
 		end
+		self.lastAuraUpdate = now
 	end
 
 
