@@ -2036,9 +2036,8 @@ function BattleGroundEnemies:ShowAuraTooltip(playerButton, displayedAura)
 	local spellId = displayedAura.spellId
 	if not spellId then return end
 
-	local filter = displayedAura.Filter
 	local unitID = playerButton:GetUnitID()
-
+	local filter = getFilterFromAuraInfo(displayedAura)
 	if unitID and filter then
 		local index = FindAuraBySpellID(unitID, spellId, filter)
 		if index then
