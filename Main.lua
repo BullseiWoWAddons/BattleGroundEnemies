@@ -3415,7 +3415,7 @@ local function checkEffectiveEnableStateForArenaFrames()
 	end
 end
 
-function BattleGroundEnemies:EnableFallbacktoCombatlogScanning()
+function BattleGroundEnemies:EnableFallbackToCombatlogScanning()
 	if not self.combatlogScanningEnabled then
 		self:Information(L.CombatLogScanningForEnemiesEnabled)
 
@@ -3425,7 +3425,7 @@ function BattleGroundEnemies:EnableFallbacktoCombatlogScanning()
 	self.combatlogScanningEnabled = true
 end
 
-function BattleGroundEnemies:DisableFallbacktoCombatlogScanning()
+function BattleGroundEnemies:DisableFallbackToCombatlogScanning()
 	if self.combatlogScanningEnabled then
 		self:Information(L.CombatLogScanningForEnemiesDisabled)
 		self.SearchedGUIDs = nil
@@ -3615,10 +3615,10 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
 	if foundEnemies == 0 then
 		if self.IsRatedBG and IsRetail then
-			self:EnableFallbacktoCombatlogScanning()
+			self:EnableFallbackToCombatlogScanning()
 		end
 	else
-		self:DisableFallbacktoCombatlogScanning()
+		self:DisableFallbackToCombatlogScanning()
 
 		self.Enemies:DeleteAndCreateNewPlayers()
 	end
@@ -3741,7 +3741,7 @@ BattleGroundEnemies.PARTY_LEADER_CHANGED = BattleGroundEnemies.GROUP_ROSTER_UPDA
 
 --Fires when the player logs in, /reloads the UI or zones between map instances. Basically whenever the loading screen appears.
 function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
-	self:DisableFallbacktoCombatlogScanning()
+	self:DisableFallbackToCombatlogScanning()
 	if self.Testmode.Active then --disable testmode
 		self:DisableTestMode()
 	end
