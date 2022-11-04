@@ -1140,19 +1140,51 @@ function BattleGroundEnemies:SetupOptions()
 						end,
 						order = 4
 					},
-					MyTarget_Color = {
-						type = "color",
-						name = L.MyTarget_Color,
-						desc = L.MyTarget_Color_Desc,
-						hasAlpha = true,
-						order = 5
+					MyTarget = {
+						type = "group",
+						name = L.MyTarget,
+						inline = true,
+						order = 5,
+						args = {
+							MyTarget_Color = {
+								type = "color",
+								name = L.Color,
+								desc = L.MyTarget_Color_Desc,
+								hasAlpha = true,
+								order = 1
+							},
+							MyTarget_BorderSize = {
+								type = "range",
+								name = L.BorderSize,
+								min = 1,
+								max = 5,
+								step = 1,
+								order = 2
+							}
+						}
 					},
-					MyFocus_Color = {
-						type = "color",
-						name = L.MyFocus_Color,
-						desc = L.MyFocus_Color_Desc,
-						hasAlpha = true,
-						order = 6
+					MyFocus = {
+						type = "group",
+						name = L.MyFocus,
+						inline = true,
+						order = 6,
+						args = {
+							MyFocus_Color = {
+								type = "color",
+								name = L.Color,
+								desc = L.MyFocus_Color_Desc,
+								hasAlpha = true,
+								order = 1
+							},
+							MyFocus_BorderSize = {
+								type = "range",
+								name = L.BorderSize,
+								min = 1,
+								max = 5,
+								step = 1,
+								order = 2
+							}
+						}
 					},
 					Font = {
 						type = "select",
