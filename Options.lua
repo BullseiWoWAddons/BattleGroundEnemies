@@ -1140,11 +1140,38 @@ function BattleGroundEnemies:SetupOptions()
 						end,
 						order = 4
 					},
+					ShowTooltips = {
+						type = "toggle",
+						name = L.ShowTooltips,
+						desc = L.ShowTooltips_Desc,
+						order = 5
+					},
+					ConvertCyrillic = {
+						type = "toggle",
+						name = L.ConvertCyrillic,
+						desc = L.ConvertCyrillic_Desc,
+						width = "normal",
+						order = 6
+					},
+					UseBigDebuffsPriority = {
+						type = "toggle",
+						name = L.UseBigDebuffsPriority,
+						desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriorityAura),
+						order = 7
+					},
+					Font = {
+						type = "select",
+						name = L.Font,
+						desc = L.Font_Desc,
+						dialogControl = "LSM30_Font",
+						values = AceGUIWidgetLSMlists.font,
+						order = 8
+					},
 					MyTarget = {
 						type = "group",
 						name = L.MyTarget,
 						inline = true,
-						order = 5,
+						order = 9,
 						args = {
 							MyTarget_Color = {
 								type = "color",
@@ -1167,7 +1194,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.MyFocus,
 						inline = true,
-						order = 6,
+						order = 10,
 						args = {
 							MyFocus_Color = {
 								type = "color",
@@ -1185,34 +1212,6 @@ function BattleGroundEnemies:SetupOptions()
 								order = 2
 							}
 						}
-					},
-					Font = {
-						type = "select",
-						name = L.Font,
-						desc = L.Font_Desc,
-						dialogControl = "LSM30_Font",
-						values = AceGUIWidgetLSMlists.font,
-						order = 7
-					},
-					Fake1 = Data.AddVerticalSpacing(8),
-					ShowTooltips = {
-						type = "toggle",
-						name = L.ShowTooltips,
-						desc = L.ShowTooltips_Desc,
-						order = 9
-					},
-					ConvertCyrillic = {
-						type = "toggle",
-						name = L.ConvertCyrillic,
-						desc = L.ConvertCyrillic_Desc,
-						width = "normal",
-						order = 10
-					},
-					UseBigDebuffsPriority = {
-						type = "toggle",
-						name = L.UseBigDebuffsPriority,
-						desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriorityAura),
-						order = 11
 					}
 				}
 			},
