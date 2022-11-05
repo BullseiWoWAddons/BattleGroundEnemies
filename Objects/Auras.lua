@@ -527,7 +527,6 @@ local function AttachToPlayerButton(playerButton, filterr, isPriorityContainer)
 
 		local config = self.config
 		local blizzlikeFunc
-		local filterFunc
 
 		if filter == "HARMFUL" then
 			blizzlikeFunc = ShouldDisplayDebuffBlizzLike

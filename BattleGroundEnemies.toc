@@ -25,13 +25,14 @@ Locales.lua
 Data.lua
 Defaults.lua
 Main.lua
+IconPicker.lua
 Messaging.lua
 TargetCall.lua
 Changelog.lua
 ImportExport.lua
 
 Objects\ContainerTemplate.lua
-Objects\Auracontainer2.lua
+Objects\Auras.lua
 Objects\CastBar.lua
 Objects\CombatIndicator.lua
 Objects\Covenant.lua
