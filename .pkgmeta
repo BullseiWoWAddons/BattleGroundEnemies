@@ -13,6 +13,7 @@ externals:
   Libs/UTF8: https://repos.curseforge.com/wow/utf8/trunk
   Libs/DRList-1.0: https://github.com/wardz/DRList-1.0
   Libs/LibChangelog: https://github.com/BullseiWoWAddons/LibChangelog
+  Libs/LibSpellIconSelector: https://github.com/BullseiWoWAddons/LibSpellIconSelector
   Libs/LibGroupInSpecT-1.1: https://repos.curseforge.com/wow/libgroupinspect/trunk
   Libs/FlyPaper-2.0: https://github.com/Tuller/FlyPaper-2.0
   Libs/LibSerialize:
