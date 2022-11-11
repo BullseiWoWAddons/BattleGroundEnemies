@@ -25,7 +25,6 @@ Locales.lua
 Data.lua
 Defaults.lua
 Main.lua
-IconPicker.lua
 Messaging.lua
 TargetCall.lua
 Changelog.lua
