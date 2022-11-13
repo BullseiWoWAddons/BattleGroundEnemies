@@ -13,7 +13,7 @@ Data.L = setmetatable({}, { --key set by all non english clients, Table gets acc
     __index = function(t, k)  -- t is the normal table (no metatable)
         if defaultLocale[k] then
             if gameLocale ~= "enUS" and not missingReported then
-                C_Timer.After(3, function() 
+                C_Timer.After(3, function()
                     BattleGroundEnemies:OnetimeInformation("Missing localizations for your ingame language. You can help translating this addon on https://www.curseforge.com/wow/addons/battlegroundenemies/localization")
                 end)
                 missingReported = true
@@ -21,7 +21,7 @@ Data.L = setmetatable({}, { --key set by all non english clients, Table gets acc
             --t[k] = defaultLocale[k] --add it to the table so we dont have to invoce the metatable in the future
             return defaultLocale[k]
         else
-            C_Timer.After(3, function() 
+            C_Timer.After(3, function()
                 BattleGroundEnemies:OnetimeInformation("Missing localization entry for['"..k.."']. Please report this to the addon author.")
             end)
             return k
