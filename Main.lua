@@ -2,6 +2,7 @@ local AddonName, Data = ...
 local L = Data.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRList = LibStub("DRList-1.0")
+
 local LibRaces = LibStub("LibRaces-1.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
@@ -71,18 +72,18 @@ if HasSpeccs then
 	LGIST=LibStub:GetLibrary("LibGroupInSpecT-1.1")
 end
 
+
+
 LSM:Register("font", "PT Sans Narrow Bold", [[Interface\AddOns\BattleGroundEnemies\Fonts\PT Sans Narrow Bold.ttf]])
 LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusBar")
 
 local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies", UIParent)
 BattleGroundEnemies.Counter = {}
 
---todo: add icon selector for combat indicator and add the module to testmode
--- add castbars to testmode
+--todo: add castbars and combat indicator to testmode
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
-
 
 
 
@@ -461,6 +462,16 @@ do
 				unitID = self.unitID
 				if self.UnitIDs.HasAllyUnitID then
 					updateStuffWithEvents = true
+
+					--throttle the aura updates in case we only have a ally unitID
+					local lastAuraUpdate = self.lastAuraUpdate
+					if lastAuraUpdate then
+						if GetTime() - lastAuraUpdate > 0.5 then
+							updateAuras = true
+						end
+					else
+						updateAuras = true
+					end
 				end
 			end
 		end
@@ -842,7 +853,7 @@ do
 		if not maxHealths[self] then
 			local myMaxHealth = UnitHealthMax("player")
 			local playerMaxHealthDifference = math_random(-15, 15) -- the player has the same health as me +/- 15%
-			local playerMaxHealth = myMaxHealth * (1 + (playerMaxHealthDifference/100))
+			local playerMaxHealth = math.ceil(myMaxHealth * (1 + (playerMaxHealthDifference/100)))
 			maxHealths[self] = playerMaxHealth
 		end
 		return maxHealths[self]
@@ -1581,7 +1592,7 @@ local function PopulateMainframe(playerType)
 
 			--MyTarget, indicating the current target of the player
 			playerButton.MyTarget = CreateFrame('Frame', nil, playerButton.healthBar, BackdropTemplateMixin and "BackdropTemplate")
-	
+
 			playerButton.MyTarget:Hide()
 
 			--MyFocus, indicating the current focus of the player
@@ -3649,8 +3660,6 @@ function BattleGroundEnemies.Allies:UpdateAllUnitIDs()
 	end
 end
 
-local ticker
-local lastRun = GetTime()
 function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 
 
@@ -3722,8 +3731,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	local _, zone = IsInInstance()
 
 	if zone == "pvp" or zone == "arena" then
-
-		
+		self.Enemies:RemoveAllPlayers()
 		if GetBattlefieldArenaFaction then
 			local MyBgFaction = GetBattlefieldArenaFaction()  -- returns the playered faction 0 for horde, 1 for alliance, doesnt exist in TBC
 			self:Debug("MyBgFaction:", MyBgFaction)
@@ -3744,9 +3752,6 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 		self:CheckForArenaEnemies()
 		if zone == "arena" then
 			IsInArena = true
-			if not IsInBrawl() then
-				self.Enemies:RemoveAllPlayers()
-			end
 		else
 			IsInBattleground = true
 			if HasRBG then
