@@ -82,7 +82,7 @@ local options = function(location)
 			}
 		}
 	end
-	t.UpdatePeroid = {
+	t.UpdatePeriod = {
 		type = "range",
 		name = L.UpdatePeriod,
 		desc = L.UpdatePeriod_Desc,
