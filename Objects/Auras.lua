@@ -42,7 +42,7 @@ local defaults = {
 			DebuffTypeFiltering_Filterlist = {},
 			SpellIDFiltering_Enabled = false,
 			SpellIDFiltering_Filterlist = {},
-			DurationFilter_Enabled = true,
+			DurationFilter_Enabled = false,
 			DurationFilter_CustomMaxDuration = 20
 		}
 	}
