@@ -2,6 +2,17 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.0.2.2",
+		Sections = {
+			{
+				Header = "Changes:",
+				Entries = {
+					"When the duration filter is enabled for auras it will only show the aura if it actually has a duration.",
+				}
+			}
+		}
+	},
+	{
 		Version = "10.0.2.1",
 		Sections = {
 			{
