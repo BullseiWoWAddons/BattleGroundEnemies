@@ -106,7 +106,7 @@ local healthBar = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.HealthBar,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"UpdateHealth", "PlayerChanged"},
+	events = {"UpdateHealth", "PlayerDetailsChanged"},
 	expansions = "All"
 })
 
@@ -223,7 +223,7 @@ function healthBar:AttachToPlayerButton(playerButton)
 		end
 	end
 
-	function playerButton.healthBar:PlayerChanged()
+	function playerButton.healthBar:PlayerDetailsChanged()
 		local color = playerButton.PlayerClassColor
 		self:SetStatusBarColor(color.r,color.g,color.b)
 		self:SetMinMaxValues(0, 1)

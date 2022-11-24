@@ -42,7 +42,7 @@ local classDefaults = {
 	}
 }
 
-local events = {"SetSpecAndRole"}
+local events = {"PlayerDetailsChanged"}
 
 local class = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Class",
@@ -118,7 +118,7 @@ local function attachToPlayerButton(playerButton, type)
 	frame.Icon = frame:CreateTexture(nil, 'OVERLAY')
 	frame.Icon:SetAllPoints()
 
-	frame.SetSpecAndRole = function(self)
+	frame.PlayerDetailsChanged = function(self)
 		if self.type == "Class" then
 			--either no spec or the player wants to always see it > display it
 			if playerButton.PlayerClass then
@@ -142,7 +142,7 @@ local function attachToPlayerButton(playerButton, type)
 
 	frame.ApplyAllSettings = function(self)
 		self:Show()
-		self:SetSpecAndRole()
+		self:PlayerDetailsChanged()
 	end
 	return frame
 end
