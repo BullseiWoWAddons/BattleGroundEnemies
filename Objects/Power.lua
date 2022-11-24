@@ -104,6 +104,7 @@ function power:AttachToPlayerButton(playerButton)
 			local powerType, powerToken, altR, altG, altB = UnitPowerType(unitID)
 		
 			self:CheckForNewPowerColor(powerToken)
+			self:UpdatePower(unitID)
 		end
 	end
 
