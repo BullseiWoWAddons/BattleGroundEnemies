@@ -121,9 +121,10 @@ local function attachToPlayerButton(playerButton, type)
 	frame.PlayerDetailsChanged = function(self)
 		if self.type == "Class" then
 			--either no spec or the player wants to always see it > display it
-			if playerButton.PlayerClass then
+			local coords = CLASS_ICON_TCOORDS[playerButton.PlayerClass]
+			if playerButton.PlayerClass and coords then
 				self.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
-				self.Icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[playerButton.PlayerClass]))
+				self.Icon:SetTexCoord(unpack(coords))
 			else
 				self.Icon:SetTexture(nil)
 			end	
