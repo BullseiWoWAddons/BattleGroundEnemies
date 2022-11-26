@@ -2,23 +2,14 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
-		Version = "10.0.2.2",
-		Sections = {
-			{
-				Header = "Changes:",
-				Entries = {
-					"When the duration filter is enabled for auras it will only show the aura if it actually has a duration.",
-				}
-			}
-		}
-	},
-	{
 		Version = "10.0.2.1",
 		Sections = {
 			{
 				Header = "Changes:",
 				Entries = {
-					"Non priority auras are now enabled by default in arenas. By default it will show dispellable auras and auras applied by you.",
+					"When the duration filter is enabled for auras it will only show the aura if it actually has a duration.",
+					"The addon will now show by default non priority buffs and debuffs that are applied by the player.",
+					"Improved the handling of update in combat. This mostly affected name changes of stealth units at the beginning of a arena."
 				}
 			}
 		}
