@@ -6,13 +6,26 @@ Data.changelog = {
 		General = "This version fixes some problems i found during solo shuffle arenas. It adds some allied races and improved auras.",
 		Sections = {
 			{
+				Header = "New Features:",
+				Entries = {
+					"Added racials Bag of Tricks, Fireblood, Light's Judgment, Bull Rush, Haymaker and Arcane Pulse",
+					"The addon will now also show auras without a duration in the highest priority module.",
+				}
+			},
+			{
 				Header = "Changes:",
 				Entries = {
+					"The addon will now show non priority buffs and debuffs that are applied by the player by or are dispellable by default.",
+					"The enemy players are now always sorted by arena id when in arena, by default arena1 is the top player"
+				}
+			},
+			{
+				Header = "Bugfixes:",
+				Entries = {
 					"When the duration filter is enabled for auras it will only show the aura if it actually has a duration.",
-					"The addon will now show non priority buffs and debuffs that are applied by the player by default.",
-					"Improved the handling of update in combat. This mostly affected name changes of stealth units at the beginning of an arena.",
-					"The addon will now also show auras without a duration in the highest priority module.",
-					"Added racials Bag of Tricks, Fireblood, Light's Judgment, Bull Rush, Haymaker and Arcane Pulse"
+					"Update LibSpellIconSelector library to avoid taint. Thanks to zaphon at GitHub for the report.",
+					"Improved the handling of update in combat. This mostly affected name changes of stealth units at the beginning of an arena while in combat.",
+					"Fixed error reported by Thenetbug at Curseforge that happened in rated Battlegrounds when the combat log scanning was getting switched off."
 				}
 			}
 		}
