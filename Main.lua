@@ -3434,12 +3434,15 @@ local function checkEffectiveEnableStateForArenaFrames()
 	end
 end
 
+function BattleGroundEnemies:ResetCombatLogScanninningTables()
+	self.SearchedGUIDs = {}
+	self.PlayerGUIDs = {}
+end
+
 function BattleGroundEnemies:EnableFallbackToCombatlogScanning()
 	if not self.combatlogScanningEnabled then
 		self:Information(L.CombatLogScanningForEnemiesEnabled)
-
-		self.SearchedGUIDs = {}
-		self.PlayerGUIDs = {}
+		self:ResetCombatLogScanninningTables()
 	end
 	self.combatlogScanningEnabled = true
 end
@@ -3447,8 +3450,7 @@ end
 function BattleGroundEnemies:DisableFallbackToCombatlogScanning()
 	if self.combatlogScanningEnabled then
 		self:Information(L.CombatLogScanningForEnemiesDisabled)
-		self.SearchedGUIDs = nil
-		self.PlayerGUIDs = nil
+		self:ResetCombatLogScanninningTables()
 	end
 	self.combatlogScanningEnabled = false
 end
