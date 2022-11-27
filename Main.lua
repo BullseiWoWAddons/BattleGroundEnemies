@@ -689,8 +689,8 @@ do
 			self.MyFocus:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT")
 
 			i = i + 1
-			if i > 5 then print("something went wrong in SetModulePositions") end
-		until allModulesSet or i > 5
+		--	if i > 10 then print("something went wrong in SetModulePositions") end
+		until allModulesSet or i > 10 --maxium of 10 tries
 	end
 
 	function buttonFunctions:ApplyConfigs()
@@ -1749,7 +1749,7 @@ local function PopulateMainframe(playerType)
 	end
 
 	function mainframe:CreateOrUpdatePlayer(name, race, classTag, specName, additionalData)
-		--BattleGroundEnemies:LogToSavedVariables("CreateOrUpdatePlayer", name, race, classTag, specName, additionalData)
+		-- BattleGroundEnemies:LogToSavedVariables("CreateOrUpdatePlayer", name, race, classTag, specName, additionalData)
 		local playerButton = self.Players[name]
 		local t
 		if playerButton then	--already existing
@@ -1785,7 +1785,6 @@ local function PopulateMainframe(playerType)
 
 	function mainframe:DeleteAndCreateNewPlayers(inCombatCallback)
 		local inCombat = InCombatLockdown()
-		local playerRemoved = false
 		for playerName, playerButton in pairs(self.Players) do
 			if playerButton.Status == 2 then --no longer existing
 				if inCombat then
@@ -1794,7 +1793,6 @@ local function PopulateMainframe(playerType)
 					end
 				else
 					self:RemovePlayer(playerButton)
-					playerRemoved = true
 				end
 			else -- == 1 -- set to 2 for the next comparison
 				playerButton.Status = 2
@@ -1813,9 +1811,7 @@ local function PopulateMainframe(playerType)
 				playerButton.Status = 2
 			end
 		end
-		if newPlayerCount > 0 or playerRemoved then
-			self:SortPlayers()
-		end
+		self:SortPlayers()
 	end
 
 	do
@@ -1858,6 +1854,7 @@ local function PopulateMainframe(playerType)
 		end
 
 		function mainframe:SortPlayers(forceRepositioning)
+			-- BattleGroundEnemies:LogToSavedVariables("SortPlayers", self.PlayerType)
 			local newPlayerOrder = {}
 			for playerName, playerButton in pairs(self.Players) do
 				table.insert(newPlayerOrder, playerButton)
@@ -1875,10 +1872,10 @@ local function PopulateMainframe(playerType)
 						end
 					end
 					if usePlayerSortingByArenaUnitID then
-						--BattleGroundEnemies:LogToSavedVariables("usePlayerSortingByArenaUnitID", self.PlayerType)
+						-- BattleGroundEnemies:LogToSavedVariables("usePlayerSortingByArenaUnitID", self.PlayerType)
 						table.sort(newPlayerOrder, PlayerSortingByArenaUnitID)
 					else
-						--BattleGroundEnemies:LogToSavedVariables("dont usePlayerSortingByArenaUnitID", self.PlayerType)
+						-- BattleGroundEnemies:LogToSavedVariables("dont usePlayerSortingByArenaUnitID", self.PlayerType)
 						table.sort(newPlayerOrder, PlayerSortingByRoleClassName)
 					end
 				else
@@ -2847,7 +2844,7 @@ local function CreateArenaEnemiesAfterCombat()
 end
 
 function BattleGroundEnemies.Enemies:CreateArenaEnemies()
-	--BattleGroundEnemies:LogToSavedVariables("CreateArenaEnemies")
+	-- BattleGroundEnemies:LogToSavedVariables("CreateArenaEnemies")
 	if not IsInArena then return end
 
 	self:BeforePlayerUpdate()
@@ -2865,6 +2862,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 		else
 			classTag = select(2, UnitClass(unitID))
 		end
+		-- BattleGroundEnemies:LogToSavedVariables("classTag", classTag)
 
 		if classTag then
 			local playerName
@@ -3482,6 +3480,7 @@ function BattleGroundEnemies:ThrottleUpdateArenaPlayers()
 end
 
 function BattleGroundEnemies:UpdateArenaPlayers()
+	-- BattleGroundEnemies:LogToSavedVariables("UpdateArenaPlayers")
 	self.Enemies:CreateArenaEnemies()
 
 	if #BattleGroundEnemies.Enemies.CurrentPlayerOrder > 1 or #BattleGroundEnemies.Allies.CurrentPlayerOrder > 1 then --this ensures that we checked for enemies and the flag carrier will be shown (if its an enemy)
@@ -3635,6 +3634,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 			end
 		end
 		if updateArenaPlayers then
+			-- BattleGroundEnemies:LogToSavedVariables("123")
 			self:ThrottleUpdateArenaPlayers() --do this in case UPDATE_BATTLEFIELD_SCORE fires after the Arena_opponent_update, we still use UPDATE_BATTLEFIELD_SCORE in arenas to provide the name in prep phase of the first round in solo shuffle
 		end
 		return
