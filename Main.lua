@@ -2847,6 +2847,7 @@ local function CreateArenaEnemiesAfterCombat()
 end
 
 function BattleGroundEnemies.Enemies:CreateArenaEnemies()
+	--BattleGroundEnemies:LogToSavedVariables("CreateArenaEnemies")
 	if not IsInArena then return end
 
 	self:BeforePlayerUpdate()
@@ -3552,7 +3553,7 @@ local function UpdateBattleFieldScoreAftercombat()
 end
 
 function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
-	-- BattleGroundEnemies:LogToSavedVariables("UPDATE_BATTLEFIELD_SCORE")
+	--BattleGroundEnemies:LogToSavedVariables("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug(GetCurrentMapAreaID())
 	-- self:Debug("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
@@ -3622,7 +3623,20 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 		self.Enemies:DeleteAndCreateNewPlayers(UpdateBattleFieldScoreAftercombat)
 	end
 
-	if IsInArena then return end -- dont create alies via battlefield scrore when in arena, this prevents error in solo shuffle when the scoreboard is shown at the end (all players are one team)
+	if IsInArena then
+		local updateArenaPlayers = false
+		for i = 1, 5 do
+			local name = UnitName("arena"..i)
+			if name and name ~= "" then
+				updateArenaPlayers = true
+				break
+			end
+		end
+		if updateArenaPlayers then
+			self:ThrottleUpdateArenaPlayers() --do this in case UPDATE_BATTLEFIELD_SCORE fires after the Arena_opponent_update, we still use UPDATE_BATTLEFIELD_SCORE in arenas to provide the name in prep phase of the first round in solo shuffle
+		end
+		return
+	end -- dont create alies via battlefield scrore when in arena, this prevents error in solo shuffle when the scoreboard is shown at the end (all players are one team)
 
 	if foundAllies == 0 then
 		self:Debug("Missing Allies, probably the enemy tab is selected")
