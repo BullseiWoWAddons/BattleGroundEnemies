@@ -3,13 +3,14 @@ local AddonName, Data = ...
 Data.changelog = {
 	{
 		Version = "10.0.2.1",
-		General = "This version fixes some problems i found during solo shuffle arenas. It adds some allied races and improved auras.",
+		General = "This version fixes some problems i found during solo shuffle arenas and adds some features. It adds some allied races and improved auras.",
 		Sections = {
 			{
 				Header = "New Features:",
 				Entries = {
 					"Added racials Bag of Tricks, Fireblood, Light's Judgment, Bull Rush, Haymaker and Arcane Pulse",
 					"The addon will now also show auras without a duration in the highest priority module.",
+					"The addon will now use the scoreboard info the show the player names in the prep room before the first round starts when in a solo shuffle"
 				}
 			},
 			{
