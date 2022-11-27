@@ -9,7 +9,8 @@ Data.changelog = {
 				Entries = {
 					"When the duration filter is enabled for auras it will only show the aura if it actually has a duration.",
 					"The addon will now show by default non priority buffs and debuffs that are applied by the player.",
-					"Improved the handling of update in combat. This mostly affected name changes of stealth units at the beginning of a arena."
+					"Improved the handling of update in combat. This mostly affected name changes of stealth units at the beginning of a arena.",
+					"The addon will now also show auras without a duration in the highest priority module."
 				}
 			}
 		}
