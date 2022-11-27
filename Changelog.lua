@@ -3,13 +3,14 @@ local AddonName, Data = ...
 Data.changelog = {
 	{
 		Version = "10.0.2.1",
+		General = "This version fixes some problems i found during solo shuffle arenas and also some other problems.",
 		Sections = {
 			{
 				Header = "Changes:",
 				Entries = {
 					"When the duration filter is enabled for auras it will only show the aura if it actually has a duration.",
-					"The addon will now show by default non priority buffs and debuffs that are applied by the player.",
-					"Improved the handling of update in combat. This mostly affected name changes of stealth units at the beginning of a arena.",
+					"The addon will now show non priority buffs and debuffs that are applied by the player by default.",
+					"Improved the handling of update in combat. This mostly affected name changes of stealth units at the beginning of an arena.",
 					"The addon will now also show auras without a duration in the highest priority module."
 				}
 			}
