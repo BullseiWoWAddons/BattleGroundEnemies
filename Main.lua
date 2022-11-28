@@ -3027,8 +3027,8 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 		else
 			classTag = select(2, UnitClass(unitID))
 		end
-		BattleGroundEnemies:LogToSavedVariables("classTag", classTag)
-		BattleGroundEnemies:LogToSavedVariables("specName", specName)
+		--BattleGroundEnemies:LogToSavedVariables("classTag", classTag)
+		--BattleGroundEnemies:LogToSavedVariables("specName", specName)
 
 
 		if classTag then
@@ -3044,10 +3044,10 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 				--useful in solo shuffle in first round, then we can show a plaername via data from scoreboard
 				local match = matchBattleFieldScoreToArenaEnemyPlayer(battleFieldScores, {classTag = classTag, specName = specName})
 				if match then
-					BattleGroundEnemies:LogToSavedVariables("found a match")
+					--BattleGroundEnemies:LogToSavedVariables("found a match")
 					playerName = match.name
 				else
-					BattleGroundEnemies:LogToSavedVariables("didnt find a match", unitID)
+					--BattleGroundEnemies:LogToSavedVariables("didnt find a match", unitID)
 					-- use the unitID
 					playerName = unitID
 				end
