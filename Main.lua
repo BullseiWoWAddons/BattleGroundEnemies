@@ -3737,12 +3737,10 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 		local foundArenaEnemies = false
 		if GetArenaOpponentSpec then
 			for i = 1, 5 do
-				if GetArenaOpponentSpec then --HasSpeccs
-					local specID, gender = GetArenaOpponentSpec(i)
-					if (specID and specID > 0) then
-						foundArenaEnemies = true
-						break
-					end
+				local specID, gender = GetArenaOpponentSpec(i)
+				if (specID and specID > 0) then
+					foundArenaEnemies = true
+					break
 				end
 			end
 		end
