@@ -3883,6 +3883,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 		end
 	end
 
+	--see if our faciton in BG changed
 	for i = 1, #battlefieldScores do
 		local score = battlefieldScores[i]
 		local name = score.name
@@ -3915,8 +3916,8 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 		end
 	end
 	BattleGroundEnemies.Enemies:AfterPlayerSourceUpdate(PlayerSources.Scoreboard)
-	BattleGroundEnemies.Allies:AfterPlayerSourceUpdate(PlayerSources.Scoreboard
-)end
+	BattleGroundEnemies.Allies:AfterPlayerSourceUpdate(PlayerSources.Scoreboard)
+end
 
 
 function BattleGroundEnemies.Allies:AddGroupMember(name, isLeader, isAssistant, classTag, unitID)
