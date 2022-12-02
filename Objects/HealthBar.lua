@@ -228,7 +228,9 @@ function healthBar:AttachToPlayerButton(playerButton)
 	end
 
 	function playerButton.healthBar:PlayerDetailsChanged()
-		local color = playerButton.PlayerClassColor
+		local playerDetails = playerButton.PlayerDetails
+		if not playerDetails then return end
+		local color = playerDetails.PlayerClassColor
 		self:SetStatusBarColor(color.r,color.g,color.b)
 		self:SetMinMaxValues(0, 1)
 		self:SetValue(1)

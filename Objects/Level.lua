@@ -76,9 +76,9 @@ function level:AttachToPlayerButton(playerButton)
 
 	-- Level
 
-	function fs:PlayerDetailsChanged()
-
-		if playerButton.PlayerLevel then self:SetLevel(playerButton.PlayerLevel) end --for testmode
+	function fs:PlayerDetailsChanged(playerDetails)
+		if not playerDetails then return end
+		if playerDetails.PlayerLevel then self:SetLevel(playerDetails.PlayerLevel) end --for testmode
 	end
 
 	function fs:UnitIdUpdate(unitID)
