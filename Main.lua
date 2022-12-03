@@ -26,7 +26,6 @@ local AuraUtil = AuraUtil
 local C_PvP = C_PvP
 local CreateFrame = CreateFrame
 local CTimerNewTicker = C_Timer.NewTicker
-local EnumUtil = EnumUtil or {}
 local GetArenaOpponentSpec = GetArenaOpponentSpec
 local GetBattlefieldArenaFaction = GetBattlefieldArenaFaction
 local GetBattlefieldScore = GetBattlefieldScore
@@ -53,7 +52,6 @@ local UnitFactionGroup = UnitFactionGroup
 local UnitGUID = UnitGUID
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsGhost = UnitIsGhost
-local UnitLevel = UnitLevel
 local UnitName = UnitName
 local UnitRace = UnitRace
 local UnitRealmRelationship = UnitRealmRelationship
@@ -103,6 +101,7 @@ local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies", UIParent
 BattleGroundEnemies.Counter = {}
 
 --todo: add castbars and combat indicator to testmode
+--move unitID update for allies
 
 -- for Clique Support
 ClickCastFrames = ClickCastFrames or {}
@@ -119,7 +118,12 @@ local PlayerSources = {
 	ArenaPlayers = "ArenaPlayers",
 	FakePlayers = "FakePlayers",
 	CombatLog = "CombatLog"
-} 
+}
+
+local PlayerTypes = {
+	Allies = "Allies",
+	Enemies = "Enemies"
+}
 
 
 
@@ -446,7 +450,7 @@ local buttonFunctions = {}
 do
 
 	function buttonFunctions:GetOppositeMainFrame()
-		return BattleGroundEnemies[self.PlayerType == "Enemies" and "Allies" or "Enemies"]
+		return BattleGroundEnemies[self.PlayerType == PlayerTypes.Enemies  and PlayerTypes.Allies  or PlayerTypes.Enemies]
 	end
 
 	function buttonFunctions:OnDragStart()
@@ -597,7 +601,9 @@ do
 					targetButton:IsNowTargeting(targetButton)
 				end
 
-				if not InCombatLockdown() then --if we are in combat we go get to set the stuff below later since GROUP_ROSTER_UPDATE also has a combat check and will get called after combat
+				if InCombatLockdown() then --if we are in combat we go get to set the stuff below later since GROUP_ROSTER_UPDATE also has a combat check and will get called after combat
+					return BattleGroundEnemies:QueueForUpdateAfterCombat(BattleGroundEnemies[self.PlayerType], "UpdateAllUnitIDs")
+				else
 					self.unit = unitID
 					self:SetAttribute('unit', unitID)
 					BattleGroundEnemies.Allies:SortPlayers()
@@ -2222,15 +2228,13 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 	Mixin(moduleFrame, moduleSetupTable)
 
 
-	local t = {"Enemies", "Allies"}
 	local BGSizes = {"5", "15", "40"}
-	for i = 1, #t do
-		local tt = t[i]
+	for k in pairs(PlayerTypes) do
 		for j = 1, #BGSizes do
 			local BGSize = BGSizes[j]
-			Data.defaultSettings.profile[tt][BGSize].ButtonModules = Data.defaultSettings.profile[tt][BGSize].ButtonModules or {}
-			Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName] = Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName] or {}
-			copySettingsWithoutOverwrite(moduleSetupTable.defaultSettings, Data.defaultSettings.profile[tt][BGSize].ButtonModules[moduleName])
+			Data.defaultSettings.profile[k][BGSize].ButtonModules = Data.defaultSettings.profile[k][BGSize].ButtonModules or {}
+			Data.defaultSettings.profile[k][BGSize].ButtonModules[moduleName] = Data.defaultSettings.profile[k][BGSize].ButtonModules[moduleName] or {}
+			copySettingsWithoutOverwrite(moduleSetupTable.defaultSettings, Data.defaultSettings.profile[k][BGSize].ButtonModules[moduleName])
 		end
 	end
 
@@ -2474,7 +2478,7 @@ do
 			BattleGroundEnemies:FillFakePlayerData(tankAmount, mainFrame, "TANK")
 			BattleGroundEnemies:FillFakePlayerData(damagerAmount, mainFrame, "DAMAGER")
 		
-			mainFrame:AfterPlayerSourceUpdate(PlayerSources.FakePlayers)
+			mainFrame:AfterPlayerSourceUpdate()
 
 			if continue then
 				for name, playerButton in pairs(mainFrame.Players) do
@@ -3045,8 +3049,8 @@ do
 		LibChangelog:ShowChangelog(AddonName)
 
 
-		PopulateMainframe("Allies")
-		PopulateMainframe("Enemies")
+		PopulateMainframe(PlayerTypes.Allies)
+		PopulateMainframe(PlayerTypes.Enemies)
 
 		if LGIST then -- the libary doesnt work in TBCC, IsTBCC
 			LGIST.RegisterCallback(BattleGroundEnemies.Allies, "GroupInSpecT_Update")
@@ -3130,7 +3134,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 		end
 	end
 
-	self:AfterPlayerSourceUpdate(PlayerSources.ArenaPlayers)
+	self:AfterPlayerSourceUpdate()
 
 	for playerName, playerButton in pairs(self.Players) do
 		local playerDetails = playerButton.PlayerDetails
@@ -3386,7 +3390,7 @@ function BattleGroundEnemies:UpdateEnemiesFromCombatlogScanning()
 		end
 	end
 
-	self.Enemies:AfterPlayerSourceUpdate(PlayerSources.CombatLog)
+	self.Enemies:AfterPlayerSourceUpdate()
 end
 
 local UpdateEnemmiesFoundByGUIDTicker = nil
@@ -3915,8 +3919,8 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 			t:AddPlayerToSource(PlayerSources.Scoreboard, score)
 		end
 	end
-	BattleGroundEnemies.Enemies:AfterPlayerSourceUpdate(PlayerSources.Scoreboard)
-	BattleGroundEnemies.Allies:AfterPlayerSourceUpdate(PlayerSources.Scoreboard)
+	BattleGroundEnemies.Enemies:AfterPlayerSourceUpdate()
+	BattleGroundEnemies.Allies:AfterPlayerSourceUpdate()
 end
 
 
@@ -3974,7 +3978,7 @@ function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 	self.Allies.groupLeader = nil
 	self.Allies.assistants = {}
 
-	--if not IsInGroup() then return end  --IsInGroup returns true when user is in a Raid and In a 5 man group
+	--IsInGroup returns true when user is in a Raid and In a 5 man group
 
 	self:RequestEverythingFromGroupmembers()
 
@@ -3984,21 +3988,17 @@ function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 	self.Allies:UpdatePlayerCount(numGroupMembers)
 
 	if IsInRaid() then
-		local unitIDPrefix = "raid"
-
 		for i = 1, numGroupMembers do -- the player itself only shows up here when he is in a raid
 			local name, rank, subgroup, level, localizedClass, classTag, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(i)
 
 			if name and name ~= self.PlayerDetails.PlayerName and rank and classTag then
-				self.Allies:AddGroupMember(name, rank == 2, rank == 1, classTag, unitIDPrefix..i)
+				self.Allies:AddGroupMember(name, rank == 2, rank == 1, classTag, "raid"..i)
 			end
 		end
 	else
 		-- we are in a party, 5 man group
-		local unitIDPrefix = "party"
-
 		for i = 1, numGroupMembers do
-			local unitID = unitIDPrefix..i
+			local unitID = "party"..i
 			local name = GetUnitName(unitID, true)
 
 			local classTag = select(2, UnitClass(unitID))
@@ -4012,7 +4012,7 @@ function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 	self.PlayerDetails.isGroupLeader = UnitIsGroupLeader("player")
 	self.PlayerDetails.isGroupAssistant = UnitIsGroupAssistant("player")
 	self.Allies:AddGroupMember(self.PlayerDetails.PlayerName, self.PlayerDetails.isGroupLeader, self.PlayerDetails.isGroupAssistant, self.PlayerDetails.PlayerClass, "player")
-	self.Allies:AfterPlayerSourceUpdate(PlayerSources.GroupMembers)
+	self.Allies:AfterPlayerSourceUpdate()
 	self.Allies:UpdateAllUnitIDs()
 end
 
@@ -4029,6 +4029,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	end
 
 	self.Enemies:RemoveAllPlayersFromAllSources()
+	self.Allies.RemoveAllPlayersFromSource(PlayerSources.Scoreboard)
 	local _, zone = IsInInstance()
 	if zone == "pvp" or zone == "arena" then
 		if GetBattlefieldArenaFaction then
