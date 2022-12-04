@@ -58,7 +58,7 @@ local level = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UnitIdUpdate"},
-	expansions = "All"
+	enabledInThisExpansion = true
 })
 
 function level:AttachToPlayerButton(playerButton)

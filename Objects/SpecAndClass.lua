@@ -50,7 +50,7 @@ local class = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = classDefaults,
 	options = nil,
 	events = events,
-	expansions = "All"
+	enabledInThisExpansion = true
 })
 local spec = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Spec",
@@ -58,7 +58,7 @@ local spec = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = specDefaults,
 	options = nil,
 	events = events,
-	expansions = {WOW_PROJECT_MAINLINE}
+	enabledInThisExpansion = not not GetSpecializationInfo
 })
 
 

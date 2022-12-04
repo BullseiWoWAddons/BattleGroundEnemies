@@ -66,7 +66,7 @@ local name = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"PlayerDetailsChanged"},
-	expansions = "All"
+	enabledInThisExpansion = true
 })
 
 

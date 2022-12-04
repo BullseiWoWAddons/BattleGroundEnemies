@@ -46,7 +46,7 @@ local trinket = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"ShouldQueryAuras", "CareAboutThisAura", "NewAura", "SPELL_CAST_SUCCESS"},
-	expansions = "All"
+	enabledInThisExpansion = true
 })
 
 function trinket:AttachToPlayerButton(playerButton)

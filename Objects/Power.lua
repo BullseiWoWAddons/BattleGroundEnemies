@@ -65,7 +65,7 @@ local power = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UnitIdUpdate", "UpdatePower", "PlayerDetailsChanged"},
-	expansions = "All"
+	enabledInThisExpansion = true
 })
 
 function power:AttachToPlayerButton(playerButton)

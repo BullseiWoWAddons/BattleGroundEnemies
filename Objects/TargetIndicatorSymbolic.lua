@@ -66,7 +66,7 @@ local symbolicTargetIndicator = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UpdateTargetIndicators"},
-	expansions = "All"
+	enabledInThisExpansion = true
 })
 
 function symbolicTargetIndicator:AttachToPlayerButton(playerButton)

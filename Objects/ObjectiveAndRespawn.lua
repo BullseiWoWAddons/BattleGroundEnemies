@@ -77,7 +77,7 @@ local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeFullAuraUpdate", "NewAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},
-	expansions = "All"
+	enabledInThisExpansion = true
 })
 
 function objectiveAndRespawn:AttachToPlayerButton(playerButton)

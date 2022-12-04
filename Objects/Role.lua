@@ -26,7 +26,7 @@ local role = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = {"PlayerDetailsChanged"},
-	expansions = {WOW_PROJECT_MAINLINE}
+	enabledInThisExpansion = not not GetSpecializationRole
 })
 
 function role:AttachToPlayerButton(playerButton)
