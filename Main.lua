@@ -222,7 +222,6 @@ local function CreateFakeAura(filter)
 
 			auraTable = foundA.foundPlayerAuras
 		else
-
 			auraTable = foundA.foundNonPlayerAuras
 		end
 	end
@@ -1495,23 +1494,6 @@ local function PopulateMainframe(playerType)
 		end
 	end
 
-	local function convertScoreboardKeys(scoreT)
-		local t = {
-			name = scoreT.name,
-			raceName = scoreT.raceName,
-			classTag = scoreT.classToken,
-			specName = scoreT.talentSpec
-		}
-		return t
-	end
-
-	local function addScoreBoardPlayers(newPlayers, scoreboardEnemies)
-		for i = 1, #scoreboardEnemies do
-			local scoreboardEnemy = scoreboardEnemies[i]
-			table.insert(newPlayers, convertScoreboardKeys(scoreboardEnemy))
-		end
-	end
-
 	function mainframe:AfterPlayerSourceUpdate()
 		local newPlayers = {} --contains combined data from PlayerSources
 		if self.PlayerType == "Enemies" then
@@ -1519,7 +1501,8 @@ local function PopulateMainframe(playerType)
 				newPlayers = self.PlayerSources[PlayerSources.FakePlayers]
 			else
 				local scoreboardEnemies = self.PlayerSources[PlayerSources.Scoreboard]
-				local foundScoreboardEnemies = #scoreboardEnemies
+				local numScoreboardEnemies = #scoreboardEnemies
+				local addScoreBoardPlayers = false
 				if IsInArena then
 					--use arenaPlayers is primary source
 					local arenaEnemies = self.PlayerSources[PlayerSources.ArenaPlayers]
@@ -1547,18 +1530,29 @@ local function PopulateMainframe(playerType)
 							table.insert(newPlayers, t)
 						end
 					else
-						addScoreBoardPlayers(newPlayers, scoreboardEnemies)
+						addScoreBoardPlayers = true
 						--maybe we got some in scoreboard
 					end
 				else --in BattleGround 
-					if foundScoreboardEnemies == 0 then
+					if numScoreboardEnemies == 0 then
 						if self.IsRatedBG and IsRetail then
 							BattleGroundEnemies:EnableFallbackToCombatlogScanning()
 							newPlayers = self.PlayerSources[PlayerSources.CombatLog]
 						end
 					else
 						BattleGroundEnemies:DisableFallbackToCombatlogScanning()
-						addScoreBoardPlayers(newPlayers, scoreboardEnemies)
+						addScoreBoardPlayers = true
+					end
+				end
+				if addScoreBoardPlayers then
+					for i = 1, #numScoreboardEnemies do
+						local scoreboardEnemy = scoreboardEnemies[i]
+						table.insert(newPlayers, {
+							name = scoreboardEnemy.name,
+							raceName = scoreboardEnemy.raceName,
+							classTag = scoreboardEnemy.classToken,
+							specName = scoreboardEnemy.talentSpec
+						})
 					end
 				end
 			end
@@ -2184,15 +2178,7 @@ end
 function BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName)
 	local moduleFrame = self.ButtonModules[moduleName]
 	if moduleFrame then
-		if moduleFrame.expansions == "All" then
-			return true
-		else
-			for i = 1, #moduleFrame.expansions do
-				if moduleFrame.expansions[i] == WOW_PROJECT_ID then
-					return true
-				end
-			end
-		end
+		return moduleFrame.enabledInThisExpansion
 	end
 	return false
 end
@@ -2217,8 +2203,7 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 	if not moduleSetupTable.moduleName then return error("NewButtonModule error: No moduleName specified") end
 	local moduleName = moduleSetupTable.moduleName
 	if not moduleSetupTable.localizedModuleName then return error("NewButtonModule error for module: " .. moduleName .. " No localizedModuleName specified") end
-	if not moduleSetupTable.expansions then return error("NewButtonModule error for module: " .. moduleName .. " No expansions specified") end
-	if type(moduleSetupTable.expansions) ~= "table" and moduleSetupTable.expansions ~= "All" then return error("NewButtonModule error for module: " .. moduleName .. " expansions must be a table or 'All'") end
+	if moduleSetupTable.enabledInThisExpansion == nil then return error("NewButtonModule error for module: " .. moduleName .. " enabledInThisExpansion is nil") end
 
 
 	if self.ButtonModules[moduleName] then return error("module "..moduleName.." is already registered") end
@@ -4029,7 +4014,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	end
 
 	self.Enemies:RemoveAllPlayersFromAllSources()
-	self.Allies.RemoveAllPlayersFromSource(PlayerSources.Scoreboard)
+	self.Allies:RemoveAllPlayersFromSource(PlayerSources.Scoreboard)
 	local _, zone = IsInInstance()
 	if zone == "pvp" or zone == "arena" then
 		if GetBattlefieldArenaFaction then
