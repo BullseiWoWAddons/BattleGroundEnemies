@@ -1521,10 +1521,10 @@ local function PopulateMainframe(playerType)
 								--useful in solo shuffle in first round, then we can show a playername via data from scoreboard
 								local match = matchBattleFieldScoreToArenaEnemyPlayer(scoreboardEnemies, arenaEnemy)
 								if match then
-									BattleGroundEnemies:LogToSavedVariables("found a match")
+									--BattleGroundEnemies:LogToSavedVariables("found a match")
 									playerName = match.name
 								else
-									BattleGroundEnemies:LogToSavedVariables("didnt find a match", arenaEnemy.additionalData.PlayerArenaUnitID)
+									--BattleGroundEnemies:LogToSavedVariables("didnt find a match", arenaEnemy.additionalData.PlayerArenaUnitID)
 									-- use the unitID
 									playerName = arenaEnemy.additionalData.PlayerArenaUnitID
 								end
@@ -1588,10 +1588,10 @@ local function PopulateMainframe(playerType)
 					local specName = groupMember.specName
 					if not specName or specName == "" then
 						local name = groupMember.name
-						BattleGroundEnemies:LogToSavedVariables("player", name, "doesnt have a spec from group member")
+						--BattleGroundEnemies:LogToSavedVariables("player", name, "doesnt have a spec from group member")
 						local match = self:FindPlayerInSource(PlayerSources.Scoreboard, groupMember)
 						if match then
-							BattleGroundEnemies:LogToSavedVariables("player", name, "we found a spec from the scoreboard")
+							--BattleGroundEnemies:LogToSavedVariables("player", name, "we found a spec from the scoreboard")
 							groupMember.specName = match.talentSpec
 						end
 					end
@@ -1948,7 +1948,7 @@ local function PopulateMainframe(playerType)
 
 		for i = 1, playerCount do
 			local playerButton = orderedPlayers[i]
-			if playerButton then
+			if playerButton then --should never be nil
 				playerButton.Position = i
 				if column > 1 then
 					offsetX = (column - 1) * (barWidth + horizontalSpacing) * offsetDirectionX
@@ -1975,29 +1975,6 @@ local function PopulateMainframe(playerType)
 					column = column + 1
 					row = 1
 				end
-			else
-				--this should never happen, not sure how it can ever be nil
-				BattleGroundEnemies:LogToSavedVariables("Player doesnt exist in Button Positioning")
-				BattleGroundEnemies:LogToSavedVariables("i", i)
-				BattleGroundEnemies:LogToSavedVariables("All Players")
-				for playerName, plBTN in pairs(self.Players) do
-					BattleGroundEnemies:LogToSavedVariables("playerName", playerName)
-					BattleGroundEnemies:LogTablesToSavedVariables(plBTN.PlayerDetails)
-				end
-				for j = 1, playerCount do
-					BattleGroundEnemies:LogToSavedVariables("j", j)
-
-					local btn = orderedPlayers[j]
-					if not btn then
-						BattleGroundEnemies:LogToSavedVariables("j doesnt exist", j)
-					else
-					
-						BattleGroundEnemies:LogTablesToSavedVariables(btn.PlayerDetails)
-					end
-				
-				end
-				
-				error("the mvp error happened")
 			end
 		end
 	end
@@ -2130,19 +2107,19 @@ local function PopulateMainframe(playerType)
 		end
 
 		function mainframe:SortPlayers(forceRepositioning)
-			BattleGroundEnemies:LogToSavedVariables("SortPlayers", self.PlayerType)
+			--BattleGroundEnemies:LogToSavedVariables("SortPlayers", self.PlayerType)
 			local newPlayerOrder = {}
 			for playerName, playerButton in pairs(self.Players) do
 				BattleGroundEnemies:LogToSavedVariables(playerName)
 				table.insert(newPlayerOrder, playerButton)
 			end
-
+--[[ 
 			BattleGroundEnemies:LogToSavedVariables("before sorting")
 			for i = 1, #newPlayerOrder do
 				BattleGroundEnemies:LogToSavedVariables(i, newPlayerOrder[i].PlayerDetails.PlayerName)
 			end
 
-
+ ]]
 
 			if IsInArena then
 				if (self.PlayerType == PlayerTypes.Enemies) then
@@ -2176,10 +2153,10 @@ local function PopulateMainframe(playerType)
 				end
 			end
 
-			BattleGroundEnemies:LogToSavedVariables("after sorting")
+--[[ 			BattleGroundEnemies:LogToSavedVariables("after sorting")
 			for i = 1, #newPlayerOrder do
 				BattleGroundEnemies:LogToSavedVariables(i, newPlayerOrder[i].PlayerDetails.PlayerName)
-			end
+			end ]]
 
 			self.NumShownPlayers = #newPlayerOrder
 			self:UpdatePlayerCount()
