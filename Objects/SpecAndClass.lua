@@ -58,7 +58,7 @@ local spec = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = specDefaults,
 	options = nil,
 	events = events,
-	enabledInThisExpansion = not not GetSpecializationInfo
+	enabledInThisExpansion = not not GetSpecializationInfoByID
 })
 
 
