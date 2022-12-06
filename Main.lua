@@ -1428,10 +1428,13 @@ local function PopulateMainframe(playerType)
 	mainframe.NumShownPlayers = 0
 
 
-	for sourceName in pairs(PlayerSources) do
-		mainframe.PlayerSources[sourceName] = {}
+	function mainframe:InitializeAllPlayerSources()
+		for sourceName in pairs(PlayerSources) do
+			mainframe.PlayerSources[sourceName] = {}
+		end
 	end
 
+	mainframe:InitializeAllPlayerSources()
 	mainframe.config = BattleGroundEnemies.db.profile[playerType]
 
 	function mainframe:ApplyAllSettings()
@@ -1440,6 +1443,7 @@ local function PopulateMainframe(playerType)
 	end
 
 	function mainframe:RemoveAllPlayersFromAllSources()
+		self:InitializeAllPlayerSources()
 		self:AfterPlayerSourceUpdate()
 	end
 
@@ -1496,7 +1500,7 @@ local function PopulateMainframe(playerType)
 
 	function mainframe:AfterPlayerSourceUpdate()
 		local newPlayers = {} --contains combined data from PlayerSources
-		if self.PlayerType == "Enemies" then
+		if self.PlayerType == PlayerTypes.Enemies then
 			if BattleGroundEnemies.Testmode.Active then
 				newPlayers = self.PlayerSources[PlayerSources.FakePlayers]
 			else
@@ -1545,7 +1549,7 @@ local function PopulateMainframe(playerType)
 					end
 				end
 				if addScoreBoardPlayers then
-					for i = 1, #numScoreboardEnemies do
+					for i = 1, numScoreboardEnemies do
 						local scoreboardEnemy = scoreboardEnemies[i]
 						table.insert(newPlayers, {
 							name = scoreboardEnemy.name,
@@ -1566,7 +1570,7 @@ local function PopulateMainframe(playerType)
 				else
 					--just addMyself and fill up the rest with fakeplayers
 					if PlayerButton.PlayerDetails then
-						table.insert(newPlayers, groupMembers[numGroupMembers])
+						table.insert(newPlayers, groupMembers[numGroupMembers]) --i am always last in here
 						local fakeAllies = self.PlayerSources[PlayerSources.FakePlayers]
 						local numFakeAllies = #fakeAllies
 						for i = 1, numFakeAllies do
@@ -1614,7 +1618,7 @@ local function PopulateMainframe(playerType)
 		if BattleGroundEnemies.Testmode.Active then
 			self:SetScript("OnUpdate", nil)
 		else
-			if self.PlayerType == "Enemies" then
+			if self.PlayerType == PlayerTypes.Enemies then
 				--BattleGroundEnemies:LogToSavedVariables("Registered enemie events")
 				self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 				self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
@@ -1698,7 +1702,7 @@ local function PopulateMainframe(playerType)
 
 		BattleGroundEnemies:UpdateBGSize()
 
-		local isEnemy = self.PlayerType == "Enemies"
+		local isEnemy = self.PlayerType == PlayerTypes.Enemies
 		BattleGroundEnemies.EnemyFaction = BattleGroundEnemies.EnemyFaction or (playerFaction == "Horde" and 1 or 0)
 
 		if self.bgSizeConfig and self.bgSizeConfig.PlayerCount.Enabled then
@@ -1786,7 +1790,7 @@ local function PopulateMainframe(playerType)
 
 
 			playerButton.PlayerType = self.PlayerType
-			playerButton.PlayerIsEnemy = playerButton.PlayerType == "Enemies" and true or false
+			playerButton.PlayerIsEnemy = playerButton.PlayerType == PlayerTypes.Enemies and true or false
 
 			playerButton:SetScript("OnSizeChanged", function(self, width, height)
 				--self.DRContainer:SetWidthOfAuraFrames(height)
@@ -1944,33 +1948,56 @@ local function PopulateMainframe(playerType)
 
 		for i = 1, playerCount do
 			local playerButton = orderedPlayers[i]
-			playerButton.Position = i
+			if playerButton then
+				playerButton.Position = i
+				if column > 1 then
+					offsetX = (column - 1) * (barWidth + horizontalSpacing) * offsetDirectionX
+				else
+					offsetX = 0
+				end
+
+				if row > 1 then
+					offsetY = (row - 1) * (barHeight + verticalSpacing) * offsetDirectionY
+				else
+					offsetY = 0
+				end
 
 
-			if column > 1 then
-				offsetX = (column - 1) * (barWidth + horizontalSpacing) * offsetDirectionX
+				playerButton:ClearAllPoints()
+				playerButton:SetPoint(point, self, relpoint, offsetX, offsetY)
+
+				playerButton:SetModulePositions()
+
+
+				if row < rowsPerColumn then
+					row = row + 1
+				else
+					column = column + 1
+					row = 1
+				end
 			else
-				offsetX = 0
-			end
+				--this should never happen, not sure how it can ever be nil
+				BattleGroundEnemies:LogToSavedVariables("Player doesnt exist in Button Positioning")
+				BattleGroundEnemies:LogToSavedVariables("i", i)
+				BattleGroundEnemies:LogToSavedVariables("All Players")
+				for playerName, plBTN in pairs(self.Players) do
+					BattleGroundEnemies:LogToSavedVariables("playerName", playerName)
+					BattleGroundEnemies:LogTablesToSavedVariables(plBTN.PlayerDetails)
+				end
+				for j = 1, playerCount do
+					BattleGroundEnemies:LogToSavedVariables("j", j)
 
-			if row > 1 then
-				offsetY = (row - 1) * (barHeight + verticalSpacing) * offsetDirectionY
-			else
-				offsetY = 0
-			end
-
-
-			playerButton:ClearAllPoints()
-			playerButton:SetPoint(point, self, relpoint, offsetX, offsetY)
-
-			playerButton:SetModulePositions()
-
-
-			if row < rowsPerColumn then
-				row = row + 1
-			else
-				column = column + 1
-				row = 1
+					local btn = orderedPlayers[j]
+					if not btn then
+						BattleGroundEnemies:LogToSavedVariables("j doesnt exist", j)
+					else
+					
+						BattleGroundEnemies:LogTablesToSavedVariables(btn.PlayerDetails)
+					end
+				
+				end
+				
+				error("the mvp error happened")
 			end
 		end
 	end
@@ -2079,6 +2106,7 @@ local function PopulateMainframe(playerType)
 		end
 
 		local function PlayerSortingByArenaUnitID(playerA, playerB)-- a and b are playerButtons
+			if not (playerA and playerB) then return end
 			local detailsPlayerA = playerA.PlayerDetails
 			local detailsPlayerB = playerB.PlayerDetails
 			if not (detailsPlayerA.PlayerArenaUnitID and detailsPlayerB.PlayerArenaUnitID) then return end
@@ -2089,26 +2117,35 @@ local function PopulateMainframe(playerType)
 
 		local function CRFSort_Group_(playerA, playerB) -- this is basically a adapted CRFSort_Group to make the sorting in arena
 			if not (playerA and playerB) then return end
-			if not (playerA.unitID and playerB.unitID) then return true end
-			if ( playerA.unitID == "player" ) then
+			local detailsPlayerA = playerA.PlayerDetails
+			local detailsPlayerB = playerB.PlayerDetails
+			if not (detailsPlayerA.unitID and detailsPlayerB.unitID) then return true end
+			if ( detailsPlayerA.unitID == "player" ) then
 				return true;
-			elseif ( playerB.unitID == "player" ) then
+			elseif ( detailsPlayerB.unitID == "player" ) then
 				return false;
 			else
-				return playerA.unitID < playerB.unitID;	--String compare is OK since we don't go above 1 digit for party.
+				return detailsPlayerA.unitID < detailsPlayerB.unitID;	--String compare is OK since we don't go above 1 digit for party.
 			end
 		end
 
 		function mainframe:SortPlayers(forceRepositioning)
-			-- BattleGroundEnemies:LogToSavedVariables("SortPlayers", self.PlayerType)
+			BattleGroundEnemies:LogToSavedVariables("SortPlayers", self.PlayerType)
 			local newPlayerOrder = {}
 			for playerName, playerButton in pairs(self.Players) do
+				BattleGroundEnemies:LogToSavedVariables(playerName)
 				table.insert(newPlayerOrder, playerButton)
 			end
 
+			BattleGroundEnemies:LogToSavedVariables("before sorting")
+			for i = 1, #newPlayerOrder do
+				BattleGroundEnemies:LogToSavedVariables(i, newPlayerOrder[i].PlayerDetails.PlayerName)
+			end
+
+
 
 			if IsInArena then
-				if (self.PlayerType == "Enemies") then
+				if (self.PlayerType == PlayerTypes.Enemies) then
 					local usePlayerSortingByArenaUnitID = false
 					usePlayerSortingByArenaUnitID = true
 					for i = 1, #newPlayerOrder do
@@ -2137,6 +2174,11 @@ local function PopulateMainframe(playerType)
 					orderChanged = true
 					break
 				end
+			end
+
+			BattleGroundEnemies:LogToSavedVariables("after sorting")
+			for i = 1, #newPlayerOrder do
+				BattleGroundEnemies:LogToSavedVariables(i, newPlayerOrder[i].PlayerDetails.PlayerName)
 			end
 
 			self.NumShownPlayers = #newPlayerOrder
@@ -2410,7 +2452,7 @@ do
 			else
 				classTag = Data.ClassList[math_random(1, #Data.ClassList)]
 			end
-			local nameprefix = mainFrame.PlayerType == "Enemies" and "Enemy" or "Ally"
+			local nameprefix = mainFrame.PlayerType == PlayerTypes.Enemies and "Enemy" or "Ally"
 			name = L[nameprefix]..counter.."-Realm"..counter
 
 			mainFrame:AddPlayerToSource(PlayerSources.FakePlayers, {
@@ -3175,7 +3217,7 @@ local function stringifyMultitArgs(...)
 	return text
 end
 
-local function addTimestamp()
+local function getTimestamp()
 	local timestampFormat = "[%I:%M:%S] " --timestamp format
 	local stamp = BetterDate(timestampFormat, time())
 	return stamp
@@ -3190,9 +3232,14 @@ function BattleGroundEnemies:Debug(...)
 		self.debugFrame = CreatedebugFrame()
 	end
 
-	local text = stringifyMultitArgs(addTimestamp(), ...)
+	local text = stringifyMultitArgs(getTimestamp(), ...)
 
 	self.debugFrame:AddMessage(text)
+end
+
+function BattleGroundEnemies:LogTablesToSavedVariables(...)
+	local tables = {...}
+	table.insert(self.db.profile.log, {timestamp = getTimestamp(), data = tables})
 end
 
 function BattleGroundEnemies:LogToSavedVariables(...)
@@ -3203,7 +3250,7 @@ function BattleGroundEnemies:LogToSavedVariables(...)
 
 	local text = stringifyMultitArgs(...)
 	self:OnetimeInformation(text)
-	text = stringifyMultitArgs(addTimestamp(), text)
+	text = stringifyMultitArgs(getTimestamp(), text)
 
 	table_insert(self.db.profile.log, text)
 end
