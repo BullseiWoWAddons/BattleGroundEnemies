@@ -40,9 +40,12 @@ function role:AttachToPlayerButton(playerButton)
 
 	playerButton.Role.PlayerDetailsChanged = function(self, playerDetails)
 		if not playerDetails then return end
-		if playerDetails.PlayerSpecName then
-			self.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
-			self.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(playerDetails.PlayerRoleID))
+		local specData = playerButton:GetSpecData()
+		if specData then
+			if specData.roleID then
+				self.Icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
+				self.Icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(specData.roleID))
+			end
 		end
 	end
 end
