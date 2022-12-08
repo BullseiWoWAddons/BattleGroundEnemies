@@ -3112,7 +3112,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	if not IsInArena then return end
 
 	self:BeforePlayerSourceUpdate(PlayerSources.ArenaPlayers)
-	for i = 1, MAX_ARENA_ENEMIES or 5 do
+	for i = 1, 15 do --we can have 15 enemies in the Arena Brawl Packed House
 		local unitID = "arena"..i
 
 
