@@ -2,6 +2,23 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.0.2.4",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed the flickering health bar.",
+				}
+			},
+			{
+				Header = "Changes:",
+				Entries = {
+					"The addon will now check for up to 15 arena unitIDs, this is helpful in the Arena Brawl Packed House.",
+				}
+			},
+		}
+	},
+	{
 		Version = "10.0.2.3",
 		Sections = {
 			{
