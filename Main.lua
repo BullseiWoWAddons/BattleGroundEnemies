@@ -536,12 +536,6 @@ do
 	end
 
 	function buttonFunctions:PlayerDetailsChanged()
-		local specData = self:GetSpecData()
-		if specData then
-			self.PlayerDetails.PlayerSpecID = specData.specID
-			self.PlayerDetails.PlayerRoleNumber = specData.roleNumber
-			self.PlayerDetails.PlayerRoleID = specData.roleID
-		end
 		self:SetBindings()
 		self:DispatchEvent("PlayerDetailsChanged", self.PlayerDetails)
 	end
@@ -1862,6 +1856,7 @@ local function PopulateMainframe(playerType)
 		end
 
 		playerButton.PlayerDetails = playerDetails
+		-- BattleGroundEnemies:LogToSavedVariables("PlayerDetailsChanged")
 		playerButton:PlayerDetailsChanged()
 
 		self.Target = nil
@@ -1984,12 +1979,26 @@ local function PopulateMainframe(playerType)
 	end
 
 	function mainframe:CreateOrUpdatePlayer(name, race, classTag, specName, additionalData)
+		local spec = false
+		if specName and specName ~="" then
+			spec = specName
+		end
+		local specData
+		if classTag and spec then
+			local t = Data.Classes[classTag]
+			if t then
+				t = t[spec]
+				specData = t
+			end
+		end
+
 		local playerDetails = {
 			PlayerName = name,
 			PlayerClass = string.upper(classTag), --apparently it can happen that we get a lowercase "druid" from GetBattlefieldScore() in TBCC, IsTBCC
 			PlayerClassColor = RAID_CLASS_COLORS[classTag],
 			PlayerRace = race and LibRaces:GetRaceToken(race) or "Unknown", --delivers a locale independent token for relentless check
-			PlayerSpecName = specName ~= "" and specName or false, --set to false since we use Mixin() and Mixin doesnt mixin nil values and therefore we dont overwrite values with nil
+			PlayerSpecName = spec, --set to false since we use Mixin() and Mixin doesnt mixin nil values and therefore we dont overwrite values with nil
+			PlayerRoleNumber = specData and specData.roleNumber,
 			PlayerLevel = false,
 			isFakePlayer = false, 		--to set a base value, might be overwritten by mixin
 			PlayerArenaUnitID = nil 	--to set a base value, might be overwritten by mixin
@@ -2007,6 +2016,7 @@ local function PopulateMainframe(playerType)
 			for k, v in pairs(playerDetails) do
 				if v ~= currentDetails[k] then
 					detailsChanged = true
+					-- BattleGroundEnemies:LogToSavedVariables("k changed1", k)
 					break
 				end
 			end
@@ -2015,6 +2025,7 @@ local function PopulateMainframe(playerType)
 				for k, v in pairs(currentDetails) do
 					if v ~= playerDetails[k] then
 						detailsChanged = true
+						-- BattleGroundEnemies:LogToSavedVariables("k changed2", k)
 						break
 					end
 				end
@@ -2110,7 +2121,7 @@ local function PopulateMainframe(playerType)
 			--BattleGroundEnemies:LogToSavedVariables("SortPlayers", self.PlayerType)
 			local newPlayerOrder = {}
 			for playerName, playerButton in pairs(self.Players) do
-				BattleGroundEnemies:LogToSavedVariables(playerName)
+				-- BattleGroundEnemies:LogToSavedVariables(playerName)
 				table.insert(newPlayerOrder, playerButton)
 			end
 --[[ 
@@ -3088,6 +3099,7 @@ function BattleGroundEnemies.Enemies:ChangeName(oldName, newName)  --only used i
 
 	if playerButton then
 		playerButton.PlayerDetails.PlayerName = newName
+		-- BattleGroundEnemies:LogToSavedVariables("name changed", oldName, newName)
 		playerButton:PlayerDetailsChanged()
 
 		self.Players[newName] = playerButton
