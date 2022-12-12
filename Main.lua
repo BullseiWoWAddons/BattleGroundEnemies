@@ -1133,7 +1133,7 @@ do
 		if not self.isShown then return end
 		local now = GetTime()
 		if self.lastAuraUpdate and self.lastAuraUpdate == now then return end --this event will fire for the same player multiple times if lets say he is shown on nameplate and on target frame
-		
+
 		local updatedAuraInfos = {
 			addedAuras = {},
 			isFullUpdate = true
@@ -1146,7 +1146,7 @@ do
 				if type(second) == "table" then --new 10.0 UNIT_AURA
 					updatedAuraInfos = second
 					if not updatedAuraInfos.isFullUpdate then
-	
+
 						local addedAuras = updatedAuraInfos.addedAuras
 						if addedAuras ~= nil then
 							for i = 1, #addedAuras do
@@ -1154,7 +1154,7 @@ do
 								self.Auras[getFilterFromAuraInfo(addedAura)][addedAura.auraInstanceID] = addPriority(addedAura)
 							end
 						end
-	
+
 						local updatedAuraInstanceIDs = updatedAuraInfos.updatedAuraInstanceIDs
 						if updatedAuraInstanceIDs ~= nil then
 							for i = 1, #updatedAuraInstanceIDs do
@@ -1172,7 +1172,7 @@ do
 								end
 							end
 						end
-	
+
 						local removedAuraInstanceIDs = updatedAuraInfos.removedAuraInstanceIDs
 						if removedAuraInstanceIDs ~= nil then
 							for i = 1, #removedAuraInstanceIDs do
@@ -1192,8 +1192,8 @@ do
 			wipe(self.Auras.HELPFUL)
 			wipe(self.Auras.HARMFUL)
 		end
-		
-	
+
+
 
 		--[[
 
@@ -1475,13 +1475,13 @@ local function PopulateMainframe(playerType)
 		local foundMatchIndex
 		for i = 1, #scoreTables do
 			local scoreInfo = scoreTables[i]
-	
+
 			-- local faction = scoreInfo.faction
 			-- local name = scoreInfo.name
 			-- local classToken = scoreInfo.classToken
 			-- local specName = scoreInfo.talentSpec
 			-- local raceName = scoreInfo.raceName
-	
+
 			if scoreInfo.classToken and arenaPlayerInfo.classTag then
 				if scoreInfo.faction == BattleGroundEnemies.EnemyFaction and scoreInfo.classToken == arenaPlayerInfo.classTag and scoreInfo.talentSpec == arenaPlayerInfo.specName then --specname/talentSpec can be nil for old expansions
 					if foundPlayer then
@@ -2497,7 +2497,7 @@ do
 			BattleGroundEnemies:FillFakePlayerData(healerAmount, mainFrame, "HEALER")
 			BattleGroundEnemies:FillFakePlayerData(tankAmount, mainFrame, "TANK")
 			BattleGroundEnemies:FillFakePlayerData(damagerAmount, mainFrame, "DAMAGER")
-		
+
 			mainFrame:AfterPlayerSourceUpdate()
 
 			if continue then
