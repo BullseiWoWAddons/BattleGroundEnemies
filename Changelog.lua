@@ -2,6 +2,25 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.0.2.7",
+		Sections = {
+			{
+				Header = "Changes:",
+				Entries = {
+					"The addon will not set the pvp trinket CD to 2 minutes if the expansion is retail or the player is level 70 or higher. Otherwise it will be 5 minutes. Thanks to henrygeorgebush at curseforge.",
+					"Human racial now has 120 seconds CD in classic. Thanks to henrygeorgebush at curseforge."
+				}
+			},
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed testmode auras. Thanks to henrygeorgebush at curseforge.",
+					"Fixed debuff type filtering. Buffs can now be filtered by type magic, and debuffs by type magic, curse, poision and Disease. Thanks to henrygeorgebush at curseforge."
+				}
+			},
+		}
+	},
+	{
 		Version = "10.0.2.6",
 		Sections = {
 			{

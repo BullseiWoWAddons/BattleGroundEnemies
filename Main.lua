@@ -2659,10 +2659,6 @@ do
 	FakePlayersOnUpdateFrame:SetScript("OnUpdate", FakeOnUpdate)
 end
 
-
-BattleGroundEnemies.Objects = {}
-
-
 local RequestFrame = CreateFrame("Frame", nil, BattleGroundEnemies)
 RequestFrame:Hide()
 do
