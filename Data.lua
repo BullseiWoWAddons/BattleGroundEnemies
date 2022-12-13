@@ -114,12 +114,12 @@ Data.DrCategorys = {
 Data.DebuffTypes = {
 	HELPFUL = {
 		Magic = L.Magic,
-		Disease = L.Disease,
-		Poison = L.Poison,
-		Curse = L.Curse
 	},
 	HARMFUL = {
 		Magic = L.Magic,
+		Disease = L.Disease,
+		Poison = L.Poison,
+		Curse = L.Curse
 	}
 
 }
