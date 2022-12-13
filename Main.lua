@@ -1093,7 +1093,6 @@ do
 
 	--packaged the aura into the new UnitAura packaged format (structure UnitAuraInfo)
 	local function UnitAuraToUnitAuraInfo(filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
-		print("hier,", spellId)
 		local aura
 		if type(name) == "table" then  --seems already packaged
 			aura = name
