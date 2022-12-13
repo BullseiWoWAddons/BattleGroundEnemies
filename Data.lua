@@ -885,44 +885,44 @@ Data.CovenantSpells = {
 }
 
 Data.RacialSpellIDtoCooldown = {
-	 [7744] = {cd = 120, trinketCD = 30 },					--Will of the Forsaken, Undead Racial, 30 sec cooldown trigger on trinket
-	[20594] = {cd = 120 				},					--Stoneform, Dwarf Racial
-	[58984] = {cd = 120 				},					--Shadowmeld, Night Elf Racial
-	[59752] = {cd = 180, trinketCD = 90 },  				--Every Man for Himself, Human Racial, 90 sec cooldown trigger on trinket
-	[28730] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Mage and Warlock,
-	[50613] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Death Knight,
-   [202719] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Demon Hunter,
-	[80483] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Hunter,
-   [129597] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Monk,
-   [155145] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Paladin,
-   [232633] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Priest,
-	[25046] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Rogue,
-	[69179] = {cd = 90  				},					--Arcane Torrent, Blood Elf Racial, Warrior,
-	[20589] = {cd = 90  				}, 					--Escape Artist, Gnome Racial
-	[26297] = {cd = 180 				},					--Berserkering, Troll Racial
-	[33702] = {cd = 120 				},					--Blood Fury, Orc Racial, Mage,  Warlock
-	[20572]	= {cd = 120 				},					--Blood Fury, Orc Racial, Warrior, Hunter, Rogue, Death Knight
-	[33697] = {cd = 120 				},					--Blood Fury, Orc Racial, Shaman, Monk
-	[20577] = {cd = 120 				}, 					--Cannibalize, Undead Racial
-	[68992]	= {cd = 120 				},					--Darkflight, Worgen Racial
-	[59545] = {cd = 180 				},					--Gift of the Naaru, Draenei Racial, Death Knight
-	[59543] = {cd = 180 				},					--Gift of the Naaru, Draenei Racial, Hunter
-	[59548] = {cd = 180 				},					--Gift of the Naaru, Draenei Racial, Mage
-   [121093]	= {cd = 180 				},					--Gift of the Naaru, Draenei Racial, Monk
-	[59542] = {cd = 180 				},					--Gift of the Naaru, Draenei Racial, Paladin
-	[59544] = {cd = 180 				},					--Gift of the Naaru, Draenei Racial, Priest
-	[59547] = {cd = 180 				},					--Gift of the Naaru, Draenei Racial, Shaman
-	[28880] = {cd = 180 				},					--Gift of the Naaru, Draenei Racial, Warrior
-   [107079] = {cd = 120 				},					--Quaking Palm, Pandaren Racial
-	[69041] = {cd = 90  				},					--Rocket Barrage, Goblin Racial
-	[69070] = {cd = 90  				},					--Rocket Jump, Goblin Racial
-	[20549] = {cd = 90  				},					--War Stomp, Tauren Racial
-   [312411] = {cd = 90					},					--Bag of Tricks, Vulpera Racial
-   [265221] = {cd = 120					},					--Fireblood, Dark Iron Dwarf Racial
-   [255647] = {cd = 150					},					--Light's Judgment, Lightforged Draenei Racial
-   [255654] = {cd = 120					},					--Bull Rush, Highmountain Tauren Racial
-   [287712] = {cd = 150					}, 					--Haymaker, Kul Tiran Racial
-   [260364] = {cd = 180					}					--Arcane Pulse, Nightborne Racial
+	 [7744] = {cd = 120, trinketCD = 30						},					--Will of the Forsaken, Undead Racial, 30 sec cooldown trigger on trinket
+	[20594] = {cd = 120 									},					--Stoneform, Dwarf Racial
+	[58984] = {cd = 120 									},					--Shadowmeld, Night Elf Racial
+	[59752] = {cd = IsRetail and 180 or 120, trinketCD = 90 },  				--Every Man for Himself, Human Racial, 90 sec cooldown trigger on trinket, got renamed in Shadowlands to Will to Survive
+	[28730] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Mage and Warlock,
+	[50613] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Death Knight,
+   [202719] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Demon Hunter,
+	[80483] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Hunter,
+   [129597] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Monk,
+   [155145] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Paladin,
+   [232633] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Priest,
+	[25046] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Rogue,
+	[69179] = {cd = 90  									},					--Arcane Torrent, Blood Elf Racial, Warrior,
+	[20589] = {cd = 90  									}, 					--Escape Artist, Gnome Racial
+	[26297] = {cd = 180 									},					--Berserkering, Troll Racial
+	[33702] = {cd = 120 									},					--Blood Fury, Orc Racial, Mage,  Warlock
+	[20572]	= {cd = 120 									},					--Blood Fury, Orc Racial, Warrior, Hunter, Rogue, Death Knight
+	[33697] = {cd = 120 									},					--Blood Fury, Orc Racial, Shaman, Monk
+	[20577] = {cd = 120 									}, 					--Cannibalize, Undead Racial
+	[68992]	= {cd = 120 									},					--Darkflight, Worgen Racial
+	[59545] = {cd = 180 									},					--Gift of the Naaru, Draenei Racial, Death Knight
+	[59543] = {cd = 180 									},					--Gift of the Naaru, Draenei Racial, Hunter
+	[59548] = {cd = 180 									},					--Gift of the Naaru, Draenei Racial, Mage
+   [121093]	= {cd = 180 									},					--Gift of the Naaru, Draenei Racial, Monk
+	[59542] = {cd = 180 									},					--Gift of the Naaru, Draenei Racial, Paladin
+	[59544] = {cd = 180 									},					--Gift of the Naaru, Draenei Racial, Priest
+	[59547] = {cd = 180 									},					--Gift of the Naaru, Draenei Racial, Shaman
+	[28880] = {cd = 180 									},					--Gift of the Naaru, Draenei Racial, Warrior
+   [107079] = {cd = 120 									},					--Quaking Palm, Pandaren Racial
+	[69041] = {cd = 90  									},					--Rocket Barrage, Goblin Racial
+	[69070] = {cd = 90  									},					--Rocket Jump, Goblin Racial
+	[20549] = {cd = 90  									},					--War Stomp, Tauren Racial
+   [312411] = {cd = 90										},					--Bag of Tricks, Vulpera Racial
+   [265221] = {cd = 120										},					--Fireblood, Dark Iron Dwarf Racial
+   [255647] = {cd = 150										},					--Light's Judgment, Lightforged Draenei Racial
+   [255654] = {cd = 120										},					--Bull Rush, Highmountain Tauren Racial
+   [287712] = {cd = 150										}, 					--Haymaker, Kul Tiran Racial
+   [260364] = {cd = 180										}					--Arcane Pulse, Nightborne Racial
 }
 
 if IsWrath then
