@@ -143,7 +143,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 	end
 
 	function f:NewInput(inputData)
-		local key= #self.inputs + 1
+		local key = #self.inputs + 1
 		inputData.key = key
 		self.inputs[key] = inputData
 		return self.inputs[key]
