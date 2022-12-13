@@ -1093,8 +1093,9 @@ do
 
 	--packaged the aura into the new UnitAura packaged format (structure UnitAuraInfo)
 	local function UnitAuraToUnitAuraInfo(filter, name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura, castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
+		print("hier,", spellId)
 		local aura
-		if type(name) == "table" then  --seems alrady packaged
+		if type(name) == "table" then  --seems already packaged
 			aura = name
 		else
 			local isDebuff = filter == "HARMFUL" or "HELPFUL"
@@ -1253,7 +1254,7 @@ do
 
 		for i = 1, #auraFilters do
 			local filter = auraFilters[i]
-			shouldQueryAuras = unitID and self:DispatchUntilTrue("ShouldQueryAuras", unitID, filter) --ask all subscribers/modules if Aura Scanning is necessary for this filter
+			shouldQueryAuras = self:DispatchUntilTrue("ShouldQueryAuras", unitID, filter) --ask all subscribers/modules if Aura Scanning is necessary for this filter
 			if shouldQueryAuras then
 				if updatedAuraInfos.isFullUpdate then
 					wipe(self.Auras[filter])

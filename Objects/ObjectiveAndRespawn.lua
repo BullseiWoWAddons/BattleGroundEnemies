@@ -166,6 +166,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:ShouldQueryAuras(unitID, filter)
+		if not unitID then return false end
 		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then
 			return filter == "HARMFUL"
 		else
