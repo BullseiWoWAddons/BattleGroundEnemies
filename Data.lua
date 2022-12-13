@@ -755,9 +755,28 @@ Data.BattlegroundspezificDebuffs = { --key = mapID, value = table with key = num
 }
 
 
+
+--[[ 
+	Classic Data
+	Insignia of the Alliance 5 min CD
+	Insignia of the Horde 5 min CD
+
+	Medallions got added in TBC and require level 70
+
+	Medallion of the Alliance 2 min CD
+	Medallion of the Horde 2 min CD
+ ]]
+
+local trinketCD
+if IsRetail or UnitLevel("player") >= 70 then
+	trinketCD = 120
+else
+	trinketCD = 300
+end
+
 Data.TrinketData = {
 	[195710] = {cd = 180											},		-- 1: Honorable Medallion, 3. min. CD, detected by Combatlog
-	[42292]  = {cd = 120, itemID = 37865							},		-- 2: Medallion of the Alliance, Medallion of the Horde used in Classic, TBC, and probably some other Expansions  2 min. CD, detected by Combatlog, should show as Medaillon; used in TBC etc
+	[42292]  = {cd = trinketCD, itemID = 37865						},		-- 2: Medallion of the Alliance, Medallion of the Horde used in Classic, TBC, and probably some other Expansions  2 min. CD, detected by Combatlog, should show as Medaillon; used in TBC etc
 	[208683] = {cd = 120											}, 		-- 2: Gladiator's Medallion, 2 min. CD, detected by Combatlog
 	[336126] = {cd = 120											},		-- 2: Gladiator's Medallion, 2 min. CD, Shadowlands Update
 --	[195901] = {cd = 60, fileID = GetSpellTexture(214027)			},		-- 3: Adaptation, 1 min. CD, detected by Aura 195901
@@ -776,7 +795,7 @@ if IsClassic then
 		[GetSpellInfo(23273)] = {spellId = 23273, cd = 300, itemID = 18856},	-- Immune Charm/Fear/Polymorph	Rogue, Warlock
 		[GetSpellInfo(23274)] = {spellId = 23274, cd = 300, itemID = 18856}, 	-- Immune Fear/Polymorph/Snare	Mage
 		[GetSpellInfo(23276)] = {spellId = 23276, cd = 300, itemID = 18856},	-- Immune Fear/Polymorph/Stun	Paladin, Priest
-		[GetSpellInfo(23227)] = {spellId = 23227, cd = 300, itemID = 18856}	-- Immune Charm/Fear/Stun		Druid
+		[GetSpellInfo(23227)] = {spellId = 23227, cd = 300, itemID = 18856}		-- Immune Charm/Fear/Stun		Druid
 	})
 end
 
@@ -936,14 +955,12 @@ for spellId in pairs(Data.RacialSpellIDtoCooldown) do
 	local racialName = GetSpellInfo(spellId)
 
 	if racialName then
-
 		if not Data.RacialNameToSpellIDs[racialName] then
 			Data.RacialNameToSpellIDs[racialName] = {}
 			Data.Racialnames[GetSpellInfo(spellId)] = GetSpellInfo(spellId)
 		end
 		Data.RacialNameToSpellIDs[racialName][spellId] = true
 	end
-
 end
 
 
