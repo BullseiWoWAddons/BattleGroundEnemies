@@ -34,6 +34,7 @@ Modules\ContainerTemplate.lua
 Modules\Auras.lua
 Modules\CastBar.lua
 Modules\CombatIndicator.lua
+Modules\Cooldowns.lua
 Modules\Covenant.lua
 Modules\DR.lua
 Modules\HealthBar.lua
