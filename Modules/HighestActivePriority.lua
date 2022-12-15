@@ -32,6 +32,12 @@ local options = function(location)
 			type = "group",
 			name = L.Countdowntext,
 			inline = true,
+			get = function(option)
+				return Data.GetOption(location.Cooldown, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.Cooldown, option, ...)
+			end,
 			order = 1,
 			args = Data.AddCooldownSettings(location.Cooldown)
 		}
