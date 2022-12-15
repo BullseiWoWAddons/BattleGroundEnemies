@@ -1206,7 +1206,7 @@ do
 					shouldQueryAuras = self:DispatchUntilTrue("ShouldQueryAuras", unitID, filter) --ask all subscribers/modules if Aura Scanning is necessary for this filter
 					if shouldQueryAuras then
 						if AuraUtil.ForEachAura then
-							local usePackedAura = true --this will make the function return a aura info table instead of many returns, added in 10.0
+							local usePackedAura = true --this will make the function AuraUtil.ForEachAura return a aura info table instead of many returns, added in 10.0
 							AuraUtil.ForEachAura(unitID, filter, batchCount, function(...)
 								local aura = UnitAuraToUnitAuraInfo(filter, ...)
 								if aura.auraInstanceID then
@@ -1235,7 +1235,7 @@ do
 						for j = 1, batchCount do
 							local aura = FakeUnitAura(self, j, filter)
 							if aura then
-								table_insert(self.Auras[filter], aura)
+								table_insert(self.Auras[filter], addPriority(aura))
 							end
 						end
 					end
