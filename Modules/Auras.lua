@@ -445,6 +445,9 @@ local function createNewAuraFrame(playerButton, container)
 	childFrame.Container = container
 	childFrame.icon:SetDrawLayer("BORDER", -1) -- 1 to make it behind the SetBackdrop bg
 
+	childFrame:SetScript("OnSizeChanged", function(self, width, height)
+		BattleGroundEnemies.CropImage(self.icon, width, height)
+	end)
 
 	childFrame.ApplyChildFrameSettings = function(self)
 		local conf = container.config
