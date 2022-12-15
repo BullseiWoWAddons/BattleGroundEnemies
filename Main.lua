@@ -1863,6 +1863,7 @@ local function PopulateMainframe(playerType)
 			playerButton:UpdateRange(true)
 		end
 
+		playerButton:UNIT_AURA()
 		playerButton:Show()
 
 		self.Players[playerButton.PlayerDetails.PlayerName] = playerButton
