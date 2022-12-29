@@ -30,12 +30,12 @@ local classDefaults = {
 	ActivePoints = 2,
 	Points = {
 		{
-			Point = "TOPLEFT",
+			Point = "TOPRIGHT",
 			RelativeFrame = "Button",
 			RelativePoint = "TOPLEFT",
 		},
 		{
-			Point = "BOTTOMLEFT",
+			Point = "BOTTOMRIGHT",
 			RelativeFrame = "Button",
 			RelativePoint = "BOTTOMLEFT",
 		}
