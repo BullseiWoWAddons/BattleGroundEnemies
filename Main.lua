@@ -429,12 +429,12 @@ do
 		local unitID = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
 		if unitID then
 			unitIDs.HasAllyUnitID = false
-			self:NewUnitID(unitID)
+			self:UpdateUnitID(unitID, unitID.."target")
 		elseif unitIDs.Ally then
 			unitIDs.HasAllyUnitID = true
 			local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitIDs.Ally)
 			if playerButton and playerButton == self then
-				self:NewUnitID(unitIDs.Ally)
+				self:UpdateUnitID(unitIDs.Ally, unitIDs.Ally.."target")
 				unitIDs.HasAllyUnitID = true
 			end
 		else
@@ -574,34 +574,12 @@ do
 		end
 	end
 
-	function buttonFunctions:NewUnitID(unitID, targetUnitID)
+	function buttonFunctions:UpdateUnitID(unitID, targetUnitID)
 		if not UnitExists(unitID) then return end
 		self.unitID = unitID
+		self.TargetUnitID = targetUnitID
 		if self.PlayerIsEnemy then
-			self.TargetUnitID = unitID.."target"
 			self:UpdateRaidTargetIcon()
-		else
-			--self.unitID already gets assigned for allies before, info from GROUP_ROSTER_UPDATE
-			self.TargetUnitID = targetUnitID
-			if self.unit ~= unitID then
-				--ally has a new unitID now
-				--self:Debug("player", groupMember.PlayerName, "has a new unit and targeted something")
-
-				local targetButton = self.Target
-				if targetButton then
-					--reset the TargetedByEnemy
-					targetButton:IsNoLongerTarging(targetButton)
-					targetButton:IsNowTargeting(targetButton)
-				end
-
-				if InCombatLockdown() then --if we are in combat we go get to set the stuff below later since GROUP_ROSTER_UPDATE also has a combat check and will get called after combat
-					return BattleGroundEnemies:QueueForUpdateAfterCombat(BattleGroundEnemies[self.PlayerType], "UpdateAllUnitIDs")
-				else
-					self.unit = unitID
-					self:SetAttribute('unit', unitID)
-					BattleGroundEnemies.Allies:SortPlayers()
-				end
-			end
 		end
 		self:UpdateAll(unitID)
 		self:DispatchEvent("UnitIdUpdate", unitID)
@@ -2264,7 +2242,7 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 	return moduleFrame
 end
 
-function BattleGroundEnemies:GetBigDebuffsPriority(spellId)
+function BattleGroundEnemies:GetBigDebuffsSpellPriority(spellId)
 	if not BattleGroundEnemies.db.profile.UseBigDebuffsPriority then return end
 	if not BigDebuffs then return end
 	local priority = BigDebuffs.GetDebuffPriority and BigDebuffs:GetDebuffPriority(spellId)
@@ -2274,10 +2252,8 @@ function BattleGroundEnemies:GetBigDebuffsPriority(spellId)
 end
 
 function BattleGroundEnemies:GetSpellPriority(spellId)
-	return self:GetBigDebuffsPriority(spellId) or Data.SpellPriorities[spellId]
+	return self:GetBigDebuffsSpellPriority(spellId) or Data.SpellPriorities[spellId]
 end
-
-
 
 
 BattleGroundEnemies:SetScript("OnEvent", function(self, event, ...)
@@ -3969,20 +3945,51 @@ function BattleGroundEnemies.Allies:AddGroupMember(name, isLeader, isAssistant, 
 	end
 end
 
+
+
 function BattleGroundEnemies.Allies:UpdateAllUnitIDs()
 		--it happens that numGroupMembers is higher than the value of the maximal players for that battleground, for example 15 in a 10 man bg, thats why we wipe AllyUnitIDToAllyDetails
 	for allyName, allyButton in pairs(self.Players) do
 		if allyButton then
+			local unitID
+			local targetUnitID
 			if allyButton.PlayerDetails.PlayerName ~= BattleGroundEnemies.PlayerDetails.PlayerName then
-				local unitID = allyButton.PlayerDetails.unitID
-				if not unitID then return end
+				local unit = allyButton.PlayerDetails.unitID
+				if not unit then return end
 
-				local targetUnitID = unitID.."target"
-				allyButton:NewUnitID(unitID, targetUnitID)
+				unitID = unit
+				targetUnitID = unitID.."target"
 			else
-				allyButton:NewUnitID("player", "target")
+				unitID = "player"
+				targetUnitID = "target"
 				PlayerButton = allyButton
 			end
+			if not (unitID and targetUnitID) then return end
+
+
+			--self.unitID already gets assigned for allies before, info from GROUP_ROSTER_UPDATE
+			
+			if allyButton.unit ~= unitID then
+				--ally has a new unitID now
+				--self:Debug("player", groupMember.PlayerName, "has a new unit and targeted something")
+
+				local targetButton = allyButton.Target
+				if targetButton then
+					--reset the TargetedByEnemy
+					targetButton:IsNoLongerTarging(targetButton)
+					targetButton:IsNowTargeting(targetButton)
+				end
+
+				if InCombatLockdown() then --if we are in combat we go get to set the stuff below later since GROUP_ROSTER_UPDATE also has a combat check and will get called after combat
+					return BattleGroundEnemies:QueueForUpdateAfterCombat(BattleGroundEnemies[allyButton.PlayerType], "UpdateAllUnitIDs")
+				else
+					allyButton.unit = unitID
+					allyButton:SetAttribute('unit', unitID)
+					BattleGroundEnemies.Allies:SortPlayers()
+				end
+			end
+
+			allyButton:UpdateUnitID(unitID, targetUnitID)
 		end
 	end
 end
