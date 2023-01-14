@@ -3450,7 +3450,11 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
 end
 
 local function IamTargetcaller()
-	return (BattleGroundEnemies.PlayerDetails.isGroupLeader and #BattleGroundEnemies.Allies.assistants == 0) or (not BattleGroundEnemies.PlayerDetails.isGroupLeader and BattleGroundEnemies.PlayerDetails.isGroupAssistant)
+	if BattleGroundEnemies.PlayerDetails.isGroupLeader then
+		return #BattleGroundEnemies.Allies.assistants == 0
+	else
+		return BattleGroundEnemies.PlayerDetails.isGroupAssistant
+	end
 end
 
 do
