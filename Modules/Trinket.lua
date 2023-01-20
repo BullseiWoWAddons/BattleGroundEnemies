@@ -6,6 +6,9 @@ local GetTime = GetTime
 local GetSpellTexture = GetSpellTexture
 local GameTooltip = GameTooltip
 
+local DRList = LibStub("DRList-1.0")
+
+
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local defaultSettings = {
@@ -128,6 +131,7 @@ function trinket:AttachToPlayerButton(playerButton)
 		if filter == "HELPFUL" then return end
 
 		local spellId = aura.spellId
+		local spellName = aura.name
 		if spellId == 336139 then --adapted debuff > adaptation
 			local currentTime = GetTime()
 			self:DisplayTrinket(spellId)
@@ -140,11 +144,14 @@ function trinket:AttachToPlayerButton(playerButton)
 		local continue = not self.spellId and Data.cCdurationBySpellID[spellId]
 		if not continue then return end
 
+		local drCat = DRList:GetCategoryBySpellID(IsClassic and spellName or spellId)
+		if not drCat then return end
+
 		local Racefaktor = 1
-	--[[ 	if drCat == "stun" and playerButton.PlayerDetails.PlayerRace == "Orc" then
+		if drCat == "stun" and playerButton.PlayerDetails.PlayerRace == "Orc" then
 			--Racefaktor = 0.8	--Hardiness, but since september 5th hotfix hardiness no longer stacks with relentless so we have no way of determing if the player is running relentless or not
 			return
-		end ]]
+		end
 
 
 		--local diminish = actualduraion/(Racefaktor * normalDuration * Trinketfaktor)
