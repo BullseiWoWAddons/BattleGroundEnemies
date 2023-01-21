@@ -2970,6 +2970,11 @@ function BattleGroundEnemies:UpdateBGSize()
 	local MaxNumPlayers = math_max(self.Allies.NumShownPlayers, self.Enemies.NumShownPlayers)
 	--BattleGroundEnemies:LogToSavedVariables("UpdateBGSize", MaxNumPlayers)
 	if MaxNumPlayers then
+		if MaxNumPlayers > 40 then
+			self.Allies:Disable()
+			self.Enemies:Disable()
+			return
+		end
 		if MaxNumPlayers > 15 then
 			if not self.BGSize or self.BGSize ~= 40 then
 				self:BGSizeChanged(40)
