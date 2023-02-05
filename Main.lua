@@ -959,6 +959,8 @@ do
 			i = i + 1
 		end
 
+		if not BattleGroundEnemies.db.profile.RBG then return end
+
 		local enemyTargets = i
 
 		if BattleGroundEnemies.IsRatedBG then
