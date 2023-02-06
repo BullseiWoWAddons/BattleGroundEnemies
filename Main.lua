@@ -3676,7 +3676,8 @@ local function disableArenaFrames()
 			ArenaEnemyFrames_Disable(ArenaEnemyFrames)
 		end
 	elseif ArenaEnemyMatchFramesContainer then
-		if ArenaEnemyMatchFramesContainer.Disable then ArenaEnemyMatchFramesContainer:Disable() end
+		ArenaEnemyMatchFramesContainer:SetAlpha(0)
+		ArenaEnemyMatchFramesContainer:SetScale(0.01)
 	end
 end
 
@@ -3686,7 +3687,8 @@ local function checkEffectiveEnableStateForArenaFrames()
 			ArenaEnemyFrames_CheckEffectiveEnableState(ArenaEnemyFrames)
 		end
 	elseif ArenaEnemyMatchFramesContainer then
-		if ArenaEnemyMatchFramesContainer.CheckEffectiveEnableState then ArenaEnemyMatchFramesContainer:CheckEffectiveEnableState() end
+		ArenaEnemyMatchFramesContainer:SetAlpha(1)
+		ArenaEnemyMatchFramesContainer:SetScale(1)
 	end
 end
 
