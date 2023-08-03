@@ -1,1 +1,4 @@
-todo: add castbars and combat indicator to testmode
+Add castbars and combat indicator to testmode
+Add global names to frames
+Work on cooldown tracking
+improved layout editing
