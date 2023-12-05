@@ -964,58 +964,57 @@ for spellId in pairs(Data.RacialSpellIDtoCooldown) do
 end
 
 
+-- Data.EnemiesRangeToRange = {}
+-- Data.EnemiesItemIDToRange = {}
+-- Data.EnemiesRangeToItemID	= {
+-- 	[5] = 37727, -- Ruby Acorn --works, also for allies,
+-- 	[6] = 63427, -- Worgsaw --works, also for allies,
+-- 	[8] = 34368, -- Attuned Crystal Cores --works, also for allies,
+-- 	[10] = 32321, -- Sparrowhawk Net
+-- 	[15] = 33069, -- Sturdy Rope --doesn't work on allies
+-- 	[20] = 10645, -- Gnomish Death Ray --doesn't work on allies
+-- 	[25] = 24268, -- Netherweave Net --doesn't work on allies
+-- 	[30] = 34191, -- Handful of Snowflakes
+-- 	[35] = 18904, -- Zorbin's Ultra-Shrinker
+-- 	[40] = 28767, -- The Decapitator --doesn't work on allies
+-- 	[45] = 32698, -- Wrangling Rope
+-- 	[50] = 116139, -- Haunting Memento
+-- 	[60] = 32825, -- Soul Cannon
+-- 	[70] = 41265, -- Eyesore Blaster
+-- 	[80] = 35278, -- Reinforced Net
+-- 	[100] = 33119, -- Malister's Frost Wand --doesn't work on allies
+-- }
+-- Data.AlliesRangeToRange = {}
+-- Data.AlliesItemIDToRange = {}
+-- Data.AlliesRangeToItemID	= {
+-- 	[5] = 37727, -- Ruby Acorn
+-- 	[6] = 63427, -- Worgsaw
+-- 	[8] = 34368, -- Attuned Crystal Cores
+-- 	[10] = 32321, -- Sparrowhawk Net
+-- 	[15] = 6450, -- Silk Bandage
+-- 	[20] = 21519, -- Mistletoe
+-- 	[25] = 31463, -- Zezzak's Shard
+-- 	[30] = 34191, -- Handful of Snowflakes
+-- 	[35] = 18904, -- Zorbin's Ultra-Shrinker
+-- 	[40] = 34471, -- Vial of the Sunwell
+-- 	[45] = 32698, -- Wrangling Rope
+-- 	[50] = 116139, -- Haunting Memento
+-- 	[60] = 32825, -- Soul Cannon
+-- 	[70] = 41265, -- Eyesore Blaster
+-- 	[80] = 35278, -- Reinforced Net
+-- }
+
+-- for range, itemID in next, Data.EnemiesRangeToItemID do
+-- 	Data.EnemiesRangeToRange[range] = range --for testmode
+-- 	Data.EnemiesItemIDToRange[itemID] = range --for testmode
+-- end
+
+-- for range, itemID in next, Data.AlliesRangeToItemID do
+-- 	Data.AlliesRangeToRange[range] = range --for testmode
+-- 	Data.AlliesItemIDToRange[itemID] = range --for testmode
+-- end
 
 
-
-Data.EnemiesRangeToRange = {}
-Data.EnemiesItemIDToRange = {}
-Data.EnemiesRangeToItemID	= {
-	[5] = 37727, -- Ruby Acorn --works, also for allies,
-	[6] = 63427, -- Worgsaw --works, also for allies,
-	[8] = 34368, -- Attuned Crystal Cores --works, also for allies,
-	[10] = 32321, -- Sparrowhawk Net
-	[15] = 33069, -- Sturdy Rope --doesn't work on allies
-	[20] = 10645, -- Gnomish Death Ray --doesn't work on allies
-	[25] = 24268, -- Netherweave Net --doesn't work on allies
-	[30] = 34191, -- Handful of Snowflakes
-	[35] = 18904, -- Zorbin's Ultra-Shrinker
-	[40] = 28767, -- The Decapitator --doesn't work on allies
-	[45] = 32698, -- Wrangling Rope
-	[50] = 116139, -- Haunting Memento
-	[60] = 32825, -- Soul Cannon
-	[70] = 41265, -- Eyesore Blaster
-	[80] = 35278, -- Reinforced Net
-	[100] = 33119, -- Malister's Frost Wand --doesn't work on allies
-}
-Data.AlliesRangeToRange = {}
-Data.AlliesItemIDToRange = {}
-Data.AlliesRangeToItemID	= {
-	[5] = 37727, -- Ruby Acorn
-	[6] = 63427, -- Worgsaw
-	[8] = 34368, -- Attuned Crystal Cores
-	[10] = 32321, -- Sparrowhawk Net
-	[15] = 6450, -- Silk Bandage
-	[20] = 21519, -- Mistletoe
-	[25] = 31463, -- Zezzak's Shard
-	[30] = 34191, -- Handful of Snowflakes
-	[35] = 18904, -- Zorbin's Ultra-Shrinker
-	[40] = 34471, -- Vial of the Sunwell
-	[45] = 32698, -- Wrangling Rope
-	[50] = 116139, -- Haunting Memento
-	[60] = 32825, -- Soul Cannon
-	[70] = 41265, -- Eyesore Blaster
-	[80] = 35278, -- Reinforced Net
-}
-
-for range, itemID in next, Data.EnemiesRangeToItemID do
-	Data.EnemiesRangeToRange[range] = range --for testmode
-	Data.EnemiesItemIDToRange[itemID] = range --for testmode
-end
-
-for range, itemID in next, Data.AlliesRangeToItemID do
-	Data.AlliesRangeToRange[range] = range --for testmode
-	Data.AlliesItemIDToRange[itemID] = range --for testmode
-end
 
 
 Data.Classes = {}
