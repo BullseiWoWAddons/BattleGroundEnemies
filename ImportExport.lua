@@ -40,7 +40,7 @@ local function CreateImportExportFrame()
 	frame.EditBox:SetSize(frame.scrollBar:GetWidth(), 170)
 	frame.EditBox:SetPoint("TOPLEFT", frame.scrollBar)
 	frame.EditBox:SetPoint("BOTTOMRIGHT", frame.scrollBar)
-	frame.EditBox:SetMaxBytes(nil);
+	--frame.EditBox:SetMaxBytes(nil);
 	frame.EditBox:SetFontObject(GameFontNormal)
 	frame.EditBox:SetAutoFocus(false)
 	frame.EditBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
