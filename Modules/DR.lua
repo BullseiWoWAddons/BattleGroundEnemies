@@ -204,7 +204,8 @@ local function setupDrFrame(container, drFrame, drDetails)
 	drFrame:SetStatus()
 
 	drFrame.spellId = drDetails.spellId
-	drFrame.Icon:SetTexture(IsClassic and GetSpellTexture(DRList.spells[drDetails.spellName].spellId) or GetSpellTexture(drDetails.spellId))
+	--drFrame.Icon:SetTexture(IsClassic and GetSpellTexture(DRList.spells[drDetails.spellName].spellId) or GetSpellTexture(drDetails.spellId)) no longer needed classic seems to support spellIDs now
+	drFrame.Icon:SetTexture(GetSpellTexture(drDetails.spellId))
 	local duration = DRList:GetResetTime(drDetails.drCat)
 	drFrame.Cooldown:SetCooldown(drDetails.startTime, duration)
 end
@@ -217,7 +218,8 @@ function dRTracking:AttachToPlayerButton(playerButton)
 		local config = self.config
 		--BattleGroundEnemies:Debug(operation, spellId)
 
-		local drCat = DRList:GetCategoryBySpellID(IsClassic and spellName or spellId)
+		--local drCat = DRList:GetCategoryBySpellID(IsClassic and spellName or spellId) --no longer needed, classic seems to support spellIDs now
+		local drCat = DRList:GetCategoryBySpellID(spellId)
 
 		if not drCat then return end
 
