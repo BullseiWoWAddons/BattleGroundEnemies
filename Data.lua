@@ -210,18 +210,25 @@ do
 		taunt = 1
 	}
 
-	if IsClassic then
-		for spellName, spellData in pairs(DRList.spells) do
-			local category = spellData.category
-			table_insert(Data.DrCategoryToSpell[category], spellName)
-			Data.SpellPriorities[spellName] = drCategoryToPriority[category]
-		end
-	else
-		for spellId, categorieName in pairs(DRList.spells) do
-			table_insert(Data.DrCategoryToSpell[categorieName], spellId)
-			Data.SpellPriorities[spellId] = drCategoryToPriority[categorieName]
-		end
+
+	-- no more needed since classic supports spellIDs now
+	-- if IsClassic then
+	-- 	for spellName, spellData in pairs(DRList.spells) do
+	-- 		local category = spellData.category
+	-- 		table_insert(Data.DrCategoryToSpell[category], spellName)
+	-- 		Data.SpellPriorities[spellName] = drCategoryToPriority[category]
+	-- 	end
+	-- else
+	-- 	for spellId, categorieName in pairs(DRList.spells) do
+	-- 		table_insert(Data.DrCategoryToSpell[categorieName], spellId)
+	-- 		Data.SpellPriorities[spellId] = drCategoryToPriority[categorieName]
+	-- 	end
+	-- end
+	for spellId, categorieName in pairs(DRList.spells) do
+		table_insert(Data.DrCategoryToSpell[categorieName], spellId)
+		Data.SpellPriorities[spellId] = drCategoryToPriority[categorieName]
 	end
+
 end
 
 
