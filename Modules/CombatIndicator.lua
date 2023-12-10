@@ -14,15 +14,15 @@ local defaultSettings = {
 	Enabled = false,
 	Parent = "healthBar",
 	ActivePoints = 1,
-	Width = 26,
-	Height = 26,
+	Width = 21,
+	Height = 21,
 	Points = {
 		{
 			Point = "TOPLEFT",
 			RelativeFrame = "Level",
 			RelativePoint = "TOPRIGHT",
-			OffsetX = 5,
-			OffsetY = -2
+			OffsetX = -13,
+			OffsetY = -15
 		}
 	},
 	Combat = {
