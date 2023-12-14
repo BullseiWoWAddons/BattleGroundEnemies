@@ -3891,6 +3891,9 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
 	--self:Debug("IsRatedBG", IsRatedBG)
 
+	self.EnemyFaction = self.EnemyFaction or 0 --set fallback value, have to investigate why self.EnemyFaction is not set inside PLAYER_ENTERING_WORLD event handler
+	self.AllyFaction = self.AllyFaction or 1
+
 	local _, _, _, _, numEnemies = GetBattlefieldTeamInfo(self.EnemyFaction)
 	local _, _, _, _, numAllies = GetBattlefieldTeamInfo(self.AllyFaction)
 
