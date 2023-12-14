@@ -3,6 +3,7 @@ local AddonName, Data = ...
 Data.changelog = {
 	{
 		Version = "10.2.0.0",
+		General = "This version mostly contains bugfixes being reported during the last months. I Tried to catch them all. If you still face some issues please let me know on Curseforge or GitHub.",
 		Sections = {
 			{
 				Header = "Changes:",

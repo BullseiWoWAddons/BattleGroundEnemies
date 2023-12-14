@@ -1,3 +1,4 @@
 Add castbars and combat indicator to testmode
 Work on cooldown tracking
 improved layout editing
+have to investigate why self.EnemyFaction is not set inside PLAYER_ENTERING_WORLD event handler
