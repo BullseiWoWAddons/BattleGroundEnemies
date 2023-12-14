@@ -31,7 +31,7 @@ Data.defaultSettings = {
 			Enabled = true,
 
 			RangeIndicator_Enabled = true,
-			RangeIndicator_Range = 28767,
+			RangeIndicator_Range = 40,
 			RangeIndicator_Alpha = 0.55,
 			RangeIndicator_Everything = true,
 			RangeIndicator_Frames = {},
@@ -48,7 +48,7 @@ Data.defaultSettings = {
 
 				Position_X = false,
 				Position_Y = false,
-				BarWidth = 240,
+				BarWidth = 200,
 				BarHeight = 47,
 				BarVerticalGrowdirection = "downwards",
 				BarVerticalSpacing = 40,
@@ -75,7 +75,7 @@ Data.defaultSettings = {
 						Points = {
 							{
 								Point = "RIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Spec",
 								RelativePoint = "LEFT",
 								OffsetX = -3
 							}
@@ -84,11 +84,24 @@ Data.defaultSettings = {
 					Covenant = {
 						Enabled = false
 					},
+					Cooldowns = {
+						Points = {
+							{
+								Point = "TOPLEFT",
+								RelativeFrame = "Racial",
+								RelativePoint = "TOPRIGHT",
+							}
+						},
+						Container = {
+							HorizontalGrowDirection = "rightwards",
+							VerticalGrowdirection = "upwards",
+						},
+					},
 					DRTracking = {
 						Points = {
 							{
 								Point = "TOPRIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Class",
 								RelativePoint = "BOTTOMRIGHT",
 								OffsetY = -2
 							}
@@ -233,7 +246,7 @@ Data.defaultSettings = {
 
 				Position_X = false,
 				Position_Y = false,
-				BarWidth = 220,
+				BarWidth = 180,
 				BarHeight = 28,
 				BarVerticalGrowdirection = "downwards",
 				BarVerticalSpacing = 3,
@@ -258,18 +271,32 @@ Data.defaultSettings = {
 						Points = {
 							{
 								Point = "RIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Spec",
 								RelativePoint = "LEFT",
 								OffsetX = -3
 							},
 						}
 					},
+					Cooldowns = {
+						Points = {
+							{
+								Point = "TOPLEFT",
+								RelativeFrame = "Racial",
+								RelativePoint = "TOPRIGHT",
+							}
+						},
+						Container = {
+							HorizontalGrowDirection = "rightwards",
+							VerticalGrowdirection = "upwards",
+						},
+					},
 					DRTracking = {
 						Points = {
 							{
 								Point = "TOPRIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Class",
 								RelativePoint = "TOPLEFT",
+								OffsetX = -2
 							}
 						},
 						Container = {
@@ -387,7 +414,7 @@ Data.defaultSettings = {
 
 				Position_X = false,
 				Position_Y = false,
-				BarWidth = 220,
+				BarWidth = 180,
 				BarHeight = 22,
 				BarVerticalGrowdirection = "downwards",
 				BarVerticalSpacing = 1,
@@ -412,18 +439,32 @@ Data.defaultSettings = {
 						Points = {
 							{
 								Point = "RIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Spec",
 								RelativePoint = "LEFT",
 								OffsetX = -3
 							}
 						}
 					},
+					Cooldowns = {
+						Points = {
+							{
+								Point = "TOPLEFT",
+								RelativeFrame = "Racial",
+								RelativePoint = "TOPRIGHT",
+							}
+						},
+						Container = {
+							HorizontalGrowDirection = "rightwards",
+							VerticalGrowdirection = "upwards",
+						},
+					},
 					DRTracking = {
 						Points = {
 							{
 								Point = "TOPRIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Class",
 								RelativePoint = "TOPLEFT",
+								OffsetX= -2
 							}
 						},
 						Container = {
@@ -537,7 +578,7 @@ Data.defaultSettings = {
 			Enabled = true,
 
 			RangeIndicator_Enabled = true,
-			RangeIndicator_Range = 34471,
+			RangeIndicator_Range = 40,
 			RangeIndicator_Alpha = 0.55,
 			RangeIndicator_Everything = true,
 			RangeIndicator_Frames = {},
@@ -554,7 +595,7 @@ Data.defaultSettings = {
 
 				Position_X = false,
 				Position_Y = false,
-				BarWidth = 240,
+				BarWidth = 200,
 				BarHeight = 47,
 				BarVerticalGrowdirection = "downwards",
 				BarVerticalSpacing = 40,
@@ -572,7 +613,6 @@ Data.defaultSettings = {
 						ShadowColor = {0, 0, 0, 1},
 					}
 				},
-
 				ButtonModules = {
 					CastBar = {
 						Enabled = true,
@@ -590,6 +630,19 @@ Data.defaultSettings = {
 					},
 					Covenant = {
 						Enabled = false
+					},
+					Cooldowns = {
+						Points = {
+							{
+								Point = "TOPRIGHT",
+								RelativeFrame = "Button",
+								RelativePoint = "TOPRIGHT",
+							}
+						},
+						Container = {
+							HorizontalGrowDirection = "rightwards",
+							VerticalGrowdirection = "upwards",
+						},
 					},
 					DRTracking = {
 						Points = {
@@ -714,13 +767,13 @@ Data.defaultSettings = {
 						Points = {
 							{
 								Point = "TOPRIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Spec",
 								RelativePoint = "TOPLEFT",
 								OffsetX = -1
 							},
 							{
 								Point = "BOTTOMRIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Spec",
 								RelativePoint = "BOTTOMLEFT",
 								OffsetX = -1
 							}
@@ -740,7 +793,7 @@ Data.defaultSettings = {
 
 				Position_X = false,
 				Position_Y = false,
-				BarWidth = 220,
+				BarWidth = 180,
 				BarHeight = 28,
 				BarVerticalGrowdirection = "downwards",
 				BarVerticalSpacing = 3,
@@ -769,6 +822,19 @@ Data.defaultSettings = {
 								RelativePoint = "RIGHT",
 								OffsetX = 28,
 							},
+						},
+					},
+					Cooldowns = {
+						Points = {
+							{
+								Point = "TOPLEFT",
+								RelativeFrame = "Racial",
+								RelativePoint = "TOPRIGHT",
+							}
+						},
+						Container = {
+							HorizontalGrowDirection = "rightwards",
+							VerticalGrowdirection = "upwards",
 						},
 					},
 					DRTracking = {
@@ -868,13 +934,13 @@ Data.defaultSettings = {
 						Points = {
 							{
 								Point = "TOPRIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Spec",
 								RelativePoint = "TOPLEFT",
 								OffsetX = -1
 							},
 							{
 								Point = "BOTTOMRIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Spec",
 								RelativePoint = "BOTTOMLEFT",
 								OffsetX = -1
 							}
@@ -893,7 +959,7 @@ Data.defaultSettings = {
 
 				Position_X = false,
 				Position_Y = false,
-				BarWidth = 220,
+				BarWidth = 180,
 				BarHeight = 22,
 				BarVerticalGrowdirection = "downwards",
 				BarVerticalSpacing = 1,
@@ -923,6 +989,19 @@ Data.defaultSettings = {
 								OffsetX = 28,
 							}
 						}
+					},
+					Cooldowns = {
+						Points = {
+							{
+								Point = "TOPLEFT",
+								RelativeFrame = "Racial",
+								RelativePoint = "TOPRIGHT",
+							}
+						},
+						Container = {
+							HorizontalGrowDirection = "rightwards",
+							VerticalGrowdirection = "upwards",
+						},
 					},
 					DRTracking = {
 						Points = {
@@ -1020,7 +1099,7 @@ Data.defaultSettings = {
 						Points = {
 							{
 								Point = "TOPRIGHT",
-								RelativeFrame = "Button",
+								RelativeFrame = "Spec",
 								RelativePoint = "TOPLEFT",
 								OffsetX = -1
 							},
