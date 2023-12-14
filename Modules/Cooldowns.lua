@@ -16,7 +16,6 @@ local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
 	ActivePoints = 1,
-	DisplayType = "Frame",
 	IconSize = 20,
 	Cooldown = {
 		ShowNumber = true,
@@ -72,20 +71,6 @@ local options = function(location)
 	}
 end
 
-local dRstates = {
-	[1] = { 0, 1, 0, 1}, --green (next cc in DR time will be only half duration)
-	[2] = { 1, 1, 0, 1}, --yellow (next cc in DR time will be only 1/4 duration)
-	[3] = { 1, 0, 0, 1}, --red (next cc in DR time will not apply, player is immune)
-}
-
-local function drFrameUpdateStatusBorder(drFrame)
-	drFrame:SetBackdropBorderColor(unpack(dRstates[drFrame:GetStatus()]))
-end
-
-local function drFrameUpdateStatusText(drFrame)
-	drFrame.Cooldown.Text:SetTextColor(unpack(dRstates[drFrame:GetStatus()]))
-end
-
 local flags = {
 	HasDynamicSize = true
 }
@@ -102,7 +87,7 @@ local cooldowns = BattleGroundEnemies:NewButtonModule({
 
 local function createNewCooldownFrame(playerButton, container)
 	local cooldownFrame = CreateFrame("Frame", nil, container, BackdropTemplateMixin and "BackdropTemplate")
-	cooldownFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(drFrame)
+	cooldownFrame.Cooldown = BattleGroundEnemies.MyCreateCooldown(cooldownFrame)
 
 	cooldownFrame.Cooldown:SetScript("OnCooldownDone", function()
 		cooldownFrame:Remove()
@@ -124,25 +109,12 @@ local function createNewCooldownFrame(playerButton, container)
 
 	cooldownFrame.ApplyChildFrameSettings = function(self)
 		self.Cooldown:ApplyCooldownSettings(container.config.Cooldown, false, false)
-		self:SetDisplayType()
 	end
 
 	cooldownFrame.GetStatus = function(self)
 		local status = self.input.status
 		status = (math.min(status, 3))
 		return status
-	end
-
-	cooldownFrame.SetDisplayType = function(self)
-		if container.config.DisplayType == "Frame" then
-			self.SetStatus = drFrameUpdateStatusBorder
-		else
-			self.SetStatus = drFrameUpdateStatusText
-		end
-
-		self.Cooldown.Text:SetTextColor(1, 1, 1, 1)
-		self:SetBackdropBorderColor(0, 0, 0, 0)
-		if self.input and self.input.status ~= 0 then self:SetStatus() end
 	end
 
 	cooldownFrame:SetBackdrop({
@@ -156,6 +128,9 @@ local function createNewCooldownFrame(playerButton, container)
 
 	cooldownFrame.Icon = cooldownFrame:CreateTexture(nil, "BORDER", nil, -1) -- -1 to make it behind the SetBackdrop bg
 	cooldownFrame.Icon:SetAllPoints()
+    cooldownFrame:SetScript("OnSizeChanged", function(self, width, height)
+		BattleGroundEnemies.CropImage(self.Icon, width, height)
+	end)
 
 	cooldownFrame:ApplyChildFrameSettings()
 
@@ -164,36 +139,53 @@ local function createNewCooldownFrame(playerButton, container)
 end
 
 local function setupCooldownFrame(container, cooldownFrame, cooldownDetails)
-	cooldownFrame:SetStatus()
-
+    print("setupCooldownFrame")
 	cooldownFrame.spellId = cooldownDetails.spellId
 	cooldownFrame.Icon:SetTexture(GetSpellTexture(cooldownDetails.spellId))
-	cooldownFrame.Cooldown:SetCooldown(cooldownDetails.startTime, cooldownDetails.expirationTime)
+	cooldownFrame.Cooldown:SetCooldown(cooldownDetails.startTime, cooldownDetails.duration)
 end
 
 function cooldowns:AttachToPlayerButton(playerButton)
 	local container = BattleGroundEnemies:NewContainer(playerButton, createNewCooldownFrame, setupCooldownFrame)
 	--frame:SetBackdropColor(0, 0, 0, 0)
 
+
+
+	function container:GetCooldown(spellID)
+		local cooldownData
+
+
+		return cooldownData
+	end
+
 	function container:SPELL_CAST_SUCCESS(srcName, destName, spellId)
+		if true then return end
+        print("SPELL_CAST_SUCCESS", srcName, destName, spellId)
 		local config = self.config
 		--BattleGroundEnemies:Debug(operation, spellId)
 
-		local cooldown = math.random(50, 120)
 
-        local currentTime = GetTime()
-        local expireTime = currentTime + cooldown
+		print("1")
+		local cooldownData = BattleGroundEnemies:GetSpellCooldownData(spellId)
+		print("2")
 
+		if not cooldownData then return end
+		print("3")
+
+		local cooldown = cooldownData.duration
 		if not cooldown then return end
+		print("4")
 
         local input = self:FindInputByAttribute("spellId", spellId)
         if not input then
             input = self:NewInput({
-                "spellId", spellId
+                spellId = spellId
             })
         end
 
-        input.expirationTime = expireTime
+		local currentTime = GetTime()
+
+        input.duration = cooldown
         input.startTime = currentTime
         self:Display()
 	end
