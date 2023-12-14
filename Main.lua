@@ -789,9 +789,9 @@ do
 			if self.PlayerIsEnemy then
 				if self.PlayerDetails.PlayerArenaUnitID then --its a arena enemy
 					newState.unit = self.PlayerDetails.PlayerArenaUnitID
-					newState.type1 = "target"    -- type1 = LEFT-Click to target
-					newState.type2 = "focus"     -- type2 = Right-Click to focus
-					setupUsualAttributes = false
+					-- newState.type1 = "target"    -- type1 = LEFT-Click to target
+					-- newState.type2 = "focus"     -- type2 = Right-Click to focus
+					-- setupUsualAttributes = false
 				end
 			else
 				if BattleGroundEnemies.db.profile[self.PlayerType].UseClique then
