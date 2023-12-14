@@ -112,7 +112,7 @@ function castBar:AttachToPlayerButton(playerButton)
 	playerButton.CastBar.CreateCastBar = function(self)
 		local style = self.config.Style
 		if style ~= self.style then
-			if self.CastBar then --This will create a big of garbage behind, but hopefully the user doesn't switch the castbar style/template too much
+			if self.CastBar then --This will create a bit of garbage behind, but hopefully the user doesn't switch the castbar style/template too much
 				self.CastBar:UnregisterAllEvents()
 				self.CastBar:Hide()
 				wipe(self.CastBar)
