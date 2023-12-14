@@ -3,7 +3,7 @@ local AddonName, Data = ...
 Data.changelog = {
 	{
 		Version = "10.2.0.0",
-		General = "This version mostly contains bugfixes being reported during the last months. I Tried to catch them all. If you still face some issues please let me know on Curseforge or GitHub.",
+		General = "This version mostly contains bugfixes and minor tweaks being reported during the last months. I Tried to catch them all. If you still face some issues please let me know on Curseforge or GitHub.",
 		Sections = {
 			{
 				Header = "Changes:",
@@ -12,7 +12,7 @@ Data.changelog = {
 					"The Addon now resets all auras if a different player has been assigned to a button.",
 					"Aura icons are now cropped a little bit for cleaner looks.",
 					"The addon is now disabled if more than 40 people are in a raid. (For example in Epic Battlegrounds)",
-					"player frames now have a global name assigned."
+					"Player frames now have a global name assigned."
 				}
 			},
 			{
