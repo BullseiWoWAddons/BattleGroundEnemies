@@ -98,6 +98,7 @@ globals = {
 	"AlertFrame",
 	"Ambiguate",
 	"ArenaCastingBarFrameTemplate",
+	"ArenaEnemyFramesContainer",
 	"ArenaEnemyFrames_CheckEffectiveEnableState",
 	"ArenaEnemyFrames_Disable",
 	"ArenaEnemyFrames",
