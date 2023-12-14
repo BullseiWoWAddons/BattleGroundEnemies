@@ -2,6 +2,37 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.2.0.0",
+		Sections = {
+			{
+				Header = "Changes:",
+				Entries = {
+					"The Addon now uses LibRangeCheck-3.0 to check for the distance to other players. This also fixes the error message due to blizzards new combat restrictions on retail. You might need to change your range indicator range setting",
+					"The Addon now resets all auras if a different player has been assigned to a button.",
+					"Aura icons are now cropped a little bit for cleaner looks.",
+					"The addon is now disabled if more than 40 people are in a raid. (For example in Epic Battlegrounds)",
+					"player frames now have a global name assigned."
+				}
+			},
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fix the hiding of the arena frames in battlegrounds and arena.",
+					"Includes new version of LibChangelog which fixes an error message on wotlk/classic.",
+					"Fixed an error in the icon selector for the combat indicator.",
+					"Fixed an bug with the spec not showing when testing solo.",
+					"Fixed some problems with debuff type filtering."
+				}
+			},
+			{
+				Header = "New Features:",
+				Entries = {
+					"Added support for blizzards mouseover casting on ally frames. This feature is enabled by default",
+				}
+			},
+		}
+	},
+	{
 		Version = "10.0.2.7",
 		Sections = {
 			{
