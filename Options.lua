@@ -7,6 +7,8 @@ local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 
+local LRC = LibStub:GetLibrary("LibRangeCheck-3.0")
+
 local function GetAllModuleAnchors(moduleName)
 	local moduleAnchors = {}
 	for moduleNamee, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
@@ -17,7 +19,6 @@ local function GetAllModuleAnchors(moduleName)
 	moduleAnchors.Button = L.Button
 	return moduleAnchors
 end
-
 
 local function GetAllModuleFrames()
 	local t = {}
@@ -87,7 +88,7 @@ function BattleGroundEnemies:ModuleFrameNeedsHeight(moduleFrame, config)
 	local heightFlag = flags.Width
 
 	if heightFlag == "Fixed" then return end
-	
+
 	local activePoints = self:GetActivePoints(config)
 	if not activePoints then return end
 	return BattleGroundEnemies:FrameNeedsWidth(activePoints[1], activePoints[2])
@@ -219,8 +220,8 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 					OffsetX = {
 						type = "range",
 						name = L.OffsetX,
-						min = -100,
-						max = 100,
+						min = -300,
+						max = 300,
 						step = 1,
 						order = 4
 					},
@@ -726,12 +727,25 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						name = L.RangeIndicator_Range,
 						desc = L.RangeIndicator_Range_Desc,
 						disabled = function() return not location.RangeIndicator_Enabled end,
-						get = function() return Data[playerType.."ItemIDToRange"][location.RangeIndicator_Range] end,
-						set = function(option, value)
-							value = Data[playerType.."RangeToItemID"][value]
-							return Data.SetOption(location, option, value)
+						-- get = function() return Data[playerType.."ItemIDToRange"][location.RangeIndicator_Range] end,
+						-- set = function(option, value)
+						-- 	value = Data[playerType.."RangeToItemID"][value]
+						-- 	return Data.SetOption(location, option, value)
+						-- end,
+						-- values =   Data[playerType.."RangeToRange"],
+						values = function()
+							local checkers 
+							if playerType == "Enemies" then
+								checkers = LRC:GetHarmCheckers(true)
+							else
+								checkers = LRC:GetFriendCheckers(true)
+							end
+							local ranges = {}
+							for range, checker in checkers do
+								ranges[range] = range
+							end
+							return ranges
 						end,
-						values = Data[playerType.."RangeToRange"],
 						width = "half",
 						order = 2
 					},
@@ -1153,25 +1167,19 @@ function BattleGroundEnemies:SetupOptions()
 						width = "normal",
 						order = 6
 					},
-					UseBigDebuffsPriority = {
-						type = "toggle",
-						name = L.UseBigDebuffsPriority,
-						desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriorityAura),
-						order = 7
-					},
 					Font = {
 						type = "select",
 						name = L.Font,
 						desc = L.Font_Desc,
 						dialogControl = "LSM30_Font",
 						values = AceGUIWidgetLSMlists.font,
-						order = 8
+						order = 9
 					},
 					MyTarget = {
 						type = "group",
 						name = L.MyTarget,
 						inline = true,
-						order = 9,
+						order = 10,
 						args = {
 							MyTarget_Color = {
 								type = "color",
@@ -1194,7 +1202,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.MyFocus,
 						inline = true,
-						order = 10,
+						order = 11,
 						args = {
 							MyFocus_Color = {
 								type = "color",
@@ -1215,18 +1223,32 @@ function BattleGroundEnemies:SetupOptions()
 					}
 				}
 			},
+			DataSettings = {
+				type = "group",
+				name = L.Data,
+				childGroups = "tab",
+				order = 3,
+				args = {
+					UseBigDebuffsPriority = {
+						type = "toggle",
+						name = L.UseBigDebuffsPriority,
+						desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriorityAura),
+						order = 7
+					},
+				}
+			},
 			EnemySettings = {
 				type = "group",
 				name = L.Enemies,
 				childGroups = "tab",
-				order = 3,
+				order = 4,
 				args = addEnemyAndAllySettings(self, self.Enemies)
 			},
 			AllySettings = {
 				type = "group",
 				name = L.Allies,
 				childGroups = "tab",
-				order = 4,
+				order = 5,
 				args = addEnemyAndAllySettings(self, self.Allies)
 			},
 			RBGSettings = {
@@ -1234,7 +1256,7 @@ function BattleGroundEnemies:SetupOptions()
 				name = L.RBGSpecificSettings,
 				desc = L.RBGSpecificSettings_Desc,
 				--inline = true,
-				order = 5,
+				order = 6,
 				get = function(option)
 					return Data.GetOption(location.RBG, option)
 				end,
@@ -1280,9 +1302,6 @@ function BattleGroundEnemies:SetupOptions()
 									}
 
 								}
-
-
-
 							},
 							EnemiesTargetingAllies = {
 								type = "group",
@@ -1387,7 +1406,7 @@ function BattleGroundEnemies:SetupOptions()
 				type = "group",
 				name = L.MoreProfileOptions,
 				childGroups = "tab",
-				order = 6,
+				order = 7,
 				args = {
 					ImportButton = {
 						type = "execute",
