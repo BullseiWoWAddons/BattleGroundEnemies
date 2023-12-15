@@ -90,7 +90,7 @@ globals = {
 	"tDeleteItem",
 	"tInvert",
 	"tostringall",
-
+	
 	-- everything else
 	-- Legion/TombOfSargeras/Kiljaeden.lua
 	"AbbreviateLargeNumbers",
@@ -141,6 +141,7 @@ globals = {
 	"CloseDropDownMenus",
 	"CombatLog_String_GetIcon",
 	"CombatLogGetCurrentEventInfo",
+	"CompactArenaFrame",
 	"COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION",
 	"CompactUnitFrame_UpdateHealPrediction",
 	"CreateColor",
