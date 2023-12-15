@@ -2,6 +2,24 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.2.0.1",
+		General = "Some minor changes and bugfixes",
+		Sections = {
+			{
+				Header = "Changes:",
+				Entries = {
+					"Custom keybinding now also works in arenas. Thanks to ItsMeATaco at CurseForge for reporting"
+				}
+			},
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"The addon now also hides the new square arena frames introduced some months ago when the option is set. Thanks to Kennahz from GitHub for the report",
+				}
+			},
+		}
+	},
+	{
 		Version = "10.2.0.0",
 		General = "This version mostly contains bugfixes and minor tweaks being reported during the last months. I Tried to catch them all. If you still face some issues please let me know on Curseforge or GitHub.",
 		Sections = {
