@@ -3077,14 +3077,14 @@ do
 
 		if LGIST then -- the libary doesnt work in TBCC, IsTBCC
 			LGIST.RegisterCallback(BattleGroundEnemies.Allies, "GroupInSpecT_Update")
+
+			--GroupInSpecT_Update doesnt fire when in group and nobody is requesting the spec, noticiable when solo and running testmode for example(no spec icon)
+			local myCachedSpecInfo = LGIST:GetCachedInfo(self.PlayerDetails.GUID)
+			if myCachedSpecInfo then
+				specCache[self.PlayerDetails.GUID] = myCachedSpecInfo.spec_name_localized
+			end
 		end
 
-
-		--GroupInSpecT_Update doesnt fire when in group and nobody is requesting the spec, noticiable when solo and running testmode for example(no spec icon)
-		local myCachedSpecInfo = LGIST:GetCachedInfo(self.PlayerDetails.GUID)
-		if myCachedSpecInfo then
-			specCache[self.PlayerDetails.GUID] = myCachedSpecInfo.spec_name_localized
-		end
 
 
 		self:RegisterEvent("GROUP_ROSTER_UPDATE")

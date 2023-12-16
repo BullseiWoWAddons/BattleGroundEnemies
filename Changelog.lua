@@ -2,6 +2,18 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.2.0.3",
+		General = "Bugfix an error.",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed an error regarding LibGroupInSpecT on Classic. Thanks to timber_hall@CurseForge for the report.",
+				}
+			},
+		}
+	},
+	{
 		Version = "10.2.0.2",
 		General = "Some minor changes and bugfixes",
 		Sections = {
