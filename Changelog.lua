@@ -2,6 +2,18 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.2.0.2",
+		General = "Some minor changes and bugfixes",
+		Sections = {
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed the reverse operation of the Disable arena frames in arena setting. Thanks to synthetized@CurseForge for reporting.",
+				}
+			},
+		}
+	},
+	{
 		Version = "10.2.0.1",
 		General = "Some minor changes and bugfixes",
 		Sections = {
