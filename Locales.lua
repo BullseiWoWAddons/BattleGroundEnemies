@@ -37,10 +37,8 @@ local L = Data.L;
 
 if LOCALE_deDE then
 --@localization(locale="deDE", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@
-elseif LOCALE_esES then
+elseif LOCALE_esES or LOCALE_esMX then
 --@localization(locale="esES", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@
-elseif LOCALE_esMX then
---@localization(locale="esMX", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@
 elseif LOCALE_frFR then
 --@localization(locale="frFR", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@
 elseif LOCALE_itIT then
