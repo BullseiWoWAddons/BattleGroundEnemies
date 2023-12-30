@@ -3,7 +3,7 @@ local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
 local styles = {
-	Arena = ARENA,
+	Arena =  DoesTemplateExist("ArenaCastingBarFrameTemplate") and ARENA or nil,
 	Normal = L.NormalCastingBar,
 	Small = L.SmallCastingBar
 }
@@ -11,7 +11,7 @@ local styles = {
 local defaultSettings = {
 	Parent = "Button",
 	ActivePoints = 1,
-	Style = "Arena",
+	Style = "Small",
 	Scale = 1.5
 }
 
@@ -56,18 +56,9 @@ local settingToTemplate = {
 	Normal = function(self)
 		self:SetWidth(195)
 		self:SetHeight(13)
-		
+
 		local f = CreateFrame("statusbar", nil, self, "CastingBarFrameTemplate")
 		f:SetAllPoints()
-		return f
-	end,
-	Arena = function(self)
-		self:SetWidth(80)
-		self:SetHeight(14)
-
-		local f = CreateFrame("statusbar", nil, self, "ArenaCastingBarFrameTemplate")
-		f:SetAllPoints()
-		f.Icon:SetPoint("RIGHT", f, "LEFT", -5, 0)
 		return f
 	end,
 	Small = function(self)
@@ -78,10 +69,16 @@ local settingToTemplate = {
 		f:SetAllPoints()
 		return f
 	end,
+	Arena = DoesTemplateExist("ArenaCastingBarFrameTemplate") and function(self)
+		self:SetWidth(80)
+		self:SetHeight(14)
+
+		local f = CreateFrame("statusbar", nil, self, "ArenaCastingBarFrameTemplate")
+		f:SetAllPoints()
+		f.Icon:SetPoint("RIGHT", f, "LEFT", -5, 0)
+		return f
+	end or nil
 }
-
-
-LoadAddOn("Blizzard_ArenaUI")
 
 function castBar:AttachToPlayerButton(playerButton)
 -- Covenant Icon
@@ -117,7 +114,10 @@ function castBar:AttachToPlayerButton(playerButton)
 				self.CastBar:Hide()
 				wipe(self.CastBar)
 			end
-			if not settingToTemplate[style] then return BattleGroundEnemies:OnetimeInformation("An Error happened, the Castbar template doesnt exist.") end
+			if not settingToTemplate[style] then
+				self.config.Style = defaultSettings.Style
+				BattleGroundEnemies:OnetimeInformation("The Castbar style/template doesnt exist on this client. Automatically set castbar style to: " .. defaultSettings.Style)
+			end
 			self.CastBar = settingToTemplate[style](self)
 			CastingBarFrame_OnLoad(self.CastBar, "fake") --set a fake unit to avoid The error in the onupdate script CastingBarFrame_OnUpdate which gets set by the template
 
