@@ -5,6 +5,7 @@ local CreateFrame = CreateFrame
 local GetTime = GetTime
 local GetSpellTexture = GetSpellTexture
 local GameTooltip = GameTooltip
+local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local DRList = LibStub("DRList-1.0")
 
@@ -85,7 +86,13 @@ function trinket:AttachToPlayerButton(playerButton)
 		if not Data.TrinketData[spellId] then return end
 		self:DisplayTrinket(spellId, Data.TrinketData[spellId].itemID)
 		if Data.TrinketData[spellId].cd then
-			self:SetTrinketCooldown(GetTime(), Data.TrinketData[spellId].cd or 0)
+			local trinketCD=Data.TrinketData[spellId].cd or 0
+			
+			-- If healer in retail reduce 2 min trinkets to 90 seconds.
+			if IsRetail and playerButton.PlayerDetails.PlayerRoleNumber==1 and trinketCD==120 then
+				trinketCD=90
+			end
+			self:SetTrinketCooldown(GetTime(), trinketCD)
 		end
 	end
 
