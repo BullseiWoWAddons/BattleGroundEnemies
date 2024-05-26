@@ -61,7 +61,7 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
-local HasSpeccs = not not GetNumSpecializationsForClassID
+local HasSpeccs = not not GetSpecializationInfoByID  -- Mists of Pandaria
 local HasRBG = not not IsRatedBattleground
 
 local MaxLevel = GetMaxPlayerLevel()

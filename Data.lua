@@ -225,7 +225,14 @@ do
 	-- 	end
 	-- end
 	for spellId, categorieName in pairs(DRList.spells) do
-		table_insert(Data.DrCategoryToSpell[categorieName], spellId)
+		if type(categorieName) == "table" then
+			for k, categorie in pairs(categorieName) do
+				table_insert(Data.DrCategoryToSpell[categorie], spellId)
+			end
+		else
+			table_insert(Data.DrCategoryToSpell[categorieName], spellId)
+		end
+		
 		Data.SpellPriorities[spellId] = drCategoryToPriority[categorieName]
 	end
 
@@ -1111,9 +1118,10 @@ do
 			Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}-- for Classic, TBCC Wrath, and any other expansions without specs and some brawls
 
 			
-			if GetNumSpecializationsForClassID then --HasSpeccs
+			if GetNumSpecializationsForClassID and GetSpecializationInfoByID then --HasSpeccs
 				for i = 1, GetNumSpecializationsForClassID(classID) do
-					local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version
+					local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version				
+
 					Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
 					table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = maleSpecName}) --for testmode
 
