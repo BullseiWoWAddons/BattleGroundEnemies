@@ -2,6 +2,24 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.2.7.0",
+		General = "Update for Cataclysm Classic",
+		Sections = {
+			{
+				Header = "Changes:",
+				Entries = {
+					"Trinket cooldown reduced to 90 seocnds for healers, thanks to hazzal from GitHub for the report."
+				}
+			},
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed errors on Cataclysm classic",
+				}
+			},
+		}
+	},
+	{
 		Version = "10.2.0.3",
 		General = "Bugfix an error.",
 		Sections = {
