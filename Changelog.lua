@@ -2,6 +2,24 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "10.2.7.1",
+		General = "Bugfix and new cooldown settings",
+		Sections = {
+			{
+				Header = "New Feature:",
+				Entries = {
+					"Added a settings to enable/disable the cooldown swipe texture as requested by JordanK295 from GitHub."
+				}
+			},
+			{
+				Header = "Bugfixes:",
+				Entries = {
+					"Fixed the imported profile settings not surviving a interface reload or a logout after being imported from a string. Thanks to Zendara from Curseforge for the report.",
+				}
+			},
+		}
+	},
+	{
 		Version = "10.2.7.0",
 		General = "Update for Cataclysm Classic",
 		Sections = {
