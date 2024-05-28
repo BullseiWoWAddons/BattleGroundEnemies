@@ -12,6 +12,26 @@ local LibSerialize = LibStub("LibSerialize")
 local ButtonFrameTemplate_HidePortrait = ButtonFrameTemplate_HidePortrait
 local CreateFrame = CreateFrame
 
+local CopyTable = CopyTable or function(settings, shallow)
+	local copy = {};
+	for k, v in pairs(settings) do
+		if type(v) == "table" and not shallow then
+			copy[k] = CopyTable(v);
+		else
+			copy[k] = v;
+		end
+	end
+	return copy;
+end
+
+
+
+local MergeTable = MergeTable or function(destination, source)
+	for k, v in pairs(source) do
+		destination[k] = v;
+	end
+end
+
 
 local function CreateImportExportFrame()
 	local frame = CreateFrame("Frame", "dsafsdafdsafdsafsdaf", UIParent, "ButtonFrameTemplate")
@@ -63,7 +83,7 @@ local function CreateImportExportFrame()
 				return BattleGroundEnemies:Information("Empty input, please enter a exported string here.")
 			end
 			local data = BattleGroundEnemies:ReceivePrintData(stringg)
-			BattleGroundEnemies.db.profile = data
+			MergeTable(BattleGroundEnemies.db.profile, data)
 
 			BattleGroundEnemies:NotifyChange()
 		end
