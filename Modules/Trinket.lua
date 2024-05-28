@@ -22,6 +22,7 @@ local defaultSettings = {
 		FontSize = 12,
 		FontOutline = "OUTLINE",
 		EnableShadow = false,
+		DrawSwipe = true,
 		ShadowColor = {0, 0, 0, 1},
 	}
 }
@@ -188,7 +189,7 @@ function trinket:AttachToPlayerButton(playerButton)
 	function frame:ApplyAllSettings()
 
 		local moduleSettings = self.config
-		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, false, true, {0, 0, 0, 0.5})
+		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, false, {0, 0, 0, 0.5})
 	end
 	playerButton.Trinket = frame
 end

@@ -36,6 +36,7 @@ local defaultSettings = {
 		FontOutline = "THICKOUTLINE",
 		FontColor = {1, 1, 1, 1},
 		EnableShadow = false,
+		DrawSwipe = true,
 		ShadowColor = {0, 0, 0, 1}
 	}
 }
@@ -118,7 +119,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	function frame:ApplyAllSettings()
 		local conf = self.config
 		self.AuraText:ApplyFontStringSettings(conf.Text)
-		self.Cooldown:ApplyCooldownSettings(conf.Cooldown, true, true, {0, 0, 0, 0.75})
+		self.Cooldown:ApplyCooldownSettings(conf.Cooldown, true, {0, 0, 0, 0.75})
 	end
 	function frame:SearchForDebuffs(aura)
 		--BattleGroundEnemies:Debug("Läüft")

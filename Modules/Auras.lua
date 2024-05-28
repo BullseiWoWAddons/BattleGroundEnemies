@@ -27,6 +27,7 @@ local defaults = {
 		FontSize = 8,
 		FontOutline = "OUTLINE",
 		EnableShadow = false,
+		DrawSwipe = false,
 		ShadowColor = {0, 0, 0, 1},
 	},
 	Filtering = {
@@ -454,7 +455,7 @@ local function createNewAuraFrame(playerButton, container)
 
 		--self.count:ApplyFontStringSettings(conf.StackText)
 		local cooldownConfig = conf.Cooldown
-		self.cooldown:ApplyCooldownSettings(cooldownConfig, true, false)
+		self.cooldown:ApplyCooldownSettings(cooldownConfig, true)
 		if container.filter == "HELPFUL" then
 			self.Stealable:SetSize(conf.Container.IconSize + 3, conf.Container.IconSize + 3)
 		end

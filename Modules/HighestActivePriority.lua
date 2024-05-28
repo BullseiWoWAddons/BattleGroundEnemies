@@ -9,6 +9,7 @@ local defaultSettings = {
 		FontSize = 12,
 		FontOutline = "OUTLINE",
 		EnableShadow = false,
+		DrawSwipe = true,
 		ShadowColor = {0, 0, 0, 1},
 	},
 	ActivePoints = 2,
@@ -134,7 +135,7 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 
 	function frame:ApplyAllSettings()
 		local moduleSettings = self.config
-		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, true, true, {0, 0, 0, 0.5})
+		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, true, {0, 0, 0, 0.5})
 		self:MakeSureWeAreOnTop()
 	end
 

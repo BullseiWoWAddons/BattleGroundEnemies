@@ -2919,9 +2919,9 @@ local function ApplyFontStringSettings(fs, settings)
 	fs:EnableShadowColor(settings.EnableShadow, settings.ShadowColor)
 end
 
-local function ApplyCooldownSettings(self, config, cdReverse, setDrawSwipe, swipeColor)
+local function ApplyCooldownSettings(self, config, cdReverse, swipeColor)
 	self:SetReverse(cdReverse)
-	self:SetDrawSwipe(setDrawSwipe)
+	self:SetDrawSwipe(config.DrawSwipe)
 	if swipeColor then self:SetSwipeColor(unpack(swipeColor)) end
 	self:SetHideCountdownNumbers(not config.ShowNumber)
 	if self.Text then

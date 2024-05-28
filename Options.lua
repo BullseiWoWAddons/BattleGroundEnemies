@@ -592,6 +592,12 @@ function Data.AddCooldownSettings(location)
 					end,
 					hasAlpha = true,
 					order = 7
+				},
+				DrawSwipe = {
+					type = "toggle",
+					name = L.Enable_DrawSwipe,
+					desc = L.Enable_DrawSwipe_Desc,
+					order = 8
 				}
 			}
 		}

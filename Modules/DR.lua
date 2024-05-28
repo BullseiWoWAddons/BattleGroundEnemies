@@ -27,6 +27,7 @@ local defaultSettings = {
 		FontSize = 12,
 		FontOutline = "OUTLINE",
 		EnableShadow = false,
+		DrawSwipe = false,
 		ShadowColor = {0, 0, 0, 1},
 	},
 	Container = {
@@ -160,7 +161,7 @@ local function createNewDrFrame(playerButton, container)
 	drFrame.Container = container
 
 	drFrame.ApplyChildFrameSettings = function(self)
-		self.Cooldown:ApplyCooldownSettings(container.config.Cooldown, false, false)
+		self.Cooldown:ApplyCooldownSettings(container.config.Cooldown, false)
 		self:SetDisplayType()
 	end
 
