@@ -3,6 +3,8 @@ local AddonName, Data = ...
 local GetTime = GetTime
 local GetSpellTexture = GetSpellTexture
 
+local IsCataClassic = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
+
 local L = Data.L
 
 local defaultSettings = {
@@ -213,7 +215,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 				self.AuraText:SetText("")
 				self.ActiveRespawnTimer = true
 			end
-			self.Cooldown:SetCooldown(GetTime(), 26) --overwrite an already active timer
+			self.Cooldown:SetCooldown(GetTime(), IsCataClassic and 45 or 26) --overwrite an already active timer
 		end
 	end
 
