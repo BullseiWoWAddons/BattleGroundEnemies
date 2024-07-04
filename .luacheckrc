@@ -95,6 +95,7 @@ globals = {
 	-- Legion/TombOfSargeras/Kiljaeden.lua
 	"AbbreviateLargeNumbers",
 	"AceGUIWidgetLSMlists",
+	"ACTION_BUTTON_USE_KEY_DOWN",
 	"AlertFrame",
 	"Ambiguate",
 	"ArenaCastingBarFrameTemplate",
@@ -271,6 +272,7 @@ globals = {
 	"MovieFrame",
 	"NO",
 	"ObjectiveTrackerFrame",
+	"OPTION_TOOLTIP_ACTION_BUTTON_USE_KEY_DOWN",
 	"PlayerFrame",
 	"PlayerHasToy",
 	"PlaySound",

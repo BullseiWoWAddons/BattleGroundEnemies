@@ -798,17 +798,23 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				--childGroups = "tab",
 				order = 7,
 				args = {
+					ActionButtonUseKeyDown = {
+						type = "toggle",
+						name = ACTION_BUTTON_USE_KEY_DOWN,
+						desc = OPTION_TOOLTIP_ACTION_BUTTON_USE_KEY_DOWN,
+						order = 1,
+					},
 					UseClique = {
 						type = "toggle",
 						name = L.EnableClique,
 						desc = L.EnableClique_Desc,
-						order = 1,
+						order = 2,
 						hidden = playerType == "Enemies"
 					},
 					LeftButton = {
 						type = "group",
 						name = KEY_BUTTON1,
-						order = 2,
+						order = 3,
 						disabled = function() return location.UseClique end,
 						args = {
 							LeftButtonType = {
@@ -832,7 +838,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					RightButton = {
 						type = "group",
 						name = KEY_BUTTON2,
-						order = 3,
+						order = 4,
 						disabled = function() return location.UseClique end,
 						args = {
 							RightButtonType = {
@@ -856,7 +862,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					MiddleButton = {
 						type = "group",
 						name = KEY_BUTTON3,
-						order = 4,
+						order = 5,
 						disabled = function() return location.UseClique end,
 						args = {
 

@@ -772,7 +772,10 @@ do
 			local setupUsualAttributes = true
 			--use a table to track changes and compare them to GetAttribute
 			--set baseline
-			local newState = {
+
+
+
+			local newAttributes = {
 				unit = not self.PlayerIsEnemy and self.unit or false,
 				type1 = false,
 				type2 = false,
@@ -788,9 +791,9 @@ do
 
 			if self.PlayerIsEnemy then
 				if self.PlayerDetails.PlayerArenaUnitID then --its a arena enemy
-					newState.unit = self.PlayerDetails.PlayerArenaUnitID
-					-- newState.type1 = "target"    -- type1 = LEFT-Click to target
-					-- newState.type2 = "focus"     -- type2 = Right-Click to focus
+					newAttributes.unit = self.PlayerDetails.PlayerArenaUnitID
+					-- newAttributes.type1 = "target"    -- type1 = LEFT-Click to target
+					-- newAttributes.type2 = "focus"     -- type2 = Right-Click to focus
 					-- setupUsualAttributes = false
 				end
 			else
@@ -806,44 +809,49 @@ do
 
 
 			if setupUsualAttributes then
-				newState.type1 = "macro" -- type1 = LEFT-Click
-				newState.type2 = "macro" -- type2 = Right-Click
-				newState.type3 = "macro" -- type3 = Middle-Click
+				newAttributes.type1 = "macro" -- type1 = LEFT-Click
+				newAttributes.type2 = "macro" -- type2 = Right-Click
+				newAttributes.type3 = "macro" -- type3 = Middle-Click
 
 				for i = 1, 3 do
 					local bindingType = self.config[mouseButtons[i] .. "Type"]
 
 					if bindingType == "Target" then
-						newState['macrotext' .. i] = '/cleartarget\n' ..
+						newAttributes['macrotext' .. i] = '/cleartarget\n' ..
 							'/targetexact ' ..
 							self.PlayerDetails.PlayerName
 					elseif bindingType == "Focus" then
-						newState['macrotext' .. i] = '/targetexact ' .. self.PlayerDetails.PlayerName .. '\n' ..
+						newAttributes['macrotext' .. i] = '/targetexact ' .. self.PlayerDetails.PlayerName .. '\n' ..
 							'/focus\n' ..
 							'/targetlasttarget'
 					else -- Custom
 						local macrotext = (BattleGroundEnemies.db.profile[self.PlayerType][mouseButtons[i] .. "Value"])
 							:gsub("%%n", self.PlayerDetails.PlayerName)
-						newState['macrotext' .. i] = macrotext
+						newAttributes['macrotext' .. i] = macrotext
 					end
 				end
 			end
 
 			--check what have actually changed
 			local updateNeeded = false
-			for attribute, value in pairs(newState) do
+			for attribute, value in pairs(newAttributes) do
 				local currentValue = self:GetAttribute(attribute)
 				if currentValue ~= value then
 					updateNeeded = true
 					break
 				end
 			end
+			local newRegisterForClicksValue = BattleGroundEnemies.db.profile[self.PlayerType].ActionButtonUseKeyDown and "AnyDown" or "AnyUp"
+			if self.registerForClicksValue == nil or self.registerForClicksValue ~= newRegisterForClicksValue then
+				updateNeeded = true
+			end
 			if updateNeeded then
 				if InCombatLockdown() then
 					return BattleGroundEnemies:QueueForUpdateAfterCombat(self, "SetBindings")
 				end
-
-				for attribute, value in pairs(newState) do
+				self:RegisterForClicks(newRegisterForClicksValue)
+				self.registerForClicksValue = newRegisterForClicksValue
+				for attribute, value in pairs(newAttributes) do
 					self:SetAttribute(attribute, value)
 				end
 			end
