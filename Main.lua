@@ -3413,7 +3413,7 @@ function CombatLogevents.UNIT_DIED(self, _, destName, _, _, _)
 end
 
 function BattleGroundEnemies:UpdateEnemiesFromCombatlogScanning()
-	self.Enemies.BeforePlayerSourceUpdate(PlayerSources.CombatLog)
+	self.Enemies:BeforePlayerSourceUpdate(PlayerSources.CombatLog)
 	for guid, data in pairs(self.PlayerGUIDs) do
 		if data.IsEnemy then
 			--check if its still a enemy, a ally might have joined and we might have gotten a combat log event before that
