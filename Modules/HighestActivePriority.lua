@@ -1,6 +1,9 @@
 local AddonName, Data = ...
 local L = Data.L
 
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+
+
 local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",

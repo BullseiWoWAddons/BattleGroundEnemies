@@ -3,7 +3,7 @@ local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 local CreateFrame = CreateFrame
 local GetTime = GetTime
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 local GameTooltip = GameTooltip
 local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 

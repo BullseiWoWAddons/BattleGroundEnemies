@@ -8,8 +8,8 @@ local table_insert = table.insert
 local GetClassInfo = GetClassInfo
 local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
 local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
-local GetSpellInfo = GetSpellInfo
-local GetSpellTexture = GetSpellTexture
+local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or GetSpellInfo
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
 local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC

@@ -5,7 +5,8 @@ local L = Data.L
 local CreateFrame = CreateFrame
 local GetTime = GetTime
 local GameTooltip = GameTooltip
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+
 
 
 

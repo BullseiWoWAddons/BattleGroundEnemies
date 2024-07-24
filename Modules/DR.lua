@@ -5,7 +5,8 @@ local L = Data.L
 local LSM = LibStub("LibSharedMedia-3.0")
 
 
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+
 local CreateFrame = CreateFrame
 local BackdropTemplateMixin = BackdropTemplateMixin
 local GameTooltip = GameTooltip

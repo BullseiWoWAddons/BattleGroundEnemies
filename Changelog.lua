@@ -2,6 +2,18 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "11.0.0.0",
+		General = "Update for The War Within",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed a typo/bug reported by zzwtest from GitHub."
+				}
+			}
+		}
+	},
+	{
 		Version = "10.2.7.3",
 		General = "Minor update",
 		Sections = {

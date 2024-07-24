@@ -1,7 +1,8 @@
 local BattleGroundEnemies = BattleGroundEnemies
 local AddonName, Data = ...
 local GetTime = GetTime
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+
 
 local IsCataClassic = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
 
