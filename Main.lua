@@ -24,6 +24,7 @@ local unpack = unpack
 
 local AuraUtil = AuraUtil
 local C_PvP = C_PvP
+local C_UnitAuras = C_UnitAuras
 local CreateFrame = CreateFrame
 local CTimerNewTicker = C_Timer.NewTicker
 local GetArenaOpponentSpec = GetArenaOpponentSpec
@@ -2375,13 +2376,17 @@ local function FindAuraBySpellID(unitID, spellId, filter)
 	if not unitID or not spellId then return end
 
 	for i = 1, 40 do
-		local name, _, amount, debuffType, duration, expirationTime, unitCaster, _, _, id, _, _, _, _, _, value2, value3, value4 =
-			UnitAura(unitID, i, filter)
-		if not id then return end -- no more auras
+		if C_UnitAuras and C_UnitAuras.GetAuraDataByIndex then
+			local aura = C_UnitAuras.GetAuraDataByIndex(unitID, i, filter)
+			if aura and aura.spellId == spellId then return i end
+		else
+			local name, _, amount, debuffType, duration, expirationTime, unitCaster, _, _, id, _, _, _, _, _, value2, value3, value4 = UnitAura(unitID, i, filter)
+			if not id then return end -- no more auras
 
-		if spellId == id then
-			return i, name, _, amount, debuffType, duration, expirationTime, unitCaster, _, _, id, _, _, _, _, _, value2,
-				value3, value4
+			if spellId == id then
+				return i, name, _, amount, debuffType, duration, expirationTime, unitCaster, _, _, id, _, _, _, _, _, value2,
+					value3, value4
+			end
 		end
 	end
 end
