@@ -39,7 +39,8 @@ local GetRaidRosterInfo = GetRaidRosterInfo
 local GetSpecializationInfoByID = GetSpecializationInfoByID
 local GetSpellBookItemName = C_SpellBook and C_SpellBook.GetSpellBookItemName or GetSpellBookItemName
 local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or GetSpellInfo
-local GetSpellTabInfo = C_SpellBook and C_SpellBook.GetSpellBookSkillLineInfo or GetSpellTabInfo
+local GetSpellTabInfo = GetSpellTabInfo
+local C_SpellBook = C_SpellBook
 local GetTime = GetTime
 local GetUnitName = GetUnitName
 local InCombatLockdown = InCombatLockdown
@@ -2618,15 +2619,29 @@ do
 			local foundA = Data.FoundAuras[filter]
 			local playerSpells = {}
 			local numTabs = GetNumSpellTabs()
-			for i = 1, numTabs do
-				local name, texture, offset, numSpells = GetSpellTabInfo(i)
-				for j = 1, numSpells do
-					local id = j + offset
-					local spellName, _, spelliD = GetSpellBookItemName(id, 'spell')
-					if spelliD and IsSpellKnown(spelliD) then
-						playerSpells[spelliD] = true
+			for j = 1, numTabs do
+				if GetSpellTabInfo then
+					local name, texture, offset, numSpells = GetSpellTabInfo(j)
+					for k = 1, numSpells do
+						local id = k + offset
+						local spellName, _, spelliD = GetSpellBookItemName(id, 'spell')
+						if spelliD and IsSpellKnown(spelliD) then
+							playerSpells[spelliD] = true
+						end
 					end
+				elseif C_SpellBook and C_SpellBook.GetSpellBookSkillLineInfo then
+					local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(j)
+					local offset, numSlots = skillLineInfo.itemIndexOffset, skillLineInfo.numSpellBookItems
+					for k = offset + 1, offset + numSlots do
+						local name, subName = C_SpellBook.GetSpellBookItemName(k, Enum.SpellBookSpellBank.Player)
+						local spellID = select(2,C_SpellBook.GetSpellBookItemType(k, Enum.SpellBookSpellBank.Player))
+						if spellID and IsSpellKnown(spellID) then
+							playerSpells[spellID] = true
+						end
+					end
+
 				end
+				
 			end
 
 			for spellId, auraDetails in pairs(auras) do
