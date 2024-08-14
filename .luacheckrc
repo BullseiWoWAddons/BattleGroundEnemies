@@ -115,6 +115,7 @@ globals = {
 	"BNSendWhisper",
 	"BossBanner",
 	"ButtonFrameTemplate_HidePortrait",
+	"C_AddOns",
 	"C_BattleNet",
 	"C_ChatInfo",
 	"C_Covenants",
