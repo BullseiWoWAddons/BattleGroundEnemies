@@ -24,6 +24,7 @@ local unpack = unpack
 
 local AuraUtil = AuraUtil
 local C_PvP = C_PvP
+local C_Spell = C_Spell
 local C_UnitAuras = C_UnitAuras
 local CreateFrame = CreateFrame
 local CTimerNewTicker = C_Timer.NewTicker
@@ -38,7 +39,7 @@ local GetNumSpellTabs = C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines or
 local GetRaidRosterInfo = GetRaidRosterInfo
 local GetSpecializationInfoByID = GetSpecializationInfoByID
 local GetSpellBookItemName = C_SpellBook and C_SpellBook.GetSpellBookItemName or GetSpellBookItemName
-local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or GetSpellInfo
+local GetSpellInfo = GetSpellInfo
 local GetSpellTabInfo = GetSpellTabInfo
 local C_SpellBook = C_SpellBook
 local GetTime = GetTime
@@ -236,11 +237,21 @@ local function CreateFakeAura(filter)
 	local auraToSend = auraTable[whichAura]
 
 
-	if not GetSpellInfo(auraToSend.spellId) then return end --this spellID is probably not existing in this version of the game
+	local spellName
+	if C_Spell and C_Spell.GetSpellInfo then
+		local spellInfo = C_Spell.GetSpellInfo(auraToSend.spellId)
+		if spellInfo then
+			spellName = spellInfo.name
+		end
+	else
+		spellName = GetSpellInfo(auraToSend.spellId)
+	end
+
+	if not spellName then return end
 
 	local newAura = {
 		applications = auraToSend.applications,
-		name = GetSpellInfo(auraToSend.spellId),
+		name = spellName,
 		auraInstanceID = nil,
 		canApplyAura = canApplyAura or auraToSend.canApplyAura,
 		charges = nil,
@@ -2447,7 +2458,13 @@ local function SetupTrinketAndRacialData()
 				randomTrinkets[count] = triggerSpellID
 				count = count + 1
 			else
-				if GetSpellInfo(triggerSpellID) then
+				local spellExists
+				if C_Spell and C_Spell.GetSpellInfo then
+					spellExists = C_Spell.GetSpellInfo(triggerSpellID)
+				else
+					spellExists = GetSpellInfo(triggerSpellID)
+				end
+				if spellExists then
 					randomTrinkets[count] = triggerSpellID
 					count = count + 1
 				end
@@ -2458,7 +2475,13 @@ local function SetupTrinketAndRacialData()
 	do
 		local count = 1
 		for racialSpelliD, data in pairs(Data.RacialSpellIDtoCooldown) do
-			if GetSpellInfo(racialSpelliD) then
+			local spellExists
+			if C_Spell and C_Spell.GetSpellInfo then
+				spellExists = C_Spell.GetSpellInfo(racialSpelliD)
+			else
+				spellExists = GetSpellInfo(racialSpelliD)
+			end
+			if spellExists then
 				randomRacials[count] = racialSpelliD
 				count = count + 1
 			end
@@ -2643,7 +2666,13 @@ do
 			end
 
 			for spellId, auraDetails in pairs(auras) do
-				if GetSpellInfo(spellId) then
+				local spellExists
+				if C_Spell and C_Spell.GetSpellInfo then
+					spellExists = C_Spell.GetSpellInfo(spellId)
+				else
+					spellExists = GetSpellInfo(spellId)
+				end
+				if spellExists then
 					if filter == "HARMFUL" and DRList:GetCategoryBySpellID(IsClassic and auraDetails.name or spellId) then
 						foundA.foundDRAuras[#foundA.foundDRAuras + 1] = auraDetails
 					elseif playerSpells[spellId] then

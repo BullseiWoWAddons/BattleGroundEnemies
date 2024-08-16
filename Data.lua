@@ -8,7 +8,8 @@ local table_insert = table.insert
 local GetClassInfo = GetClassInfo
 local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
 local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
-local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or GetSpellInfo
+local GetSpellInfo = GetSpellInfo
+local C_Spell = C_Spell
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
 local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
@@ -965,13 +966,19 @@ end
 Data.RacialNameToSpellIDs = {}
 Data.Racialnames = {}
 for spellId in pairs(Data.RacialSpellIDtoCooldown) do
-
-	local racialName = GetSpellInfo(spellId)
-
+	local racialName
+	if C_Spell and C_Spell.GetSpellInfo then
+		local spellInfo = C_Spell.GetSpellInfo(spellId)
+		if spellInfo then
+			racialName = spellInfo.name
+		end
+	else
+		racialName = GetSpellInfo(spellId)
+	end
 	if racialName then
 		if not Data.RacialNameToSpellIDs[racialName] then
 			Data.RacialNameToSpellIDs[racialName] = {}
-			Data.Racialnames[GetSpellInfo(spellId)] = GetSpellInfo(spellId)
+			Data.Racialnames[racialName] = racialName
 		end
 		Data.RacialNameToSpellIDs[racialName][spellId] = true
 	end
