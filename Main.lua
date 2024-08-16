@@ -2687,7 +2687,7 @@ do
 						if not playerButton.isDead then
 							if BattleGroundEnemies.BGSize == 15 and n == 1 and not hasFlag then --this guy has a objective now
 								-- hide old flag carrier
-								local oldFlagholder = holdsflags
+								local oldFlagholder = holdsflag
 								if oldFlagholder then
 									oldFlagholder:DispatchEvent("ArenaOpponentHidden")
 								end
@@ -3462,6 +3462,7 @@ function BattleGroundEnemies:UpdateEnemiesFromCombatlogScanning()
 	self.Enemies:AfterPlayerSourceUpdate()
 end
 
+local UpdateEnemmiesFoundByGUIDTicker = nil
 function BattleGroundEnemies:SearchGUIDForPlayers(GUID)
 	if not GUID then return end
 	if GUID == "" then return end
@@ -3512,7 +3513,7 @@ function BattleGroundEnemies:SearchGUIDForPlayers(GUID)
 	end
 end
 
-local UpdateEnemmiesFoundByGUIDTicker = nil
+
 function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
 	local timestamp, subevent, hide, srcGUID, srcName, srcF1, srcF2, destGUID, destName, destF1, destF2, spellId, spellName, spellSchool, auraType = CombatLogGetCurrentEventInfo()
 	self:SearchGUIDForPlayers(srcGUID)
