@@ -2,6 +2,18 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "11.0.2.2",
+		General = "Update for The War Within",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed error message on classic"
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.2.1",
 		General = "Update for The War Within",
 		Sections = {
