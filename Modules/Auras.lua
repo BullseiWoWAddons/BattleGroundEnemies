@@ -245,14 +245,14 @@ local function AddFilteringSettings(location, filter)
 								local valueTable = {}
 								if C_Spell and C_Spell.GetSpellInfo then
 									for spellId in pairs(location.CustomFiltering.SpellIDFiltering_Filterlist) do
-										local spellInfo = C_Spell.GetSpellInfo(spellId)
-										if spellInfo then
-											valueTable[spellId] = spellId..": "..(spellInfo.name or "")
+										if C_Spell and C_Spell.GetSpellInfo then
+											local spellInfo = C_Spell.GetSpellInfo(spellId)
+											if spellInfo then
+												valueTable[spellId] = spellId..": "..(spellInfo.name or "")
+											end
+										else
+											valueTable[spellId] = spellId..": "..(GetSpellInfo(spellId) or "")
 										end
-									end
-								else
-									for spellId in pairs(location.CustomFiltering.SpellIDFiltering_Filterlist) do
-										valueTable[spellId] = spellId..": "..(GetSpellInfo(spellId) or "")
 									end
 								end
 								
