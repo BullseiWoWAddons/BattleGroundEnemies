@@ -604,9 +604,7 @@ local function AttachToPlayerButton(playerButton, filterr, isPriorityContainer)
 		-- 	}
 		-- end
 
-		if not auraContainer:CareAboutThisAura(unitID, filter, aura) then
-			return
-		end
+		if not auraContainer:CareAboutThisAura(unitID, filter, aura) then return end
 	
 		self:NewInput(aura)
 	end
