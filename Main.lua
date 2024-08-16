@@ -3448,12 +3448,17 @@ function BattleGroundEnemies:UpdateEnemiesFromCombatlogScanning()
 			if self.Allies.Players[data.name] then
 				data.IsEnemy = false
 			else
+				local scoreInfo
+				if C_PvP and C_PvP.GetScoreInfoByPlayerGuid then
+					scoreInfo = C_PvP.GetScoreInfoByPlayerGuid(guid)
+				end
+
 				-- its still a enemy
 				self.Enemies:AddPlayerToSource(PlayerSources.CombatLog, {
 					name = data.name,
 					raceName = data.race,
 					classTag = data.classToken,
-					specName = data.spec,
+					specName = scoreInfo and scoreInfo.talentSpec,
 				})
 			end
 		end
@@ -3473,7 +3478,7 @@ function BattleGroundEnemies:SearchGUIDForPlayers(GUID)
 	if self.PlayerGUIDs[GUID] then return end
 
 
-	
+
 	local localizedClass, englishClass, localizedRace, englishRace, sex, name, realm = GetPlayerInfoByGUID(GUID)
 
 	if not localizedClass then return end -- see if its a player, it GetPlayerInfoByGUID doens't return anythng its not a player
@@ -3484,15 +3489,15 @@ function BattleGroundEnemies:SearchGUIDForPlayers(GUID)
 	local ambiguatedName = Ambiguate(name, "none")
 	local isEnemy = false
 
-	local scoreInfo = C_PvP.GetScoreInfoByPlayerGuid(GUID)
 	self.PlayerGUIDs[GUID] = {
 		name = ambiguatedName,
 		race = localizedRace,
 		classToken = englishClass,
-		scoreInfo = scoreInfo
 	}
 
-	--[[ 		if scoreInfo and type(scoreInfo) =="table" then
+	--[[ 		
+	local scoreInfo = C_PvP.GetScoreInfoByPlayerGuid(GUID)
+	if scoreInfo and type(scoreInfo) =="table" then
 		if scoreInfo.faction ~= myBGFaction then
 			isEnemy = true
 			self.PlayerGUIDs[GUID].spec = scoreInfo.talentSpec
@@ -3518,7 +3523,7 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
 	local timestamp, subevent, hide, srcGUID, srcName, srcF1, srcF2, destGUID, destName, destF1, destF2, spellId, spellName, spellSchool, auraType = CombatLogGetCurrentEventInfo()
 	self:SearchGUIDForPlayers(srcGUID)
 	self:SearchGUIDForPlayers(destGUID)
-	
+
 	--self:Debug(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellId,spellName,spellSchool, auraType)
 	local covenantID = Data.CovenantSpells[spellId]
 	if covenantID then
