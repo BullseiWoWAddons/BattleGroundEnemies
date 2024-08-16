@@ -160,7 +160,7 @@ function cooldowns:AttachToPlayerButton(playerButton)
 		return cooldownData
 	end
 
-	function container:SPELL_CAST_SUCCESS(srcName, destName, spellId)
+	function container:SPELL_CAST_SUCCESS(srcGUID, srcName, destGUID, destName, spellId)
 		if true then return end
         print("SPELL_CAST_SUCCESS", srcName, destName, spellId)
 		local config = self.config

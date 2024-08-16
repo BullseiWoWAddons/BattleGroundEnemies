@@ -2,6 +2,18 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "11.0.2.1",
+		General = "Update for The War Within",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed the combat log scanning problem leading to problems with DR tracking and other features relying on combat log."
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.2.0",
 		General = "Update for The War Within",
 		Sections = {

@@ -1552,11 +1552,9 @@ local function PopulateMainframe(playerType)
 				else --in BattleGround
 					if numScoreboardEnemies == 0 then
 						if self.IsRatedBG and IsRetail then
-							BattleGroundEnemies:EnableFallbackToCombatlogScanning()
 							newPlayers = self.PlayerSources[PlayerSources.CombatLog]
 						end
 					else
-						BattleGroundEnemies:DisableFallbackToCombatlogScanning()
 						addScoreBoardPlayers = true
 					end
 				end
@@ -2641,7 +2639,7 @@ do
 					end
 
 				end
-				
+
 			end
 
 			for spellId, auraDetails in pairs(auras) do
@@ -2689,7 +2687,7 @@ do
 						if not playerButton.isDead then
 							if BattleGroundEnemies.BGSize == 15 and n == 1 and not hasFlag then --this guy has a objective now
 								-- hide old flag carrier
-								local oldFlagholder = holdsflag
+								local oldFlagholder = holdsflags
 								if oldFlagholder then
 									oldFlagholder:DispatchEvent("ArenaOpponentHidden")
 								end
@@ -2699,12 +2697,12 @@ do
 								holdsflag = playerButton
 								hasFlag = true
 							elseif n == 2 and playerButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
-								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies,
-									playerButton.PlayerDetails.PlayerName, nil,
+								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, nil,
+									playerButton.PlayerDetails.PlayerName, nil, nil,
 									randomRacials[math_random(1, #randomRacials)])
 							elseif n == 3 and playerButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
-								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies,
-									playerButton.PlayerDetails.PlayerName, nil,
+								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, nil,
+									playerButton.PlayerDetails.PlayerName, nil, nil,
 									randomTrinkets[math_random(1, #randomTrinkets)])
 							elseif n == 4 then --power simulation
 								playerButton:UNIT_POWER_FREQUENT()
@@ -3355,6 +3353,13 @@ function BattleGroundEnemies:GetPlayerbuttonByName(name)
 	return self.Enemies.Players[name] or self.Allies.Players[name]
 end
 
+function BattleGroundEnemies:GetPlayerbuttonByGUID(GUID)
+	local guidData = self.PlayerGUIDs[GUID]
+	if not guidData then return end
+
+	return self:GetPlayerbuttonByName(guidData.name)
+end
+
 local CombatLogevents = {}
 BattleGroundEnemies.CombatLogevents = CombatLogevents
 
@@ -3381,15 +3386,15 @@ end ]]
 end ]]
 
 
-function CombatLogevents.SPELL_AURA_REFRESH(self, srcName, destName, spellId, spellName, auraType, amount)
-	local playerButton = self:GetPlayerbuttonByName(destName)
+function CombatLogevents.SPELL_AURA_REFRESH(self, srcGUID, srcName, destGUID, destName, spellId, spellName, auraType, amount)
+	local playerButton = self:GetPlayerbuttonByGUID(destGUID)
 	if playerButton then
 		playerButton:AuraRemoved(spellId, spellName)
 	end
 end
 
-function CombatLogevents.SPELL_AURA_REMOVED(self, srcName, destName, spellId, spellName, auraType)
-	local playerButton = self:GetPlayerbuttonByName(destName)
+function CombatLogevents.SPELL_AURA_REMOVED(self, srcGUID, srcName, destGUID, destName, spellId, spellName, auraType)
+	local playerButton = self:GetPlayerbuttonByGUID(destGUID)
 	if playerButton then
 		playerButton:AuraRemoved(spellId, spellName)
 	end
@@ -3397,10 +3402,10 @@ end
 
 --CombatLogevents.SPELL_DISPEL = CombatLogevents.SPELL_AURA_REMOVED
 
-function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellId)
-	local playerButton = self:GetPlayerbuttonByName(srcName)
+function CombatLogevents.SPELL_CAST_SUCCESS(self, srcGUID, srcName, destGUID, destName, spellId)
+	local playerButton = self:GetPlayerbuttonByGUID(srcGUID)
 	if playerButton and playerButton.isShown then
-		playerButton:DispatchEvent("SPELL_CAST_SUCCESS", srcName, destName, spellId)
+		playerButton:DispatchEvent("SPELL_CAST_SUCCESS", srcGUID, srcName, destGUID, destName, spellId)
 
 		local defaultInterruptDuration = Data.Interruptdurations[spellId]
 		if defaultInterruptDuration then -- check if enemy got interupted
@@ -3416,8 +3421,8 @@ function CombatLogevents.SPELL_CAST_SUCCESS(self, srcName, destName, spellId)
 	end
 end
 
-function CombatLogevents.SPELL_INTERRUPT(self, _, destName, spellId, _, _)
-	local playerButton = self:GetPlayerbuttonByName(destName)
+function CombatLogevents.SPELL_INTERRUPT(self, srcGUID, srcName, destGUID, destName, spellId, _, _)
+	local playerButton = self:GetPlayerbuttonByGUID(destGUID)
 	if playerButton and playerButton.isShown then
 		local defaultInterruptDuration = Data.Interruptdurations[spellId]
 		if defaultInterruptDuration then
@@ -3427,9 +3432,9 @@ function CombatLogevents.SPELL_INTERRUPT(self, _, destName, spellId, _, _)
 end
 
 CombatLogevents.Counter = {}
-function CombatLogevents.UNIT_DIED(self, _, destName, _, _, _)
+function CombatLogevents.UNIT_DIED(self, srcGUID, srcName, destGUID, destName, _, _, _)
 	--self:Debug("subevent", destName, "UNIT_DIED")
-	local playerButton = self:GetPlayerbuttonByName(destName)
+	local playerButton = self:GetPlayerbuttonByGUID(destGUID)
 	if playerButton then
 		playerButton:PlayerDied()
 	end
@@ -3457,62 +3462,66 @@ function BattleGroundEnemies:UpdateEnemiesFromCombatlogScanning()
 	self.Enemies:AfterPlayerSourceUpdate()
 end
 
+function BattleGroundEnemies:SearchGUIDForPlayers(GUID)
+	if not GUID then return end
+	if GUID == "" then return end
+	if self.SearchedGUIDs[GUID] then return end
+
+	self.SearchedGUIDs[GUID] = true
+
+	if self.PlayerGUIDs[GUID] then return end
+
+
+	
+	local localizedClass, englishClass, localizedRace, englishRace, sex, name, realm = GetPlayerInfoByGUID(GUID)
+
+	if not localizedClass then return end -- see if its a player, it GetPlayerInfoByGUID doens't return anythng its not a player
+
+	if realm and realm ~= "" then
+		name = name .. "-" .. realm
+	end
+	local ambiguatedName = Ambiguate(name, "none")
+	local isEnemy = false
+
+	local scoreInfo = C_PvP.GetScoreInfoByPlayerGuid(GUID)
+	self.PlayerGUIDs[GUID] = {
+		name = ambiguatedName,
+		race = localizedRace,
+		classToken = englishClass,
+		scoreInfo = scoreInfo
+	}
+
+	--[[ 		if scoreInfo and type(scoreInfo) =="table" then
+		if scoreInfo.faction ~= myBGFaction then
+			isEnemy = true
+			self.PlayerGUIDs[GUID].spec = scoreInfo.talentSpec
+		end
+	else
+		if not self.Allies[ambiguatedName] then
+			isEnemy = true
+		end
+	end ]]
+	if not self.Allies.Players[ambiguatedName] then
+		self.PlayerGUIDs[GUID].IsEnemy = true
+		if UpdateEnemmiesFoundByGUIDTicker then UpdateEnemmiesFoundByGUIDTicker:Cancel() end -- use a timer to apply changes after 1 second, this prevents from too many updates after each player is found
+
+		UpdateEnemmiesFoundByGUIDTicker = CTimerNewTicker(1, function()
+			BattleGroundEnemies:UpdateEnemiesFromCombatlogScanning()
+			UpdateEnemmiesFoundByGUIDTicker = nil
+		end, 1)
+	end
+end
+
 local UpdateEnemmiesFoundByGUIDTicker = nil
 function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
-	local timestamp, subevent, hide, srcGUID, srcName, srcF1, srcF2, destGUID, destName, destF1, destF2, spellId, spellName, spellSchool, auraType =
-		CombatLogGetCurrentEventInfo()
-	if self.combatlogScanningEnabled then
-		if srcGUID and srcGUID ~= "" then
-			if not self.SearchedGUIDs[srcGUID] then
-				self.SearchedGUIDs[srcGUID] = true
-				if not self.PlayerGUIDs[srcGUID] then
-					-- see if its a player
-					local localizedClass, englishClass, localizedRace, englishRace, sex, name, realm =
-						GetPlayerInfoByGUID(srcGUID)
-
-					if localizedClass then --we have a actual player
-						if realm and realm ~= "" then
-							name = name .. "-" .. realm
-						end
-						local ambiguatedName = Ambiguate(name, "none")
-						local isEnemy = false
-
-						local scoreInfo = C_PvP.GetScoreInfoByPlayerGuid(srcGUID)
-						self.PlayerGUIDs[srcGUID] = {
-							name = ambiguatedName,
-							race = localizedRace,
-							classToken = englishClass,
-							scoreInfo = scoreInfo
-						}
-
-						--[[ 		if scoreInfo and type(scoreInfo) =="table" then
-							if scoreInfo.faction ~= myBGFaction then
-								isEnemy = true
-								self.PlayerGUIDs[srcGUID].spec = scoreInfo.talentSpec
-							end
-						else
-							if not self.Allies[ambiguatedName] then
-								isEnemy = true
-							end
-						end ]]
-						if not self.Allies.Players[ambiguatedName] then
-							self.PlayerGUIDs[srcGUID].IsEnemy = true
-							if UpdateEnemmiesFoundByGUIDTicker then UpdateEnemmiesFoundByGUIDTicker:Cancel() end -- use a timer to apply changes after 1 second, this prevents from too many updates after each player is found
-
-							UpdateEnemmiesFoundByGUIDTicker = CTimerNewTicker(1, function()
-								BattleGroundEnemies:UpdateEnemiesFromCombatlogScanning()
-								UpdateEnemmiesFoundByGUIDTicker = nil
-							end, 1)
-						end
-					end
-				end
-			end
-		end
-	end
+	local timestamp, subevent, hide, srcGUID, srcName, srcF1, srcF2, destGUID, destName, destF1, destF2, spellId, spellName, spellSchool, auraType = CombatLogGetCurrentEventInfo()
+	self:SearchGUIDForPlayers(srcGUID)
+	self:SearchGUIDForPlayers(destGUID)
+	
 	--self:Debug(timestamp,subevent,hide,srcGUID,srcName,srcF1,srcF2,destGUID,destName,destF1,destF2,spellId,spellName,spellSchool, auraType)
 	local covenantID = Data.CovenantSpells[spellId]
 	if covenantID then
-		local playerButton = self:GetPlayerbuttonByName(srcName)
+		local playerButton = self:GetPlayerbuttonByGUID(srcGUID)
 		if playerButton then
 			-- this player used a covenant ability show an icon for that
 			playerButton.Covenant:UpdateCovenant(covenantID)
@@ -3521,7 +3530,7 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
 	if CombatLogevents[subevent] then
 		-- IsClassic: spellId is always 0, so we have to work with the spellname :( but at least UnitAura() shows spellIDs
 		--CombatLogevents.Counter[subevent] = (CombatLogevents.Counter[subevent] or 0) + 1
-		return CombatLogevents[subevent](self, srcName, destName, spellId, spellName, auraType)
+		return CombatLogevents[subevent](self, srcGUID, srcName, destGUID, destName, spellId, spellName, auraType)
 	end
 end
 
@@ -3758,24 +3767,8 @@ local function checkEffectiveEnableStateForArenaFrames()
 end
 
 function BattleGroundEnemies:ResetCombatLogScanninningTables()
-	self.SearchedGUIDs = {}
+	self.SearchedGUIDs = self.SearchedGUIDs or {}
 	self.PlayerGUIDs = {}
-end
-
-function BattleGroundEnemies:EnableFallbackToCombatlogScanning()
-	if not self.combatlogScanningEnabled then
-		self:Information(L.CombatLogScanningForEnemiesEnabled)
-		self:ResetCombatLogScanninningTables()
-	end
-	self.combatlogScanningEnabled = true
-end
-
-function BattleGroundEnemies:DisableFallbackToCombatlogScanning()
-	if self.combatlogScanningEnabled then
-		self:Information(L.CombatLogScanningForEnemiesDisabled)
-		self:ResetCombatLogScanninningTables()
-	end
-	self.combatlogScanningEnabled = false
 end
 
 function BattleGroundEnemies:ToggleArenaFrames()
@@ -4124,7 +4117,7 @@ BattleGroundEnemies.PARTY_LEADER_CHANGED = BattleGroundEnemies.GROUP_ROSTER_UPDA
 
 --Fires when the player logs in, /reloads the UI or zones between map instances. Basically whenever the loading screen appears.
 function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
-	self:DisableFallbackToCombatlogScanning()
+	self:ResetCombatLogScanninningTables()
 	if self.Testmode.Active then --disable testmode
 		self:DisableTestMode()
 	end

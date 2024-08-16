@@ -175,7 +175,7 @@ function trinket:AttachToPlayerButton(playerButton)
 		end
 	end
 
-	function frame:SPELL_CAST_SUCCESS(srcName, destName, spellId)
+	function frame:SPELL_CAST_SUCCESS(srcGUID, srcName, destGUID, destName, spellId)
 		self:TrinketCheck(spellId)
 	end
 

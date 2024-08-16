@@ -144,7 +144,7 @@ function racial:AttachToPlayerButton(playerButton)
 		self.Cooldown:SetCooldown(GetTime(), Data.RacialSpellIDtoCooldown[spellId].cd)
 	end
 
-	function frame:SPELL_CAST_SUCCESS(srcName, destName, spellId)
+	function frame:SPELL_CAST_SUCCESS(srcGUID, srcName, destGUID, destName, spellId)
 		self:RacialCheck(spellId)
 	end
 	playerButton.Racial = frame
