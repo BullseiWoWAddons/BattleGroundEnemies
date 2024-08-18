@@ -133,6 +133,8 @@ local PlayerTypes = {
 	Enemies = "Enemies"
 }
 
+local previousCvarRaidOptionIsShown = GetCVar("raidOptionIsShown")
+
 
 
 local function getFilterFromAuraInfo(aura)
@@ -3151,7 +3153,7 @@ do
 
 		self:SetupOptions()
 
-		AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 709, 532)
+		AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 800, 532)
 
 		AceConfigDialog:AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
 
@@ -3807,16 +3809,26 @@ function BattleGroundEnemies:ResetCombatLogScanninningTables()
 end
 
 function BattleGroundEnemies:ToggleArenaFrames()
-	if InCombatLockdown() then
-		return self:QueueForUpdateAfterCombat(self, "ToggleArenaFrames")
-	end
+	if InCombatLockdown() then return self:QueueForUpdateAfterCombat(self, "ToggleArenaFrames") end
 
-	if IsInArena and self.db.profile.DisableArenaFramesInArena then
-		return disableArenaFrames()
-	elseif IsInBattleground and self.db.profile.DisableArenaFramesInBattleground then
-		return disableArenaFrames()
-	end
+	if (IsInArena and self.db.profile.DisableArenaFramesInArena) or (IsInBattleground and self.db.profile.DisableArenaFramesInBattleground) then return disableArenaFrames() end
+
 	checkEffectiveEnableStateForArenaFrames()
+end
+
+local function restoreShowRaidFrameCVar()
+	SetCVar("raidOptionIsShown", previousCvarRaidOptionIsShown)
+end
+
+local function disableRaidFrames()
+	previousCvarRaidOptionIsShown = GetCVar("raidOptionIsShown")
+	SetCVar("raidOptionIsShown", false)
+end
+
+function BattleGroundEnemies:ToggleRaidFrames()
+	if (IsInArena and self.db.profile.DisableRaidFramesInArena) or (IsInBattleground and self.db.profile.DisableRaidFramesInBattleground) then return disableRaidFrames() end
+
+	restoreShowRaidFrameCVar()
 end
 
 local UpdateArenaPlayersTicker
@@ -4205,4 +4217,5 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 
 	self:UpdateMapID()
 	self:ToggleArenaFrames()
+	self:ToggleRaidFrames()
 end
