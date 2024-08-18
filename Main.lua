@@ -3065,27 +3065,29 @@ function BattleGroundEnemies:BGSizeChanged(newBGSize)
 end
 
 function BattleGroundEnemies:UpdateBGSize()
-	local MaxNumPlayers = math_max(self.Allies.NumShownPlayers, self.Enemies.NumShownPlayers)
+	local maxNumPlayers = math_max(self.Allies.NumShownPlayers, self.Enemies.NumShownPlayers)
 	--BattleGroundEnemies:LogToSavedVariables("UpdateBGSize", MaxNumPlayers)
-	if MaxNumPlayers then
-		if MaxNumPlayers > 40 then
-			self.Allies:Disable()
-			self.Enemies:Disable()
-			return
+	if not maxNumPlayers then return end
+	
+	if maxNumPlayers > 40 then
+		self.Allies:Disable()
+		self.Enemies:Disable()
+		return
+	end
+
+
+	if maxNumPlayers > 15 then
+		if not self.BGSize or self.BGSize ~= 40 then
+			self:BGSizeChanged(40)
 		end
-		if MaxNumPlayers > 15 then
-			if not self.BGSize or self.BGSize ~= 40 then
-				self:BGSizeChanged(40)
+	else
+		if maxNumPlayers <= 5 then
+			if not self.BGSize or self.BGSize ~= 5 then --arena
+				self:BGSizeChanged(5)
 			end
 		else
-			if MaxNumPlayers <= 5 then
-				if not self.BGSize or self.BGSize ~= 5 then --arena
-					self:BGSizeChanged(5)
-				end
-			else
-				if not self.BGSize or self.BGSize ~= 15 then
-					self:BGSizeChanged(15)
-				end
+			if not self.BGSize or self.BGSize ~= 15 then
+				self:BGSizeChanged(15)
 			end
 		end
 	end
@@ -3125,6 +3127,8 @@ do
 				self.db.profile.log = nil
 			end
 		end
+
+		BattleGroundEnemies:UpgradeDB(self.db)
 
 
 		LibChangelog:Register(AddonName, Data.changelog, self.db.profile, "lastReadVersion", "onlyShowWhenNewVersion")
