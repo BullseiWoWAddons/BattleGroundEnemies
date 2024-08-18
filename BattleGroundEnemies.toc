@@ -27,6 +27,7 @@ Locales.lua
 Data.lua
 Defaults.lua
 Main.lua
+dbupgrades.lua
 Messaging.lua
 TargetCall.lua
 Changelog.lua
