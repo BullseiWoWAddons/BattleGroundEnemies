@@ -29,9 +29,9 @@ local function GetAllModuleFrames()
 end
 
 local BGSizeToLocale = {
-	[5] = ARENA,
-	[15] = L.BGSize_15,
-	[40] = L.BGSize_40
+	[5] = "1".."–".."5 ".. L.players,
+	[15] = "6".."–".."15 ".. L.players,
+	[40] = "16".."–".."40 ".. L.players
 }
 
 
@@ -1146,6 +1146,27 @@ function BattleGroundEnemies:SetupOptions()
 						desc = L.Locked_Desc,
 						order = 1
 					},
+					ShowTooltips = {
+						type = "toggle",
+						name = L.ShowTooltips,
+						desc = L.ShowTooltips_Desc,
+						order = 2
+					},
+					ConvertCyrillic = {
+						type = "toggle",
+						name = L.ConvertCyrillic,
+						desc = L.ConvertCyrillic_Desc,
+						width = "normal",
+						order = 3
+					},
+					Font = {
+						type = "select",
+						name = L.Font,
+						desc = L.Font_Desc,
+						dialogControl = "LSM30_Font",
+						values = AceGUIWidgetLSMlists.font,
+						order = 4
+					},
 					DisableArenaFramesInArena = {
 						type = "toggle",
 						name = L.DisableArenaFramesInArena,
@@ -1154,7 +1175,7 @@ function BattleGroundEnemies:SetupOptions()
 							Data.SetOption(location, option, value)
 							self:ToggleArenaFrames()
 						end,
-						order = 3
+						order = 5
 					},
 					DisableArenaFramesInBattleground = {
 						type = "toggle",
@@ -1164,34 +1185,34 @@ function BattleGroundEnemies:SetupOptions()
 							Data.SetOption(location, option, value)
 							self:ToggleArenaFrames()
 						end,
-						order = 4
-					},
-					ShowTooltips = {
-						type = "toggle",
-						name = L.ShowTooltips,
-						desc = L.ShowTooltips_Desc,
-						order = 5
-					},
-					ConvertCyrillic = {
-						type = "toggle",
-						name = L.ConvertCyrillic,
-						desc = L.ConvertCyrillic_Desc,
-						width = "normal",
 						order = 6
 					},
-					Font = {
-						type = "select",
-						name = L.Font,
-						desc = L.Font_Desc,
-						dialogControl = "LSM30_Font",
-						values = AceGUIWidgetLSMlists.font,
-						order = 9
+					DisableRaidFramesInArena = {
+						type = "toggle",
+						name = L.DisableRaidFramesInArena,
+						desc = L.DisableRaidFramesInArena_Desc,
+						set = function(option, value)
+							Data.SetOption(location, option, value)
+							self:ToggleRaidFrames()
+						end,
+						order = 7
 					},
+					DisableRaidFramesInBattleground = {
+						type = "toggle",
+						name = L.DisableRaidFramesInBattleground,
+						desc = L.DisableRaidFramesInBattleground_Desc,
+						set = function(option, value)
+							Data.SetOption(location, option, value)
+							self:ToggleRaidFrames()
+						end,
+						order = 8
+					},
+				
 					MyTarget = {
 						type = "group",
 						name = L.MyTarget,
 						inline = true,
-						order = 10,
+						order = 9,
 						args = {
 							MyTarget_Color = {
 								type = "color",
@@ -1214,7 +1235,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = L.MyFocus,
 						inline = true,
-						order = 11,
+						order = 10,
 						args = {
 							MyFocus_Color = {
 								type = "color",
