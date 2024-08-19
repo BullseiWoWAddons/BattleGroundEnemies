@@ -3098,8 +3098,9 @@ function BattleGroundEnemies:SelectPlayerCountProfile()
 
 	local foundProfilesForPlayerCount = {}
 	for i = 1, #self.db.profile.Allies.playerCountConfig do
-		local minPlayerCount = self.db.profile.Allies.playerCountConfig[i].minPlayerCount
-		local maxPlayerCount = self.db.profile.Allies.playerCountConfig[i].maxPlayerCount
+		local playerCountProfile = self.db.profile.Allies.playerCountConfig[i]
+		local minPlayerCount = playerCountProfile.minPlayerCount
+		local maxPlayerCount = playerCountProfile.maxPlayerCount
 
 		if maxNumPlayers <= maxPlayerCount and maxNumPlayers >= minPlayerCount then
 			table.insert(foundProfilesForPlayerCount, i)
@@ -3114,7 +3115,7 @@ function BattleGroundEnemies:SelectPlayerCountProfile()
 		local overlappingProfilesString = ""
 		for i = 1, #foundProfilesForPlayerCount do
 			local overlappingIndexProfile = foundProfilesForPlayerCount[i]
-			local overlappingIndexShownName = BattleGroundEnemies:GetPlayerCountConfigName(foundProfilesForPlayerCount[i])
+			local overlappingIndexShownName = BattleGroundEnemies:GetPlayerCountConfigName(self.db.profile.Allies.playerCountConfig[overlappingIndexProfile])
 			overlappingProfilesString = overlappingProfilesString .. "and " .. overlappingIndexShownName
 		end
 		BattleGroundEnemies:Information("Found multiple player count profiles fitting the current player count of ".. maxNumPlayers.. "please check your settings and make sure they don't overlap")

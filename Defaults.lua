@@ -3,8 +3,6 @@ local AddonName, Data = ...
 Data.defaultSettings = {
 	profile = {
 		Font = "PT Sans Narrow Bold",
-		dbversion = 1,
-
 		Locked = false,
 		Debug = false,
 
