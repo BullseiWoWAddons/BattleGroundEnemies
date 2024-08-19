@@ -10,6 +10,9 @@ end
 
 function BattleGroundEnemies:UpgradeDB(db)
     if not db.dbversion or db.dbversion < 1 then
+        
+        
+        
         --[[         --in version 1 the format chagned from 
             
                 db.profile.Enemies = {
@@ -21,13 +24,13 @@ function BattleGroundEnemies:UpgradeDB(db)
                 to
                 db.profile.Enemies.playerCountSettngs = {
                     {
-                        minplayerCount = 1
-                        maxplayerCount = 5
+                        minPlayerCount = 1
+                        maxPlayerCount = 5
                     },
 
                     {
-                        minplayerCount = 5
-                        maxplayerCount = 15
+                        minPlayerCount = 5
+                        maxPlayerCount = 15
                     },
 
 
@@ -42,16 +45,17 @@ function BattleGroundEnemies:UpgradeDB(db)
         for i = 1, #playerTypes do
             for j = 1, #maxSizes do
                 local oldSettings = db.profile[playerTypes][tostring(maxSizes)]
-                db.profile[playerTypes].playerCountSettings = db.profile[playerTypes].playerCountSettings or {}
+                db.profile[playerTypes].playerCountConfig = db.profile[playerTypes].playerCountConfig or {}
                 local newTable = {}
                 MergeTable(newTable, oldSettings)
-                newTable.minplayerCount = minSizes[i]
-                newTable.maxplayerCount = maxSizes[i]
-                table.insert(db.profile[playerTypes].playerCountSettings, newTable)
+                newTable.minPlayerCount = minSizes[i]
+                newTable.maxPlayerCount = maxSizes[i]
+                table.insert(db.profile[playerTypes].playerCountConfig, newTable)
             end
         end
 
     end
 
     db.dbversion = 1
+    BattleGroundEnemies:NotifyChange()
 end

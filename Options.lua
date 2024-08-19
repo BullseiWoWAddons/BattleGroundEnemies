@@ -28,14 +28,6 @@ local function GetAllModuleFrames()
 	return t
 end
 
-local BGSizeToLocale = {
-	[5] = "1".."–".."5 ".. L.players,
-	[15] = "6".."–".."15 ".. L.players,
-	[40] = "16".."–".."40 ".. L.players
-}
-
-
-
 -- Points
 -- TOPLEFT 		TOP 		TOPRIGHT
 -- LEFT 		CENTER 		RIGHT
@@ -604,7 +596,7 @@ function Data.AddCooldownSettings(location)
 	}
 end
 
-function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType, BGSize)
+function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType)
 	local i = 1
 	local temp = {}
 	for moduleName, moduleFrame in pairs(self.ButtonModules) do
@@ -659,7 +651,7 @@ function BattleGroundEnemies:AddModuleSettings(location, defaults, playerType, B
 				Reset = {
 					type = "execute",
 					name = L.ResetModule,
-					desc = L.ResetModule_Desc:format(L[playerType], BGSizeToLocale[tonumber(BGSize)]),
+					desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies:GetPlayerCountConfigName(location)),
 					func = function()
 						location.ButtonModules[moduleName] = copy(defaults.ButtonModules[moduleName])
 						BattleGroundEnemies:NotifyChange()
@@ -888,14 +880,14 @@ local function addEnemyAndAllySettings(self, mainFrame)
 		}
 	}
 
+	for i = 1, #BattleGroundEnemies.db.profile[playerType].playerCountConfig do
 
-	for k, BGSize in pairs({"5", "15", "40"}) do
-		local location = BattleGroundEnemies.db.profile[playerType][BGSize]
-		local defaults = BattleGroundEnemies.db.defaults.profile[playerType][BGSize]
-		settings[BGSize] = {
+		local location = BattleGroundEnemies.db.profile[playerType].playerCountConfig[i]
+		local defaults = BattleGroundEnemies.db.defaults.profile[playerType][i]
+		settings[BattleGroundEnemies:GetPlayerCountConfigName(location)] = {
 			type = "group",
-			name = L["BGSize_"..BGSize],
-			desc = L["BGSize_"..BGSize.."_Desc"]:format(L[playerType]),
+			name = BattleGroundEnemies:GetPlayerCountConfigName(location),
+			desc = BattleGroundEnemies:GetPlayerCountConfigName(location).."desc",
 			disabled = function() return not mainFrame.config.Enabled end,
 			get =  function(option)
 				return Data.GetOption(location, option)
@@ -903,7 +895,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			set = function(option, ...)
 				return Data.SetOption(location, option, ...)
 			end,
-			order = k + 1,
+			order = i + 1,
 			args = {
 				Enabled = {
 					type = "toggle",
@@ -914,15 +906,15 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				Fake = Data.AddHorizontalSpacing(2),
 				CopySettings = {
 					type = "execute",
-					name = L.CopySettings:format(L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
-					desc = L.CopySettings_Desc:format(L[oppositePlayerType]..": "..L["BGSize_"..BGSize]),
+					name = L.CopySettings:format(L[oppositePlayerType]..": "..BattleGroundEnemies:GetPlayerCountConfigName(location)),
+					desc = L.CopySettings_Desc:format(L[oppositePlayerType]..": "..BattleGroundEnemies:GetPlayerCountConfigName(location)),
 					func = function()
 						print("func called")
-						BattleGroundEnemies.db.profile[playerType][BGSize] = copy(BattleGroundEnemies.db.profile[oppositePlayerType][BGSize])
+						BattleGroundEnemies.db.profile[playerType].playerCountConfig[i] = copy(BattleGroundEnemies.db.profile[oppositePlayerType].playerCountConfig[i])
 						BattleGroundEnemies:NotifyChange()
 					end,
 					confirm = function()
-						return L.ConfirmProfileOverride:format(L[playerType]..": "..L["BGSize_"..BGSize], L[oppositePlayerType]..": "..L["BGSize_"..BGSize])
+						return L.ConfirmProfileOverride:format(L[playerType]..": "..BattleGroundEnemies:GetPlayerCountConfigName(location), L[oppositePlayerType]..": "..BattleGroundEnemies:GetPlayerCountConfigName(location))
 					end,
 					width = "double",
 					order = 3
@@ -1060,7 +1052,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							type = "group",
 							name = L.ModuleSettings,
 							order = 8,
-							args = self:AddModuleSettings(location, defaults, playerType, BGSize)
+							args = self:AddModuleSettings(location, defaults, playerType)
 						}
 					}
 				}
@@ -1095,24 +1087,27 @@ function BattleGroundEnemies:SetupOptions()
 				inline = true,
 				order = 1,
 				args = {
-					Testmode_BGSize = {
-						type = "select",
+					Testmode_PlayerCount = {
+						type = "range",
 						name = L.BattlegroundSize,
-						order = 1,
-						get = function() return self.Testmode.BGSizeTestmode end,
+						disabled = InCombatLockdown,
+						min = 1,
+						max = 40,
+						step = 1,
+						get = function() return self.Testmode.PlayerCountTestmode end,
 						set = function(option, value)
-							self.Testmode.BGSizeTestmode = value
+							self.Testmode.PlayerCountTestmode = value
 							if self.Testmode.Active then
 								self:CreateFakePlayers()
 							end
 						end,
-						values = BGSizeToLocale
+						order = 1
 					},
 					Testmode_Enabled = {
 						type = "execute",
 						name = L.Testmode_Toggle,
 						desc = L.Testmode_Toggle_Desc,
-						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Testmode.Active) or not self.BGSize end,
+						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Testmode.Active) or not self.profileIndex end,
 						func = self.ToggleTestmode,
 						order = 2
 					},
