@@ -10,8 +10,7 @@ function Data.Helpers.AreOverlappingRanges(rangeA, rangeB)
 end
 
 function Data.Helpers.NumberIsInRange(number, range)
-    if number <= range.max then return true end
-    if number >= range.min then return true end
+    if number >= range.min and number <= range.max then return true end
 
     return false
 end
