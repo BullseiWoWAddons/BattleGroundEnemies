@@ -8,12 +8,17 @@ local MergeTable = MergeTable or function(destination, source)
 	end
 end
 
+
+--destination is the new db table which already has the new defaults in them
+--just copy over the exsting settings without altering the structure of the destination table
 local function MergeTableDeep(destination, source)
 	for k, v in pairs(source) do
-        if type(v) == "table" then
+        if type(v) == "table" and type(destination[k]) == "table" then
             MergeTableDeep(destination[k], v)
         else
-            destination[k] = v;
+            if type(v) == type(destination[k]) then
+                destination[k] = v;
+            end
         end
 	end
 end
