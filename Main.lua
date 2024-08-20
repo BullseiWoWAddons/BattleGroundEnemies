@@ -14,6 +14,7 @@ local math_floor = math.floor
 local gsub = gsub
 local math_random = math.random
 local math_max = math.max
+local math_min = math.min
 local pairs = pairs
 local print = print
 local table_insert = table.insert
@@ -1461,11 +1462,6 @@ local function PopulateMainframe(playerType)
 	mainframe:InitializeAllPlayerSources()
 	mainframe.config = BattleGroundEnemies.db.profile[playerType]
 
-	function mainframe:ApplyAllSettings()
-		--BattleGroundEnemies:Debug(self.PlayerType)
-		if BattleGroundEnemies.profileIndex then mainframe:ApplyPlayerCountProfileSettings() end
-	end
-
 	function mainframe:RemoveAllPlayersFromAllSources()
 		self:InitializeAllPlayerSources()
 		self:AfterPlayerSourceUpdate()
@@ -1594,6 +1590,7 @@ local function PopulateMainframe(playerType)
 						table.insert(newPlayers, groupMembers[numGroupMembers]) --i am always last in here
 						local fakeAllies = self.PlayerSources[PlayerSources.FakePlayers]
 						local numFakeAllies = #fakeAllies
+						print("numFakeAllies", numFakeAllies)
 						for i = 1, numFakeAllies do
 							local fakeAlly = fakeAllies[i]
 							table.insert(newPlayers, fakeAlly)
@@ -1705,7 +1702,7 @@ local function PopulateMainframe(playerType)
 	end
 
 	function mainframe:CheckEnableState()
-		if self.config.Enabled and BattleGroundEnemies.profileIndex and self.playerCountConfig.Enabled then
+		if self.config.Enabled and BattleGroundEnemies.activeProfile and self.playerCountConfig.Enabled then
 			self:Enable()
 		else
 			self:Disable()
@@ -2252,7 +2249,7 @@ local function PopulateMainframe(playerType)
 				BattleGroundEnemies:LogToSavedVariables(i, newPlayerOrder[i].PlayerDetails.PlayerName)
 			end ]]
 
-			
+
 			if orderChanged or forceRepositioning then
 				local inCombat = InCombatLockdown()
 				if inCombat then
@@ -2560,36 +2557,22 @@ do
 
 	function BattleGroundEnemies:CreateFakePlayers()
 		local count = self.Testmode.PlayerCountTestmode or 5
+		
 		for number, mainFrame in pairs({ self.Allies, self.Enemies }) do
-			local continue = true
+			local remaining = count
+			if mainFrame == self.Allies then 
+				remaining = remaining - 1 
+				print("is allie")
+			end
 			mainFrame:BeforePlayerSourceUpdate(PlayerSources.FakePlayers)
 
 			local healerAmount = math_random(2, 3)
+			healerAmount = math_min(healerAmount, remaining)
+			remaining = remaining - healerAmount
 			local tankAmount = math_random(1)
-			local damagerAmount = count - healerAmount - tankAmount
-
-
-			if mainFrame == self.Allies then
-				local myRole
-				if HasSpeccs then
-					if not specCache[self.PlayerDetails.GUID] then
-						BattleGroundEnemies:Information(
-							"you don't seem to have a specialization. The testmode requires one.")
-					else
-						myRole = Data.Classes[self.PlayerDetails.PlayerClass][specCache[self.PlayerDetails.GUID]]
-							.roledID
-					end
-				else
-					myRole = "DAMAGER"
-				end
-				if myRole == "HEALER" then
-					healerAmount = healerAmount - 1
-				elseif myRole == "TANK" then
-					tankAmount = tankAmount - 1
-				else
-					damagerAmount = damagerAmount - 1
-				end
-			end
+			tankAmount = math_min(tankAmount, remaining)
+			remaining = remaining - tankAmount
+			local damagerAmount = remaining
 
 			counter = 1
 			BattleGroundEnemies:FillFakePlayerData(healerAmount, mainFrame, "HEALER")
@@ -2598,11 +2581,9 @@ do
 
 			mainFrame:AfterPlayerSourceUpdate()
 
-			if continue then
-				for name, playerButton in pairs(mainFrame.Players) do
-					if IsRetail then
-						playerButton.Covenant:UpdateCovenant(math_random(1, #Data.CovenantIcons))
-					end
+			for name, playerButton in pairs(mainFrame.Players) do
+				if IsRetail then
+					playerButton.Covenant:UpdateCovenant(math_random(1, #Data.CovenantIcons))
 				end
 			end
 		end
@@ -3063,8 +3044,16 @@ function BattleGroundEnemies:Enable()
 	self.Enemies:CheckEnableState()
 end
 
+function BattleGroundEnemies:NoActivePlayercountProfile()
+	self.activeProfile = false
+	self.profileIndex = false
+	self.Allies:Disable()
+	self.Enemies:Disable()
+end
+
 function BattleGroundEnemies:PlayerCountProfileChanged(newProfileIndex)
 	--BattleGroundEnemies:LogToSavedVariables("PlayerCountProfileChanged", newBGSize)
+	self.activeProfile = true
 	self.profileIndex = newProfileIndex
 	--self:Debug(newBGSize)
 	self.Allies:ApplyPlayerCountProfileSettings()
@@ -3108,6 +3097,7 @@ function BattleGroundEnemies:SelectPlayerCountProfile()
 	end
 
 	if #foundProfilesForPlayerCount == 0 then
+		self:NoActivePlayercountProfile()
 		return BattleGroundEnemies:Information("Can't find a profile for the current player count, please check the settings")
 	end
 
@@ -3118,6 +3108,7 @@ function BattleGroundEnemies:SelectPlayerCountProfile()
 			local overlappingIndexShownName = BattleGroundEnemies:GetPlayerCountConfigName(self.db.profile.Allies.playerCountConfig[overlappingIndexProfile])
 			overlappingProfilesString = overlappingProfilesString .. "and " .. overlappingIndexShownName
 		end
+		self:NoActivePlayercountProfile()
 		BattleGroundEnemies:Information("Found multiple player count profiles fitting the current player count of ".. maxNumPlayers.. "please check your settings and make sure they don't overlap")
 		BattleGroundEnemies:Information("The following profiles are overlapping: "..overlappingProfilesString)
 
@@ -3300,8 +3291,7 @@ local timer = nil
 function BattleGroundEnemies:ApplyAllSettings()
 	if timer then timer:Cancel() end -- use a timer to apply changes after 0.2 second, this prevents the UI from getting laggy when the user uses a slider option
 	timer = CTimerNewTicker(0.2, function()
-		BattleGroundEnemies.Enemies:ApplyAllSettings()
-		BattleGroundEnemies.Allies:ApplyAllSettings()
+		BattleGroundEnemies:SelectPlayerCountProfile()
 		timer = nil
 	end, 1)
 end
