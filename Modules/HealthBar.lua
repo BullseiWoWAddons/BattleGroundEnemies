@@ -251,6 +251,7 @@ function healthBar:AttachToPlayerButton(playerButton)
 		end
 
 		self.HealthText:ApplyFontStringSettings(config.HealthText)
+		self:PlayerDetailsChanged()
 	end
 end
 

@@ -121,7 +121,8 @@ local function attachToPlayerButton(playerButton, type)
 	frame.Icon = frame:CreateTexture(nil, 'OVERLAY')
 	frame.Icon:SetAllPoints()
 
-	frame.PlayerDetailsChanged = function(self, playerDetails)
+	frame.PlayerDetailsChanged = function(self)
+		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		if self.type == "Class" then
 			--either no spec or the player wants to always see it > display it
@@ -147,7 +148,7 @@ local function attachToPlayerButton(playerButton, type)
 
 	frame.ApplyAllSettings = function(self)
 		self:Show()
-		self:PlayerDetailsChanged(playerButton.PlayerDetails)
+		self:PlayerDetailsChanged()
 	end
 	return frame
 end

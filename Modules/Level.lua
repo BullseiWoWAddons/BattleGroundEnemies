@@ -76,7 +76,8 @@ function level:AttachToPlayerButton(playerButton)
 
 	-- Level
 
-	function fs:PlayerDetailsChanged(playerDetails)
+	function fs:PlayerDetailsChanged()
+		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		if playerDetails.PlayerLevel then self:SetLevel(playerDetails.PlayerLevel) end --for testmode
 	end
@@ -98,6 +99,7 @@ function level:AttachToPlayerButton(playerButton)
 
 	function fs:ApplyAllSettings()
 		self:ApplyFontStringSettings(self.config.Text)
+		self:PlayerDetailsChanged()
 		self:DisplayLevel()
 	end
 	playerButton.Level = fs

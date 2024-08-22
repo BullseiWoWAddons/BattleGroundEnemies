@@ -48,7 +48,8 @@ function role:AttachToPlayerButton(playerButton)
 		self:PlayerDetailsChanged()
 	end
 
-	playerButton.Role.PlayerDetailsChanged = function(self, playerDetails)
+	playerButton.Role.PlayerDetailsChanged = function(self)
+		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		local specData = playerButton:GetSpecData()
 		if specData then

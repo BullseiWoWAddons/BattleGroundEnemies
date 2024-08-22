@@ -109,7 +109,7 @@ function name:AttachToPlayerButton(playerButton)
 		self.DisplayedName = name
 	end
 
-	function playerButton.Name:PlayerDetailsChanged(playerDetails)
+	function playerButton.Name:PlayerDetailsChanged()
 		self:SetName()
 	end
 
