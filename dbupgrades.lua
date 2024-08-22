@@ -66,12 +66,12 @@ function BattleGroundEnemies:UpgradeDB(db)
                         local oldSettings = profileData[playerType][tostring(maxSizes[j])]
                         if oldSettings then
 
-                            profileData[playerType].playerCountConfig = profileData[playerType].playerCountConfig or {}
+                            profileData[playerType].playerCountConfigs = profileData[playerType].playerCountConfigs or {}
 
                             oldSettings.minPlayerCount = minSizes[j]
                             oldSettings.maxPlayerCount = maxSizes[j]
 
-                            MergeTableDeep(profileData[playerType].playerCountConfig[j], oldSettings)
+                            MergeTableDeep(profileData[playerType].playerCountConfigs[j], oldSettings)
                             profileData[playerType][tostring(maxSizes[j])] = nil
                             didStuff = true
                         end

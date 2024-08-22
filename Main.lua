@@ -556,7 +556,7 @@ do
 
 	function buttonFunctions:PlayerDetailsChanged()
 		self:SetBindings()
-		self:DispatchEvent("PlayerDetailsChanged", self.PlayerDetails)
+		self:DispatchEvent("PlayerDetailsChanged")
 	end
 
 	function buttonFunctions:UpdateRaidTargetIcon(forceIndex)
@@ -714,12 +714,13 @@ do
 
 	function buttonFunctions:SetConfigShortCuts()
 		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
-		self.playerCountConfig = self.config.playerCountConfig[BattleGroundEnemies.profileIndex]
+		self.playerCountConfig = BattleGroundEnemies[self.PlayerType].playerCountConfig
 	end
 
 	function buttonFunctions:ApplyButtonSettings()
 		self:SetConfigShortCuts()
 		local conf = self.playerCountConfig
+		if not conf then return end
 
 		self:SetWidth(conf.BarWidth)
 		self:SetHeight(conf.BarHeight)
@@ -1590,7 +1591,6 @@ local function PopulateMainframe(playerType)
 						table.insert(newPlayers, groupMembers[numGroupMembers]) --i am always last in here
 						local fakeAllies = self.PlayerSources[PlayerSources.FakePlayers]
 						local numFakeAllies = #fakeAllies
-						print("numFakeAllies", numFakeAllies)
 						for i = 1, numFakeAllies do
 							local fakeAlly = fakeAllies[i]
 							table.insert(newPlayers, fakeAlly)
@@ -1627,6 +1627,7 @@ local function PopulateMainframe(playerType)
 			local additionalData = newPlayer.additionalData
 			self:CreateOrUpdatePlayerDetails(name, raceName, classTag, specName, additionalData)
 		end
+		self:SetPlayerCount(#newPlayers)
 		self:CreateOrRemovePlayerButtons()
 	end
 
@@ -1659,12 +1660,12 @@ local function PopulateMainframe(playerType)
 		self:Hide()
 	end
 
-	function mainframe:ApplyPlayerCountProfileSettings()
-		--BattleGroundEnemies:LogToSavedVariables("ApplyPlayerCountProfileSettings", BattleGroundEnemies.BGSize, self.PlayerType)
-		--if not BattleGroundEnemies.BGSize then return end
-		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
+	function mainframe:NoActivePlayercountProfile()
+		self.playerCountConfig = false
+		self:Disable()
+	end
 
-		self.playerCountConfig = self.config.playerCountConfig[BattleGroundEnemies.profileIndex]
+	function mainframe:ApplyPlayerCountProfileSettings()
 		if InCombatLockdown() then
 			return BattleGroundEnemies:QueueForUpdateAfterCombat(self, "ApplyPlayerCountProfileSettings")
 		end
@@ -1701,8 +1702,77 @@ local function PopulateMainframe(playerType)
 		self:CheckEnableState()
 	end
 
+	function mainframe:GetPlayerCountsFromConfig(playerCountConfig)
+		if type(playerCountConfig) ~= "table" then
+			error("playerCountConfig must be a table")
+		end
+		local minPlayers = playerCountConfig.minPlayerCount
+		local maxPlayers = playerCountConfig.maxPlayerCount
+		return minPlayers, maxPlayers
+	end
+
+	function mainframe:GetPlayerCountConfigName(playerCountConfig)
+		local minPlayers, maxPlayers = self:GetPlayerCountsFromConfig(playerCountConfig)
+		return minPlayers.."–"..maxPlayers.. " ".. L.players
+	end
+
+	function mainframe:SelectPlayerCountProfile(forceUpdate)
+		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
+		local maxNumPlayers = math_max(self.NumPlayers or 0)
+		--BattleGroundEnemies:LogToSavedVariables("SelectPlayerCountProfile", MaxNumPlayers)
+		if not maxNumPlayers then return end
+
+		if maxNumPlayers > 40 then
+			self:Disable()
+			return
+		end
+
+		local playerCountConfigs
+		if self.config.CustomPlayerCountConfigsEnabled then
+			playerCountConfigs = self.config.customPlayerCountConfigs
+		else
+			playerCountConfigs = self.config.playerCountConfigs
+		end
+
+		local foundProfilesForPlayerCount = {}
+		for i = 1, #playerCountConfigs do
+			local playerCountProfile = playerCountConfigs[i]
+			local minPlayerCount = playerCountProfile.minPlayerCount
+			local maxPlayerCount = playerCountProfile.maxPlayerCount
+
+			if maxNumPlayers <= maxPlayerCount and maxNumPlayers >= minPlayerCount then
+				table.insert(foundProfilesForPlayerCount, playerCountProfile)
+			end
+		end
+
+		if #foundProfilesForPlayerCount == 0 then
+			self:NoActivePlayercountProfile()
+			return BattleGroundEnemies:Information("Can't find a profile for the current player count of " .. self.NumPlayers .."players for "..self.PlayerType.." please check the settings")
+		end
+
+		if #foundProfilesForPlayerCount > 1 then
+			local overlappingProfilesString = ""
+			for i = 1, #foundProfilesForPlayerCount do
+				local overlappingIndexShownName = self:GetPlayerCountConfigName(foundProfilesForPlayerCount[i])
+				overlappingProfilesString = overlappingProfilesString .. "and " .. overlappingIndexShownName
+			end
+			self:NoActivePlayercountProfile()
+			BattleGroundEnemies:Information("Founds multiple player count profiles fitting the current player count for "..self.PlayerType.." please  check your settings and make sure they don't overlap")
+			BattleGroundEnemies:Information("The following profiles are overlapping: "..overlappingProfilesString)
+
+			return
+		end
+
+
+
+		if forceUpdate or foundProfilesForPlayerCount[1] ~= self.playerCountConfig then
+			self.playerCountConfig = foundProfilesForPlayerCount[1]
+			self:ApplyPlayerCountProfileSettings()
+		end
+	end
+
 	function mainframe:CheckEnableState()
-		if self.config.Enabled and BattleGroundEnemies.activeProfile and self.playerCountConfig.Enabled then
+		if self.config.Enabled and self.playerCountConfig and self.playerCountConfig.Enabled then
 			self:Enable()
 		else
 			self:Disable()
@@ -1710,13 +1780,20 @@ local function PopulateMainframe(playerType)
 	end
 
 	function mainframe:SetRealPlayerCount(realCount)
+		local oldCount = self.RealPlayerCount
 		self.RealPlayerCount = realCount
+		if not oldCount or oldCount ~= realCount then
+			self:SelectPlayerCountProfile()
+		end
 		self:UpdatePlayerCount()
 	end
 
 	function mainframe:SetPlayerCount(count)
+		local oldCount = self.NumPlayers
 		self.NumPlayers = count
-		BattleGroundEnemies:SelectPlayerCountProfile()
+		if not oldCount or oldCount ~= count then
+			self:SelectPlayerCountProfile()
+		end
 		self:UpdatePlayerCount()
 	end
 
@@ -1968,6 +2045,7 @@ local function PopulateMainframe(playerType)
 		local orderedPlayers = self.CurrentPlayerOrder
 
 		local config = self.playerCountConfig
+		if not config then return end
 		local columns = config.BarColumns
 
 
@@ -2127,12 +2205,7 @@ local function PopulateMainframe(playerType)
 			end
 		end
 
-
-		local newPlayerCount = #self.NewPlayersDetails
-
-		self:SetPlayerCount(newPlayerCount + existingPlayersCount)
-
-		for i = 1, newPlayerCount do
+		for i = 1, #self.NewPlayersDetails do
 			local playerDetails = self.NewPlayersDetails[i]
 			if inCombat then
 				return BattleGroundEnemies:QueueForUpdateAfterCombat(self, "AfterPlayerSourceUpdate")
@@ -2307,6 +2380,12 @@ local function copySettingsWithoutOverwrite(src, dest)
 	return dest
 end
 
+local function copyButtonModuleDefaultsIntoDefaults(playerCountConfig, moduleSetupTable)
+	playerCountConfig.ButtonModules = playerCountConfig.ButtonModules or {}
+	playerCountConfig.ButtonModules[moduleSetupTable.moduleName] = playerCountConfig.ButtonModules[moduleSetupTable.moduleName] or {}
+	copySettingsWithoutOverwrite(moduleSetupTable.defaultSettings, playerCountConfig.ButtonModules[moduleSetupTable.moduleName])
+end
+
 function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 	if type(moduleSetupTable) ~= "table" then return error("Tried to register a Module but the parameter wasn't a table") end
 	if not moduleSetupTable.moduleName then return error("NewButtonModule error: No moduleName specified") end
@@ -2329,14 +2408,13 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 
 
 	for k in pairs(PlayerTypes) do
-		for j = 1, #Data.defaultSettings.profile[k].playerCountConfig do
-			Data.defaultSettings.profile[k].playerCountConfig[j].ButtonModules = Data.defaultSettings.profile[k].playerCountConfig[j]
-				.ButtonModules or {}
-			Data.defaultSettings.profile[k].playerCountConfig[j].ButtonModules[moduleName] = Data.defaultSettings.profile[k].playerCountConfig[j]
-				.ButtonModules[moduleName] or {}
-			copySettingsWithoutOverwrite(moduleSetupTable.defaultSettings,
-				Data.defaultSettings.profile[k].playerCountConfig[j].ButtonModules[moduleName])
+		for j = 1, #Data.defaultSettings.profile[k].playerCountConfigs do
+			local playerCountConfig = Data.defaultSettings.profile[k].playerCountConfigs[j]
+			copyButtonModuleDefaultsIntoDefaults(playerCountConfig, moduleSetupTable)
 		end
+
+		local customPlayerCountConfigGeneric =  Data.defaultSettings.profile[k].customPlayerCountConfigs["**"]
+		copyButtonModuleDefaultsIntoDefaults(customPlayerCountConfigGeneric, moduleSetupTable)
 	end
 
 	--not used
@@ -2557,12 +2635,11 @@ do
 
 	function BattleGroundEnemies:CreateFakePlayers()
 		local count = self.Testmode.PlayerCountTestmode or 5
-		
+
 		for number, mainFrame in pairs({ self.Allies, self.Enemies }) do
 			local remaining = count
-			if mainFrame == self.Allies then 
-				remaining = remaining - 1 
-				print("is allie")
+			if mainFrame == self.Allies then
+				remaining = remaining - 1
 			end
 			mainFrame:BeforePlayerSourceUpdate(PlayerSources.FakePlayers)
 
@@ -3044,81 +3121,7 @@ function BattleGroundEnemies:Enable()
 	self.Enemies:CheckEnableState()
 end
 
-function BattleGroundEnemies:NoActivePlayercountProfile()
-	self.activeProfile = false
-	self.profileIndex = false
-	self.Allies:Disable()
-	self.Enemies:Disable()
-end
 
-function BattleGroundEnemies:PlayerCountProfileChanged(newProfileIndex)
-	--BattleGroundEnemies:LogToSavedVariables("PlayerCountProfileChanged", newBGSize)
-	self.activeProfile = true
-	self.profileIndex = newProfileIndex
-	--self:Debug(newBGSize)
-	self.Allies:ApplyPlayerCountProfileSettings()
-	self.Enemies:ApplyPlayerCountProfileSettings()
-end
-
-function BattleGroundEnemies:GetPlayerCountConfigName(playerCountConfig)
-	local minPlayers = playerCountConfig.minPlayerCount
-	local maxPlayers = playerCountConfig.maxPlayerCount
-	return minPlayers.."–"..maxPlayers.. " ".. L.players
-end
-
-function BattleGroundEnemies:AreOverlappingRanges(rangeA, rangeB)
-	if rangeB.min <= rangeA.max then return true end
-	if rangeB.max >= rangeA.min then return true end
-
-	return false
-end
-
-function BattleGroundEnemies:SelectPlayerCountProfile()
-	local maxNumPlayers = math_max(self.Allies.NumPlayers or 0, self.Enemies.NumPlayers or 0)
-	--BattleGroundEnemies:LogToSavedVariables("SelectPlayerCountProfile", MaxNumPlayers)
-	if not maxNumPlayers then return end
-	if maxNumPlayers == 0 then maxNumPlayers = 1 end
-
-	if maxNumPlayers > 40 then
-		self.Allies:Disable()
-		self.Enemies:Disable()
-		return
-	end
-
-	local foundProfilesForPlayerCount = {}
-	for i = 1, #self.db.profile.Allies.playerCountConfig do
-		local playerCountProfile = self.db.profile.Allies.playerCountConfig[i]
-		local minPlayerCount = playerCountProfile.minPlayerCount
-		local maxPlayerCount = playerCountProfile.maxPlayerCount
-
-		if maxNumPlayers <= maxPlayerCount and maxNumPlayers >= minPlayerCount then
-			table.insert(foundProfilesForPlayerCount, i)
-		end
-	end
-
-	if #foundProfilesForPlayerCount == 0 then
-		self:NoActivePlayercountProfile()
-		return BattleGroundEnemies:Information("Can't find a profile for the current player count, please check the settings")
-	end
-
-	if #foundProfilesForPlayerCount > 1 then
-		local overlappingProfilesString = ""
-		for i = 1, #foundProfilesForPlayerCount do
-			local overlappingIndexProfile = foundProfilesForPlayerCount[i]
-			local overlappingIndexShownName = BattleGroundEnemies:GetPlayerCountConfigName(self.db.profile.Allies.playerCountConfig[overlappingIndexProfile])
-			overlappingProfilesString = overlappingProfilesString .. "and " .. overlappingIndexShownName
-		end
-		self:NoActivePlayercountProfile()
-		BattleGroundEnemies:Information("Found multiple player count profiles fitting the current player count of ".. maxNumPlayers.. "please check your settings and make sure they don't overlap")
-		BattleGroundEnemies:Information("The following profiles are overlapping: "..overlappingProfilesString)
-
-		return
-	end
-
-	if not self.profileIndex or self.profileIndex ~= foundProfilesForPlayerCount[1] then
-		self:PlayerCountProfileChanged(foundProfilesForPlayerCount[1])
-	end
-end
 
 do
 	local function PVPMatchScoreboard_OnHide()
@@ -3158,9 +3161,9 @@ do
 		BattleGroundEnemies:UpgradeDB(self.db)
 
 
-		LibChangelog:Register(AddonName, Data.changelog, self.db.profile, "lastReadVersion", "onlyShowWhenNewVersion")
+		--LibChangelog:Register(AddonName, Data.changelog, self.db.profile, "lastReadVersion", "onlyShowWhenNewVersion")
 
-		LibChangelog:ShowChangelog(AddonName)
+		--LibChangelog:ShowChangelog(AddonName)
 
 
 		PopulateMainframe(PlayerTypes.Allies)
@@ -3291,7 +3294,8 @@ local timer = nil
 function BattleGroundEnemies:ApplyAllSettings()
 	if timer then timer:Cancel() end -- use a timer to apply changes after 0.2 second, this prevents the UI from getting laggy when the user uses a slider option
 	timer = CTimerNewTicker(0.2, function()
-		BattleGroundEnemies:SelectPlayerCountProfile()
+		BattleGroundEnemies.Allies:SelectPlayerCountProfile(true)
+		BattleGroundEnemies.Enemies:SelectPlayerCountProfile(true)
 		timer = nil
 	end, 1)
 end
