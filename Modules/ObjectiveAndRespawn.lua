@@ -1,5 +1,9 @@
 local BattleGroundEnemies = BattleGroundEnemies
-local AddonName, Data = ...
+
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local GetTime = GetTime
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 

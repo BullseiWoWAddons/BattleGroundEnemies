@@ -1,4 +1,9 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
@@ -82,7 +87,8 @@ local function CreateImportExportFrame()
 			if not stringg or stringg == "" then
 				return BattleGroundEnemies:Information("Empty input, please enter a exported string here.")
 			end
-			local data = BattleGroundEnemies:ReceivePrintData(stringg)
+			local data, error = BattleGroundEnemies:ReceivePrintData(stringg)
+			if error then return BattleGroundEnemies:Information(error) end
 			MergeTable(BattleGroundEnemies.db.profile, data)
 
 			BattleGroundEnemies:NotifyChange()
@@ -119,54 +125,50 @@ end
 
 local function SerializeAndCompress(data)
 	local serialized = LibSerialize:Serialize(data)
-	if not serialized then
-		return BattleGroundEnemies:Information("An serialization error happened")
-	end
+	if not serialized then return false, "An serialization error happened" end
+	
 	local compressed = LibDeflate:CompressDeflate(serialized)
-	if not compressed then
-		return BattleGroundEnemies:Information("An compression error happened")
-	end
+	if not compressed then return false, "An compression error happened" end
 	return compressed
 end
 
 local function DecompressAndDeserialize(decoded)
-	if not decoded then
-		return BattleGroundEnemies:Information("An decoding error happened")
+	if not decoded then return false, "An decoding error happened" 
 	end
 	local decompressed = LibDeflate:DecompressDeflate(decoded)
-    if not decompressed then
-		return BattleGroundEnemies:Information("An decompressing error happened")
-	end
+    if not decompressed then return false, "An decompressing error happened" end
+
     local success, data = LibSerialize:Deserialize(decompressed)
-    if not success then
-		return BattleGroundEnemies:Information("An deserialization error happened")
-	end
+    if not success then return false, "An decompressing error happened" end
+
 	return data
 end
 
 
 -- With compression (recommended):
-function BattleGroundEnemies:ExportDataViaAddonMessage(data)
-    local compressed = SerializeAndCompress(data)
+function BattleGroundEnemies:EncodeDataForAddonMessage(data)
+    local compressed, error = SerializeAndCompress(data)
+	if not compressed then return false, error end
+
     local encoded = LibDeflate:EncodeForWoWAddonChannel(compressed)
 	if not encoded then
-		return BattleGroundEnemies:Information("An encoding error happened")
+		return false, "An encoding error happened"
 	end
+	return encoded
    -- self:SendCommMessage("MyPrefix", encoded, "WHISPER", UnitName("player"))
 end
 
-function BattleGroundEnemies:ReceiveAddonMessageData(prefix, payload, distribution, sender)
+function BattleGroundEnemies:DecodeAddonMessageData(payload)
 	return DecompressAndDeserialize(LibDeflate:DecodeForWoWAddonChannel(payload))
     -- Handle `data`
 end
 
 function BattleGroundEnemies:ExportDataViaPrint(data)
-    local compressed = SerializeAndCompress(data)
-	local encoded = LibDeflate:EncodeForPrint(compressed)
+    local compressed, error = SerializeAndCompress(data)
+	if not compressed then return BattleGroundEnemies:Information(error) end
 
-	if not encoded then
-		return BattleGroundEnemies:Information("An encoding error happened")
-	end
+	local encoded = LibDeflate:EncodeForPrint(compressed)
+	if not encoded then return BattleGroundEnemies:Information("An encoding error happened") end
 
 	self:ImportExportFrameSetupForMode("Export", encoded)
 

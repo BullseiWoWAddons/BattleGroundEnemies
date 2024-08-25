@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local L = Data.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRList = LibStub("DRList-1.0")
@@ -137,7 +140,9 @@ local PlayerTypes = {
 local previousCvarRaidOptionIsShown = GetCVar("raidOptionIsShown")
 
 
-
+---comment
+---@param aura AuraData
+---@return string
 local function getFilterFromAuraInfo(aura)
 	return aura.isHarmful and "HARMFUL" or "HELPFUL"
 end
@@ -210,6 +215,9 @@ end
 
 local auraFilters = { "HELPFUL", "HARMFUL" }
 
+---comment
+---@param filter any
+---@return table
 local function CreateFakeAura(filter)
 	local foundA = Data.FoundAuras[filter]
 
@@ -1161,6 +1169,10 @@ do
 		return aura
 	end
 
+	---comment
+	---@param unitID UnitToken
+	---@param second UnitAuraUpdateInfo
+	---@param third any
 	function buttonFunctions:UNIT_AURA(unitID, second, third)
 		if not self.isShown then return end
 		local now = GetTime()
@@ -1721,6 +1733,7 @@ local function PopulateMainframe(playerType)
 		local maxNumPlayers = math_max(self.NumPlayers or 0)
 		--BattleGroundEnemies:LogToSavedVariables("SelectPlayerCountProfile", MaxNumPlayers)
 		if not maxNumPlayers then return end
+		if maxNumPlayers == 0 then return self:NoActivePlayercountProfile() end
 
 		if maxNumPlayers > 40 then
 			self:Disable()
@@ -1747,7 +1760,8 @@ local function PopulateMainframe(playerType)
 
 		if #foundProfilesForPlayerCount == 0 then
 			self:NoActivePlayercountProfile()
-			return BattleGroundEnemies:Information("Can't find a profile for the current player count of " .. self.NumPlayers .."players for "..self.PlayerType.." please check the settings")
+			return
+			--return BattleGroundEnemies:Information("Can't find a profile for the current player count of " .. self.NumPlayers .." players for "..self.PlayerType.." please check the settings")
 		end
 
 		if #foundProfilesForPlayerCount > 1 then
@@ -1773,6 +1787,12 @@ local function PopulateMainframe(playerType)
 
 	function mainframe:CheckEnableState()
 		if self.config.Enabled and self.playerCountConfig and self.playerCountConfig.Enabled then
+			if IsInArena and not BattleGroundEnemies.db.profile.ShowBGEInArena then
+				return self:Disable()
+			end
+			if IsInBattleground and not BattleGroundEnemies.db.profile.ShowBGEInBattleground then
+				return self:Disable()
+			end
 			self:Enable()
 		else
 			self:Disable()
@@ -2680,6 +2700,9 @@ do
 
 	local TestmodeRanOnce = false
 	function BattleGroundEnemies:EnableTestMode()
+		if InCombatLockdown() then
+			return BattleGroundEnemies:Information(L.ErrorTestmodeInCombat)
+		end
 		self.Testmode.Active = true
 
 		if not TestmodeRanOnce then
@@ -3158,12 +3181,12 @@ do
 			end
 		end
 
-		BattleGroundEnemies:UpgradeDB(self.db)
+		BattleGroundEnemies:UpgradeProfiles(self.db)
 
 
-		--LibChangelog:Register(AddonName, Data.changelog, self.db.profile, "lastReadVersion", "onlyShowWhenNewVersion")
+		LibChangelog:Register(AddonName, Data.changelog, self.db.profile, "lastReadVersion", "onlyShowWhenNewVersion")
 
-		--LibChangelog:ShowChangelog(AddonName)
+		LibChangelog:ShowChangelog(AddonName)
 
 
 		PopulateMainframe(PlayerTypes.Allies)
@@ -3187,7 +3210,7 @@ do
 
 		self:SetupOptions()
 
-		AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 800, 532)
+		AceConfigDialog:SetDefaultSize("BattleGroundEnemies", 800, 700)
 
 		AceConfigDialog:AddToBlizOptions("BattleGroundEnemies", "BattleGroundEnemies")
 
@@ -3296,6 +3319,8 @@ function BattleGroundEnemies:ApplyAllSettings()
 	timer = CTimerNewTicker(0.2, function()
 		BattleGroundEnemies.Allies:SelectPlayerCountProfile(true)
 		BattleGroundEnemies.Enemies:SelectPlayerCountProfile(true)
+		BattleGroundEnemies:ToggleArenaFrames()
+		BattleGroundEnemies:ToggleRaidFrames()
 		timer = nil
 	end, 1)
 end
@@ -3824,14 +3849,17 @@ end
 
 local function checkEffectiveEnableStateForArenaFrames()
 	if ArenaEnemyFrames then
+		print("1")
 		if ArenaEnemyFrames_CheckEffectiveEnableState then
 			ArenaEnemyFrames_CheckEffectiveEnableState(ArenaEnemyFrames)
 		end
 	elseif ArenaEnemyFramesContainer then
+		print("2")
 		ArenaEnemyFramesContainer:SetAlpha(1)
 		ArenaEnemyFramesContainer:SetScale(1)
 	end
 	if CompactArenaFrame then
+		print("3")
 		CompactArenaFrame:SetAlpha(1)
 		CompactArenaFrame:SetScale(1)
 	end
@@ -3843,8 +3871,9 @@ function BattleGroundEnemies:ResetCombatLogScanninningTables()
 end
 
 function BattleGroundEnemies:ToggleArenaFrames()
+	print("pups")
 	if InCombatLockdown() then return self:QueueForUpdateAfterCombat(self, "ToggleArenaFrames") end
-
+	print("fart")
 	if (IsInArena and self.db.profile.DisableArenaFramesInArena) or (IsInBattleground and self.db.profile.DisableArenaFramesInBattleground) then return disableArenaFrames() end
 
 	checkEffectiveEnableStateForArenaFrames()

@@ -1,16 +1,20 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 
 Data.Helpers =  {}
 
 function Data.Helpers.AreOverlappingRanges(rangeA, rangeB)
-    if rangeB.min <= rangeA.max then return true end
-    if rangeB.max >= rangeA.min then return true end
+    if rangeA.min > rangeB.max then return false end
+    if rangeA.max < rangeB.min then return false end
 
-    return false
+    return true
 end
 
 function Data.Helpers.NumberIsInRange(number, range)
-    if number >= range.min and number <= range.max then return true end
+    if number < range.min then return false end
+    if number > range.max then return false end
 
-    return false
+    return true
 end

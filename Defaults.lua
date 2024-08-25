@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 
 local allieDefaults15man = {
 	Enabled = true,
@@ -342,8 +345,16 @@ Data.defaultSettings = {
 		Locked = false,
 		Debug = false,
 
+		shareActiveProfile = false,
+
 		DisableArenaFramesInArena = false,
 		DisableArenaFramesInBattleground = false,
+
+		DisableRaidFramesInArena = false,
+		DisableRaidFramesInBattleground = false,
+
+		ShowBGEInArena = true,
+		ShowBGEInBattleground = true,
 
 		MyTarget_Color = {1, 1, 1, 1},
 		MyTarget_BorderSize = 2,

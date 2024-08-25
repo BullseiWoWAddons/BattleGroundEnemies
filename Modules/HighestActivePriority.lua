@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local L = Data.L
 
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture

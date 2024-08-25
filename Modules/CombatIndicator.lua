@@ -1,6 +1,9 @@
 
 local BattleGroundEnemies = BattleGroundEnemies
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local LibSpellIconSelector = LibStub("LibSpellIconSelector")
 
 local L = Data.L

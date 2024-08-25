@@ -1,6 +1,24 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 
 Data.changelog = {
+	{
+		Version = "11.0.2.3",
+		General = "Update for The War Within",
+		Sections = {
+			{
+				Header = "New Features:",
+				Entries = {
+					"Changed the way the addon in regards to player counts. For testmode you can now specify an exact number of players you want to test with. You can now also create more player count sub profiles, this allows for finer control (In theory you can now have up to 40 sub profiles for player counts from 1 to 40). You can enable this feature in Enemies/Allies > General",
+					"Added an option to hide raid frames in arenas and battlegrounds",
+					"Added more settings to copy/restore profiles",
+					"Added settings to enable/disable the addon in arena/battlegrounds"
+				}
+			}
+		}
+	},
 	{
 		Version = "11.0.2.2",
 		General = "Update for The War Within",
