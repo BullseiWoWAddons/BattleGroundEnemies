@@ -2,6 +2,18 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "11.0.2.3",
+		General = "Update for The War Within",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"New version of LibGroupInSpecT library to get rid of error."
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.2.2",
 		General = "Update for The War Within",
 		Sections = {
