@@ -7,7 +7,7 @@ local L = Data.L
 local table_insert = table.insert
 
 local C_Spell = C_Spell
-local GetSpellInfo = GetSpellInfo
+local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellName
 local SpellGetVisibilityInfo = SpellGetVisibilityInfo
 local SpellIsPriorityAura = SpellIsPriorityAura
 local SpellIsSelfBuff = SpellIsSelfBuff
@@ -248,15 +248,8 @@ local function AddFilteringSettings(location, filter)
 								local valueTable = {}
 
 								for spellId in pairs(location.CustomFiltering.SpellIDFiltering_Filterlist) do
-									local spellName
-									if C_Spell and C_Spell.GetSpellInfo then
-										local spellInfo = C_Spell.GetSpellInfo(spellId)
-										if spellInfo then
-											spellName = spellInfo.name
-										end
-									else
-										spellName = GetSpellInfo(spellId)
-									end
+									local spellName = GetSpellName(spellId)
+							
 									valueTable[spellId] = spellId..": "..(spellName or "")
 								end
 
