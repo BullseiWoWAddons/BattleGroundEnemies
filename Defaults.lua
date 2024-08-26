@@ -1155,6 +1155,7 @@ Data.defaultSettings = {
 				["**"] = allieDefaults15man --**means it will be used by all other keys in here, for example customPlayerCountConfigs.xyx will be allieDefaults15man
 		
 			}
-		}
+		},
+		ButtonModules = {}
 	}
 }
