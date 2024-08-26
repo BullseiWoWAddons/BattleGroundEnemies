@@ -2400,10 +2400,10 @@ local function copySettingsWithoutOverwrite(src, dest)
 	return dest
 end
 
-local function copyButtonModuleDefaultsIntoDefaults(playerCountConfig, moduleSetupTable)
-	playerCountConfig.ButtonModules = playerCountConfig.ButtonModules or {}
-	playerCountConfig.ButtonModules[moduleSetupTable.moduleName] = playerCountConfig.ButtonModules[moduleSetupTable.moduleName] or {}
-	copySettingsWithoutOverwrite(moduleSetupTable.defaultSettings, playerCountConfig.ButtonModules[moduleSetupTable.moduleName])
+local function copyModuleDefaultsIntoDefaults(location, moduleName, moduleDefaults)
+	location.ButtonModules = location.ButtonModules or {}
+	location.ButtonModules[moduleName] = location.ButtonModules[moduleName] or {}
+	copySettingsWithoutOverwrite(moduleDefaults, location.ButtonModules[moduleName])
 end
 
 function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
@@ -2430,12 +2430,18 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 	for k in pairs(PlayerTypes) do
 		for j = 1, #Data.defaultSettings.profile[k].playerCountConfigs do
 			local playerCountConfig = Data.defaultSettings.profile[k].playerCountConfigs[j]
-			copyButtonModuleDefaultsIntoDefaults(playerCountConfig, moduleSetupTable)
+			copyModuleDefaultsIntoDefaults(playerCountConfig, moduleName, moduleSetupTable.defaultSettings)
 		end
 
 		local customPlayerCountConfigGeneric =  Data.defaultSettings.profile[k].customPlayerCountConfigs["**"]
-		copyButtonModuleDefaultsIntoDefaults(customPlayerCountConfigGeneric, moduleSetupTable)
+		copyModuleDefaultsIntoDefaults(customPlayerCountConfigGeneric, moduleName, moduleSetupTable.defaultSettings)
 	end
+
+	if moduleSetupTable.generalDefaults then
+		copyModuleDefaultsIntoDefaults(Data.defaultSettings.profile, moduleName, moduleSetupTable.generalDefaults)
+	end
+	
+
 
 	--not used
 	--[[ moduleFrame:SetScript("OnEvent", function(self, event, ...)
@@ -3849,17 +3855,14 @@ end
 
 local function checkEffectiveEnableStateForArenaFrames()
 	if ArenaEnemyFrames then
-		print("1")
 		if ArenaEnemyFrames_CheckEffectiveEnableState then
 			ArenaEnemyFrames_CheckEffectiveEnableState(ArenaEnemyFrames)
 		end
 	elseif ArenaEnemyFramesContainer then
-		print("2")
 		ArenaEnemyFramesContainer:SetAlpha(1)
 		ArenaEnemyFramesContainer:SetScale(1)
 	end
 	if CompactArenaFrame then
-		print("3")
 		CompactArenaFrame:SetAlpha(1)
 		CompactArenaFrame:SetScale(1)
 	end
@@ -3871,9 +3874,7 @@ function BattleGroundEnemies:ResetCombatLogScanninningTables()
 end
 
 function BattleGroundEnemies:ToggleArenaFrames()
-	print("pups")
 	if InCombatLockdown() then return self:QueueForUpdateAfterCombat(self, "ToggleArenaFrames") end
-	print("fart")
 	if (IsInArena and self.db.profile.DisableArenaFramesInArena) or (IsInBattleground and self.db.profile.DisableArenaFramesInBattleground) then return disableArenaFrames() end
 
 	checkEffectiveEnableStateForArenaFrames()
