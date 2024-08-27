@@ -139,9 +139,10 @@ local generalOptions = function(location)
 						spells[spellID] = string.format("|T%s:20|t %s", iconID, spellName) --https://wowwiki-archive.fandom.com/wiki/UI_escape_sequences
 					end
 				end
+				spells[false] = false
 				return spells
 			end,
-			sorting = function ()
+			sorting = function (a,b,c) --needs a numeric table with keys from 1 to ..., values are the keys for values function above
 				local categorySpells = {}
 				local function sortSpells(a,b)
 					return a.name < b.name
@@ -155,13 +156,13 @@ local generalOptions = function(location)
 							name = spellName
 						})
 					end
-
 				end
 				table.sort(categorySpells, sortSpells)
 				local sortedSpellNames = {} --key is spellID, value = key from values function return table
 				for i = 1, #categorySpells do
 					table.insert(sortedSpellNames, categorySpells[i].spellId)
 				end
+				table.insert(sortedSpellNames, 1, false)
 				return sortedSpellNames
 			end,
 			get = function(option)
