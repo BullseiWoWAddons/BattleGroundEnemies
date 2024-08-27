@@ -109,7 +109,7 @@ end
 LSM:Register("font", "PT Sans Narrow Bold", [[Interface\AddOns\BattleGroundEnemies\Fonts\PT Sans Narrow Bold.ttf]])
 LSM:Register("statusbar", "UI-StatusBar", "Interface\\TargetingFrame\\UI-StatusBar")
 
-local BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies", UIParent)
+BattleGroundEnemies = CreateFrame("Frame", "BattleGroundEnemies", UIParent)
 BattleGroundEnemies.Counter = {}
 
 --todo: add castbars and combat indicator to testmode
