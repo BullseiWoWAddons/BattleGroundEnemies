@@ -5,16 +5,30 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
-		Version = "11.0.2.3",
-		General = "Update for The War Within",
+		Version = "11.0.2.4",
+		General = "This update brings some new features. ",
 		Sections = {
 			{
 				Header = "New Features:",
 				Entries = {
 					"Changed the way the addon in regards to player counts. For testmode you can now specify an exact number of players you want to test with. You can now also create more player count sub profiles, this allows for finer control (In theory you can now have up to 40 sub profiles for player counts from 1 to 40). You can enable this feature in Enemies/Allies > General",
 					"Added an option to hide raid frames in arenas and battlegrounds",
+					"Added settings to enable/disable the addon in arena/battlegrounds",
 					"Added more settings to copy/restore profiles",
-					"Added settings to enable/disable the addon in arena/battlegrounds"
+					"Rearranged some settings.",
+					"Added the ability for general module settings. First settings there will be custom DR category icons. You can find this settings in General > Modules"
+				}
+			}
+		}
+	},
+	{
+		Version = "11.0.2.3",
+		General = "Update for The War Within",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"New version of LibGroupInSpecT library to get rid of error."
 				}
 			}
 		}
