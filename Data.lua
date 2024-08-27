@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 
 local L = Data.L
 local DRList = LibStub("DRList-1.0")
@@ -9,6 +12,7 @@ local GetClassInfo = GetClassInfo
 local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
 local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
 local GetSpellInfo = GetSpellInfo
+local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellName
 local C_Spell = C_Spell
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
@@ -807,10 +811,10 @@ Data.TrinketData = {
 if IsClassic then
 	--Classic: there are no spellIDs in the combat log in classic, only spellnames
 	Mixin(Data.TrinketData, {
-		[GetSpellInfo(23273)] = {spellId = 23273, cd = 300, itemID = 18856},	-- Immune Charm/Fear/Polymorph	Rogue, Warlock
-		[GetSpellInfo(23274)] = {spellId = 23274, cd = 300, itemID = 18856}, 	-- Immune Fear/Polymorph/Snare	Mage
-		[GetSpellInfo(23276)] = {spellId = 23276, cd = 300, itemID = 18856},	-- Immune Fear/Polymorph/Stun	Paladin, Priest
-		[GetSpellInfo(23227)] = {spellId = 23227, cd = 300, itemID = 18856}		-- Immune Charm/Fear/Stun		Druid
+		[GetSpellName(23273)] = {spellId = 23273, cd = 300, itemID = 18856},	-- Immune Charm/Fear/Polymorph	Rogue, Warlock
+		[GetSpellName(23274)] = {spellId = 23274, cd = 300, itemID = 18856}, 	-- Immune Fear/Polymorph/Snare	Mage
+		[GetSpellName(23276)] = {spellId = 23276, cd = 300, itemID = 18856},	-- Immune Fear/Polymorph/Stun	Paladin, Priest
+		[GetSpellName(23227)] = {spellId = 23227, cd = 300, itemID = 18856}		-- Immune Charm/Fear/Stun		Druid
 	})
 end
 
@@ -966,16 +970,8 @@ end
 Data.RacialNameToSpellIDs = {}
 Data.Racialnames = {}
 for spellId in pairs(Data.RacialSpellIDtoCooldown) do
-	local racialName
-	if C_Spell and C_Spell.GetSpellInfo then
-		local spellInfo = C_Spell.GetSpellInfo(spellId)
-		if spellInfo then
-			racialName = spellInfo.name
-		end
-	else
-		racialName = GetSpellInfo(spellId)
-	end
-	if racialName then
+	local racialName = GetSpellName(spellId)
+	if racialName and racialName ~= "" then
 		if not Data.RacialNameToSpellIDs[racialName] then
 			Data.RacialNameToSpellIDs[racialName] = {}
 			Data.Racialnames[racialName] = racialName

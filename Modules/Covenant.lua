@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 local C_Covenants = C_Covenants

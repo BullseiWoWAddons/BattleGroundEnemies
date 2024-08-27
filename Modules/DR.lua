@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
@@ -6,6 +9,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellName
 
 local CreateFrame = CreateFrame
 local BackdropTemplateMixin = BackdropTemplateMixin
@@ -42,6 +46,11 @@ local defaultSettings = {
 	},
 	Filtering_Enabled = false,
 	Filtering_Filterlist = {},
+}
+
+local generalDefaults = {
+	CustomCategoryIconsEnabled = false,
+	CustomCategoryIcons = {}
 }
 
 local options = function(location)
@@ -111,6 +120,81 @@ local options = function(location)
 	}
 end
 
+
+local generalOptions = function(location)
+
+	local categories = DRList:GetCategories()
+	local categoryoptions = {}
+	for engCategory, localCategory in pairs(categories) do
+		categoryoptions[engCategory] = {
+			type = "select",
+			name = localCategory,
+			values = function()
+				local spells = {}
+
+				for spellID, category in DRList:IterateSpellsByCategory(engCategory) do
+					local iconID = GetSpellTexture(spellID)
+					local spellName = GetSpellName(spellID)
+					if iconID then
+						spells[spellID] = string.format("|T%s:20|t %s", iconID, spellName) --https://wowwiki-archive.fandom.com/wiki/UI_escape_sequences
+					end
+				end
+				spells[false] = false
+				return spells
+			end,
+			sorting = function (a,b,c) --needs a numeric table with keys from 1 to ..., values are the keys for values function above
+				local categorySpells = {}
+				local function sortSpells(a,b)
+					return a.name < b.name
+				end
+
+				for spellID, category in DRList:IterateSpellsByCategory(engCategory) do
+					local spellName = GetSpellName(spellID)
+					if spellName then
+						table.insert(categorySpells, {
+							spellId = spellID,
+							name = spellName
+						})
+					end
+				end
+				table.sort(categorySpells, sortSpells)
+				local sortedSpellNames = {} --key is spellID, value = key from values function return table
+				for i = 1, #categorySpells do
+					table.insert(sortedSpellNames, categorySpells[i].spellId)
+				end
+				table.insert(sortedSpellNames, 1, false)
+				return sortedSpellNames
+			end,
+			get = function(option)
+				return Data.GetOption(location.CustomCategoryIcons, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.CustomCategoryIcons, option, ...)
+			end,
+		}
+
+	end
+
+	return {
+		CustomCategoryIconsEnabled = {
+			type = "toggle",
+			name = L.EnableCustomDRCategoryIcons,
+			desc = L.EnableCustomDRCategoryIcons_Desc,
+			order = 1
+		},
+		CustomIconsSelect = {
+			type = "group",
+			name = "",
+			inline = true,
+			hidden = function ()
+				return not location.CustomCategoryIconsEnabled
+			end,
+			order = 2,
+			args = categoryoptions
+		}
+	}
+end
+
 local dRstates = {
 	[1] = { 0, 1, 0, 1}, --green (next cc in DR time will be only half duration)
 	[2] = { 1, 1, 0, 1}, --yellow (next cc in DR time will be only 1/4 duration)
@@ -134,7 +218,9 @@ local dRTracking = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.DRTracking,
 	flags = flags,
 	defaultSettings = defaultSettings,
+	generalDefaults = generalDefaults,
 	options = options,
+	generalOptions = generalOptions,
 	events = {"AuraRemoved"},
 	enabledInThisExpansion = true
 })
@@ -203,11 +289,24 @@ local function createNewDrFrame(playerButton, container)
 end
 
 local function setupDrFrame(container, drFrame, drDetails)
+	local globalModuleSetting = BattleGroundEnemies.db.profile.ButtonModules.DRTracking
 	drFrame:SetStatus()
 
 	drFrame.spellId = drDetails.spellId
 	--drFrame.Icon:SetTexture(IsClassic and GetSpellTexture(DRList.spells[drDetails.spellName].spellId) or GetSpellTexture(drDetails.spellId)) no longer needed classic seems to support spellIDs now
-	drFrame.Icon:SetTexture(GetSpellTexture(drDetails.spellId))
+	local icon
+	if globalModuleSetting.CustomCategoryIconsEnabled then
+		local spellIdForICon = globalModuleSetting.CustomCategoryIcons[drDetails.drCat]
+		if spellIdForICon then
+			icon = GetSpellTexture(spellIdForICon)
+			if not icon then
+				BattleGroundEnemies:OnetimeInformation("The custom spell icon you selected for the DR category "..  drDetails.drCat.. " doesn't seam to exist anymore, please choose a new icon for this category. Using the spell's icon instead.")
+			end
+		else --if we end up here the user probably doesn't want a custom icon for this category since he left that option untouched/nil
+		end
+	end
+	if not icon then icon = GetSpellTexture(drDetails.spellId) end
+	drFrame.Icon:SetTexture(icon)
 	local duration = DRList:GetResetTime(drDetails.drCat)
 	drFrame.Cooldown:SetCooldown(drDetails.startTime, duration)
 end
@@ -239,7 +338,7 @@ function dRTracking:AttachToPlayerButton(playerButton)
 			end
 
 			input.status = (input.status or 0) + 1
-			
+
 			input.startTime = GetTime()
 			self:Display()
 		end

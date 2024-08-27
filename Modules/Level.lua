@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 local MaxLevel = GetMaxPlayerLevel()
@@ -76,7 +79,8 @@ function level:AttachToPlayerButton(playerButton)
 
 	-- Level
 
-	function fs:PlayerDetailsChanged(playerDetails)
+	function fs:PlayerDetailsChanged()
+		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		if playerDetails.PlayerLevel then self:SetLevel(playerDetails.PlayerLevel) end --for testmode
 	end
@@ -98,6 +102,7 @@ function level:AttachToPlayerButton(playerButton)
 
 	function fs:ApplyAllSettings()
 		self:ApplyFontStringSettings(self.config.Text)
+		self:PlayerDetailsChanged()
 		self:DisplayLevel()
 	end
 	playerButton.Level = fs

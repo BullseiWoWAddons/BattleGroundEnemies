@@ -225,6 +225,7 @@ globals = {
 	"GetSpellDescription",
 	"GetSpellInfo",
 	"GetSpellLink",
+	"GetSpellName",
 	"GetSpellorMacroIconInfo",
 	"GetSpellTabInfo",
 	"GetSpellTexture",

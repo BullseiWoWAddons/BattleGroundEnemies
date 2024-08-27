@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 local GetTexCoordsForRoleSmallCircle = GetTexCoordsForRoleSmallCircle or function(role)
@@ -48,7 +51,8 @@ function role:AttachToPlayerButton(playerButton)
 		self:PlayerDetailsChanged()
 	end
 
-	playerButton.Role.PlayerDetailsChanged = function(self, playerDetails)
+	playerButton.Role.PlayerDetailsChanged = function(self)
+		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		local specData = playerButton:GetSpecData()
 		if specData then

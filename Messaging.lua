@@ -1,31 +1,48 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
+LibStub("AceComm-3.0"):Embed(BattleGroundEnemies)
+
 
 local CTimerNewTicker = C_Timer.NewTicker
-local SendAddonMessage = C_ChatInfo.SendAddonMessage
+local GetTime = GetTime
 local max = math.max
 
-local BGE_VERSION = "11.0.2.3"
+
+local BGE_VERSION = "11.0.2.4"
 local AddonPrefix = "BGE"
-local versionQueryString, versionResponseString = "Q^%s", "V^%s"
+local versionQueryString, versionResponseString = "Q^%s^%i", "V^%s^%i"
+local profileQueryString, profileResponseString = "PQ^%s", "PR^%s"
 local targetCallVolunteerQueryString = "TVQ^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
 local targetCallVolunteerResponseString = "TVR^%s"
 local targetCallCallerQueryString = "TCQ" -- wil be send to all the viewers to show if you are volunteering vor target calling
 local targetCallCallerResponseString = "TCV^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
 
+
 local highestVersion = BGE_VERSION
-local versions = {}
-
-versionQueryString = versionQueryString:format(BGE_VERSION)
-versionResponseString = versionResponseString:format(BGE_VERSION)
-
-BattleGroundEnemies:RegisterEvent("CHAT_MSG_ADDON")
-
-C_ChatInfo.RegisterAddonMessagePrefix(AddonPrefix)
+local playerData = {}
 
 
+
+local function generateStrings()
+	versionQueryString = versionQueryString:format(BGE_VERSION, BattleGroundEnemies.db.profile.shareActiveProfile and 1 or 0)
+	versionResponseString = versionResponseString:format(BGE_VERSION, BattleGroundEnemies.db.profile.shareActiveProfile and 1 or 0)
+	return {
+		vq = versionQueryString,
+		vr = versionResponseString
+	}
+end
+
+local function encodeProfileResponse(profile)
+	local encoded = BattleGroundEnemies:ExportDataCompressed(profile, false)
+	if not encoded then return end
+	profileResponseString = profileResponseString:format(encoded)
+	return profileResponseString
+end
 
 --[[
 	targetcallilng, thoughts:
@@ -95,11 +112,11 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 	for allyName, allyButton in pairs(BattleGroundEnemies.Allies.Players) do
 		local playerDetails = allyButton.PlayerDetails
 
-		if versions[allyName] then
-			if IsFirstNewerThanSecond(highestVersion, versions[allyName]) then
-				results.old[#results.old+1] = coloredNameVersion(playerDetails, versions[allyName])
+		if playerData[allyName] then
+			if IsFirstNewerThanSecond(highestVersion, playerData[allyName].version) then
+				results.old[#results.old+1] = coloredNameVersion(playerDetails, playerData[allyName].version)
 			else
-				results.current[#results.current+1] = coloredNameVersion(playerDetails, versions[allyName])
+				results.current[#results.current+1] = coloredNameVersion(playerDetails, playerData[allyName].version)
 			end
 		else
 			results.none[#results.none+1] = coloredNameVersion(playerDetails, "")
@@ -124,7 +141,7 @@ once when requested in a 3 second time frame, every new request resets the timer
 
 
 function BattleGroundEnemies:QueryVersions(channel)
-	SendAddonMessage(AddonPrefix, versionQueryString, channel)
+	BattleGroundEnemies:SendCommMessage(AddonPrefix, generateStrings().vq, channel)
 end
 
 -- function BattleGroundEnemies:QueryTargetCallVolunteers(channel)
@@ -150,7 +167,6 @@ end
 -- end
 
 
-
 local wasInGroup = nil
 function BattleGroundEnemies:RequestEverythingFromGroupmembers()
 
@@ -165,32 +181,51 @@ function BattleGroundEnemies:RequestEverythingFromGroupmembers()
 
 	elseif wasInGroup and not groupType then
 		wasInGroup = nil
-		versions = {}
+		playerData = {}
 	end
 end
 
-function BattleGroundEnemies:UpdateVersions(sender, prefix, version)
+function BattleGroundEnemies:ProfileReceived(sender, data)
+	if type(data) ~= "table" then return end
+	playerData[sender] = playerData[sender] or {}
+	data.receivedAt = GetTime()
+	playerData[sender].profileData = data
+end
+
+function BattleGroundEnemies:SendCurrentProfileTo(sender)
+	local encoded = encodeProfileResponse({version = BGE_VERSION, profile = BattleGroundEnemies.db.profile})
+	if not encoded then return end
+	BattleGroundEnemies:SendCommMessage(AddonPrefix, encoded, IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
+end
+
+function BattleGroundEnemies:UpdatePlayerData(sender, prefix, version, profileSharingEnabled)
 	if prefix == "Q" then
 		if timers.VersionCheck then timers.VersionCheck:Cancel() end
 		timers.VersionCheck = CTimerNewTicker(3, function()
 			if IsInGroup() then
-				SendAddonMessage(AddonPrefix, versionResponseString, IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- LE_PARTY_CATEGORY_INSTANCE = 2
+				BattleGroundEnemies:SendCommMessage(AddonPrefix, generateStrings().vr, IsInGroup(2) and "INSTANCE_CHAT" or "RAID") -- LE_PARTY_CATEGORY_INSTANCE = 2
 			end
 			timers.VersionCheck = nil
 		end, 1)
 	end
 	if prefix == "V" or prefix == "Q" then -- V = version response, Q = version query
+		playerData[sender] = playerData[sender] or {}
 		if version then
-			versions[sender] = version
-			if IsFirstNewerThanSecond(version, highestVersion) then highestVersion = version end
+			playerData[sender].version = version
+			if IsFirstNewerThanSecond(version, highestVersion) then
 
-			if IsFirstNewerThanSecond(highestVersion, BGE_VERSION) then
 				if timers.outdatedTimer then timers.outdatedTimer:Cancel() end
 				timers.outdatedTimer = CTimerNewTicker(3, function()
 					BattleGroundEnemies:OnetimeInformation(L.NewVersionAvailable..": ", highestVersion)
 					timers.outdatedTimer = nil
 				end, 1)
+
+				highestVersion = version
 			end
+		end
+		if profileSharingEnabled then
+			profileSharingEnabled = profileSharingEnabled == "1" and true or false
+			playerData[sender].profileSharingEnabled = profileSharingEnabled
 		end
 	end
 end
@@ -222,14 +257,39 @@ end
 -- end
 
 function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sender)  --the sender always contains the realm of the player, even when from same realm
-	if channel ~= "RAID" and channel ~= "PARTY" and channel ~= "INSTANCE_CHAT" or addonPrefix ~= AddonPrefix then return end
+	if addonPrefix ~= AddonPrefix then return end
+	if (channel == "RAID" or channel == "PARTY" or channel == "INSTANCE_CHAT") then
 
-	local msgPrefix, msg = strsplit("^", message)
-	sender = Ambiguate(sender, "none")
-	if msgPrefix == "V" or msgPrefix == "Q" then
-		self:UpdateVersions(sender, msgPrefix, msg)
+		sender = Ambiguate(sender, "none")
+		local msgPrefix, version, profileSharingEnabled = strsplit("^", message) --try if there is already a msgPrefix and version, if so we got old addon version response
+
+		if msgPrefix == "V" or msgPrefix == "Q" then
+			--info 2 is whether or not that player got profile sharing enabled
+			self:UpdatePlayerData(sender, msgPrefix, version, profileSharingEnabled)
+	 end
+	elseif channel == "WHISPER" then
+		local decoded = BattleGroundEnemies:DecodeReceivedData(message, false)
+		if not decoded then return end
+
+		local msgPrefix, info1, info2 = strsplit("^", message)
+		if not info1 then return end
+
+		if msgPrefix == "PQ" then
+			local requestFromPlayerName = Ambiguate(info1, "none")  -- name of the player he wants that profile from
+
+			if requestFromPlayerName == BattleGroundEnemies.PlayerDetails.PlayerName and BattleGroundEnemies.db.profile.shareActiveProfile then --sender wants my profile
+				self:SendCurrentProfileTo(sender)
+			end
+		elseif msgPrefix == "PR" then --someone send us their profile
+			self:ProfileReceived(sender, info1)
+		end
 	end
 end
+
+--C_ChatInfo.RegisterAddonMessagePrefix(AddonPrefix)
+
+BattleGroundEnemies:RegisterComm(AddonPrefix, "CHAT_MSG_ADDON")
+
 
 
 

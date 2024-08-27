@@ -1,5 +1,9 @@
 local BattleGroundEnemies = BattleGroundEnemies
-local AddonName, Data = ...
+
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local GetTime = GetTime
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
@@ -208,7 +212,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:UnitDied()
-		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.Testmode.Active and BattleGroundEnemies.BGSize == 15)) then
+		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.Testmode.Active)) then
 		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
 				self:Show()

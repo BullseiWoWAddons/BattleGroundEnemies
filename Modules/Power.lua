@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local LSM = LibStub("LibSharedMedia-3.0")
 local L = Data.L
@@ -108,7 +111,8 @@ function power:AttachToPlayerButton(playerButton)
 		end
 	end
 
-	function playerButton.Power:PlayerDetailsChanged(playerDetails)
+	function playerButton.Power:PlayerDetailsChanged()
+		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		if not playerDetails.PlayerClass then return end
 		
@@ -144,6 +148,6 @@ function power:AttachToPlayerButton(playerButton)
 		self:SetHeight(self.config.Height or 0.01)
 		self:SetStatusBarTexture(LSM:Fetch("statusbar", self.config.Texture))--self.healthBar:SetStatusBarTexture(137012)
 		self.Background:SetVertexColor(unpack(self.config.Background))
-		self:PlayerDetailsChanged(playerButton.PlayerDetails)
+		self:PlayerDetailsChanged()
 	end
 end

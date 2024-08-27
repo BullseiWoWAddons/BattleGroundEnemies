@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
@@ -32,149 +35,138 @@ local MergeTable = MergeTable or function(destination, source)
 	end
 end
 
-
-local function CreateImportExportFrame()
-	local frame = CreateFrame("Frame", "dsafsdafdsafdsafsdaf", UIParent, "ButtonFrameTemplate")
-	frame:SetFrameStrata("TOOLTIP") -- to make it appear above the options panel
-
-
-	ButtonFrameTemplate_HidePortrait(frame)
-
-	frame.Inset:SetPoint("TOPLEFT", 4, -25)
-
-	-- frame:EnableMouse(true)
-
-	frame:SetSize(500, 500)
-	frame:SetPoint("CENTER")
-	-- frame:SetMovable(true)
-	-- frame:RegisterForDrag("LeftButton")
-	-- frame:SetScript("OnDragStart", frame.StartMoving)
-	-- frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-
-	frame.scrollBar = CreateFrame("ScrollFrame", nil, frame.Inset, "UIPanelScrollFrameTemplate")
-	frame.scrollBar:SetPoint("TOPLEFT", 10, -6)
-	frame.scrollBar:SetPoint("BOTTOMRIGHT", -27, 6)
-
-	frame.EditBox = CreateFrame("EditBox")
-	frame.EditBox:SetMultiLine(true)
-	frame.EditBox:SetSize(frame.scrollBar:GetWidth(), 170)
-	frame.EditBox:SetPoint("TOPLEFT", frame.scrollBar)
-	frame.EditBox:SetPoint("BOTTOMRIGHT", frame.scrollBar)
-	--frame.EditBox:SetMaxBytes(nil);
-	frame.EditBox:SetFontObject(GameFontNormal)
-	frame.EditBox:SetAutoFocus(false)
-	frame.EditBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-
-	frame.scrollBar:SetScrollChild(frame.EditBox)
-
-	if DoesTemplateExist("SharedButtonSmallTemplate") then
-		frame.Button = CreateFrame("Button", nil, frame, "SharedButtonSmallTemplate")
+local frameShown
+function BattleGroundEnemies:CreateAceGUIImportExportFrame(mode)
+	---@class AceGUI: AceGUIFrame
+	local frame = AceGUI:Create("Frame")
+	frame:EnableResize(false)
+	frame:SetTitle("Example Frame")
+	local text
+	if mode == "Import" then
+		text = L.ImportTextMessage
 	else
-		frame.Button = CreateFrame("Button", nil, frame, "MagicButtonTemplate")
+		text = L.ExportTextMessage
+	end
+	frame:SetStatusText(text)
+	frame:SetCallback("OnClose", function(widget)
+		frameShown = false
+		AceGUI:Release(widget)
+	end)
+	frame:SetLayout("Flow")
+
+	---@class editbox: AceGUIMultiLineEditBox
+	local editbox = AceGUI:Create("MultiLineEditBox")
+	editbox:SetFullWidth(true)
+	editbox:SetHeight(380)
+
+
+	frame:AddChild(editbox)
+	frame.EditBox = editbox
+
+	if mode == "Import" then
+		editbox:SetCallback("OnEnterPressed", function(widget, callbackName, text)
+			frame:SetUserData("input", text)
+			if text and text ~= "" then
+				frame.ImportButton:SetDisabled(false)
+			else
+				frame.ImportButton:SetDisabled(true)
+			end
+		end)
+		editbox:SetCallback("OnTextChanged", function(widget, callbackName, text)
+			frame.ImportButton:SetDisabled(true)
+		end)
+
+		---@class importButton: AceGUIButton
+		local importButton = AceGUI:Create("Button")
+		importButton:SetWidth(200)
+
+		importButton:SetCallback("OnClick", function(widget, ...)
+			if frame:GetUserData("mode") == "Import" then
+				local stringg = frame:GetUserData("input")
+				if not stringg or stringg == "" then
+					return BattleGroundEnemies:Information("Empty input, please enter a exported string here.")
+				end
+				local data, error = BattleGroundEnemies:DecodeReceivedData(stringg, true)
+				if error then return BattleGroundEnemies:Information(error) end
+				MergeTable(BattleGroundEnemies.db.profile, data)
+
+				BattleGroundEnemies:NotifyChange()
+			end
+			frame:Hide()
+		end)
+
+		frame:AddChild(importButton)
+		frame.ImportButton = importButton
 	end
 
-	frame.Button:SetSize(80, 22)
-	frame.Button:SetPoint("BOTTOMRIGHT", -4, 4)
-	frame.Button:SetScript("OnClick", function(self)
 
-		if frame.mode == "Import" then
-			local stringg = frame.EditBox:GetText()
-			if not stringg or stringg == "" then
-				return BattleGroundEnemies:Information("Empty input, please enter a exported string here.")
-			end
-			local data = BattleGroundEnemies:ReceivePrintData(stringg)
-			MergeTable(BattleGroundEnemies.db.profile, data)
-
-			BattleGroundEnemies:NotifyChange()
-		end
-		frame:Hide()
-	end)
 
 	return frame
 end
 
-
 function BattleGroundEnemies:ImportExportFrameSetupForMode(mode, exportString)
-	self.ImportExportFrame = self.ImportExportFrame or CreateImportExportFrame()
-	if self.ImportExportFrame.SetTitle then
-		self.ImportExportFrame:SetTitle(AddonName..": "..mode)
-	else
-		--workaround for TBCC
-		self.ImportExportFrame.TitleText:SetText(AddonName..": "..mode)
+	if frameShown and self.ImportExportFrame then
+		self.ImportExportFrame:Release()
 	end
+	frameShown = true
+	self.ImportExportFrame = BattleGroundEnemies:CreateAceGUIImportExportFrame(mode)
+
+	self.ImportExportFrame:SetTitle(AddonName..": "..mode)
+	self.ImportExportFrame:SetStatusText("AceGUI-3.0 Example Container Frame")
 	if mode == "Import" then
-		self.ImportExportFrame.Button:SetText(L.Import)
+		self.ImportExportFrame.EditBox:SetLabel(L.InsertExportedStringHere)
 		self.ImportExportFrame.EditBox:SetText("")
-		self.ImportExportFrame.EditBox:SetAutoFocus(true)
+		self.ImportExportFrame.ImportButton:SetText(L.Import)
 	else
-		self.ImportExportFrame.Button:SetText(CLOSE)
+		self.ImportExportFrame.EditBox:SetLabel(L.ImportEditBoxLabel)
 		self.ImportExportFrame.EditBox:SetText(exportString)
 		self.ImportExportFrame.EditBox:HighlightText()
 	end
-	self.ImportExportFrame.mode = mode
-	self.ImportExportFrame:Show()
+	self.ImportExportFrame.EditBox:SetFocus()
+	self.ImportExportFrame.EditBox:SetHeight(380)
+	self.ImportExportFrame:SetUserData("mode", mode)
+	self.ImportExportFrame:DoLayout()
 end
 
 
-
-local function SerializeAndCompress(data)
+function BattleGroundEnemies:ExportDataCompressed(data, forPrint)
 	local serialized = LibSerialize:Serialize(data)
-	if not serialized then
-		return BattleGroundEnemies:Information("An serialization error happened")
-	end
+	if not serialized then return false, "An serialization error happened" end
+
 	local compressed = LibDeflate:CompressDeflate(serialized)
-	if not compressed then
-		return BattleGroundEnemies:Information("An compression error happened")
+	if not compressed then return false, "An compression error happened" end
+
+	local encoded
+	if forPrint then
+		encoded = LibDeflate:EncodeForPrint(compressed)
+	else
+		encoded = LibDeflate:EncodeForWoWAddonChannel(compressed)
 	end
-	return compressed
+	if not encoded then return false, "An encoding error happened" end
+	return encoded
 end
 
-local function DecompressAndDeserialize(decoded)
-	if not decoded then
-		return BattleGroundEnemies:Information("An decoding error happened")
+
+function BattleGroundEnemies:DecodeReceivedData(encoded, fromPrint)
+	local decoded
+	if fromPrint then
+		decoded = LibDeflate:DecodeForPrint(encoded)
+	else
+		decoded = LibDeflate:DecodeForWoWAddonChannel(encoded)
 	end
+	if not decoded then return false, "An decoding error happened" end
 	local decompressed = LibDeflate:DecompressDeflate(decoded)
-    if not decompressed then
-		return BattleGroundEnemies:Information("An decompressing error happened")
-	end
+    if not decompressed then return false, "An decompressing error happened" end
+
     local success, data = LibSerialize:Deserialize(decompressed)
-    if not success then
-		return BattleGroundEnemies:Information("An deserialization error happened")
-	end
+    if not success then return false, "An decompressing error happened" end
 	return data
 end
 
-
--- With compression (recommended):
-function BattleGroundEnemies:ExportDataViaAddonMessage(data)
-    local compressed = SerializeAndCompress(data)
-    local encoded = LibDeflate:EncodeForWoWAddonChannel(compressed)
-	if not encoded then
-		return BattleGroundEnemies:Information("An encoding error happened")
+function BattleGroundEnemies:ExportButtonPressed()
+	local data, error = self:ExportDataCompressed(self.db.profile, true)
+	if error then
+		return self:Information(error)
 	end
-   -- self:SendCommMessage("MyPrefix", encoded, "WHISPER", UnitName("player"))
-end
-
-function BattleGroundEnemies:ReceiveAddonMessageData(prefix, payload, distribution, sender)
-	return DecompressAndDeserialize(LibDeflate:DecodeForWoWAddonChannel(payload))
-    -- Handle `data`
-end
-
-function BattleGroundEnemies:ExportDataViaPrint(data)
-    local compressed = SerializeAndCompress(data)
-	local encoded = LibDeflate:EncodeForPrint(compressed)
-
-	if not encoded then
-		return BattleGroundEnemies:Information("An encoding error happened")
-	end
-
-	self:ImportExportFrameSetupForMode("Export", encoded)
-
-    --self:SendCommMessage("MyPrefix", encoded, "WHISPER", UnitName("player"))
-end
-
-
-
-function BattleGroundEnemies:ReceivePrintData(string)
-    return DecompressAndDeserialize(LibDeflate:DecodeForPrint(string))
+	self:ImportExportFrameSetupForMode("Export", data)
 end
