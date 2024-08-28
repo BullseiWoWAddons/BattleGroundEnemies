@@ -18,3 +18,9 @@ function Data.Helpers.NumberIsInRange(number, range)
 
     return true
 end
+
+---@param aura AuraData
+---@return string
+function Data.Helpers.getFilterFromAuraInfo(aura)
+	return aura.isHarmful and "HARMFUL" or "HELPFUL"
+end
