@@ -33,6 +33,7 @@ Messaging.lua
 TargetCall.lua
 Changelog.lua
 ImportExport.lua
+Mainframe.lua
 
 Modules\ContainerTemplate.lua
 Modules\Auras.lua
