@@ -109,18 +109,18 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 
 
 	--loop through all of the BattleGroundEnemies.Allies.Players to find out which one of them send us their addon version
+	local t, v
 	for allyName, allyButton in pairs(BattleGroundEnemies.Allies.Players) do
-		local playerDetails = allyButton.PlayerDetails
-
+		t, v = results.none, ""
 		if playerData[allyName] then
 			if IsFirstNewerThanSecond(highestVersion, playerData[allyName].version) then
-				results.old[#results.old+1] = coloredNameVersion(playerDetails, playerData[allyName].version)
+				t = results.old
 			else
-				results.current[#results.current+1] = coloredNameVersion(playerDetails, playerData[allyName].version)
+				t = results.current
 			end
-		else
-			results.none[#results.none+1] = coloredNameVersion(playerDetails, "")
+			v = playerData[allyName].version
 		end
+		table.insert(t, coloredNameVersion(allyButton.PlayerDetails, v))
 	end
 
 
