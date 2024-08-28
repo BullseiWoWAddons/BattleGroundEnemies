@@ -3819,18 +3819,26 @@ function BattleGroundEnemies:UNIT_TARGET(unitID)
 	end
 end
 
+local function changeVisibility(frame, visible)
+	if visible then
+		frame:SetAlpha(1)
+		frame:SetScale(1)
+	else
+		frame:SetAlpha(0)
+		frame:SetScale(0.001)
+	end
+end
+
 local function disableArenaFrames()
 	if ArenaEnemyFrames then
 		if ArenaEnemyFrames_Disable then
 			ArenaEnemyFrames_Disable(ArenaEnemyFrames)
 		end
 	elseif ArenaEnemyFramesContainer then
-		ArenaEnemyFramesContainer:SetAlpha(0)
-		ArenaEnemyFramesContainer:SetScale(0.001)
+		changeVisibility(ArenaEnemyFramesContainer, false)
 	end
 	if CompactArenaFrame then
-		CompactArenaFrame:SetAlpha(0)
-		CompactArenaFrame:SetScale(0.001)
+		changeVisibility(CompactArenaFrame, false)
 	end
 end
 
@@ -3840,12 +3848,10 @@ local function checkEffectiveEnableStateForArenaFrames()
 			ArenaEnemyFrames_CheckEffectiveEnableState(ArenaEnemyFrames)
 		end
 	elseif ArenaEnemyFramesContainer then
-		ArenaEnemyFramesContainer:SetAlpha(1)
-		ArenaEnemyFramesContainer:SetScale(1)
+		changeVisibility(ArenaEnemyFramesContainer, true)
 	end
 	if CompactArenaFrame then
-		CompactArenaFrame:SetAlpha(1)
-		CompactArenaFrame:SetScale(1)
+		changeVisibility(CompactArenaFrame, true)
 	end
 end
 
