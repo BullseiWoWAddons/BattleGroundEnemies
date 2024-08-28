@@ -7,6 +7,7 @@ local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
+---@class BattleGroundEnemies: AceComm-3.0
 LibStub("AceComm-3.0"):Embed(BattleGroundEnemies)
 
 
