@@ -1,4 +1,5 @@
 
+---@class BattleGroundEnemies
 local BattleGroundEnemies = BattleGroundEnemies
 ---@type string
 local AddonName = ...

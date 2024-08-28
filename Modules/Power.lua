@@ -2,6 +2,7 @@
 local AddonName = ...
 ---@class Data
 local Data = select(2, ...)
+---@class BattleGroundEnemies
 local BattleGroundEnemies = BattleGroundEnemies
 local LSM = LibStub("LibSharedMedia-3.0")
 local L = Data.L
