@@ -112,7 +112,7 @@ function BattleGroundEnemies:ImportExportFrameSetupForMode(mode, exportString)
 	self.ImportExportFrame = BattleGroundEnemies:CreateAceGUIImportExportFrame(mode)
 
 	self.ImportExportFrame:SetTitle(AddonName..": "..mode)
-	self.ImportExportFrame:SetStatusText("AceGUI-3.0 Example Container Frame")
+	--self.ImportExportFrame:SetStatusText("AceGUI-3.0 Example Container Frame")
 	if mode == "Import" then
 		self.ImportExportFrame.EditBox:SetLabel(L.InsertExportedStringHere)
 		self.ImportExportFrame.EditBox:SetText("")

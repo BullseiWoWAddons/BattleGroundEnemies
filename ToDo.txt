@@ -1,4 +1,5 @@
 Add castbars and combat indicator to testmode
+make some of the settings specific to playercounts/faction global
 Work on cooldown tracking
 improved layout editing
 have to investigate why self.EnemyFaction is not set inside PLAYER_ENTERING_WORLD event handler
