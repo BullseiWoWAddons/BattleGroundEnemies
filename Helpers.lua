@@ -31,3 +31,26 @@ end
 function Data.Helpers.getFilterFromAuraInfo(aura)
 	return aura.isHarmful and "HARMFUL" or "HELPFUL"
 end
+
+local oppositeHorizontalPoints = {
+    TOPLEFT = "TOPRIGHT",
+    LEFT = "RIGHT",
+    BOTTOMLEFT = "BOTTOMRIGHT",
+    TOPRIGHT = "TOPLEFT",
+    RIGHT = "LEFT",
+    BOTTOMRIGHT = "BOTTOMLEFT"
+
+}
+
+function Data.Helpers.getOppositeHorizontalPoints(point)
+    if oppositeHorizontalPoints[point] then return oppositeHorizontalPoints[point] end
+end
+
+local oppositeDirections = {
+    leftwards = "rightwards",
+    rightwards = "leftwards"
+}
+
+function Data.Helpers.getOppositeDirection(direction)
+    if oppositeHorizontalPoints[direction] then return oppositeHorizontalPoints[direction] end
+end
