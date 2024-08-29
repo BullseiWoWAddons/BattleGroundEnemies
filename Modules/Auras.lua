@@ -56,7 +56,7 @@ local defaults = {
 
 -- CompactUnitFrame_Util_IsPriorityDebuff
 local function IsPriorityDebuff(spellId)
-	if BattleGroundEnemies.PlayerDetails.PlayerClass == "PALADIN" then
+	if BattleGroundEnemies.UserDetails.PlayerClass == "PALADIN" then
 		local isForbearance = (spellId == 25771)
 		return isForbearance or SpellIsPriorityAura(spellId);
 	else

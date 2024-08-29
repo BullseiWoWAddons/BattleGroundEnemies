@@ -12,10 +12,7 @@ local LibChangelog = LibStub("LibChangelog")
 
 --upvalues
 local _G = _G
-local math_floor = math.floor
-local gsub = gsub
 local math_random = math.random
-local math_max = math.max
 local math_min = math.min
 local pairs = pairs
 local print = print
@@ -25,7 +22,6 @@ local time = time
 local type = type
 local unpack = unpack
 
-local AuraUtil = AuraUtil
 local C_PvP = C_PvP
 local C_Spell = C_Spell
 local C_UnitAuras = C_UnitAuras
@@ -80,8 +76,6 @@ if HasSpeccs then
 	LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
 end
 
-local LRC = LibStub("LibRangeCheck-3.0")
-
 
 if not GetUnitName then
 	GetUnitName = function(unit, showServerName)
@@ -125,7 +119,6 @@ Enemy frames use Scoreboard, FakePlayers, ArenaPlayers, CombatLog
 ]]
 
 BattleGroundEnemies.consts = {}
-
 BattleGroundEnemies.consts.PlayerSources = {
 	Scoreboard = "Scoreboard",
 	GroupMembers = "GroupMembers",
@@ -133,7 +126,6 @@ BattleGroundEnemies.consts.PlayerSources = {
 	FakePlayers = "FakePlayers",
 	CombatLog = "CombatLog"
 }
-
 BattleGroundEnemies.consts.PlayerTypes = {
 	Allies = "Allies",
 	Enemies = "Enemies"
@@ -159,7 +151,8 @@ BattleGroundEnemies.CurrentMapID = false --contains the map id of the current ac
 BattleGroundEnemies.ButtonModules = {}   --contains moduleFrames, key is the module name
 BattleGroundEnemies.states = {
 	isInArena = false,
-	IsInBattleground = false
+	IsInBattleground = false,
+	userIsAlive = false
 }
 
 
@@ -488,7 +481,7 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 	if moduleSetupTable.generalDefaults then
 		copyModuleDefaultsIntoDefaults(Data.defaultSettings.profile, moduleName, moduleSetupTable.generalDefaults)
 	end
-	
+
 
 
 	--not used
@@ -804,7 +797,7 @@ do
 			for spellId, auraDetails in pairs(auras) do
 
 				local spellExists = GetSpellName(spellId)
-			
+
 				if spellExists and spellExists ~= "" then
 					if filter == "HARMFUL" and DRList:GetCategoryBySpellID(IsClassic and auraDetails.name or spellId) then
 						foundA.foundDRAuras[#foundA.foundDRAuras + 1] = auraDetails
@@ -1082,8 +1075,11 @@ local function ApplyCooldownSettings(self, config, cdReverse, swipeColor)
 end
 
 
-
+---comment
+---@param parent Frame
+---@return unknown
 function BattleGroundEnemies.MyCreateFontString(parent)
+	---@class MyFontString: fontstring
 	local fontString = parent:CreateFontString(nil, "OVERLAY")
 	fontString.ApplyFontStringSettings = ApplyFontStringSettings
 	fontString.EnableShadowColor = EnableShadowColor
@@ -1091,6 +1087,9 @@ function BattleGroundEnemies.MyCreateFontString(parent)
 	return fontString
 end
 
+---comment
+---@param frame cooldown
+---@return fontstring?
 function BattleGroundEnemies.GrabFontString(frame)
 	for _, region in pairs { frame:GetRegions() } do
 		if region:GetObjectType() == "FontString" then
@@ -1104,6 +1103,7 @@ function BattleGroundEnemies.AttachCooldownSettings(cooldown)
 	-- Find fontstring of the cooldown
 	local fontstring = BattleGroundEnemies.GrabFontString(cooldown)
 	if fontstring then
+		---@class MyFontString
 		cooldown.Text = fontstring
 		cooldown.Text.ApplyFontStringSettings = ApplyFontStringSettings
 		cooldown.Text.EnableShadowColor = EnableShadowColor
@@ -1163,7 +1163,7 @@ do
 
 	--Triggered immediately before PLAYER_ENTERING_WORLD on login and UI Reload, but NOT when entering/leaving instances.
 	function BattleGroundEnemies:PLAYER_LOGIN()
-		self.PlayerDetails = {
+		self.UserDetails = {
 			PlayerName = UnitName("player"),
 			PlayerClass = select(2, UnitClass("player")),
 			isGroupLeader = UnitIsGroupLeader("player"),
@@ -1196,9 +1196,9 @@ do
 			LGIST.RegisterCallback(BattleGroundEnemies.Allies, "GroupInSpecT_Update")
 
 			--GroupInSpecT_Update doesnt fire when in group and nobody is requesting the spec, noticiable when solo and running testmode for example(no spec icon)
-			local myCachedSpecInfo = LGIST:GetCachedInfo(self.PlayerDetails.GUID)
+			local myCachedSpecInfo = LGIST:GetCachedInfo(self.UserDetails.GUID)
 			if myCachedSpecInfo then
-				self.specCache[self.PlayerDetails.GUID] = myCachedSpecInfo.spec_name_localized
+				self.specCache[self.UserDetails.GUID] = myCachedSpecInfo.spec_name_localized
 			end
 		end
 
@@ -1227,71 +1227,6 @@ do
 	end
 end
 
-function BattleGroundEnemies.Enemies:ChangeName(oldName, newName) --only used in arena when players switch from "arenaX" to a real name
-	local playerButton = self.Players[oldName]
-
-	if playerButton then
-		playerButton.PlayerDetails.PlayerName = newName
-		-- BattleGroundEnemies:LogToSavedVariables("name changed", oldName, newName)
-		playerButton:PlayerDetailsChanged()
-
-		self.Players[newName] = playerButton
-		self.Players[oldName] = nil
-	end
-end
-
-function BattleGroundEnemies.Enemies:CreateArenaEnemies()
-	-- BattleGroundEnemies:LogToSavedVariables("CreateArenaEnemies")
-	if not BattleGroundEnemies.states.isInArena then return end
-
-	self:BeforePlayerSourceUpdate(self.consts.PlayerSources.ArenaPlayers)
-	for i = 1, 15 do --we can have 15 enemies in the Arena Brawl Packed House
-		local unitID = "arena" .. i
-
-
-		local _, classTag, specName
-		if GetArenaOpponentSpec and GetSpecializationInfoByID then --HasSpeccs
-			local specID, gender = GetArenaOpponentSpec(i)
-
-			if (specID and specID > 0) then
-				_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
-			end
-		else
-			classTag = select(2, UnitClass(unitID))
-		end
-		--BattleGroundEnemies:LogToSavedVariables("classTag", classTag)
-		--BattleGroundEnemies:LogToSavedVariables("specName", specName)
-
-
-		if classTag then
-			local playerName
-			local name = GetUnitName(unitID, true)
-			if name and name ~= UNKNOWN then
-				-- player has a real name, check if he is already shown as arenaX
-				self:ChangeName(unitID, name)
-				playerName = name
-			end
-
-			local raceName = UnitRace(unitID)
-			self:AddPlayerToSource(self.consts.PlayerSources.ArenaPlayers, {
-				name = playerName,
-				raceName = raceName,
-				classTag = classTag,
-				specName = specName,
-				additionalData = { PlayerArenaUnitID = unitID }
-			})
-		end
-	end
-
-	self:AfterPlayerSourceUpdate()
-
-	for playerName, playerButton in pairs(self.Players) do
-		local playerDetails = playerButton.PlayerDetails
-		if playerDetails.PlayerArenaUnitID then
-			playerButton:UpdateAll(playerDetails.PlayerArenaUnitID)
-		end
-	end
-end
 
 --Notes about UnitIDs
 --priority of unitIDs:
@@ -1388,28 +1323,7 @@ function BattleGroundEnemies:Information(...)
 	print("|cff0099ffBattleGroundEnemies:|r", ...)
 end
 
-BattleGroundEnemies.Enemies.ARENA_PREP_OPPONENT_SPECIALIZATIONS = BattleGroundEnemies.Enemies
-	.CreateArenaEnemies -- for Prepframe, not available in TBC
 
-function BattleGroundEnemies.Enemies:UNIT_NAME_UPDATE(unitID)
-	--BattleGroundEnemies:LogToSavedVariables("UNIT_NAME_UPDATE", unitID)
-	BattleGroundEnemies:ThrottleUpdateArenaPlayers()
-end
-
-function BattleGroundEnemies.Enemies:NAME_PLATE_UNIT_ADDED(unitID)
-	local enemyButton = self:GetPlayerbuttonByUnitID(unitID)
-	if enemyButton then
-		enemyButton:UpdateEnemyUnitID("Nameplate", unitID)
-	end
-end
-
-function BattleGroundEnemies.Enemies:NAME_PLATE_UNIT_REMOVED(unitID)
-	--self:Debug(unitID)
-	local enemyButton = self:GetPlayerbuttonByUnitID(unitID)
-	if enemyButton then
-		enemyButton:UpdateEnemyUnitID("Nameplate", false)
-	end
-end
 
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
@@ -1631,10 +1545,10 @@ function BattleGroundEnemies:COMBAT_LOG_EVENT_UNFILTERED()
 end
 
 local function IamTargetcaller()
-	if BattleGroundEnemies.PlayerDetails.isGroupLeader then
+	if BattleGroundEnemies.UserDetails.isGroupLeader then
 		return #BattleGroundEnemies.Allies.assistants == 0
 	else
-		return BattleGroundEnemies.PlayerDetails.isGroupAssistant
+		return BattleGroundEnemies.UserDetails.isGroupAssistant
 	end
 end
 
@@ -1811,12 +1725,12 @@ function BattleGroundEnemies:PlayerAlive()
 	for allyName, allyButton in pairs(self.Allies.Players) do
 		allyButton:UpdateTarget()
 	end
-	self.PlayerIsAlive = true
+	self.states.userIsAlive = true
 end
 
 function BattleGroundEnemies:PLAYER_ALIVE()
 	if UnitIsGhost("player") then --Releases his ghost to a graveyard.
-		self.PlayerIsAlive = false
+		self.states.userIsAlive = false
 	else                       --alive (revived while not being a ghost)
 		self:PlayerAlive()
 	end
@@ -2070,7 +1984,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 		local name = score.name
 		local faction = score.faction
 
-		if name == self.PlayerDetails.PlayerName and faction == self.EnemyFaction then
+		if name == self.UserDetails.PlayerName and faction == self.EnemyFaction then
 			self:SetEnemyFaction(self.AllyFaction)
 		end
 	end
@@ -2099,83 +2013,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 	BattleGroundEnemies.Allies:AfterPlayerSourceUpdate()
 end
 
-function BattleGroundEnemies.Allies:AddGroupMember(name, isLeader, isAssistant, classTag, unitID)
-	local raceName, raceFile, raceID = UnitRace(unitID)
-	local GUID = UnitGUID(unitID)
 
-	if name and raceName and classTag then
-		local specName = self.specCache[GUID]
-
-		self:AddPlayerToSource(self.consts.PlayerSources.GroupMembers, {
-			name = name,
-			raceName = raceName,
-			classTag = classTag,
-			specName = specName,
-			additionalData = {
-				isGroupLeader = isLeader,
-				isGroupAssistant = isAssistant,
-				GUID = GUID,
-				unitID = unitID
-			}
-		})
-	end
-
-	self.GUIDToAllyname[GUID] = name
-
-	if isLeader then
-		self.groupLeader = name
-	end
-	if isAssistant then
-		table_insert(self.assistants, name)
-	end
-end
-
-function BattleGroundEnemies.Allies:UpdateAllUnitIDs()
-	--it happens that numGroupMembers is higher than the value of the maximal players for that battleground, for example 15 in a 10 man bg, thats why we wipe AllyUnitIDToAllyDetails
-	for allyName, allyButton in pairs(self.Players) do
-		if allyButton then
-			local unitID
-			local targetUnitID
-			if allyButton.PlayerDetails.PlayerName ~= BattleGroundEnemies.PlayerDetails.PlayerName then
-				local unit = allyButton.PlayerDetails.unitID
-				if not unit then return end
-
-				unitID = unit
-				targetUnitID = unitID .. "target"
-			else
-				unitID = "player"
-				targetUnitID = "target"
-				UserButton = allyButton
-			end
-			if not (unitID and targetUnitID) then return end
-
-
-			--self.unitID already gets assigned for allies before, info from GROUP_ROSTER_UPDATE
-
-			if allyButton.unit ~= unitID then
-				--ally has a new unitID now
-				--self:Debug("player", groupMember.PlayerName, "has a new unit and targeted something")
-
-				local targetButton = allyButton.Target
-				if targetButton then
-					--reset the TargetedByEnemy
-					targetButton:IsNoLongerTarging(targetButton)
-					targetButton:IsNowTargeting(targetButton)
-				end
-
-				if InCombatLockdown() then --if we are in combat we go get to set the stuff below later since GROUP_ROSTER_UPDATE also has a combat check and will get called after combat
-					return BattleGroundEnemies:QueueForUpdateAfterCombat(BattleGroundEnemies[allyButton.PlayerType], "UpdateAllUnitIDs")
-				else
-					allyButton.unit = unitID
-					allyButton:SetAttribute('unit', unitID)
-					BattleGroundEnemies.Allies:SortPlayers()
-				end
-			end
-
-			allyButton:UpdateUnitID(unitID, targetUnitID)
-		end
-	end
-end
 
 function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 	self.Allies:BeforePlayerSourceUpdate(self.consts.PlayerSources.GroupMembers)
@@ -2196,7 +2034,7 @@ function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 			local name, rank, subgroup, level, localizedClass, classTag, zone, online, isDead, role, isML, combatRole =
 				GetRaidRosterInfo(i)
 
-			if name and name ~= self.PlayerDetails.PlayerName and rank and classTag then
+			if name and name ~= self.UserDetails.PlayerName and rank and classTag then
 				self.Allies:AddGroupMember(name, rank == 2, rank == 1, classTag, "raid" .. i)
 			end
 		end
@@ -2215,10 +2053,10 @@ function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 		end
 	end
 
-	self.PlayerDetails.isGroupLeader = UnitIsGroupLeader("player")
-	self.PlayerDetails.isGroupAssistant = UnitIsGroupAssistant("player")
-	self.Allies:AddGroupMember(self.PlayerDetails.PlayerName, self.PlayerDetails.isGroupLeader,
-		self.PlayerDetails.isGroupAssistant, self.PlayerDetails.PlayerClass, "player")
+	self.UserDetails.isGroupLeader = UnitIsGroupLeader("player")
+	self.UserDetails.isGroupAssistant = UnitIsGroupAssistant("player")
+	self.Allies:AddGroupMember(self.UserDetails.PlayerName, self.UserDetails.isGroupLeader,
+		self.UserDetails.isGroupAssistant, self.UserDetails.PlayerClass, "player")
 	self.Allies:AfterPlayerSourceUpdate()
 	self.Allies:UpdateAllUnitIDs()
 end
@@ -2271,7 +2109,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 		-- self:Debug("C_PvP.IsInBrawl", C_PvP.IsInBrawl())
 		-- self:Debug("GetCurrentMapAreaID", GetCurrentMapAreaID())
 
-		self.PlayerIsAlive = true
+		self.states.userIsAlive = true
 	else
 		BattleGroundEnemies.states.isInArena = false
 		BattleGroundEnemies.states.IsInBattleground = false

@@ -280,7 +280,7 @@ function BattleGroundEnemies:CHAT_MSG_ADDON(addonPrefix, message, channel, sende
 		if msgPrefix == "PQ" then
 			local requestFromPlayerName = Ambiguate(info1, "none")  -- name of the player he wants that profile from
 
-			if requestFromPlayerName == BattleGroundEnemies.PlayerDetails.PlayerName and BattleGroundEnemies.db.profile.shareActiveProfile then --sender wants my profile
+			if requestFromPlayerName == BattleGroundEnemies.UserDetails.PlayerName and BattleGroundEnemies.db.profile.shareActiveProfile then --sender wants my profile
 				self:SendCurrentProfileTo(sender)
 			end
 		elseif msgPrefix == "PR" then --someone send us their profile
