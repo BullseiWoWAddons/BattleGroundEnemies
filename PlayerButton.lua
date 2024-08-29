@@ -624,7 +624,7 @@ do
 		local isAlly = false
 		local isPlayer = false
 
-		if self == UserButton then
+		if self == BattleGroundEnemies.UserButton then
 			isPlayer = true
 		elseif not self.PlayerIsEnemy then
 			isAlly = true
@@ -996,7 +996,7 @@ do
 			local allyUnitID = false
 
 			for allyBtn in pairs(unitIDs.TargetedByEnemy) do
-				if allyBtn ~= UserButton then
+				if allyBtn ~= BattleGroundEnemies.UserButton then
 					allyUnitID = allyBtn.TargetUnitID
 					break
 				end
@@ -1089,7 +1089,7 @@ end
 
 function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..
-	num, self, 'SecureUnitButtonTemplate')
+	num, mainframe, 'SecureUnitButtonTemplate')
 	playerButton:RegisterForClicks('AnyUp')
 	playerButton:Hide()
 	-- setmetatable(playerButton, self)
@@ -1173,5 +1173,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 			playerButton[moduleName].moduleName = moduleName
 		end
 	end
+
+	playerButton:ApplyButtonSettings()
 	return playerButton
 end

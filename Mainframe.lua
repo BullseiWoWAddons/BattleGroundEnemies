@@ -197,7 +197,7 @@ local function CreateMainFrame(playerType)
 					addWholeGroup = true
 				else
 					--just addMyself and fill up the rest with fakeplayers
-					if UserButton.PlayerDetails then
+					if BattleGroundEnemies.UserButton.PlayerDetails then
 						table.insert(newPlayers, groupMembers[numGroupMembers]) --i am always last in here
 						local fakeAllies = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.FakePlayers]
 						local numFakeAllies = #fakeAllies
@@ -531,7 +531,7 @@ local function CreateMainFrame(playerType)
 					TimeSinceLastOnUpdate = TimeSinceLastOnUpdate + elapsed
 					if TimeSinceLastOnUpdate > UpdatePeroid then
 						if BattleGroundEnemies.states.userIsAlive then
-							if playerButton ~= UserButton then
+							if playerButton ~= BattleGroundEnemies.UserButton then
 								--BattleGroundEnemies:Debug(IsItemInRange(self.config.RangeIndicator_Range, allyButton.unitID), self.config.RangeIndicator_Range, allyButton.unitID)
 								playerButton:UpdateRangeViaLibRangeCheck(playerButton.unitID)
 							else
@@ -553,7 +553,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:RemovePlayer(playerButton)
-		if playerButton == UserButton then return end -- dont remove the Player itself
+		if playerButton == BattleGroundEnemies.UserButton then return end -- dont remove the Player itself
 
 		local targetEnemyButton = playerButton.Target
 		if targetEnemyButton then -- if that no longer exiting ally targeted something update the button of its target
@@ -943,7 +943,7 @@ function BattleGroundEnemies.Allies:UpdateAllUnitIDs()
 			else
 				unitID = "player"
 				targetUnitID = "target"
-				UserButton = allyButton
+				BattleGroundEnemies.UserButton = allyButton
 			end
 			if not (unitID and targetUnitID) then return end
 

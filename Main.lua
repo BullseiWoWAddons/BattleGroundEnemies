@@ -1187,6 +1187,7 @@ do
 
 		BattleGroundEnemies:UpgradeProfiles(self.db)
 
+		BattleGroundEnemies:ApplyAllSettings()
 
 		LibChangelog:Register(AddonName, Data.changelog, self.db.profile, "lastReadVersion", "onlyShowWhenNewVersion")
 		LibChangelog:ShowChangelog(AddonName)
@@ -1561,18 +1562,18 @@ do
 			if oldTarget.PlayerIsEnemy then
 				oldTarget:UpdateEnemyUnitID("Target", false)
 			end
-			if UserButton then
-				UserButton:IsNoLongerTarging(oldTarget)
+			if self.UserButton then
+				self.UserButton:IsNoLongerTarging(oldTarget)
 			end
 			oldTarget.MyTarget:Hide()
 		end
 
 		if playerButton then --i target an existing player
-			if UserButton then
+			if self.UserButton then
 				if playerButton.PlayerIsEnemy then
 					playerButton:UpdateEnemyUnitID("Target", "target")
 				end
-				UserButton:IsNowTargeting(playerButton)
+				self.UserButton:IsNowTargeting(playerButton)
 			end
 			playerButton.MyTarget:Show()
 			oldTarget = playerButton
@@ -1740,7 +1741,7 @@ function BattleGroundEnemies:UNIT_TARGET(unitID)
 	local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 
 
-	if playerButton and playerButton ~= UserButton then --we use Player_target_changed for the player
+	if playerButton and playerButton ~= self.UserButton then --we use Player_target_changed for the player
 		--self:LogToSavedVariables("UNIT_TARGET", unitID, playerButton.PlayerDetails.PlayerName)
 		playerButton:UpdateTarget()
 	end
