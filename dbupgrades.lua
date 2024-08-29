@@ -27,7 +27,7 @@ local function MergeTableDeep(destination, source)
 	end
 end
 
-function BattleGroundEnemies:UpgradeProfile(profile)
+function BattleGroundEnemies:UpgradeProfile(profile, profileName)
     local didStuff = false
     if not profile.dbVersion or profile.dbVersion < 1 then
 
@@ -86,7 +86,7 @@ function BattleGroundEnemies:UpgradeProfile(profile)
 
     if didStuff then
         C_Timer.After(20, function()
-            BattleGroundEnemies:Information("profile ".. profile.."saved varaibles upgraded to new format")
+            BattleGroundEnemies:Information("profile ".. profileName.." saved varaibles upgraded to new format")
         end)
     end
     return didStuff
@@ -94,6 +94,6 @@ end
 
 function BattleGroundEnemies:UpgradeProfiles(db)
     for profileName, profileData in pairs(db.profiles) do
-        self:UpgradeProfile(profileData)
+        self:UpgradeProfile(profileData, profileName)
     end
 end
