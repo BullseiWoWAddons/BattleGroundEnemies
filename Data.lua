@@ -740,6 +740,10 @@ Data.BattlegroundspezificBuffs = { --key = mapID, value = table with key = facti
 	[206] = {						-- Twin Peaks, used to be mapID 626 before BFA
 		[0] = 156621, 					-- Alliance Flag
 		[1] = 156618 					-- Horde Flag
+	},
+	[2345] = {						-- Deephaul Ravine added in Patch 11.0.2
+		[0] = 434339, 					-- Deephaul Crystal
+		[1] = 434339 					-- Deephaul Crystal
 	}
 }
 
