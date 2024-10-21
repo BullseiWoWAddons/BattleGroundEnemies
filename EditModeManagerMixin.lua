@@ -566,24 +566,20 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateBottom
 	UIParent_ManageFramePositions();
 end
 
+
 function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:SelectSystem(selectFrame)
-	print("hier dadfasdf")
 	--custom we hgihlight all frames of this system of the same plaeyrtype
 	--if not self:IsEditModeLocked() then
 		local function selectMatchingSystem(index, systemFrame)
-			print('one')
 			if systemFrame.system == selectFrame.system and systemFrame.PlayerType == selectFrame.PlayerType then
-				print("3")
 				systemFrame:SelectSystem();
 			else
-				print("2")
 				-- Only highlight a system if it was already highlighted
 				if systemFrame.isHighlighted then
 					systemFrame:HighlightSystem();
 				end
 			end
 		end
-		print("dfasdf")
 		secureexecuterange(self.registeredSystemFrames, selectMatchingSystem);
 	--end
 end

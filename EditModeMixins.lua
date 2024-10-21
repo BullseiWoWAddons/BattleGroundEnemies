@@ -21,12 +21,18 @@ EditModeSystemSettingsDialog.UpdateDialog = function(self, systemFrame)
 	
 end
 
+local currentSelection = ""
 EditModeSystemSettingsDialog.AttachToSystemFrame = function(self, systemFrame)
-	AceConfigDialog:SelectGroup(AddonName)
-	print("test124")
-	DevTool:AddData(CopyTable(systemFrame) , "systemFrame")
-	--get playertype and playercount and navigate through the settings panel
-	
+	print('123456')
+	local optionsPath = systemFrame:GetOptionsPath()
+	print("paath", optionsPath)
+
+	local pathString = table.concat(optionsPath, " ")
+	if pathString ~= currentSelection then
+		print("ungleich", unpack( optionsPath))
+		AceConfigDialog:SelectGroup(unpack( optionsPath))
+		currentSelection = pathString
+	end
 end
 
 BattleGroundEnemies.Mixins.CustomEditModeSystemMixin = {};
@@ -822,6 +828,7 @@ end
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SelectSystem()
 	print("blabla")
 	if not self.isSelected then
+		print("not eslected")
 		self:SetMovable(true);
 		self.Selection:ShowSelected();
 		EditModeSystemSettingsDialog:AttachToSystemFrame(self);

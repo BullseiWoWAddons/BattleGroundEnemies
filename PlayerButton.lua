@@ -367,7 +367,20 @@ do
 	function buttonFunctions:SetConfigShortCuts()
 		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
 		self.playerCountConfig = BattleGroundEnemies[self.PlayerType].playerCountConfig
+		if self.playerCountConfig then
+			self.basePath = {"BattleGroundEnemies", self.PlayerIsEnemy and "EnemySettings" or "AllySettings", self.MainFrame:GetPlayerCountConfigName(self.playerCountConfig) }
+		else
+			self.basePath = {}
+		end
 	end
+
+	function buttonFunctions:GetOptionsPath()
+		local t = CopyTable(self.basePath)
+		table.insert(t, "ButtonSettings")
+		return t
+	end
+
+
 
 	function buttonFunctions:ApplyButtonSettings()
 		self:SetConfigShortCuts()
@@ -1115,6 +1128,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 
 	playerButton.PlayerType = mainframe.PlayerType
 	playerButton.PlayerIsEnemy = playerButton.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies and true or false
+	playerButton.MainFrame = mainframe
 
 	playerButton:SetScript("OnSizeChanged", function(self, width, height)
 		--self.DRContainer:SetWidthOfAuraFrames(height)
@@ -1183,6 +1197,14 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 			playerButton[moduleName].GetConfig = function(self)
 				self.config = playerButton.playerCountConfig.ButtonModules[moduleName]
 				return self.config
+			end
+			playerButton[moduleName].moduleName = moduleName
+
+			playerButton[moduleName].GetOptionsPath = function(self)
+				local optionsPath = CopyTable(playerButton.basePath)
+				table.insert(optionsPath, "ModuleSettings")
+				table.insert(optionsPath, moduleName)
+				return optionsPath
 			end
 			playerButton[moduleName].moduleName = moduleName
 		end

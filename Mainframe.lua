@@ -321,9 +321,14 @@ local function CreateMainFrame(playerType)
 		return minPlayers, maxPlayers
 	end
 
-	function mainframe:GetPlayerCountConfigName(playerCountConfig)
+	function mainframe:GetPlayerCountConfigNameLocalized(playerCountConfig)
 		local minPlayers, maxPlayers = self:GetPlayerCountsFromConfig(playerCountConfig)
 		return minPlayers.."–"..maxPlayers.. " ".. L.players
+	end
+
+	function mainframe:GetPlayerCountConfigName(playerCountConfig)
+		local minPlayers, maxPlayers = self:GetPlayerCountsFromConfig(playerCountConfig)
+		return minPlayers.."–"..maxPlayers.. " ".. "players"
 	end
 
 	function mainframe:SelectPlayerCountProfile(forceUpdate)
@@ -365,7 +370,7 @@ local function CreateMainFrame(playerType)
 		if #foundProfilesForPlayerCount > 1 then
 			local overlappingProfilesString = ""
 			for i = 1, #foundProfilesForPlayerCount do
-				local overlappingIndexShownName = self:GetPlayerCountConfigName(foundProfilesForPlayerCount[i])
+				local overlappingIndexShownName = self:GetPlayerCountConfigNameLocalized(foundProfilesForPlayerCount[i])
 				overlappingProfilesString = overlappingProfilesString .. "and " .. overlappingIndexShownName
 			end
 			self:NoActivePlayercountProfile()
