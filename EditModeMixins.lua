@@ -22,14 +22,9 @@ EditModeSystemSettingsDialog.UpdateDialog = function(self, systemFrame)
 end
 
 local currentSelection = ""
-EditModeSystemSettingsDialog.AttachToSystemFrame = function(self, systemFrame)
-	print('123456')
-	local optionsPath = systemFrame:GetOptionsPath()
-	print("paath", optionsPath)
-
+EditModeSystemSettingsDialog.AttachToSystemFrame = function(self, systemFrame)	local optionsPath = systemFrame:GetOptionsPath()
 	local pathString = table.concat(optionsPath, " ")
 	if pathString ~= currentSelection then
-		print("ungleich", unpack( optionsPath))
 		AceConfigDialog:SelectGroup(unpack( optionsPath))
 		currentSelection = pathString
 	end
@@ -85,7 +80,6 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnDra
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnMouseDown()
-	print("on mouse down")
 	BattleGroundEnemies.EditMode.EditModeManager:SelectSystem(self.parent);
 end
 
@@ -826,9 +820,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:HighlightSystem()
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SelectSystem()
-	print("blabla")
 	if not self.isSelected then
-		print("not eslected")
 		self:SetMovable(true);
 		self.Selection:ShowSelected();
 		EditModeSystemSettingsDialog:AttachToSystemFrame(self);
@@ -842,7 +834,6 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SetSelectionShown(
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnEditModeEnter()
-    print("entered")
 	if not self.defaultHideSelection then
 		self:HighlightSystem();
 	end
