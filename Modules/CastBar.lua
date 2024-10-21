@@ -133,4 +133,5 @@ function castBar:AttachToPlayerButton(playerButton)
 			self:SetScale(scale)
 		end
 	end
+	return playerButton.CastBar
 end

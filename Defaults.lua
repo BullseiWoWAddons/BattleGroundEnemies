@@ -452,7 +452,7 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "TOPRIGHT",
-									RelativeFrame = "Class",
+									RelativeFrame = "Button",
 									RelativePoint = "BOTTOMRIGHT",
 									OffsetY = -2
 								}
@@ -1156,6 +1156,9 @@ Data.defaultSettings = {
 		
 			}
 		},
-		ButtonModules = {}
+		ButtonModules = {},
+		Layouts = {
+			
+		}
 	}
 }

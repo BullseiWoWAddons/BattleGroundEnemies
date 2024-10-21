@@ -70,7 +70,8 @@ local name = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"PlayerDetailsChanged"},
-	enabledInThisExpansion = true
+	enabledInThisExpansion = true,
+	attachSettingsToButton = true
 })
 
 
@@ -123,4 +124,5 @@ function name:AttachToPlayerButton(playerButton)
 		self:ApplyFontStringSettings(config.Text)
 		self:SetName()
 	end
+	return playerButton.Name
 end

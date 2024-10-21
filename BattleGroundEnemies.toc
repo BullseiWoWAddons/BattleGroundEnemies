@@ -35,7 +35,11 @@ Changelog.lua
 ImportExport.lua
 Mainframe.lua
 PlayerButton.lua
-
+EditModeMixins.lua
+EditModeUtil.lua
+EditModeManagerMixin.lua
+EditMode.lua
+ShrinkUntilTruncateFontStringMixin.lua
 Modules\ContainerTemplate.lua
 Modules\Auras.lua
 Modules\CastBar.lua

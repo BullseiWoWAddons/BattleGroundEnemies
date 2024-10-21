@@ -632,17 +632,21 @@ end
 
 function nonPriorityBuffs:AttachToPlayerButton(playerButton)
 	playerButton.NonPriorityBuffs = AttachToPlayerButton(playerButton, "HELPFUL", false)
+	return playerButton.NonPriorityBuffs
 end
 
 function nonPriorityDebuffs:AttachToPlayerButton(playerButton)
 	playerButton.NonPriorityDebuffs = AttachToPlayerButton(playerButton, "HARMFUL", false)
+	return playerButton.NonPriorityDebuffs
 end
 
 function priorityBuffs:AttachToPlayerButton(playerButton)
 	playerButton.PriorityBuffs = AttachToPlayerButton(playerButton, "HELPFUL", true)
+	return playerButton.PriorityBuffs
 end
 
 function priorityDebuffs:AttachToPlayerButton(playerButton)
 	playerButton.PriorityDebuffs = AttachToPlayerButton(playerButton, "HARMFUL", true)
+	return playerButton.PriorityDebuffs
 end
 

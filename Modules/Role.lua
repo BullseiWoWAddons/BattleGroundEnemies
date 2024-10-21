@@ -40,7 +40,8 @@ local role = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = nil,
 	events = {"PlayerDetailsChanged"},
-	enabledInThisExpansion = not not GetSpecializationRole
+	enabledInThisExpansion = not not GetSpecializationRole,
+	attachSettingsToButton = true
 })
 
 function role:AttachToPlayerButton(playerButton)
@@ -63,4 +64,5 @@ function role:AttachToPlayerButton(playerButton)
 			end
 		end
 	end
+	return playerButton.Role
 end

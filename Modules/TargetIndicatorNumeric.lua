@@ -61,7 +61,8 @@ local targetIndicatorNumeric = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UpdateTargetIndicators"},
-	enabledInThisExpansion = true
+	enabledInThisExpansion = true,
+	attachSettingsToButton = true
 })
 
 function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
@@ -89,4 +90,5 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 		if not self:GetFont() then return end
 		self:SetText(0) --we do that because the level is anchored right to this and the name is anhored right to the level
 	end
+	return playerButton.TargetIndicatorNumeric
 end

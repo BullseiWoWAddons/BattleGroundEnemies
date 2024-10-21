@@ -69,7 +69,8 @@ local power = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UnitIdUpdate", "UpdatePower", "PlayerDetailsChanged"},
-	enabledInThisExpansion = true
+	enabledInThisExpansion = true,
+	attachSettingsToButton = true
 })
 
 function power:AttachToPlayerButton(playerButton)
@@ -151,4 +152,5 @@ function power:AttachToPlayerButton(playerButton)
 		self.Background:SetVertexColor(unpack(self.config.Background))
 		self:PlayerDetailsChanged()
 	end
+	return playerButton.Power
 end

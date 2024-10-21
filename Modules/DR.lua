@@ -301,7 +301,7 @@ local function setupDrFrame(container, drFrame, drDetails)
 		if spellIdForICon then
 			icon = GetSpellTexture(spellIdForICon)
 			if not icon then
-				BattleGroundEnemies:OnetimeInformation("The custom spell icon you selected for the DR category "..  drDetails.drCat.. " doesn't seam to exist anymore, please choose a new icon for this category. Using the spell's icon instead.")
+				BattleGroundEnemies:OnetimeInformation("The custom spell icon you selected for the DR category "..  drDetails.drCat.. " doesn't seem to exist anymore, please choose a new icon for this category. Using the spell's icon instead.")
 			end
 		else --if we end up here the user probably doesn't want a custom icon for this category since he left that option untouched/nil
 		end
@@ -346,4 +346,5 @@ function dRTracking:AttachToPlayerButton(playerButton)
 	end
 
 	playerButton.DRTracking = container
+	return playerButton.DRTracking
 end

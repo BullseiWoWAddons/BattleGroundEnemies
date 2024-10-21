@@ -111,7 +111,8 @@ local healthBar = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UpdateHealth", "PlayerDetailsChanged"},
-	enabledInThisExpansion = true
+	enabledInThisExpansion = true,
+	attachSettingsToButton = true
 })
 
 
@@ -257,5 +258,6 @@ function healthBar:AttachToPlayerButton(playerButton)
 		self.HealthText:ApplyFontStringSettings(config.HealthText)
 		self:PlayerDetailsChanged()
 	end
+	return playerButton.healthBar
 end
 

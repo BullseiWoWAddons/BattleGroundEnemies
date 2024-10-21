@@ -369,7 +369,7 @@ local function CreateMainFrame(playerType)
 				overlappingProfilesString = overlappingProfilesString .. "and " .. overlappingIndexShownName
 			end
 			self:NoActivePlayercountProfile()
-			BattleGroundEnemies:Information("Founds multiple player count profiles fitting the current player count for "..self.PlayerType.." please  check your settings and make sure they don't overlap")
+			BattleGroundEnemies:Information("Found multiple player count profiles fitting the current player count for "..self.PlayerType.." please check your settings and make sure they don't overlap")
 			BattleGroundEnemies:Information("The following profiles are overlapping: "..overlappingProfilesString)
 
 			return

@@ -196,4 +196,5 @@ function trinket:AttachToPlayerButton(playerButton)
 		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, false, {0, 0, 0, 0.5})
 	end
 	playerButton.Trinket = frame
+	return playerButton.Trinket
 end

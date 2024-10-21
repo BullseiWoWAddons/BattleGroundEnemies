@@ -42,15 +42,15 @@ local oppositeHorizontalPoints = {
 
 }
 
-function Data.Helpers.getOppositeHorizontalPoints(point)
+function Data.Helpers.getOppositeHorizontalPoint(point)
     if oppositeHorizontalPoints[point] then return oppositeHorizontalPoints[point] end
 end
 
-local oppositeDirections = {
+local oppositeHorizontalDirections = {
     leftwards = "rightwards",
     rightwards = "leftwards"
 }
 
 function Data.Helpers.getOppositeDirection(direction)
-    if oppositeHorizontalPoints[direction] then return oppositeHorizontalPoints[direction] end
+    if oppositeHorizontalDirections[direction] then return oppositeHorizontalDirections[direction] end
 end

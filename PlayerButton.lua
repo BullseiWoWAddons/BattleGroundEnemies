@@ -13,7 +13,19 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
+local SetRaidTargetIconTexture = SetRaidTargetIconTexture
 
+local GetTexCoordsForRoleSmallCircle = GetTexCoordsForRoleSmallCircle or function(role)
+	if ( role == "TANK" ) then
+		return 0, 19/64, 22/64, 41/64;
+	elseif ( role == "HEALER" ) then
+		return 20/64, 39/64, 1/64, 20/64;
+	elseif ( role == "DAMAGER" ) then
+		return 20/64, 39/64, 22/64, 41/64;
+	else
+		error("Unknown role: "..tostring(role));
+	end
+end
 
 
 
@@ -202,8 +214,7 @@ do
 
 	function buttonFunctions:UpdateRaidTargetIcon(forceIndex)
 		local unit = self:GetUnitID()
-		local newIndex =
-			forceIndex --used for testmode, otherwise it will just be nil and overwritten when one actually exists
+		local newIndex = forceIndex --used for testmode, otherwise it will just be nil and overwritten when one actually exists
 		if unit then
 			newIndex = GetRaidTargetIndex(unit)
 			if newIndex then
@@ -387,8 +398,6 @@ do
 		})
 		self.MyFocus:SetBackdropColor(0, 0, 0, 0)
 		self.MyFocus:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyFocus_Color))
-
-
 
 
 		wipe(self.ButtonEvents)
@@ -1088,8 +1097,8 @@ do
 end
 
 function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
-	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..
-	num, mainframe, 'SecureUnitButtonTemplate')
+	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe, 'SecureUnitButtonTemplate')
+	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, "playerButton", {})
 	playerButton:RegisterForClicks('AnyUp')
 	playerButton:Hide()
 	-- setmetatable(playerButton, self)
@@ -1159,7 +1168,12 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	playerButton.ButtonModules = {}
 	for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 		if moduleFrame.AttachToPlayerButton then
-			moduleFrame:AttachToPlayerButton(playerButton)
+			local moduleOnFrame = moduleFrame:AttachToPlayerButton(playerButton)
+			if moduleOnFrame then
+				if not moduleFrame.attachSettingsToButton then
+					BattleGroundEnemies.EditMode.EditModeManager:AddFrame(moduleOnFrame, moduleName)
+				end
+			end
 
 			if not playerButton[moduleName] then
 				print("something went wrong here after AttachToPlayerButton",

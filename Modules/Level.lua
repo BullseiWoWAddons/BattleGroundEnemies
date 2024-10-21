@@ -62,7 +62,8 @@ local level = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UnitIdUpdate"},
-	enabledInThisExpansion = true
+	enabledInThisExpansion = true,
+	attachSettingsToButton = true
 })
 
 function level:AttachToPlayerButton(playerButton)
@@ -107,4 +108,5 @@ function level:AttachToPlayerButton(playerButton)
 		self:DisplayLevel()
 	end
 	playerButton.Level = fs
+	return playerButton.Level
 end

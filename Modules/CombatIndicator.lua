@@ -103,7 +103,8 @@ local combatIndicator = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.CombatIndicator,
 	defaultSettings = defaultSettings,
 	options = options,
-	enabledInThisExpansion = true
+	enabledInThisExpansion = true,
+	attachSettingsToButton = true
 })
 
 
@@ -233,4 +234,5 @@ function combatIndicator:AttachToPlayerButton(playerButton)
 			end)
 		end
 	end
+	return playerButton.CombatIndicator
 end

@@ -152,4 +152,5 @@ function racial:AttachToPlayerButton(playerButton)
 		self:RacialCheck(spellId)
 	end
 	playerButton.Racial = frame
+	return playerButton.Racial
 end

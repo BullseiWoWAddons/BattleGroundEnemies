@@ -439,6 +439,9 @@ function Data.SetOption(location, option, ...)
 	else
 		value = ...
 	end
+	print(location, option, ...)
+	DevTool:AddData(CopyTable(location) , "location")
+	DevTool:AddData(CopyTable(option) , "option")
 	location[option[#option]] = value
 	BattleGroundEnemies:ApplyAllSettings()
 
@@ -667,70 +670,75 @@ function Data.AddCooldownSettings(location)
 	}
 end
 
-function BattleGroundEnemies:AddModuleSettings(location, playerCountConfigDefault, playerType)
+function BattleGroundEnemies:AddModuleSettings(location, playerCountConfigDefault, playerType, condidtionFunc)
 	local temp = {}
 	for moduleName, moduleFrame in pairs(self.ButtonModules) do
+		
 
 		local locationn = location.ButtonModules[moduleName]
 
-		temp[moduleName]  = {
-			type = "group",
-			name = moduleFrame.localizedModuleName,
-			order = moduleFrame.order,
-			get =  function(option)
-				return Data.GetOption(locationn, option)
-			end,
-			set = function(option, ...)
-				return Data.SetOption(locationn, option, ...)
-			end,
-			disabled = function() return not BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) end,
-			childGroups = "tab",
-			args = {
-				Enabled = {
-					type = "toggle",
-					name = VIDEO_OPTIONS_ENABLED,
-					width = "normal",
-					order = 1
-				},
-				PositionSetting = {
-					type = "group",
-					name = L.Position .. " " .. L.AND .. " " .. L.Size,
-					get =  function(option)
-						return Data.GetOption(locationn, option)
-					end,
-					set = function(option, ...)
-						return Data.SetOption(locationn, option, ...)
-					end,
-					disabled  = function() return not locationn.Enabled end,
-					order = 2,
-					args = Data.AddPositionSetting(locationn, moduleName, moduleFrame, playerType)
-				},
-				ModuleSettings = {
-					type = "group",
-					name = L.ModuleSpecificSettings,
-					get =  function(option)
-						return Data.GetOption(locationn, option)
-					end,
-					set = function(option, ...)
-						return Data.SetOption(locationn, option, ...)
-					end,
-					disabled  = function() return not locationn.Enabled or not moduleFrame.options end,
-					order = 3,
-					args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options or {}
-				},
-				Reset = {
-					type = "execute",
-					name = L.ResetModule,
-					desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies[playerType]:GetPlayerCountConfigName(location)),
-					func = function()
-						location.ButtonModules[moduleName] = CopyTable(playerCountConfigDefault.ButtonModules[moduleName])
-						BattleGroundEnemies:NotifyChange()
-					end,
-					width = "full",
-					order = 4,
+		if condidtionFunc(moduleFrame) then
+			temp[moduleName]  = {
+				type = "group",
+				name = moduleFrame.localizedModuleName,
+				order = moduleFrame.order,
+				get =  function(option)
+					return Data.GetOption(locationn, option)
+				end,
+				set = function(option, ...)
+					return Data.SetOption(locationn, option, ...)
+				end,
+				disabled = function() return not BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) end,
+				childGroups = "tab",
+				args = {
+					Enabled = {
+						type = "toggle",
+						name = VIDEO_OPTIONS_ENABLED,
+						width = "normal",
+						order = 1
+					},
+					PositionSetting = {
+						type = "group",
+						name = L.Position .. " " .. L.AND .. " " .. L.Size,
+						get =  function(option)
+							return Data.GetOption(locationn, option)
+						end,
+						set = function(option, ...)
+							return Data.SetOption(locationn, option, ...)
+						end,
+						disabled  = function() return not locationn.Enabled end,
+						order = 2,
+						args = Data.AddPositionSetting(locationn, moduleName, moduleFrame, playerType)
+					},
+					ModuleSettings = {
+						type = "group",
+						name = L.ModuleSpecificSettings,
+						get =  function(option)
+							return Data.GetOption(locationn, option)
+						end,
+						set = function(option, ...)
+							return Data.SetOption(locationn, option, ...)
+						end,
+						disabled  = function() return not locationn.Enabled or not moduleFrame.options end,
+						order = 3,
+						args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options or {}
+					},
+					Reset = {
+						type = "execute",
+						name = L.ResetModule,
+						desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies[playerType]:GetPlayerCountConfigName(location)),
+						func = function()
+							location.ButtonModules[moduleName] = CopyTable(playerCountConfigDefault.ButtonModules[moduleName])
+							BattleGroundEnemies:NotifyChange()
+						end,
+						width = "full",
+						order = 4,
+					}
 				}
 			}
-		}
+		end
+
+		
 	end
 	return temp
 end
@@ -1354,17 +1362,18 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							max = 400,
 							step = 1,
 							order = 7
-						},
-						ModuleSettings = {
-							type = "group",
-							name = L.ModuleSettings,
-							order = 8,
-							args = self:AddModuleSettings(location, playerCountConfigDefault, playerType)
 						}
 					}
+				},
+				ModuleSettings = {
+					type = "group",
+					name = L.ModuleSettings,
+					order = 8,
+					args = self:AddModuleSettings(location, playerCountConfigDefault, playerType, function(options) return not options.attachSettingsToButton end)
 				}
 			}
 		}
+		settings[BattleGroundEnemies[playerType]:GetPlayerCountConfigName(location)].args.BarSettings.args = self:AddModuleSettings(location, playerCountConfigDefault, playerType, function(options) return options.attachSettingsToButton end)
 	end
 
 	local inputs = {

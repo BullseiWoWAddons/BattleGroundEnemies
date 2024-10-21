@@ -86,7 +86,8 @@ local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeFullAuraUpdate", "NewAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},
-	enabledInThisExpansion = true
+	enabledInThisExpansion = true,
+	attachSettingsToButton = true
 })
 
 function objectiveAndRespawn:AttachToPlayerButton(playerButton)
@@ -221,7 +222,15 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 				self.AuraText:SetText("")
 				self.ActiveRespawnTimer = true
 			end
-			self.Cooldown:SetCooldown(GetTime(), IsCataClassic and 45 or 26) --overwrite an already active timer
+			local respawmTime = 26
+			if IsCataClassic then
+				respawmTime = 45
+			else
+				if C_PvP and C_PvP.IsSoloRBG() then
+					respawmTime = 15
+				end
+			end
+			self.Cooldown:SetCooldown(GetTime(), respawmTime) --overwrite an already active timer
 		end
 	end
 
@@ -240,4 +249,5 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		self:Reset()
 	end
 	playerButton.ObjectiveAndRespawn = frame
+	return playerButton.ObjectiveAndRespawn
 end

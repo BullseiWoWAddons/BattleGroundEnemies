@@ -198,5 +198,6 @@ function spec_HighestActivePriority:AttachToPlayerButton(playerButton)
 		self:Reset()
 	end
 	playerButton.HighestPriorityAura = frame
+	return playerButton.HighestPriorityAura
 end
 

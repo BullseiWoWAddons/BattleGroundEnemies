@@ -159,8 +159,10 @@ end
 
 function class:AttachToPlayerButton(playerButton)
 	playerButton.Class = attachToPlayerButton(playerButton, "Class")
+	return playerButton.Class
 end
 
 function spec:AttachToPlayerButton(playerButton)
 	playerButton.Spec = attachToPlayerButton(playerButton, "Spec")
+	return playerButton.Spec
 end

@@ -197,4 +197,5 @@ function cooldowns:AttachToPlayerButton(playerButton)
 	end
 
 	playerButton.Cooldowns = container
+	return playerButton.Cooldowns
 end
