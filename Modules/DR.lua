@@ -33,7 +33,7 @@ local defaultSettings = {
 		FontSize = 12,
 		FontOutline = "OUTLINE",
 		EnableShadow = false,
-		DrawSwipe = false,
+		DrawSwipe = true,
 		ShadowColor = {0, 0, 0, 1},
 	},
 	Container = {
