@@ -1198,7 +1198,6 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 				self.config = playerButton.playerCountConfig.ButtonModules[moduleName]
 				return self.config
 			end
-			playerButton[moduleName].moduleName = moduleName
 
 			playerButton[moduleName].GetOptionsPath = function(self)
 				local optionsPath = CopyTable(playerButton.basePath)
