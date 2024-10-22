@@ -249,7 +249,7 @@ local function createNewDrFrame(playerButton, container)
 	drFrame.Container = container
 
 	drFrame.ApplyChildFrameSettings = function(self)
-		self.Cooldown:ApplyCooldownSettings(container.config.Cooldown, false)
+		self.Cooldown:ApplyCooldownSettings(container.config.Cooldown, true , {0, 0, 0, 0.5})
 		self:SetDisplayType()
 	end
 
