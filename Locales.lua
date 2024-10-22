@@ -25,7 +25,7 @@ Data.L = setmetatable({}, { --key set by all non english clients, Table gets acc
             return defaultLocale[k]
         else
             C_Timer.After(3, function()
-                BattleGroundEnemies:OnetimeInformation("Missing localization entry for['"..k.."']. Please report this to the addon author.")
+                BattleGroundEnemies:OnetimeDebug("Missing localization entry for['"..k.."']. Please report this to the addon author.")
             end)
             return k
         end

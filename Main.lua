@@ -1280,6 +1280,26 @@ local function getTimestamp()
 	return stamp
 end
 
+local sentDebugMessages = {}
+function BattleGroundEnemies:OnetimeDebug(...)
+
+	local message = table.concat({ ... }, ", ")
+	if sentDebugMessages[message] then return end
+	
+	if not self.db then return end
+	if not self.db.profile then return end
+	if not self.db.profile.Debug then return end
+
+	if not self.debugFrame then
+		self.debugFrame = CreatedebugFrame()
+	end
+
+	local text = stringifyMultitArgs(getTimestamp(), ...)
+
+	self.debugFrame:AddMessage(text)
+	sentDebugMessages[message] = true
+end
+
 function BattleGroundEnemies:Debug(...)
 	if not self.db then return end
 	if not self.db.profile then return end

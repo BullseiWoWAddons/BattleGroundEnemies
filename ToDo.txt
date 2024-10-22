@@ -8,3 +8,4 @@ for editmode, set which frames can snap to which other frames
 button itsef can not be moved, only by moving the mainframe
 modules can be attached to the button or other modules
 15 second respawn in blitz rbg, mabye different map ids?
+i need to add a feature to not include alpha versions in the version check 
