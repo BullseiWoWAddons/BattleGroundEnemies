@@ -145,10 +145,10 @@ function CustomEditModeMagnetismManager:RegisterGridLine(line, verticalLine, cen
 end
 
 function CustomEditModeMagnetismManager:GetEligibleMagneticFrames(systemFrame)
-    -- UIParent is always eligible
+    -- button is always eligible
     local eligibleFrames = {
-        horizontal	= { UIParent },
-        vertical	= { UIParent },
+        horizontal	= { systemFrame.playerButton },
+        vertical	= { systemFrame.playerButton },
     };
 
     for magneticFrame in pairs(self.magneticFrames) do
@@ -171,14 +171,21 @@ function CustomEditModeMagnetismManager:GetMagneticFrameInfoTable(frame, point, 
 end
 
 function CustomEditModeMagnetismManager:CheckReplaceMagneticFrameInfo(currentMagneticFrameInfo, frame, point, relativePoint, distance, offset, isHorizontal)
+    BattleGroundEnemies:Debug("CheckReplaceMagneticFrameInfo", currentMagneticFrameInfo, frame, point, relativePoint, distance, offset, isHorizontal)
     local scaledDistance = distance * UIParent:GetEffectiveScale();
     if scaledDistance > self.magnetismRange then
+        BattleGroundEnemies:Debug("bla 1", frame, point, relativePoint, distance, offset, isHorizontal)
+
         return currentMagneticFrameInfo;
     end
 
     if not currentMagneticFrameInfo or scaledDistance < currentMagneticFrameInfo.distance then
+        BattleGroundEnemies:Debug("bla 2", frame, point, relativePoint, distance, offset, isHorizontal)
+
         return self:GetMagneticFrameInfoTable(frame, point, relativePoint, scaledDistance, offset, isHorizontal);
     else
+        BattleGroundEnemies:Debug("bla 3", frame, point, relativePoint, distance, offset, isHorizontal)
+
         return currentMagneticFrameInfo;
     end
 end
@@ -341,7 +348,10 @@ end
 -- Only returns options which are within magnetism range.
 -- If no frames are in range, returns nil for that option.
 function CustomEditModeMagnetismManager:GetMagneticFrameInfoOptions(systemFrame)
+    
     local eligibleFrames = self:GetEligibleMagneticFrames(systemFrame);
+    --DevTool:AddData(CopyTable(eligibleFrames, true) , "eligibleFrames")
+
     local horizontalMagneticFrameInfo, verticalMagneticFrameInfo;
     local potentialHorizontalCornerMagneticFrame, potentialVerticalCornerMagneticFrame;
 
@@ -351,23 +361,27 @@ function CustomEditModeMagnetismManager:GetMagneticFrameInfoOptions(systemFrame)
     -- Find closest in range horizontal frame
     local horizontalYes = true;
     for _, frame in ipairs(eligibleFrames.horizontal) do
-        if frame == UIParent then
-            local verticalLinesYes = true;
-            distance, point, relativePoint, offset = self:FindClosestGridLine(systemFrame, verticalLinesYes);
-        else
-            local frameLeft, frameRight = frame:GetScaledSelectionSides();
-            if frame:IsToTheLeftOfFrame(systemFrame) then
-                distance = systemFrameLeft - frameRight;
-                point = "LEFT";
-                relativePoint = "RIGHT";
-            else
-                distance = frameLeft - systemFrameRight;
-                point = "RIGHT";
-                relativePoint = "LEFT";
-            end
+    
+        local frameLeft, frameRight = frame:GetScaledSelectionSides();
+        if frame:IsToTheLeftOfFrame(systemFrame) then
+            BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsToTheLeftOfFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
+            distance = systemFrameLeft - frameRight;
+            point = "LEFT";
+            relativePoint = "RIGHT";
+        else 
+            BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsToTheRightOfFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
 
-            offset = 0;
+            distance = frameLeft - systemFrameRight;
+            point = "RIGHT";
+            relativePoint = "LEFT";
+
+            if distance < 0 then
+                distance = -distance
+            end
         end
+
+        offset = 0;
+    
 
         horizontalMagneticFrameInfo = self:CheckReplaceMagneticFrameInfo(horizontalMagneticFrameInfo, frame, point, relativePoint, distance, offset, horizontalYes);
 
@@ -379,24 +393,28 @@ function CustomEditModeMagnetismManager:GetMagneticFrameInfoOptions(systemFrame)
     -- Find closest in range vertical frame
     local horizontalNo = false;
     for _, frame in ipairs(eligibleFrames.vertical) do
-        if frame == UIParent then
-            local verticalLinesNo = false;
-            distance, point, relativePoint, offset = self:FindClosestGridLine(systemFrame, verticalLinesNo);
+   
+        local _, _, frameBottom, frameTop = frame:GetScaledSelectionSides();
+
+        if frame:IsAboveFrame(systemFrame) then
+            BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsAboveFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
+
+            distance = frameBottom - systemFrameTop;
+            point = "TOP";
+            relativePoint = "BOTTOM";
         else
-            local _, _, frameBottom, frameTop = frame:GetScaledSelectionSides();
+            BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsUnderFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
 
-            if frame:IsAboveFrame(systemFrame) then
-                distance = frameBottom - systemFrameTop;
-                point = "TOP";
-                relativePoint = "BOTTOM";
-            else
-                distance = systemFrameBottom - frameTop;
-                point = "BOTTOM";
-                relativePoint = "TOP";
+            distance = systemFrameBottom - frameTop;
+            point = "BOTTOM";
+            relativePoint = "TOP";
+            if distance < 0 then
+                distance = -distance
             end
-
-            offset = 0;
         end
+
+        offset = 0;
+    
 
         verticalMagneticFrameInfo = self:CheckReplaceMagneticFrameInfo(verticalMagneticFrameInfo, frame, point, relativePoint, distance, offset, horizontalNo);
 
@@ -421,35 +439,41 @@ end
 local function IsGridLineOrUIParent(frame)
     return frame and (frame.isGridLine or frame == UIParent);
 end
-
 -- Returns a table of frames this input frame would snap to.
 function CustomEditModeMagnetismManager:GetMagneticFrameInfos(systemFrame)
-    local horizontalMagneticFrameInfo, verticalMagneticFrameInfo, cornerMagneticFrameInfo = self:GetMagneticFrameInfoOptions(systemFrame);
+	local horizontalMagneticFrameInfo, verticalMagneticFrameInfo, cornerMagneticFrameInfo = self:GetMagneticFrameInfoOptions(systemFrame);
 
-    if cornerMagneticFrameInfo then
-        -- Prioritize corner snaps
-        return { cornerMagneticFrameInfo };
-    elseif horizontalMagneticFrameInfo and IsGridLineOrUIParent(horizontalMagneticFrameInfo.frame) and verticalMagneticFrameInfo and IsGridLineOrUIParent(verticalMagneticFrameInfo.frame) then
-        -- If horizontal and vertical are both grid lines or UIParent then we are gonna double snap to them
-        return { horizontalMagneticFrameInfo, verticalMagneticFrameInfo };
-    elseif horizontalMagneticFrameInfo or verticalMagneticFrameInfo then
-        -- Snap to the closest frame info between the horizontal and vertical
-        if horizontalMagneticFrameInfo and (not verticalMagneticFrameInfo or horizontalMagneticFrameInfo.distance < verticalMagneticFrameInfo.distance) then
-            return { horizontalMagneticFrameInfo };
-        else
-            return { verticalMagneticFrameInfo };
-        end
-    end
 
-    return nil;
+    --if horizontalMagneticFrameInfo then DevTool:AddData(CopyTable(horizontalMagneticFrameInfo, true) , "horizontalMagneticFrameInfo") end
+    --if verticalMagneticFrameInfo then DevTool:AddData(CopyTable(verticalMagneticFrameInfo, true) , "verticalMagneticFrameInfo") end
+    --if cornerMagneticFrameInfo then DevTool:AddData(CopyTable(cornerMagneticFrameInfo, true) , "cornerMagneticFrameInfo") end
+
+
+	if cornerMagneticFrameInfo then
+		-- Prioritize corner snaps
+		return { cornerMagneticFrameInfo };
+	elseif horizontalMagneticFrameInfo or verticalMagneticFrameInfo then
+		-- Snap to the closest frame info between the horizontal and vertical
+		if horizontalMagneticFrameInfo and (not verticalMagneticFrameInfo or horizontalMagneticFrameInfo.distance < verticalMagneticFrameInfo.distance) then
+			return { horizontalMagneticFrameInfo };
+		else
+			return { verticalMagneticFrameInfo };
+		end
+	end
+
+	return nil;
 end
+
 
 function CustomEditModeMagnetismManager:ApplyMagnetism(systemFrame)
     local magneticFrameInfos = self:GetMagneticFrameInfos(systemFrame);
     if magneticFrameInfos then
         systemFrame:ClearAllPoints();
+        --DevTool:AddData(CopyTable(magneticFrameInfos, true) , "magneticFrameInfos")
 
         for index, magneticFrameInfo in ipairs(magneticFrameInfos) do
+            --DevTool:AddData(CopyTable(magneticFrameInfo, true) , "snapped to magneticFrameInfos")
+
             systemFrame:SnapToFrame(magneticFrameInfo);
         end
     end

@@ -310,8 +310,7 @@ do
 										--BattleGroundEnemies:LogToSavedVariables("moduleName", moduleName, "isnt set yet")
 									end
 								else
-									if not relativeFrame then return print("error", relativeFrame, "for module", moduleName, "doesnt exist")
-									end
+									return print("error", relativeFrame, "for module", moduleName, "doesnt exist")
 								end
 							else
 								--do nothing, the point was probably deleted
@@ -1111,7 +1110,7 @@ end
 
 function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe, 'SecureUnitButtonTemplate')
-	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, "playerButton", {})
+	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, "playerButton", playerButton)
 	playerButton:RegisterForClicks('AnyUp')
 	playerButton:Hide()
 	-- setmetatable(playerButton, self)
@@ -1185,7 +1184,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 			local moduleOnFrame = moduleFrame:AttachToPlayerButton(playerButton)
 			if moduleOnFrame then
 				if not moduleFrame.attachSettingsToButton then
-					BattleGroundEnemies.EditMode.EditModeManager:AddFrame(moduleOnFrame, moduleName)
+					BattleGroundEnemies.EditMode.EditModeManager:AddFrame(moduleOnFrame, moduleName, playerButton)
 				end
 			end
 

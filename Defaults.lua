@@ -130,35 +130,21 @@ local allieDefaults15man = {
 			}
 		},
 		Racial = {
-			ActivePoints = 2,
 			Points = {
 				{
 					Point = "TOPRIGHT",
 					RelativeFrame = "Trinket",
 					RelativePoint = "TOPLEFT",
-					OffsetX = -1
-				},
-				{
-					Point = "BOTTOMRIGHT",
-					RelativeFrame = "Trinket",
-					RelativePoint = "BOTTOMLEFT",
 					OffsetX = -1
 				}
 			}
 		},
 		Trinket = {
-			ActivePoints = 2,
 			Points = {
 				{
 					Point = "TOPRIGHT",
 					RelativeFrame = "Spec",
 					RelativePoint = "TOPLEFT",
-					OffsetX = -1
-				},
-				{
-					Point = "BOTTOMRIGHT",
-					RelativeFrame = "Spec",
-					RelativePoint = "BOTTOMLEFT",
 					OffsetX = -1
 				}
 			}
@@ -299,35 +285,21 @@ local enemyDefault15man = {
 			},
 		},
 		Racial = {
-			ActivePoints = 2,
 			Points = {
 				{
 					Point = "TOPLEFT",
 					RelativeFrame = "Trinket",
 					RelativePoint = "TOPRIGHT",
-					OffsetX = 1
-				},
-				{
-					Point = "BOTTOMLEFT",
-					RelativeFrame = "Trinket",
-					RelativePoint = "BOTTOMRIGHT",
 					OffsetX = 1
 				}
 			}
 		},
 		Trinket = {
-			ActivePoints = 2,
 			Points = {
 				{
 					Point = "TOPLEFT",
 					RelativeFrame = "Button",
 					RelativePoint = "TOPRIGHT",
-					OffsetX = 1
-				},
-				{
-					Point = "BOTTOMLEFT",
-					RelativeFrame = "Button",
-					RelativePoint = "BOTTOMRIGHT",
 					OffsetX = 1
 				}
 			}
@@ -549,18 +521,11 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
-							ActivePoints = 2,
 							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Trinket",
 									RelativePoint = "TOPRIGHT",
-									OffsetX = 1
-								},
-								{
-									Point = "BOTTOMLEFT",
-									RelativeFrame = "Trinket",
-									RelativePoint = "BOTTOMRIGHT",
 									OffsetX = 1
 								}
 							}
@@ -569,18 +534,11 @@ Data.defaultSettings = {
 							Enabled = false
 						},
 						Trinket = {
-							ActivePoints = 2,
 							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
 									RelativePoint = "TOPRIGHT",
-									OffsetX = 1
-								},
-								{
-									Point = "BOTTOMLEFT",
-									RelativeFrame = "Button",
-									RelativePoint = "BOTTOMRIGHT",
 									OffsetX = 1
 								}
 							}
@@ -720,35 +678,21 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
-							ActivePoints = 2,
 							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Trinket",
 									RelativePoint = "TOPRIGHT",
-									OffsetX = 1
-								},
-								{
-									Point = "BOTTOMLEFT",
-									RelativeFrame = "Trinket",
-									RelativePoint = "BOTTOMRIGHT",
 									OffsetX = 1
 								}
 							}
 						},
 						Trinket = {
-							ActivePoints = 2,
 							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
 									RelativePoint = "TOPRIGHT",
-									OffsetX = 1
-								},
-								{
-									Point = "BOTTOMLEFT",
-									RelativeFrame = "Button",
-									RelativePoint = "BOTTOMRIGHT",
 									OffsetX = 1
 								}
 							}
@@ -939,18 +883,11 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
-							ActivePoints = 2,
 							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Trinket",
 									RelativePoint = "TOPLEFT",
-									OffsetX = -1
-								},
-								{
-									Point = "BOTTOMRIGHT",
-									RelativeFrame = "Trinket",
-									RelativePoint = "BOTTOMLEFT",
 									OffsetX = -1
 								}
 							}
@@ -959,18 +896,11 @@ Data.defaultSettings = {
 							Enabled = false
 						},
 						Trinket = {
-							ActivePoints = 2,
 							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Spec",
 									RelativePoint = "TOPLEFT",
-									OffsetX = -1
-								},
-								{
-									Point = "BOTTOMRIGHT",
-									RelativeFrame = "Spec",
-									RelativePoint = "BOTTOMLEFT",
 									OffsetX = -1
 								}
 							}
@@ -1111,35 +1041,21 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
-							ActivePoints = 2,
 							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Trinket",
 									RelativePoint = "TOPLEFT",
-									OffsetX = -1
-								},
-								{
-									Point = "BOTTOMRIGHT",
-									RelativeFrame = "Trinket",
-									RelativePoint = "BOTTOMLEFT",
 									OffsetX = -1
 								}
 							}
 						},
 						Trinket = {
-							ActivePoints = 2,
 							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Spec",
 									RelativePoint = "TOPLEFT",
-									OffsetX = -1
-								},
-								{
-									Point = "BOTTOMRIGHT",
-									RelativeFrame = "Button",
-									RelativePoint = "BOTTOMLEFT",
 									OffsetX = -1
 								}
 							}

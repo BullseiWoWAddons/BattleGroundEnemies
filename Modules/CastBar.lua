@@ -85,7 +85,6 @@ local settingToTemplate = {
 }
 
 function castBar:AttachToPlayerButton(playerButton)
--- Covenant Icon
 	playerButton.CastBar = CreateFrame("frame", nil, playerButton)
 
 	--when unitID changes

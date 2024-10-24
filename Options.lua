@@ -301,28 +301,28 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		end
 	end
 
-	temp.AddPoint = {
-		type = "execute",
-		name = L.AddPoint,
-		func = function()
-			location.ActivePoints = numPoints + 1
-			location.Points = location.Points or {}
-			location.Points[numPoints + 1] = location.Points[numPoints + 1] or {
-				Point = "TOPLEFT",
-				RelativeFrame = "Button",
-				RelativePoint = "TOPLEFT"
-			}
-			BattleGroundEnemies:NotifyChange()
-		end,
-		disabled = function()
-			if not location.Points then return false end
+	-- temp.AddPoint = {
+	-- 	type = "execute",
+	-- 	name = L.AddPoint,
+	-- 	func = function()
+	-- 		location.ActivePoints = numPoints + 1
+	-- 		location.Points = location.Points or {}
+	-- 		location.Points[numPoints + 1] = location.Points[numPoints + 1] or {
+	-- 			Point = "TOPLEFT",
+	-- 			RelativeFrame = "Button",
+	-- 			RelativePoint = "TOPLEFT"
+	-- 		}
+	-- 		BattleGroundEnemies:NotifyChange()
+	-- 	end,
+	-- 	disabled = function()
+	-- 		if not location.Points then return false end
 
-			--dynamic containers with dynamic width and height can have a maximum of 1 point
-			return not canAddPoint(location, moduleFrame)
-		end,
-		width = "full",
-		order = numPoints + 4
-	}
+	-- 		--dynamic containers with dynamic width and height can have a maximum of 1 point
+	-- 		return not canAddPoint(location, moduleFrame)
+	-- 	end,
+	-- 	width = "full",
+	-- 	order = numPoints + 4
+	-- }
 	temp.WidthGroup = {
 		type = "group",
 		name = L.Width,
@@ -439,9 +439,8 @@ function Data.SetOption(location, option, ...)
 	else
 		value = ...
 	end
-	print(location, option, ...)
-	DevTool:AddData(CopyTable(location) , "location")
-	DevTool:AddData(CopyTable(option) , "option")
+	--DevTool:AddData(CopyTable(location) , "location")
+	--DevTool:AddData(CopyTable(option) , "option")
 	location[option[#option]] = value
 	BattleGroundEnemies:ApplyAllSettings()
 

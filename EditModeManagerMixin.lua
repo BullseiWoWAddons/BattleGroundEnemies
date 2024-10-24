@@ -161,10 +161,20 @@ local function CopyAnchorInfo(anchorInfo, otherAnchorInfo)
 end
 
 local function ConvertToAnchorInfo(point, relativeTo, relativePoint, offsetX, offsetY)
+	
 	if point then
+		local relativeToo
+		if type(relativeTo) == "string" then
+			relativeToo = relativeTo
+		else
+			if (type(relativeTo) == "table") then
+				relativeToo = relativeTo.system == "playerButton" and "Button" or relativeTo.system
+			end
+		end
 		local anchorInfo = {};
 		anchorInfo.point = point;
-		anchorInfo.relativeTo = relativeTo and relativeTo:GetName() or "UIParent";
+		--anchorInfo.relativeTo = relativeTo and relativeTo:GetName() or "UIParent";
+		anchorInfo.relativeTo = relativeToo;
 		anchorInfo.relativePoint = relativePoint;
 		anchorInfo.offsetX = offsetX;
 		anchorInfo.offsetY = offsetY;
@@ -175,12 +185,13 @@ local function ConvertToAnchorInfo(point, relativeTo, relativePoint, offsetX, of
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:SetHasActiveChanges(hasActiveChanges)
+	if true then return end
 	-- Clear taint off of the value passed in
 	if hasActiveChanges then
 		self.hasActiveChanges = true;
 	else
 		self.hasActiveChanges = false;
-	end	
+	end
 	self.SaveChangesButton:SetEnabled(hasActiveChanges);
 	self.RevertAllChangesButton:SetEnabled(hasActiveChanges);
 end
@@ -202,33 +213,70 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:HasActiveCha
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateSystemAnchorInfo(systemFrame)
-	local systemInfo = self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex);
+	--DevTool:AddData(CopyTable(systemFrame, true) , "systemFrame")
+	local firstPoint = systemFrame.config.Points[1]
+	local systemInfo = {anchorInfo = ConvertToAnchorInfo(firstPoint.Point,  firstPoint.RelativeFrame, firstPoint.RelativePoint, firstPoint.OffsetX or 0, firstPoint.OffsetY or 0)}   --self:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex);
 	if systemInfo then
 		local anchorInfoChanged = false;
 
 		local point, relativeTo, relativePoint, offsetX, offsetY = systemFrame:GetPoint(1);
+		BattleGroundEnemies:Debug("1", point, relativeTo, relativePoint, offsetX, offsetY)
 
-		-- If we don't have a relativeTo then we are gonna set our relativeTo to be UIParent
+		if relativeTo and relativeTo.GetName then
+			BattleGroundEnemies:Debug("2", point, relativeTo, relativePoint, offsetX, offsetY, relativeTo:GetName(), relativeTo.playerButton.PlayerDetails.PlayerName)
+
+		end
+
+
+		-- If we don't have a relativeTo then we are gonna set our relativeTo to be the playerButton
 		if not relativeTo then
-			relativeTo = UIParent;
+			relativeTo = systemFrame.playerButton;
 
 			-- When setting our relativeTo to UIParent it's possible for our y position to change slightly depending on UIParent's size from stuff like debug menus
 			-- To account for this set out position and then track the change in our top and adjust for that
-			local originalSystemFrameTop = systemFrame:GetTop();
-			systemFrame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY);
+			
+			local scaleSystemFrame = systemFrame:GetEffectiveScale()
+			local originalSystemFrameLeft = systemFrame:GetLeft() * 1;
+			local originalSystemFrameTop = systemFrame:GetTop() * 1;
+			BattleGroundEnemies:Debug("3", originalSystemFrameLeft, originalSystemFrameTop)
 
-			offsetY = offsetY + originalSystemFrameTop - systemFrame:GetTop();
-			systemFrame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY);
+			local scaleRelativeTo = relativeTo:GetEffectiveScale()
+			local relativeLeft= relativeTo:GetLeft() * 1
+			local relativeTop = relativeTo:GetTop() * 1
+
+			BattleGroundEnemies:Debug("4", relativeLeft, relativeTop)
+
+			point = "TOPLEFT"
+			relativePoint = "TOPLEFT"
+			
+
+			--systemFrame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY);
+
+			offsetX = originalSystemFrameLeft - relativeLeft
+			offsetY = originalSystemFrameTop - relativeTop
+
+			--offsetY = offsetY + originalSystemFrameTop - systemFrame:GetTop();
+			BattleGroundEnemies:Debug("5", point, relativeTo, relativePoint, offsetX, offsetY)
+			--systemFrame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY);
 		end
 
 		-- Undo offset changes due to scale so we're always working as if we're at 1.0 scale
-		local frameScale = systemFrame:GetScale();
-		offsetX = offsetX * frameScale;
-		offsetY = offsetY * frameScale;
+		--local frameScale = systemFrame:GetScale();
+		offsetX = offsetX --* frameScale;
+		offsetY = offsetY --* frameScale;
 
 		local newAnchorInfo = ConvertToAnchorInfo(point, relativeTo, relativePoint, offsetX, offsetY);
 		if not AreAnchorsEqual(systemInfo.anchorInfo, newAnchorInfo) then
-			CopyAnchorInfo(systemInfo.anchorInfo, newAnchorInfo);
+			BattleGroundEnemies:Debug("not equal")
+			--DevTool:AddData(CopyTable(newAnchorInfo, true) , "newAnchorInfo")
+			--DevTool:AddData(CopyTable(systemInfo.anchorInfo, true) , "systemInfo.anchorInfo")
+
+			firstPoint.Point = newAnchorInfo.point
+			firstPoint.RelativeFrame = newAnchorInfo.relativeTo
+			firstPoint.RelativePoint = newAnchorInfo.relativePoint
+			firstPoint.OffsetX = newAnchorInfo.offsetX
+			firstPoint.OffsetY = newAnchorInfo.offsetY
+			--CopyAnchorInfo(systemInfo.anchorInfo, newAnchorInfo);
 			anchorInfoChanged = true;
 		end
 
@@ -237,12 +285,15 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateSystem
 		-- Undo offset changes due to scale so we're always working as if we're at 1.0 scale
 		-- May not always have a second point so nil check first
 		if point ~= nil then
+			BattleGroundEnemies:Debug("hier drinl")
 			offsetX = offsetX * frameScale;
 			offsetY = offsetY * frameScale;
 		end
 
 		newAnchorInfo = ConvertToAnchorInfo(point, relativeTo, relativePoint, offsetX, offsetY);
 		if not AreAnchorsEqual(systemInfo.anchorInfo2, newAnchorInfo) then
+			BattleGroundEnemies:Debug("anchorInfo2 not equal")
+
 			CopyAnchorInfo(systemInfo.anchorInfo2, newAnchorInfo);
 			anchorInfoChanged = true;
 		end
@@ -259,15 +310,17 @@ end
 
 function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:OnSystemPositionChange(systemFrame)
 	if self:UpdateSystemAnchorInfo(systemFrame) then
-		systemFrame:SetHasActiveChanges(true);
+		--systemFrame:SetHasActiveChanges(true);
 
-		self:UpdateActionBarLayout(systemFrame);
+		--self:UpdateActionBarLayout(systemFrame);
 
 		if systemFrame.isBottomManagedFrame or systemFrame.isRightManagedFrame then
+			BattleGroundEnemies:Debug("systemFrame.isBottomManagedFrame or systemFrame.isRightManagedFrame")
 			UIParent_ManageFramePositions();
 		end
 
-		EditModeSystemSettingsDialog:UpdateDialog(systemFrame);
+		BattleGroundEnemies:NotifyChange()
+		--EditModeSystemSettingsDialog:UpdateDialog(systemFrame);
 	end
 
 	--self:OnEditModeSystemAnchorChanged();
@@ -530,7 +583,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateBottom
 
 	local layoutInfo = self:GetActiveLayoutInfo();
 	local isPresetLayout = layoutInfo.layoutType == Enum.EditModeLayoutType.Preset;
-	local isOverrideLayout = layoutInfo.layoutType == Enum.EditModeLayoutType.Override; 
+	local isOverrideLayout = layoutInfo.layoutType == Enum.EditModeLayoutType.Override;
 
 	for index, bar in ipairs(barsToUpdate) do
 		if bar and bar:IsShown() and bar:IsInDefaultPosition() then
@@ -571,7 +624,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:SelectSystem
 	--custom we hgihlight all frames of this system of the same plaeyrtype
 	--if not self:IsEditModeLocked() then
 		local function selectMatchingSystem(index, systemFrame)
-			if systemFrame.system == selectFrame.system and systemFrame.PlayerType == selectFrame.PlayerType then
+			if systemFrame.system == selectFrame.system and systemFrame.playerButton.PlayerType == selectFrame.playerButton.PlayerType then
 				systemFrame:SelectSystem();
 			else
 				-- Only highlight a system if it was already highlighted
@@ -657,11 +710,12 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:SetEnableSna
 		self:HideSnapPreviewLines();
 	end
 
-	if isUserInput then
-		self:OnAccountSettingChanged(Enum.EditModeAccountSetting.EnableSnap, enableSnap);
-	else
-		self.EnableSnapCheckButton:SetControlChecked(enableSnap);
-	end
+
+	-- if isUserInput then
+	-- 	self:OnAccountSettingChanged(Enum.EditModeAccountSetting.EnableSnap, enableSnap);
+	-- else
+	-- 	self.EnableSnapCheckButton:SetControlChecked(enableSnap);
+	-- end
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:IsSnapEnabled()
@@ -776,7 +830,7 @@ local function SetPresetEnabledState(elementDescription, disableOnMaxLayouts, di
 	local reason = GetDisableReason(disableOnMaxLayouts, disableOnActiveChanges);
 	local enabled = reason == nil;
 	elementDescription:SetEnabled(enabled);
-	
+
 	if not enabled then
 		elementDescription:SetTooltip(function(tooltip, elementDescription)
 			GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
@@ -840,7 +894,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateDropdo
 				radio:CreateButton(HUD_EDIT_MODE_RENAME_LAYOUT, function()
 					self:ShowRenameLayoutDialog(index, layoutInfo);
 				end);
-				
+
 				radio:DeactivateSubmenu();
 
 				radio:AddInitializer(function(button, description, menu)
@@ -849,7 +903,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateDropdo
 					gearButton:SetScript("OnClick", function()
 						description:ForceOpenSubmenu();
 					end);
-				
+
 					MenuUtil.HookTooltipScripts(gearButton, function(tooltip)
 						GameTooltip_SetTitle(tooltip, HUD_EDIT_MODE_RENAME_OR_COPY_LAYOUT);
 					end);
@@ -894,7 +948,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateDropdo
 			self:ShowNewLayoutDialog();
 		end);
 		SetPresetEnabledState(newLayoutButton, disableOnMaxLayouts, not disableOnActiveChanges);
-		
+
 		-- import layout
 		local importLayoutButton = rootDescription:CreateButton(HUD_EDIT_MODE_IMPORT_LAYOUT, function()
 			self:ShowImportLayoutDialog();

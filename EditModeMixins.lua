@@ -17,12 +17,13 @@ BattleGroundEnemies.Mixins = BattleGroundEnemies.Mixins or {}
 local EditModeSystemSettingsDialog = {}
 
 EditModeSystemSettingsDialog.UpdateDialog = function(self, systemFrame)
-	
-	
+
+
 end
 
 local currentSelection = ""
-EditModeSystemSettingsDialog.AttachToSystemFrame = function(self, systemFrame)	local optionsPath = systemFrame:GetOptionsPath()
+EditModeSystemSettingsDialog.AttachToSystemFrame = function(self, systemFrame)
+	local optionsPath = systemFrame:GetOptionsPath()
 	local pathString = table.concat(optionsPath, " ")
 	if pathString ~= currentSelection then
 		AceConfigDialog:SelectGroup(unpack( optionsPath))
@@ -434,7 +435,8 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SetHasActiveChange
 	if hasActiveChanges then
 		BattleGroundEnemies.EditMode.EditModeManager:SetHasActiveChanges(true);
 	end
-	EditModeSystemSettingsDialog:UpdateButtons(self);
+	BattleGroundEnemies:NotifyChange()
+	--EditModeSystemSettingsDialog:UpdateButtons(self);
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:HasActiveChanges()
@@ -539,7 +541,10 @@ end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:IsToTheLeftOfFrame(systemFrame)
 	local myLeft, myRight, myBottom, myTop = self:GetScaledSelectionSides();
+	BattleGroundEnemies:Debug("myLeft, myRight, myBottom, myTop", myLeft, myRight, myBottom, myTop)
 	local systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop = systemFrame:GetScaledSelectionSides();
+	BattleGroundEnemies:Debug("systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop", systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop)
+
 	return myRight < systemFrameLeft;
 end
 
@@ -781,6 +786,12 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetFrameMagneticEl
 		return nil;
 	end
 
+	-- Can't magnetize to a different button
+	if self.playerButton ~= systemFrame.playerButton then
+		BattleGroundEnemies:Debug("not eligible", self.playerButton.PlayerDetails.PlayerName, systemFrame.playerButton.PlayerDetails.PlayerName)
+		return nil;
+	end
+
 	local horizontalEligible = self:IsVerticallyAlignedWithFrame(systemFrame) and (self:IsToTheLeftOfFrame(systemFrame) or self:IsToTheRightOfFrame(systemFrame));
 	local verticalEligible = self:IsHorizontallyAlignedWithFrame(systemFrame) and (self:IsAboveFrame(systemFrame) or self:IsBelowFrame(systemFrame));
 
@@ -865,14 +876,19 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStart()
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStop()
+	BattleGroundEnemies:Debug("OnDragStop", self:GetPoint(1))
+	
 	if self:CanBeMoved() then
 		BattleGroundEnemies.EditMode.EditModeManager:ClearSnapPreviewFrame();
 		self:StopMovingOrSizing();
+		BattleGroundEnemies:Debug("StopMovingOrSizing", self:GetPoint(1))
 		self.isDragging = false;
 
 		if BattleGroundEnemies.EditMode.EditModeManager:IsSnapEnabled() then
-			BattleGroundEnemies.CustomEditModeMagnetismManager:ApplyMagnetism(self);
+			BattleGroundEnemies:Debug("1")
+			BattleGroundEnemies.CustomEditModeMagnetismManager:ApplyMagnetism(self);  --meses up when trieying to align under the button
 		end
+		-- messes up frame at the bottom above actionbar 
 		BattleGroundEnemies.EditMode.EditModeManager:OnSystemPositionChange(self);
 	end
 end

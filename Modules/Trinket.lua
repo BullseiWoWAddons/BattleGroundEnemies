@@ -21,6 +21,7 @@ local defaultSettings = {
 	Parent = "Button",
 	UseButtonHeightAsHeight = true,
 	UseButtonHeightAsWidth = true,
+	ActivePoints = 1,
 	Cooldown = {
 		ShowNumber = true,
 		FontSize = 12,
