@@ -24,6 +24,8 @@ Libs\LibGroupInSpecT-1.1\lib.xml
 
 Locales.lua
 
+Bindings.xml
+
 Helpers.lua
 Data.lua
 Defaults.lua
