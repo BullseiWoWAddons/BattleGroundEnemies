@@ -236,13 +236,13 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateSystem
 			-- To account for this set out position and then track the change in our top and adjust for that
 			
 			local scaleSystemFrame = systemFrame:GetEffectiveScale()
-			local originalSystemFrameLeft = systemFrame:GetLeft() * 1;
-			local originalSystemFrameTop = systemFrame:GetTop() * 1;
+			local originalSystemFrameLeft = systemFrame:GetLeft() * scaleSystemFrame;
+			local originalSystemFrameTop = systemFrame:GetTop() * scaleSystemFrame;
 			BattleGroundEnemies:Debug("3", originalSystemFrameLeft, originalSystemFrameTop)
 
 			local scaleRelativeTo = relativeTo:GetEffectiveScale()
-			local relativeLeft= relativeTo:GetLeft() * 1
-			local relativeTop = relativeTo:GetTop() * 1
+			local relativeLeft= relativeTo:GetLeft() * scaleRelativeTo
+			local relativeTop = relativeTo:GetTop()  * scaleRelativeTo
 
 			BattleGroundEnemies:Debug("4", relativeLeft, relativeTop)
 
@@ -252,8 +252,8 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateSystem
 
 			--systemFrame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY);
 
-			offsetX = originalSystemFrameLeft - relativeLeft
-			offsetY = originalSystemFrameTop - relativeTop
+			offsetX = (originalSystemFrameLeft - relativeLeft)
+			offsetY = (originalSystemFrameTop - relativeTop)
 
 			--offsetY = offsetY + originalSystemFrameTop - systemFrame:GetTop();
 			BattleGroundEnemies:Debug("5", point, relativeTo, relativePoint, offsetX, offsetY)

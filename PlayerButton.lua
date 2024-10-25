@@ -301,9 +301,12 @@ do
 
 
 								if relativeFrame then
+									local scale = (moduleFrameOnButton.config.Scale or 1)
+									moduleFrameOnButton:SetScale(scale)
 									if relativeFrame:GetNumPoints() > 0 then
+										local effectiveScale = moduleFrameOnButton:GetEffectiveScale()
 										moduleFrameOnButton:SetPoint(pointConfig.Point, relativeFrame,
-											pointConfig.RelativePoint, pointConfig.OffsetX or 0, pointConfig.OffsetY or 0)
+											pointConfig.RelativePoint, (pointConfig.OffsetX or 0) / effectiveScale, (pointConfig.OffsetY or 0) / effectiveScale)
 									else
 										-- the module we are depending on hasn't been set yet
 										allModulesSet = false
