@@ -76,6 +76,13 @@ if HasSpeccs then
 	LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
 end
 
+-- binding definitions
+BINDING_HEADER_CYCLEARENA = "BattleGroundEnemies"
+_G["BINDING_NAME_CLICK CYCLEALLIES:LeftButton"] = "Target Next Ally"
+_G["BINDING_NAME_CLICK CYCLEALLIES:RightButton"] = "Target Previous Ally"
+_G["BINDING_NAME_CLICK CYCLEEnemies:LeftButton"] = "Target Next Enemy"
+_G["BINDING_NAME_CLICK CYCLEEnemies:RightButton"] = "Target Previous Enemy"
+
 
 if not GetUnitName then
 	GetUnitName = function(unit, showServerName)
@@ -138,6 +145,9 @@ local previousCvarRaidOptionIsShown = GetCVar("raidOptionIsShown")
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
 --BattleGroundEnemies.BattlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
 BattleGroundEnemies.BattleGroundDebuffs = {} --contains battleground specific debbuffs to watchout for of the current active battlefield
+BattleGroundEnemies.currentTarget = false
+BattleGroundEnemies.currentFocus = false
+
 BattleGroundEnemies.Testmode = {
 	PlayerCountTestmode = 5,
 	Active = false,
@@ -1573,63 +1583,61 @@ local function IamTargetcaller()
 	end
 end
 
-do
-	local oldTarget
-	function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
-		local playerButton = self:GetPlayerbuttonByUnitID("target")
-		--BattleGroundEnemies:LogToSavedVariables("playerButton target", playerButton, GetUnitName("target", true))
-		if oldTarget then
-			if oldTarget.PlayerIsEnemy then
-				oldTarget:UpdateEnemyUnitID("Target", false)
-			end
-			if self.UserButton then
-				self.UserButton:IsNoLongerTarging(oldTarget)
-			end
-			oldTarget.MyTarget:Hide()
+
+function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
+	local playerButton = self:GetPlayerbuttonByUnitID("target")
+	--BattleGroundEnemies:LogToSavedVariables("playerButton target", playerButton, GetUnitName("target", true))
+	if BattleGroundEnemies.currentTarget then
+		if BattleGroundEnemies.currentTarget.PlayerIsEnemy then
+			BattleGroundEnemies.currentTarget:UpdateEnemyUnitID("Target", false)
 		end
-
-		if playerButton then --i target an existing player
-			if self.UserButton then
-				if playerButton.PlayerIsEnemy then
-					playerButton:UpdateEnemyUnitID("Target", "target")
-				end
-				self.UserButton:IsNowTargeting(playerButton)
-			end
-			playerButton.MyTarget:Show()
-			oldTarget = playerButton
-
-
-			if BattleGroundEnemies.IsRatedBG and self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then -- i am the target caller
-				SetRaidTarget("target", 8)
-			end
-		else
-			oldTarget = false
+		if self.UserButton then
+			self.UserButton:IsNoLongerTarging(BattleGroundEnemies.currentTarget)
 		end
+		BattleGroundEnemies.currentTarget.MyTarget:Hide()
 	end
-end
 
-do
-	local oldFocus
-	function BattleGroundEnemies:PLAYER_FOCUS_CHANGED()
-		local playerButton = self:GetPlayerbuttonByUnitID("focus")
-		--BattleGroundEnemies:LogToSavedVariables("playerButton focus", playerButton, GetUnitName("focus", true))
-		if oldFocus then
-			if oldFocus.PlayerIsEnemy then
-				oldFocus:UpdateEnemyUnitID("Focus", false)
-			end
-			oldFocus.MyFocus:Hide()
-		end
-		if playerButton then
+	if playerButton then --i target an existing player
+		if self.UserButton then
 			if playerButton.PlayerIsEnemy then
-				playerButton:UpdateEnemyUnitID("Focus", "focus")
+				playerButton:UpdateEnemyUnitID("Target", "target")
 			end
-			playerButton.MyFocus:Show()
-			oldFocus = playerButton
-		else
-			oldFocus = false
+			self.UserButton:IsNowTargeting(playerButton)
 		end
+		playerButton.MyTarget:Show()
+		BattleGroundEnemies.currentTarget = playerButton
+
+
+		if BattleGroundEnemies.IsRatedBG and self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then -- i am the target caller
+			SetRaidTarget("target", 8)
+		end
+	else
+		BattleGroundEnemies.currentTarget = false
 	end
 end
+
+
+
+function BattleGroundEnemies:PLAYER_FOCUS_CHANGED()
+	local playerButton = self:GetPlayerbuttonByUnitID("focus")
+	--BattleGroundEnemies:LogToSavedVariables("playerButton focus", playerButton, GetUnitName("focus", true))
+	if BattleGroundEnemies.currentFocus then
+		if BattleGroundEnemies.currentFocus.PlayerIsEnemy then
+			BattleGroundEnemies.currentFocus:UpdateEnemyUnitID("Focus", false)
+		end
+		BattleGroundEnemies.currentFocus.MyFocus:Hide()
+	end
+	if playerButton then
+		if playerButton.PlayerIsEnemy then
+			playerButton:UpdateEnemyUnitID("Focus", "focus")
+		end
+		playerButton.MyFocus:Show()
+		BattleGroundEnemies.currentFocus = playerButton
+	else
+		BattleGroundEnemies.currentFocus = false
+	end
+end
+
 
 
 function BattleGroundEnemies:UPDATE_MOUSEOVER_UNIT()
