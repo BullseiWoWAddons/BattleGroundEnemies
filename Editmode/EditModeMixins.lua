@@ -210,22 +210,13 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemLoad()
 
 
 	self.Selection:SetGetLabelTextFunction(function() return self:GetSystemName(); end);
-	self:SetupSettingsDialogAnchor();
+	--self:SetupSettingsDialogAnchor();
 	self.snappedFrames = {};
 	self.downKeys = {};
 
 	--self.settingDisplayInfoMap = EditModeSettingDisplayInfoManager:GetSystemSettingDisplayInfoMap(self.system);
 end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemHide()
-	if self.isSelected then
-		BattleGroundEnemies.EditMode.EditModeManager:ClearSelectedSystem();
-	end
-
-	if self.isManagedFrame then
-		UIParentManagedFrameMixin.OnHide(self);
-	end
-end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:ProcessMovementKey(key)
 	if not self:CanBeMoved() then
@@ -245,7 +236,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:ProcessMovementKey
 	end
 
 	if self.isManagedFrame and self:IsInDefaultPosition() then
-		self:BreakFromFrameManager();
+		--self:BreakFromFrameManager();
 	end
 
 	if self == PlayerCastingBarFrame then
@@ -307,8 +298,6 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SetScaleOverride(n
 	end
 
 	if self.isManagedFrame and self:IsInDefaultPosition() then
-		UIParent_ManageFramePositions();
-
 		if self.isRightManagedFrame and ObjectiveTrackerFrame and ObjectiveTrackerFrame:IsInDefaultPosition() then
 			ObjectiveTrackerFrame:Update();
 		end
@@ -431,43 +420,34 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:UpdateSystemSettin
 	end
 end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:ResetToDefaultPosition()
-	self.systemInfo.anchorInfo = EditModePresetLayoutManager:GetModernSystemAnchorInfo(self.system, self.systemIndex);
-	self.systemInfo.anchorInfo2 = nil;
-	self.systemInfo.isInDefaultPosition = true;
-	self:BreakSnappedFrames();
-	EditModeSystemSettingsDialog:UpdateDialog(self);
-	self:SetHasActiveChanges(true);
-end
+-- function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetManagedFrameContainer()
+-- 	if not self.isManagedFrame then
+-- 		return nil;
+-- 	end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetManagedFrameContainer()
-	if not self.isManagedFrame then
-		return nil;
-	end
+-- 	if self.isBottomManagedFrame then
+-- 		return UIParentBottomManagedFrameContainer;
+-- 	elseif self.isRightManagedFrame then
+-- 		return UIParentRightManagedFrameContainer;
+-- 	else
+-- 		return PlayerFrameBottomManagedFramesContainer;
+-- 	end
+-- end
 
-	if self.isBottomManagedFrame then
-		return UIParentBottomManagedFrameContainer;
-	elseif self.isRightManagedFrame then
-		return UIParentRightManagedFrameContainer;
-	else
-		return PlayerFrameBottomManagedFramesContainer;
-	end
-end
+-- function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:BreakFromFrameManager()
+-- 	local frameContainer = self:GetManagedFrameContainer();
+-- 	if not frameContainer then
+-- 		return;
+-- 	end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:BreakFromFrameManager()
-	local frameContainer = self:GetManagedFrameContainer();
-	if not frameContainer then
-		return;
-	end
+-- 	self.ignoreFramePositionManager = true;
+-- 	frameContainer:RemoveManagedFrame(self);
+-- 	self:SetParent(UIParent);
 
-	self.ignoreFramePositionManager = true;
-	frameContainer:RemoveManagedFrame(self);
-	self:SetParent(UIParent);
-
-	if self.isPlayerFrameBottomManagedFrame then
-		self:UpdateSystemSettingFrameSize();
-	end
-end
+-- 	if self.isPlayerFrameBottomManagedFrame then
+-- 		self:UpdateSystemSettingFrameSize();
+-- 	end
+-- end
 
 
 
@@ -510,9 +490,9 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:IsInitialized()
 end
 
 -- Override in inheriting mixins as needed
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SetupSettingsDialogAnchor()
-	self.settingsDialogAnchor = AnchorUtil.CreateAnchor("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -250, 200);
-end
+-- function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SetupSettingsDialogAnchor()
+-- 	self.settingsDialogAnchor = AnchorUtil.CreateAnchor("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -250, 200);
+-- end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SetHasActiveChanges(hasActiveChanges)
 	self.hasActiveChanges = hasActiveChanges;
@@ -578,19 +558,6 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetSettingValue(se
 	end
 end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetSettingValueBool(setting, useRawValue)
-	return self:GetSettingValue(setting, useRawValue) == 1;
-end
-
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:DoesSettingValueEqual(setting, value)
-	local useRawValue = true;
-	return self:GetSettingValue(setting, useRawValue) == value;
-end
-
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:DoesSettingDisplayValueEqual(setting, value)
-	local useRawValueNo = false;
-	return self:GetSettingValue(setting, useRawValueNo) == value;
-end
 
 -- Override in inheriting mixins as needed
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:UseSettingAltName(setting)
@@ -609,18 +576,6 @@ end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetSettingsDialogAnchor()
 	return self.settingsDialogAnchor;
-end
-
--- Override in inheriting mixins as needed
-function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:AddExtraButtons(extraButtonPool)
-	-- Create reset to default position button
-	self.resetToDefaultPositionButton = extraButtonPool:Acquire();
-	self.resetToDefaultPositionButton.layoutIndex = 3;
-	self.resetToDefaultPositionButton:SetText(HUD_EDIT_MODE_RESET_POSITION);
-	self.resetToDefaultPositionButton:SetOnClickHandler(GenerateClosure(self.ResetToDefaultPosition, self));
-	self.resetToDefaultPositionButton:SetEnabled(not self:IsInDefaultPosition());
-	self.resetToDefaultPositionButton:Show();
-	return true;
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:IsToTheLeftOfFrame(systemFrame)
@@ -832,7 +787,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:BreakFrameSnap(del
 
 		self:ClearAllPoints();
 		self:SetPoint(anchorPoint, UIParent, anchorPoint, offsetX, offsetY);
-		EditModeManagerFrame:OnSystemPositionChange(self);
+		--EditModeManagerFrame:OnSystemPositionChange(self);
 	end
 end
 
@@ -953,7 +908,7 @@ end
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStart()
 	if self:CanBeMoved() then
 		if self.isManagedFrame and self:IsInDefaultPosition() then
-			self:BreakFromFrameManager();
+			--self:BreakFromFrameManager();
 		end
 		self:StartMoving();
 		BattleGroundEnemies.EditMode.EditModeManager:SetSnapPreviewFrame(self);
