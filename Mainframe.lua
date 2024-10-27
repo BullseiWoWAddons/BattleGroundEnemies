@@ -82,15 +82,7 @@ local function CreateMainFrame(playerType)
 	]])
 
 
-	--SecureHandlerEnterLeaveTemplate ads _onenter and _onleave functionality
-	mainframe:SetAttribute("_onenter",[[
-		self:SetBindingClick(true, "MOUSEWHEELUP",self:GetName(), "Button4")
-		self:SetBindingClick(true, "MOUSEWHEELDOWN",self:GetName(), "Button5")
-	]])
-	-- onleave, clear override binding
-	mainframe:SetAttribute("_onleave",[[
-		self:ClearBindings()
-	]])
+
 	mainframe.Players = {}            --index = name, value = button(table), contains enemyButtons
 	mainframe.CurrentPlayerOrder = {} --index = number, value = playerButton(table)
 	mainframe.InactivePlayerButtons = {} --index = number, value = button(table)
@@ -673,6 +665,27 @@ local function CreateMainFrame(playerType)
 		end
 
 		self:SetAttribute("playerIndex",1)
+
+
+		if BattleGroundEnemies.db.profile.EnableMouseWheelPlayerTargeting then
+			--SecureHandlerEnterLeaveTemplate ads _onenter and _onleave functionality
+			mainframe:SetAttribute("_onenter",[[
+				self:SetBindingClick(true, "MOUSEWHEELUP",self:GetName(), "Button4")
+				self:SetBindingClick(true, "MOUSEWHEELDOWN",self:GetName(), "Button5")
+			]])
+			-- onleave, clear override binding
+			mainframe:SetAttribute("_onleave",[[
+				self:ClearBindings()
+			]])
+		else	
+			mainframe:SetAttribute("_onenter",nil)
+			-- onleave, clear override binding
+			mainframe:SetAttribute("_onleave",nil)
+		end
+
+	
+
+		
 		--button:SetAttribute("type1", "macro")
 	end
 
