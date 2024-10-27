@@ -1,11 +1,5 @@
 Add castbars and combat indicator to testmode
 make some of the settings specific to playercounts/faction global
 Work on cooldown tracking
-improved layout editing
 have to investigate why self.EnemyFaction is not set inside PLAYER_ENTERING_WORLD event handler
-make spec, class and highest priority aura one module (easier for editmode to move since its not overlappingene)
-for editmode, set which frames can snap to which other frames
-button itsef can not be moved, only by moving the mainframe
-modules can be attached to the button or other modules
-15 second respawn in blitz rbg, mabye different map ids?
 i need to add a feature to not include alpha versions in the version check 
