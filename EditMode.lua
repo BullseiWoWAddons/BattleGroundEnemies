@@ -35,7 +35,7 @@ function BattleGroundEnemies.EditMode.EditModeManager:AddFrame(frame, systemName
 	frame.Selection.Label:SetAllPoints()
 	frame.Selection.Label:SetIgnoreParentScale(true)
 	Mixin(frame.Selection.Label, ShrinkUntilTruncateFontStringMixin)
-	Mixin(frame.Selection, BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin, EditModeSystemSelectionMixin)
+	Mixin(frame.Selection, BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin, BattleGroundEnemies.Mixins.EditModeSystemSelectionMixin)
 	Mixin(frame, BattleGroundEnemies.Mixins.CustomEditModeSystemMixin)
 	frame.Selection:SetScript("OnMouseDown", frame.Selection.OnMouseDown)
 	frame.Selection:SetScript("OnDragStart", frame.Selection.OnDragStart)
@@ -49,9 +49,16 @@ end
 
 function BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
     --highlight all frames and make them clickable which opens the optons for that system
-	BattleGroundEnemies:EnableTestMode()
 	for i = 1, #self.registeredSystemFrames do
 		self.registeredSystemFrames[i]:OnEditModeEnter()
 	end
 	self:SetEnableSnap(true)
+end
+
+function BattleGroundEnemies.EditMode.EditModeManager:CloseEditmode()
+    --highlight all frames and make them clickable which opens the optons for that system
+	for i = 1, #self.registeredSystemFrames do
+		self.registeredSystemFrames[i]:OnEditModeExit()
+	end
+	self:SetEnableSnap(false)
 end

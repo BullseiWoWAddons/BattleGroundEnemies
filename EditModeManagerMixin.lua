@@ -327,7 +327,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:OnSystemPosi
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:MirrorSetting(system, systemIndex, setting, value)
-	local mirroredSettings = EditModeSettingDisplayInfoManager:GetMirroredSettings(system, systemIndex, setting);
+	local mirroredSettings -- = EditModeSettingDisplayInfoManager:GetMirroredSettings(system, systemIndex, setting);
 	if mirroredSettings then
 		for _, mirroredSettingInfo in ipairs(mirroredSettings) do
 			local systemFrame = self:GetRegisteredSystemFrame(mirroredSettingInfo.system, mirroredSettingInfo.systemIndex);
@@ -646,7 +646,7 @@ end
 
 function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:ClearSelectedSystem()
 	secureexecuterange(self.registeredSystemFrames, clearSelectedSystem);
-	EditModeSystemSettingsDialog:Hide();
+	--EditModeSystemSettingsDialog:Hide();
 end
 
 

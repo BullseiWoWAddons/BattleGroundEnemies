@@ -26,12 +26,71 @@ EditModeSystemSettingsDialog.AttachToSystemFrame = function(self, systemFrame)
 	local optionsPath = systemFrame:GetOptionsPath()
 	local pathString = table.concat(optionsPath, " ")
 	if pathString ~= currentSelection then
-		AceConfigDialog:SelectGroup(unpack( optionsPath))
+		AceConfigDialog:Open("BattleGroundEnemies")
+		AceConfigDialog:SelectGroup(unpack(optionsPath))
 		currentSelection = pathString
 	end
 end
 
 BattleGroundEnemies.Mixins.CustomEditModeSystemMixin = {};
+
+local data = {
+	["Interface/Editmode/EditModeUI"]={
+		["editmode-actionbar-highlight-nineslice-corner"]={16, 16, 0.03125, 0.53125, 0.285156, 0.347656, false, false, "1x"},
+		["_editmode-actionbar-highlight-nineslice-edgebottom"]={16, 16, 0, 0.5, 0.00390625, 0.0664062, true, false, "1x"},
+		["_editmode-actionbar-highlight-nineslice-edgetop"]={16, 16, 0, 0.5, 0.0742188, 0.136719, true, false, "1x"},
+		["editmode-actionbar-selected-nineslice-corner"]={16, 16, 0.03125, 0.53125, 0.355469, 0.417969, false, false, "1x"},
+		["_editmode-actionbar-selected-nineslice-edgebottom"]={16, 16, 0, 0.5, 0.144531, 0.207031, true, false, "1x"},
+		["_editmode-actionbar-selected-nineslice-edgetop"]={16, 16, 0, 0.5, 0.214844, 0.277344, true, false, "1x"},
+		["editmode-down-arrow"]={16, 11, 0.03125, 0.53125, 0.566406, 0.609375, false, false, "1x"},
+		["editmode-up-arrow"]={16, 11, 0.03125, 0.53125, 0.617188, 0.660156, false, false, "1x"},
+		["editmode-new-layout-plus-disabled"]={16, 16, 0.03125, 0.53125, 0.425781, 0.488281, false, false, "1x"},
+		["editmode-new-layout-plus"]={16, 16, 0.03125, 0.53125, 0.496094, 0.558594, false, false, "1x"},
+	  }, -- Interface/Editmode/EditModeUI
+	  ["Interface/Editmode/EditModeUIHighlightBackground"]={
+		["editmode-actionbar-highlight-nineslice-center"]={16, 16, 0, 1, 0, 1, true, true, "1x"},
+	  }, -- Interface/Editmode/EditModeUIHighlightBackground
+	  ["Interface/Editmode/EditModeUISelectedBackground"]={
+		["editmode-actionbar-selected-nineslice-center"]={16, 16, 0, 1, 0, 1, true, true, "1x"},
+	  }, -- Interface/Editmode/EditModeUISelectedBackground
+	  ["Interface/Editmode/EditModeUIVertical"]={
+		["!editmode-actionbar-highlight-nineslice-edgeleft"]={16, 16, 0.0078125, 0.132812, 0, 1, false, true, "1x"},
+		["!editmode-actionbar-highlight-nineslice-edgeright"]={16, 16, 0.148438, 0.273438, 0, 1, false, true, "1x"},
+		["!editmode-actionbar-selected-nineslice-edgeleft"]={16, 16, 0.289062, 0.414062, 0, 1, false, true, "1x"},
+		["!editmode-actionbar-selected-nineslice-edgeright"]={16, 16, 0.429688, 0.554688, 0, 1, false, true, "1x"},
+	}
+}
+
+local function GetAtlasDataAndFilepath(atlasname)
+	for filePath, fileAtlasses in pairs(data) do
+		for name,atlasData in pairs(fileAtlasses) do
+			if name == atlasname then return atlasData, filePath end
+		end
+	end
+end
+
+local function SetupTextureCoordinates(piece, setupInfo, pieceLayout, userLayout)
+	local left, top, _, bottom, right = piece:GetTexCoord()
+
+	local pieceMirrored = pieceLayout.mirrorLayout;
+	if pieceMirrored == nil then
+		pieceMirrored = userLayout and userLayout.mirrorLayout;
+	end
+
+	if pieceMirrored then
+		if setupInfo.mirrorVertical then
+			top, bottom = bottom, top;
+		end
+
+		if setupInfo.mirrorHorizontal then
+			left, right = right, left;
+		end
+	end
+
+	piece:SetHorizTile(setupInfo.tileHorizontal);
+	piece:SetVertTile(setupInfo.tileVertical);
+	piece:SetTexCoord(left, right, top, bottom);
+end
 
 local EditModeSystemSelectionLayout = EditModeSystemSelectionLayout or
 {
@@ -44,6 +103,23 @@ local EditModeSystemSelectionLayout = EditModeSystemSelectionLayout or
 	["LeftEdge"] = { atlas = "!%s-NineSlice-EdgeLeft" },
 	["RightEdge"] = { atlas = "!%s-NineSlice-EdgeRight" },
 	["Center"] = { atlas = "%s-NineSlice-Center", x = -8, y = 8, x1 = 8, y1 = -8, },
+	["setupPieceVisualsFunction"] = not (C_Texture and C_Texture.GetAtlasInfo("editmode-actionbar-selected-nineslice-corner")) and function(container, piece, setup, pieceLayout, textureKit, userLayout) 
+		local atlasname = string.format(pieceLayout.atlas, textureKit)
+		local atlasnameLowercase = atlasname:lower()
+		local atlasData, atlasFilePath = GetAtlasDataAndFilepath(atlasnameLowercase)
+		local splitted = {strsplit("/", atlasFilePath)}
+		local suffixPath = splitted[#splitted]
+		
+		--piece:SetHorizTile(atlasData and atlasData[7] or false);
+		--piece:SetVertTile(atlasData and atlasData[8] or false);
+	
+		piece:SetTexture([[Interface\AddOns\BattleGroundEnemies\Textures\Editmode\]]..suffixPath)
+		piece:SetSize(atlasData[1], atlasData[2])
+		piece:SetTexCoord(atlasData[3], atlasData[4], atlasData[5], atlasData[6])
+	
+		-- Change texture coordinates before applying atlas.
+		SetupTextureCoordinates(piece, setup, pieceLayout, userLayout);		
+	end
 };
 
 BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin = {};
@@ -58,8 +134,16 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnLoa
 	end
 end
 
+
+
+
+
+
 function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:ShowHighlighted()
 	NineSliceUtil.ApplyLayout(self, EditModeSystemSelectionLayout, self.highlightTextureKit);
+
+
+
 	self.isSelected = false;
 	self:UpdateLabelVisibility();
 	self:Show();
@@ -130,7 +214,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemLoad()
 	self.snappedFrames = {};
 	self.downKeys = {};
 
-	self.settingDisplayInfoMap = EditModeSettingDisplayInfoManager:GetSystemSettingDisplayInfoMap(self.system);
+	--self.settingDisplayInfoMap = EditModeSettingDisplayInfoManager:GetSystemSettingDisplayInfoMap(self.system);
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemHide()
@@ -853,7 +937,7 @@ end
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnEditModeExit()
 	self:ClearHighlight();
 	self:StopMovingOrSizing();
-	EditModeSystemSettingsDialog:Hide();
+	--EditModeSystemSettingsDialog:Hide();
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:CanBeMoved()
@@ -877,7 +961,7 @@ end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStop()
 	BattleGroundEnemies:Debug("OnDragStop", self:GetPoint(1))
-	
+
 	if self:CanBeMoved() then
 		BattleGroundEnemies.EditMode.EditModeManager:ClearSnapPreviewFrame();
 		self:StopMovingOrSizing();

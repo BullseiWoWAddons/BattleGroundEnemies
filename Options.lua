@@ -1502,6 +1502,14 @@ function BattleGroundEnemies:SetupOptions()
 						func = self.ToggleTestmode,
 						order = 2
 					},
+					Editmode_Enabled = {
+						type = "execute",
+						name = L.Editmode_Toggle,
+						desc = L.Editmode_Toggle_Desc,
+						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Editmode.Active)end,
+						func = self.ToggleEditmode,
+						order = 2
+					},
 					Testmode_ToggleAnimation = {
 						type = "execute",
 						name = L.Testmode_ToggleAnimation,
