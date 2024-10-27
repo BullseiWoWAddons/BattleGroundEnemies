@@ -35,11 +35,13 @@ Changelog.lua
 ImportExport.lua
 Mainframe.lua
 PlayerButton.lua
-EditModeMixins.lua
-EditModeUtil.lua
-EditModeManagerMixin.lua
-EditMode.lua
-ShrinkUntilTruncateFontStringMixin.lua
+
+Editmode\EditModeMixins.lua
+Editmode\EditModeUtil.lua
+Editmode\EditModeManagerMixin.lua
+Editmode\EditMode.lua
+Editmode\ShrinkUntilTruncateFontStringMixin.lua
+
 Modules\ContainerTemplate.lua
 Modules\Auras.lua
 Modules\CastBar.lua
@@ -57,6 +59,7 @@ Modules\Racial.lua
 Modules\RaidTargetIcon.lua
 Modules\Role.lua
 Modules\SpecAndClass.lua
+Modules\SpecClassProirity.lua
 Modules\TargetIndicatorNumeric.lua
 Modules\TargetIndicatorSymbolic.lua
 Modules\Trinket.lua
