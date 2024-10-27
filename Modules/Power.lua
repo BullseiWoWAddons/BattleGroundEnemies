@@ -24,8 +24,8 @@ local defaultSettings = {
 	Points = {
 		{
 			Point = "BOTTOMLEFT",
-			RelativeFrame = "Spec",
-			RelativePoint = "BOTTOMRIGHT",
+			RelativeFrame = "Button",
+			RelativePoint = "BOTTOMLEFT",
 		},
 		{
 			Point = "BOTTOMRIGHT",
