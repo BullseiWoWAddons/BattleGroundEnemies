@@ -158,6 +158,7 @@ globals = {
 	"CreateObjectPool",
 	"DebuffTypeColor",
 	"DoesTemplateExist",
+	"EditModeSystemSelectionLayout",
 	"EditModeSystemSelectionMixin",
 	"EditModeUtil",
 	"EJ_GetCreatureInfo",
