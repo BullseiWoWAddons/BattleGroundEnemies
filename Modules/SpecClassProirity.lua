@@ -21,6 +21,7 @@ local defaultSettings = {
 		DrawSwipe = true,
 		ShadowColor = {0, 0, 0, 1},
 	},
+    Width = 36,
 	ActivePoints = 1,
 	Points = {
 		{
@@ -66,18 +67,18 @@ local options = function(location)
 	}
 end
 
-local specClassPriorityOne = BattleGroundEnemies:NewButtonModule({
-	moduleName = "specClassPriorityOne",
-	localizedModuleName = L.specClassPriority,
+local SpecClassPriorityOne = BattleGroundEnemies:NewButtonModule({
+	moduleName = "SpecClassPriorityOne",
+	localizedModuleName = L.SpecClassPriorityOne,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"PlayerDetailsChanged", "ShouldQueryAuras", "CareAboutThisAura", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
+	events = {"PlayerDetailsChanged", "ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
 	enabledInThisExpansion = true
 })
 
-local specClassPriorityTwo = BattleGroundEnemies:NewButtonModule({
-	moduleName = "specClassPriorityTwo",
-	localizedModuleName = L.specClassPriority,
+local SpecClassPriorityTwo = BattleGroundEnemies:NewButtonModule({
+	moduleName = "SpecClassPriorityTwo",
+	localizedModuleName = L.SpecClassPriorityTwo,
 	defaultSettings = Mixin(defaultSettings, {
         Enabled= false,
         Points = {
@@ -89,21 +90,22 @@ local specClassPriorityTwo = BattleGroundEnemies:NewButtonModule({
         }
     }) ,
 	options = options,
-	events = {"PlayerDetailsChanged", "ShouldQueryAuras", "CareAboutThisAura", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
+	events = {"PlayerDetailsChanged", "ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
 	enabledInThisExpansion = true
 })
 
 
-local function attachToPlayerButton(playerButton, type)
+local function attachToPlayerButton(playerButton)
     local frame = CreateFrame("frame", nil, playerButton)
     frame.Background = frame:CreateTexture(nil, 'BACKGROUND')
 	frame.Background:SetAllPoints()
 	frame.Background:SetColorTexture(0,0,0,0.8)
 	frame.PriorityAuras = {}
 	frame.ActiveInterrupt = false
-	frame.Icon = frame:CreateTexture(nil, 'BACKGROUND')
-	frame.Icon:SetAllPoints()
-    frame.PriorityIcon = frame:CreateTexture(nil, 'BORDER')
+	frame.ShowsSpec = false
+	frame.SpecClassIcon = frame:CreateTexture(nil, 'BORDER', nil, 2)
+	frame.SpecClassIcon:SetAllPoints()
+    frame.PriorityIcon = frame:CreateTexture(nil, 'BORDER', nil, 3)
 	frame.PriorityIcon:SetAllPoints()
 	frame.Cooldown = BattleGroundEnemies.MyCreateCooldown(frame)
 	frame.Cooldown:SetScript("OnCooldownDone", function(self)
@@ -125,17 +127,20 @@ local function attachToPlayerButton(playerButton, type)
             else
                 local playerDetails = playerButton.PlayerDetails
                 if not playerDetails.PlayerClass then return end
+                local numClasses = GetNumClasses()
+                local localizedClass
+                for i = 1, numClasses do -- we could also just save the localized class name it into the button itself, but since its only used for this tooltip no need for that
+					local className, classFile, classID = GetClassInfo(i)
+					if classFile and classFile == playerDetails.PlayerClass then
+                        localizedClass = className
+					end
+				end
+                if not localizedClass then return end
 
                 if playerDetails.PlayerSpecName then
-                    GameTooltip:SetText(playerDetails.PlayerClass..": ".. playerDetails.PlayerSpecName)
+                    GameTooltip:SetText(localizedClass.." ".. playerDetails.PlayerSpecName)
                 else
-                    local numClasses = GetNumClasses()
-                    for i = 1, numClasses do -- we could also just save the localized class name it into the button itself, but since its only used for this tooltip no need for that
-                        local className, classFile, classID = GetClassInfo(i)
-                        if classFile and classFile == playerDetails.PlayerClass then
-                            return GameTooltip:SetText(className)
-                        end
-                    end
+                    return GameTooltip:SetText(localizedClass)
                 end
             end
 		end)
@@ -143,8 +148,7 @@ local function attachToPlayerButton(playerButton, type)
 
 
 	frame:SetScript("OnSizeChanged", function(self, width, height)
-		BattleGroundEnemies.CropImage(self.Icon, width, height)
-        BattleGroundEnemies.CropImage(self.PriorityIcon, width, height)
+        self:CropImage()
 	end)
 
 	frame:Hide()
@@ -196,6 +200,7 @@ local function attachToPlayerButton(playerButton, type)
 		else
 			frame.DisplayedAura = false
 			frame.PriorityIcon:Hide()
+			frame.Cooldown:Clear()
 		end
 	end
 
@@ -217,12 +222,8 @@ local function attachToPlayerButton(playerButton, type)
 		self:Update()
 	end
 
-	function frame:CareAboutThisAura(unitID, filter, aura)
-		return aura.Priority
-	end
-
 	function frame:ShouldQueryAuras(unitID, filter)
-		return self.config.showHighestPriority -- we care about all auras
+		return self.config.showHighestPriority 
 	end
 
 	function frame:BeforeFullAuraUpdate(filter)
@@ -234,6 +235,7 @@ local function attachToPlayerButton(playerButton, type)
 
 	function frame:NewAura(unitID, filter, aura)
 		if not aura.Priority then return end
+        if not self.config.showHighestPriority then return end
 
 		local ID = #self.PriorityAuras + 1
 
@@ -249,35 +251,47 @@ local function attachToPlayerButton(playerButton, type)
 	end
 
 	function frame:UnitDied()
-		self:Reset()
+		self:ResetPriorityData()
 	end
 
 	frame.PlayerDetailsChanged = function(self)
 		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
+		self.ShowsSpec = false
 
         local specData = playerButton:GetSpecData()
         if specData and self.config.showSpecIfExists then
-            self.Icon:SetTexture(specData.specIcon)
+            self.SpecClassIcon:SetTexture(specData.specIcon)
+			self.ShowsSpec = true
         else
             local coords = CLASS_ICON_TCOORDS[playerDetails.PlayerClass]
 			if playerDetails.PlayerClass and coords then
-				self.Icon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
-				self.Icon:SetTexCoord(unpack(coords))
+				self.SpecClassIcon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
+				self.SpecClassIcon:SetTexCoord(unpack(coords))
 			else
-				self.Icon:SetTexture(nil)
+				self.SpecClassIcon:SetTexture(nil)
 			end
         end
 		self:CropImage()
 	end
 
-	frame.ApplyAllSettings = function(self)
+    frame.CropImage = function(self)
+        local width = self:GetWidth()
+        local height = self:GetHeight()
+        if width and height and width > 0 and height > 0 then
+			if self.ShowsSpec then
+				BattleGroundEnemies.CropImage(self.SpecClassIcon, width, height)
+			end
+            BattleGroundEnemies.CropImage(self.PriorityIcon, width, height)
+        end
+    end
 
+	frame.ApplyAllSettings = function(self)
         local moduleSettings = self.config
 		self:Show()
 		self:PlayerDetailsChanged()
 		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, true, {0, 0, 0, 0.5})
-        if not self.config.showHighestPriority then
+        if not moduleSettings.showHighestPriority then
             self:ResetPriorityData()
         end
 		self:MakeSureWeAreOnTop()
@@ -285,13 +299,13 @@ local function attachToPlayerButton(playerButton, type)
 	return frame
 end
 
-function specClassPriorityOne:AttachToPlayerButton(playerButton)
-	playerButton.SpecClassPriorityOne = attachToPlayerButton(playerButton, "specClassPriorityOne")
+function SpecClassPriorityOne:AttachToPlayerButton(playerButton)
+	playerButton.SpecClassPriorityOne = attachToPlayerButton(playerButton)
 	return playerButton.SpecClassPriorityOne
 end
 
-function specClassPriorityTwo:AttachToPlayerButton(playerButton)
-	playerButton.SpecClassPriorityTwo = attachToPlayerButton(playerButton, "specClassPriorityTwo")
+function SpecClassPriorityTwo:AttachToPlayerButton(playerButton)
+	playerButton.SpecClassPriorityTwo = attachToPlayerButton(playerButton)
 	return playerButton.SpecClassPriorityTwo
 end
 
