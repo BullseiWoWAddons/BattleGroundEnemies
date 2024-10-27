@@ -238,13 +238,13 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateSystem
 			local scaleSystemFrame = systemFrame:GetEffectiveScale()
 			local originalSystemFrameLeft = systemFrame:GetLeft() * scaleSystemFrame;
 			local originalSystemFrameTop = systemFrame:GetTop() * scaleSystemFrame;
-			BattleGroundEnemies:Debug("3", originalSystemFrameLeft, originalSystemFrameTop)
+			--BattleGroundEnemies:Debug("3", originalSystemFrameLeft, originalSystemFrameTop)
 
 			local scaleRelativeTo = relativeTo:GetEffectiveScale()
 			local relativeLeft= relativeTo:GetLeft() * scaleRelativeTo
 			local relativeTop = relativeTo:GetTop()  * scaleRelativeTo
 
-			BattleGroundEnemies:Debug("4", relativeLeft, relativeTop)
+			--BattleGroundEnemies:Debug("4", relativeLeft, relativeTop)
 
 			point = "TOPLEFT"
 			relativePoint = "TOPLEFT"
@@ -256,7 +256,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateSystem
 			offsetY = (originalSystemFrameTop - relativeTop)
 
 			--offsetY = offsetY + originalSystemFrameTop - systemFrame:GetTop();
-			BattleGroundEnemies:Debug("5", point, relativeTo, relativePoint, offsetX, offsetY)
+			--BattleGroundEnemies:Debug("5", point, relativeTo, relativePoint, offsetX, offsetY)
 			--systemFrame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY);
 		end
 
@@ -267,7 +267,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateSystem
 
 		local newAnchorInfo = ConvertToAnchorInfo(point, relativeTo, relativePoint, offsetX, offsetY);
 		if not AreAnchorsEqual(systemInfo.anchorInfo, newAnchorInfo) then
-			BattleGroundEnemies:Debug("not equal")
+			--BattleGroundEnemies:Debug("not equal")
 			--DevTool:AddData(CopyTable(newAnchorInfo, true) , "newAnchorInfo")
 			--DevTool:AddData(CopyTable(systemInfo.anchorInfo, true) , "systemInfo.anchorInfo")
 
@@ -285,14 +285,14 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:UpdateSystem
 		-- Undo offset changes due to scale so we're always working as if we're at 1.0 scale
 		-- May not always have a second point so nil check first
 		if point ~= nil then
-			BattleGroundEnemies:Debug("hier drinl")
+			--BattleGroundEnemies:Debug("hier drinl")
 			offsetX = offsetX * frameScale;
 			offsetY = offsetY * frameScale;
 		end
 
 		newAnchorInfo = ConvertToAnchorInfo(point, relativeTo, relativePoint, offsetX, offsetY);
 		if not AreAnchorsEqual(systemInfo.anchorInfo2, newAnchorInfo) then
-			BattleGroundEnemies:Debug("anchorInfo2 not equal")
+			--BattleGroundEnemies:Debug("anchorInfo2 not equal")
 
 			CopyAnchorInfo(systemInfo.anchorInfo2, newAnchorInfo);
 			anchorInfoChanged = true;
@@ -315,7 +315,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeManagerFrameMixin:OnSystemPosi
 		--self:UpdateActionBarLayout(systemFrame);
 
 		if systemFrame.isBottomManagedFrame or systemFrame.isRightManagedFrame then
-			BattleGroundEnemies:Debug("systemFrame.isBottomManagedFrame or systemFrame.isRightManagedFrame")
+			--BattleGroundEnemies:Debug("systemFrame.isBottomManagedFrame or systemFrame.isRightManagedFrame")
 			UIParent_ManageFramePositions();
 		end
 

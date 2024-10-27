@@ -336,7 +336,7 @@ local function CreateMainFrame(playerType)
 
 		self.ActiveProfile:ApplyFontStringSettings(conf.PlayerCount.Text)
 
-		self.ActiveProfile:SetText(self:GetPlayerCountConfigNameLocalized(self.playerCountConfig))
+		self.ActiveProfile:SetText(L[self.PlayerType]..": ".. self:GetPlayerCountConfigNameLocalized(self.playerCountConfig))
 
 		self:SortPlayers(true) --force repositioning
 
@@ -657,7 +657,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:SetUpBindings()
-		BattleGroundEnemies:Debug("SetUpBindings", self.PlayerType)
+		--BattleGroundEnemies:Debug("SetUpBindings", self.PlayerType)
 		local maxPlayers = #self.CurrentPlayerOrder
 		self:SetAttribute("maxUnits", maxPlayers)
 		for j = 1, #self.CurrentPlayerOrder do

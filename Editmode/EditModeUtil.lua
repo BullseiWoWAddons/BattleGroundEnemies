@@ -171,20 +171,20 @@ function CustomEditModeMagnetismManager:GetMagneticFrameInfoTable(frame, point, 
 end
 
 function CustomEditModeMagnetismManager:CheckReplaceMagneticFrameInfo(currentMagneticFrameInfo, frame, point, relativePoint, distance, offset, isHorizontal)
-    BattleGroundEnemies:Debug("CheckReplaceMagneticFrameInfo", currentMagneticFrameInfo, frame, point, relativePoint, distance, offset, isHorizontal)
+    --BattleGroundEnemies:Debug("CheckReplaceMagneticFrameInfo", currentMagneticFrameInfo, frame, point, relativePoint, distance, offset, isHorizontal)
     local scaledDistance = distance * UIParent:GetEffectiveScale();
     if scaledDistance > self.magnetismRange then
-        BattleGroundEnemies:Debug("bla 1", frame, point, relativePoint, distance, offset, isHorizontal)
+        --BattleGroundEnemies:Debug("bla 1", frame, point, relativePoint, distance, offset, isHorizontal)
 
         return currentMagneticFrameInfo;
     end
 
     if not currentMagneticFrameInfo or scaledDistance < currentMagneticFrameInfo.distance then
-        BattleGroundEnemies:Debug("bla 2", frame, point, relativePoint, distance, offset, isHorizontal)
+        --BattleGroundEnemies:Debug("bla 2", frame, point, relativePoint, distance, offset, isHorizontal)
 
         return self:GetMagneticFrameInfoTable(frame, point, relativePoint, scaledDistance, offset, isHorizontal);
     else
-        BattleGroundEnemies:Debug("bla 3", frame, point, relativePoint, distance, offset, isHorizontal)
+        --BattleGroundEnemies:Debug("bla 3", frame, point, relativePoint, distance, offset, isHorizontal)
 
         return currentMagneticFrameInfo;
     end
@@ -364,12 +364,12 @@ function CustomEditModeMagnetismManager:GetMagneticFrameInfoOptions(systemFrame)
     
         local frameLeft, frameRight = frame:GetScaledSelectionSides();
         if frame:IsToTheLeftOfFrame(systemFrame) then
-            BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsToTheLeftOfFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
+            --BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsToTheLeftOfFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
             distance = systemFrameLeft - frameRight;
             point = "LEFT";
             relativePoint = "RIGHT";
         else 
-            BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsToTheRightOfFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
+            --BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsToTheRightOfFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
 
             distance = frameLeft - systemFrameRight;
             point = "RIGHT";
@@ -397,13 +397,13 @@ function CustomEditModeMagnetismManager:GetMagneticFrameInfoOptions(systemFrame)
         local _, _, frameBottom, frameTop = frame:GetScaledSelectionSides();
 
         if frame:IsAboveFrame(systemFrame) then
-            BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsAboveFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
+            --BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsAboveFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
 
             distance = frameBottom - systemFrameTop;
             point = "TOP";
             relativePoint = "BOTTOM";
         else
-            BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsUnderFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
+            --BattleGroundEnemies:Debug(frame.playerButton.PlayerDetails.PlayerName, frame.system, "IsUnderFrame", systemFrame.playerButton.PlayerDetails.PlayerName, systemFrame.system)
 
             distance = systemFrameBottom - frameTop;
             point = "BOTTOM";

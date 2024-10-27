@@ -625,9 +625,9 @@ end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:IsToTheLeftOfFrame(systemFrame)
 	local myLeft, myRight, myBottom, myTop = self:GetScaledSelectionSides();
-	BattleGroundEnemies:Debug("myLeft, myRight, myBottom, myTop", myLeft, myRight, myBottom, myTop)
+	--BattleGroundEnemies:Debug("myLeft, myRight, myBottom, myTop", myLeft, myRight, myBottom, myTop)
 	local systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop = systemFrame:GetScaledSelectionSides();
-	BattleGroundEnemies:Debug("systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop", systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop)
+	--BattleGroundEnemies:Debug("systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop", systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop)
 
 	return myRight < systemFrameLeft;
 end
@@ -651,7 +651,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:IsBelowFrame(syste
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:IsVerticallyAlignedWithFrame(systemFrame)
-	BattleGroundEnemies:Debug("IsVerticallyAlignedWithFrame", systemFrame.system, systemFrame.playerButton.PlayerDetails.PlayerName)
+	--BattleGroundEnemies:Debug("IsVerticallyAlignedWithFrame", systemFrame.system, systemFrame.playerButton.PlayerDetails.PlayerName)
 	local myLeft, myRight, myBottom, myTop = self:GetScaledSelectionSides();
 	local systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop = systemFrame:GetScaledSelectionSides();
 	return (myTop >= systemFrameBottom) and (myBottom <= systemFrameTop);
@@ -679,7 +679,7 @@ end
 
 -- Returns selection frame sides, adjusted for scale: left, right, bottom, top
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetScaledSelectionSides()
-	BattleGroundEnemies:Debug("GetScaledSelectionSides, self", self.system, self.playerButton.PlayerDetails.PlayerName)
+	--BattleGroundEnemies:Debug("GetScaledSelectionSides, self", self.system, self.playerButton.PlayerDetails.PlayerName)
 	local left, bottom, width, height = self.Selection:GetRect();
 	local scale = self:GetScale();
 	return left * scale, (left + width) * scale, bottom * scale, (bottom + height) * scale;
@@ -874,7 +874,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetFrameMagneticEl
 
 	-- Can't magnetize to a different button
 	if self.playerButton ~= systemFrame.playerButton then
-		BattleGroundEnemies:Debug("not eligible", self.playerButton.PlayerDetails.PlayerName, systemFrame.playerButton.PlayerDetails.PlayerName)
+		--BattleGroundEnemies:Debug("not eligible", self.playerButton.PlayerDetails.PlayerName, systemFrame.playerButton.PlayerDetails.PlayerName)
 		return nil;
 	end
 
@@ -962,16 +962,16 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStart()
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStop()
-	BattleGroundEnemies:Debug("OnDragStop", self.system, self.playerButton.PlayerDetails.PlayerName, self:GetPoint(1))
+	--BattleGroundEnemies:Debug("OnDragStop", self.system, self.playerButton.PlayerDetails.PlayerName, self:GetPoint(1))
 
 	if self:CanBeMoved() then
 		BattleGroundEnemies.EditMode.EditModeManager:ClearSnapPreviewFrame();
 		self:StopMovingOrSizing();
-		BattleGroundEnemies:Debug("StopMovingOrSizing", self:GetPoint(1))
+		--BattleGroundEnemies:Debug("StopMovingOrSizing", self:GetPoint(1))
 		self.isDragging = false;
 
 		if BattleGroundEnemies.EditMode.EditModeManager:IsSnapEnabled() then
-			BattleGroundEnemies:Debug("1")
+			--BattleGroundEnemies:Debug("1")
 			BattleGroundEnemies.CustomEditModeMagnetismManager:ApplyMagnetism(self);  --meses up when trieying to align under the button
 		end
 		-- messes up frame at the bottom above actionbar 

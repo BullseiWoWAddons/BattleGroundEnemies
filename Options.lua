@@ -1491,6 +1491,9 @@ function BattleGroundEnemies:SetupOptions()
 							if self.Testmode.Active then
 								self:CreateFakePlayers()
 							end
+							if self.Editmode.Active then
+								BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
+							end
 						end,
 						order = 1
 					},
@@ -1498,7 +1501,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "execute",
 						name = L.Testmode_Toggle,
 						desc = L.Testmode_Toggle_Desc,
-						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Testmode.Active)end,
+						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Testmode.Active) or self.Editmode.Active end,
 						func = self.ToggleTestmode,
 						order = 2
 					},
@@ -1555,6 +1558,12 @@ function BattleGroundEnemies:SetupOptions()
 						name = MISCELLANEOUS,
 						order = 4,
 						args = {
+							EnableMouseWheelPlayerTargeting = {
+								type = "toggle",
+								name = L.EnableMouseWheelPlayerTargeting,
+								desc = L.EnableMouseWheelPlayerTargeting_Desc,
+								order = 1
+							},
 							ShowTooltips = {
 								type = "toggle",
 								name = L.ShowTooltips,
@@ -1658,7 +1667,8 @@ function BattleGroundEnemies:SetupOptions()
 										order = 2
 									}
 								}
-							}
+							},
+						
 						}
 					},
 					DataSettings = {
