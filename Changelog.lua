@@ -17,13 +17,15 @@ Data.changelog = {
 					"added Deephaul Crystal to bg buffs", 
 					"Added global module settings for DR tracker, you can now specify a specific icon to show up for each dr category. You can find this new setting at General > Modules",
 					"Added a feature requested by RealJig at GitHub: You can now select to automatically hide the default Blizzard raid frames in a bg. You can find this settings at General > Miscellaneous",
-					"Added the possibility to create individual subprofiles for player counts, this enables you finer control over positioning of your frames."
+					"Added the possibility to create individual subprofiles for player counts, this enables you finer control over positioning of your frames.",
+					"You can now specify a player count from 1 to 40 for the testmode"
 				}
 			},
 			{
 				Header = "Changes:",
 				Entries = {
-					"Reworked the way the modules for spec and class and priority aura/interrupt work. They are now merged into one module to make it compatible with the new editmode. There are now two of this new modules, this will allow you to still see the class or spec of a player even if an aura is active, second module is disabled by default."
+					"Reworked the way the modules for spec and class and priority aura/interrupt work. They are now merged into one module to make it compatible with the new editmode. There are now two of this new modules, this will allow you to still see the class or spec of a player even if an aura is active, second module is disabled by default.",
+					"Set respawn time to 15 seconds for solo rated battlegrounds."
 				}
 			},
 			{
