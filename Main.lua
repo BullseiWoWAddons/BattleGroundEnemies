@@ -77,11 +77,11 @@ if HasSpeccs then
 end
 
 -- binding definitions
-BINDING_HEADER_CYCLEARENA = "BattleGroundEnemies"
-_G["BINDING_NAME_CLICK CYCLEALLIES:LeftButton"] = "Target Next Ally"
-_G["BINDING_NAME_CLICK CYCLEALLIES:RightButton"] = "Target Previous Ally"
-_G["BINDING_NAME_CLICK CYCLEEnemies:LeftButton"] = "Target Next Enemy"
-_G["BINDING_NAME_CLICK CYCLEEnemies:RightButton"] = "Target Previous Enemy"
+--BINDING_HEADER_BATTLEGROUNDENEMIES = "BattleGroundEnemies"
+_G["BINDING_NAME_CLICK BGEAllies:Button4"] = "Target Next Ally"
+_G["BINDING_NAME_CLICK BGEAllies:Button5"] = "Target Previous Ally"
+_G["BINDING_NAME_CLICK BGEEnemies:Button4"] = "Target Next Enemy"
+_G["BINDING_NAME_CLICK BGEEnemies:Button5"] = "Target Previous Enemy"
 
 
 if not GetUnitName then
@@ -154,6 +154,9 @@ BattleGroundEnemies.Testmode = {
 	FakePlayerAuras = {}, --key = playerbutton, value = {}
 	FakePlayerDRs = {},   --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}
 	FakeRaidTargetIcons = {} --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}}
+}
+BattleGroundEnemies.Editmode = {
+	Active = false
 }
 
 BattleGroundEnemies.IsRatedBG = false
@@ -658,6 +661,28 @@ function BattleGroundEnemies.ToggleTestmode()
 	else                                     --enable Testmode
 		BattleGroundEnemies:EnableTestMode()
 	end
+end
+
+function BattleGroundEnemies.ToggleEditmode()
+	if BattleGroundEnemies.Editmode.Active then --disable testmode
+		BattleGroundEnemies:DisableEditmode()
+	else                                     --enable Testmode
+		BattleGroundEnemies:EnableEditmode()
+	end
+end
+
+function BattleGroundEnemies:EnableEditmode()
+	self.Editmode.Active = true
+	self:EnableTestMode()
+	BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
+	self:Information(L.EditmodeEnabled)
+end
+
+function BattleGroundEnemies:DisableEditmode()
+	self.Editmode.Active = false
+	self:DisableTestMode()
+	BattleGroundEnemies.EditMode.EditModeManager:CloseEditmode()
+	self:Information(L.EditmodeDisabled)
 end
 
 function BattleGroundEnemies:DisableTestMode()

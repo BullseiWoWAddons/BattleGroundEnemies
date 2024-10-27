@@ -26,6 +26,8 @@ local allieDefaults15man = {
 			FontColor = {1, 1, 1, 1},
 			EnableShadow = false,
 			ShadowColor = {0, 0, 0, 1},
+			JustifyV = "MIDDLE",
+			JustifyH = "LEFT"
 		}
 	},
 
@@ -180,6 +182,8 @@ local enemyDefault15man = {
 			FontColor = {1, 1, 1, 1},
 			EnableShadow = false,
 			ShadowColor = {0, 0, 0, 1},
+			JustifyV = "MIDDLE",
+			JustifyH = "LEFT"
 		}
 	},
 
@@ -387,6 +391,8 @@ Data.defaultSettings = {
 							FontColor = {1, 1, 1, 1},
 							EnableShadow = false,
 							ShadowColor = {0, 0, 0, 1},
+							JustifyV = "MIDDLE",
+							JustifyH = "LEFT"
 						}
 					},
 					ButtonModules = {
@@ -574,9 +580,10 @@ Data.defaultSettings = {
 							FontColor = {1, 1, 1, 1},
 							EnableShadow = false,
 							ShadowColor = {0, 0, 0, 1},
+							JustifyV = "MIDDLE",
+							JustifyH = "LEFT"
 						}
 					},
-
 					ButtonModules = {
 						CastBar = {
 							Enabled = false,
@@ -751,6 +758,8 @@ Data.defaultSettings = {
 							FontColor = {1, 1, 1, 1},
 							EnableShadow = false,
 							ShadowColor = {0, 0, 0, 1},
+							JustifyV = "MIDDLE",
+							JustifyH = "LEFT"
 						}
 					},
 					ButtonModules = {
@@ -938,9 +947,10 @@ Data.defaultSettings = {
 							FontColor = {1, 1, 1, 1},
 							EnableShadow = false,
 							ShadowColor = {0, 0, 0, 1},
+							JustifyV = "MIDDLE",
+							JustifyH = "LEFT"
 						}
 					},
-
 					ButtonModules = {
 						CastBar = {
 							Enabled = false,

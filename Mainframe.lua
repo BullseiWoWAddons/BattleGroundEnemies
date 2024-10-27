@@ -40,11 +40,57 @@ local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 
-
-
-
 local function CreateMainFrame(playerType)
-	local mainframe = CreateFrame("Frame", nil, BattleGroundEnemies)
+
+
+	--binding voodoo
+	-- how it works:
+	-- SecureHandlerEnterLeaveTemplate is necessary to add the secure onenter and onleave event handlers
+	-- the handler then sets the wheeldown and wheelup binding to execute a button click using the global button names
+	-- when mouswheel is scrolled up or down it triggers a button click and runs the onclick kook from SecureHandlerWrapScript gets execute, which then sets the macrotext
+
+	local mainframe = CreateFrame("Button","BGE"..playerType,BattleGroundEnemies,"SecureActionButtonTemplate, SecureHandlerEnterLeaveTemplate")
+	mainframe:EnableMouseWheel(true)
+	mainframe:SetAttribute("type4", "macro")
+	mainframe:SetAttribute("type5", "macro")
+	mainframe:RegisterForClicks(GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp")
+
+	SecureHandlerWrapScript(mainframe,"OnClick",mainframe,[[
+
+		local maxUnits = self:GetAttribute("maxUnits")
+		local playerIndex = self:GetAttribute("playerIndex")
+		local nextPlayerIndex
+
+		if button == "Button4" then
+			nextPlayerIndex = playerIndex -1
+			if nextPlayerIndex <1 then
+				nextPlayerIndex = maxUnits
+			end
+		else
+			nextPlayerIndex = playerIndex + 1
+			if nextPlayerIndex >maxUnits then
+				nextPlayerIndex = 1
+			end	
+		end
+
+		local nextTargetName = self:GetAttribute("playerName"..nextPlayerIndex)
+
+		self:SetAttribute("macrotext",'/cleartarget\n' ..
+				'/targetexact ' ..
+				nextTargetName)
+		self:SetAttribute("playerIndex", nextPlayerIndex)
+	]])
+
+
+	--SecureHandlerEnterLeaveTemplate ads _onenter and _onleave functionality
+	mainframe:SetAttribute("_onenter",[[
+		self:SetBindingClick(true, "MOUSEWHEELUP",self:GetName(), "Button4")
+		self:SetBindingClick(true, "MOUSEWHEELDOWN",self:GetName(), "Button5")
+	]])
+	-- onleave, clear override binding
+	mainframe:SetAttribute("_onleave",[[
+		self:ClearBindings()
+	]])
 	mainframe.Players = {}            --index = name, value = button(table), contains enemyButtons
 	mainframe.CurrentPlayerOrder = {} --index = number, value = playerButton(table)
 	mainframe.InactivePlayerButtons = {} --index = number, value = button(table)
@@ -296,6 +342,10 @@ local function CreateMainFrame(playerType)
 
 		self.PlayerCount:ApplyFontStringSettings(conf.PlayerCount.Text)
 
+		self.ActiveProfile:ApplyFontStringSettings(conf.PlayerCount.Text)
+
+		self.ActiveProfile:SetText(self:GetPlayerCountConfigNameLocalized(self.playerCountConfig))
+
 		self:SortPlayers(true) --force repositioning
 
 		for name, playerButton in pairs(self.Players) do
@@ -501,7 +551,7 @@ local function CreateMainFrame(playerType)
 			self.buttonCounter = (self.buttonCounter or 0) + 1
 			playerButton = BattleGroundEnemies:CreatePlayerButton(self, self.buttonCounter)
 		end
- 
+
 
 		playerButton.PlayerDetails = playerDetails
 		-- BattleGroundEnemies:LogToSavedVariables("PlayerDetailsChanged")
@@ -578,6 +628,54 @@ local function CreateMainFrame(playerType)
 		self:SortPlayers()
 	end
 
+	function mainframe:GetPrevioiusPlayer()
+		local currentTarget = BattleGroundEnemies.currentTarget
+
+		local currentTargetIndex
+		for i = 1, #self.CurrentPlayerOrder do
+			local player = self.CurrentPlayerOrder[i]
+			if player == currentTarget then
+				currentTargetIndex = i
+				break
+			end
+		end
+		local newTargetIndex = (currentTargetIndex or 0) -1
+		if newTargetIndex < 1 then
+			newTargetIndex = #self.CurrentPlayerOrder
+		end
+		return newTargetIndex, self.CurrentPlayerOrder[newTargetIndex]
+	end
+
+	function mainframe:GetNextPlayer()
+		local currentTarget = BattleGroundEnemies.currentTarget
+
+		local currentTargetIndex
+		for i = 1, #self.CurrentPlayerOrder do
+			local player = self.CurrentPlayerOrder[i]
+			if player == currentTarget then
+				currentTargetIndex = i
+				break
+			end
+		end
+		local newTargetIndex = (currentTargetIndex or 0) + 1
+		if newTargetIndex >#self.CurrentPlayerOrder then
+			newTargetIndex = 0
+		end
+		return newTargetIndex, self.CurrentPlayerOrder[newTargetIndex]
+	end
+
+	function mainframe:SetUpBindings()
+		BattleGroundEnemies:Debug("SetUpBindings", self.PlayerType)
+		local maxPlayers = #self.CurrentPlayerOrder
+		self:SetAttribute("maxUnits", maxPlayers)
+		for j = 1, #self.CurrentPlayerOrder do
+			self:SetAttribute("playerName"..j, self.CurrentPlayerOrder[j].PlayerDetails.PlayerName)
+		end
+
+		self:SetAttribute("playerIndex",1)
+		--button:SetAttribute("type1", "macro")
+	end
+
 	function mainframe:ButtonPositioning()
 		local orderedPlayers = self.CurrentPlayerOrder
 
@@ -611,11 +709,11 @@ local function CreateMainFrame(playerType)
 
 		if growDownwards then
 			pointY = "TOP"
-			relPointY = "BOTTOM"
+			relPointY = "TOP"
 			offsetDirectionY = -1
 		else
 			pointY = "BOTTOM"
-			relPointY = "TOP"
+			relPointY = "BOTTOM"
 			offsetDirectionY = 1
 		end
 
@@ -656,6 +754,12 @@ local function CreateMainFrame(playerType)
 				end
 			end
 		end
+		if playerCount > 0 then
+			local lastButton = orderedPlayers[playerCount]
+			local bottom = lastButton:GetBottom()
+			self:SetSize(barWidth, self:GetTop() - bottom)
+		end
+
 	end
 
 	function mainframe:BeforePlayerUpdate()
@@ -867,6 +971,7 @@ local function CreateMainFrame(playerType)
 				end
 				self.CurrentPlayerOrder = newPlayerOrder
 				self:ButtonPositioning()
+				self:SetUpBindings()
 			end
 		end
 	end
@@ -879,8 +984,18 @@ local function CreateMainFrame(playerType)
 	mainframe:SetToplevel(true)
 
 	mainframe.PlayerCount = BattleGroundEnemies.MyCreateFontString(mainframe)
-	mainframe.PlayerCount:SetAllPoints()
+	mainframe.PlayerCount:SetPoint("BOTTOMLEFT", mainframe, "TOPLEFT")
+	mainframe.PlayerCount:SetPoint("BOTTOMRIGHT", mainframe, "TOPRIGHT")
+	mainframe.PlayerCount:SetHeight(30)
 	mainframe.PlayerCount:SetJustifyH("LEFT")
+	mainframe.PlayerCount:SetJustifyV("MIDDLE")
+
+	mainframe.ActiveProfile = BattleGroundEnemies.MyCreateFontString(mainframe)
+	mainframe.ActiveProfile:SetPoint("TOPLEFT", mainframe, "BOTTOMLEFT")
+	mainframe.ActiveProfile:SetPoint("TOPRIGHT", mainframe, "BOTTOMRIGHT")
+	mainframe.ActiveProfile:SetHeight(30)
+	mainframe.ActiveProfile:SetJustifyH("LEFT")
+	mainframe.ActiveProfile:SetJustifyV("MIDDLE")
 
     return mainframe
 end

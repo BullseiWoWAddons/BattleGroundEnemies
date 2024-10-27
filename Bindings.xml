@@ -1,6 +1,6 @@
 <Bindings>
-	<Binding name="CLICK BGECycleAllies:LeftButton" header="BATTLEGROUNDENEMIES" category="ADDONS"/>
-	<Binding name="CLICK BGECycleAllies:RightButton" category="ADDONS"/>
-	<Binding name="CLICK BGECycleEnemies:LeftButton" category="ADDONS"/>
-	<Binding name="CLICK BGECycleEnemies:RightButton" category="ADDONS"/>
+    <Binding name="CLICK BGEAllies:Button4" header="BattleGroundEnemies" category="BattleGroundEnemies"/>
+    <Binding name="CLICK BGEAllies:Button5" category="BattleGroundEnemies"/>
+    <Binding name="CLICK BGEEnemies:Button4" category="BattleGroundEnemies"/>
+    <Binding name="CLICK BGEEnemies:Button5" category="BattleGroundEnemies"/>
 </Bindings>
