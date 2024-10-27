@@ -29,7 +29,8 @@ Data.changelog = {
 			{
 				Header = "Bugfix",
 				Entries = {
-					"Fixed an error reported by Addonman on GitHub"
+					"Fixed an error reported by Addonman on GitHub",
+					"Fixed DrTracker cooldown"
 				}
 			}
 		}

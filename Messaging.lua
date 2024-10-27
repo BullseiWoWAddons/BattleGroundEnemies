@@ -16,7 +16,7 @@ local GetTime = GetTime
 local max = math.max
 
 
-local BGE_VERSION = "11.0.2.4"
+local BGE_VERSION = "11.0.5.0"
 local AddonPrefix = "BGE"
 local versionQueryString, versionResponseString = "Q^%s^%i", "V^%s^%i"
 local profileQueryString, profileResponseString = "PQ^%s", "PR^%s"
