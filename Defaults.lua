@@ -145,7 +145,7 @@ local allieDefaults15man = {
 			Points = {
 				{
 					Point = "TOPRIGHT",
-					RelativeFrame = "Spec",
+					RelativeFrame = "SpecClassPriorityOne",
 					RelativePoint = "TOPLEFT",
 					OffsetX = -1
 				}
@@ -193,9 +193,9 @@ local enemyDefault15man = {
 			Points = {
 				{
 					Point = "RIGHT",
-					RelativeFrame = "Spec",
+					RelativeFrame = "SpecClassPriorityOne",
 					RelativePoint = "LEFT",
-					OffsetX = -3
+					OffsetX = -28
 				},
 			}
 		},
@@ -337,6 +337,7 @@ Data.defaultSettings = {
 		MyFocus_Color = {0, 0.988235294117647, 0.729411764705882, 1},
 		MyFocus_BorderSize = 2,
 		ShowTooltips = true,
+		EnableMouseWheelPlayerTargeting = true,
 		UseBigDebuffsPriority = true,
 		ConvertCyrillic = true,
 
@@ -399,14 +400,20 @@ Data.defaultSettings = {
 						Class = {
 							Width = 52,
 						},
+						Spec = {
+							Width = 52,
+						},
+						SpecClassPriorityOne = {
+							Width = 52
+						},
 						CastBar = {
 							Enabled = true,
 							Points = {
 								{
 									Point = "RIGHT",
-									RelativeFrame = "Spec",
+									RelativeFrame = "SpecClassPriorityOne",
 									RelativePoint = "LEFT",
-									OffsetX = -3
+									OffsetX = -28
 								}
 							}
 						},
@@ -590,9 +597,9 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "RIGHT",
-									RelativeFrame = "Spec",
+									RelativeFrame = "SpecClassPriorityOne",
 									RelativePoint = "LEFT",
-									OffsetX = -3
+									OffsetX = -28
 								}
 							}
 						},
@@ -777,6 +784,12 @@ Data.defaultSettings = {
 						Class = {
 							Width = 52,
 						},
+						Spec = {
+							Width = 52,
+						},
+						SpecClassPriorityOne = {
+							Width = 52
+						},
 						Covenant = {
 							Enabled = false
 						},
@@ -908,7 +921,7 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "TOPRIGHT",
-									RelativeFrame = "Spec",
+									RelativeFrame = "SpecClassPriorityOne",
 									RelativePoint = "TOPLEFT",
 									OffsetX = -1
 								}
@@ -1064,7 +1077,7 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "TOPRIGHT",
-									RelativeFrame = "Spec",
+									RelativeFrame = "SpecClassPriorityOne",
 									RelativePoint = "TOPLEFT",
 									OffsetX = -1
 								}
