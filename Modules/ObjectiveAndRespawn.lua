@@ -85,7 +85,7 @@ local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.ObjectiveAndRespawnTimer,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeFullAuraUpdate", "NewAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},
+	events = {"ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
 })
@@ -181,21 +181,6 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 			return filter == "HARMFUL"
 		else
 			return false
-		end
-	end
-
-
-	function frame:CareAboutThisAura(unitID, filter, aura)
-		if BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then -- this player is shown on the arena frame and is carrying a flag, orb, etc..
-			local bgDebuffs = BattleGroundEnemies.BattleGroundDebuffs
-			if bgDebuffs then
-
-				for i = 1, #bgDebuffs do
-					if aura.spellId == bgDebuffs[i] then
-						return true
-					end
-				end
-			end
 		end
 	end
 

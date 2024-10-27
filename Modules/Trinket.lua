@@ -55,7 +55,7 @@ local trinket = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.Trinket,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"ShouldQueryAuras", "CareAboutThisAura", "NewAura", "SPELL_CAST_SUCCESS"},
+	events = {"ShouldQueryAuras", "NewAura", "SPELL_CAST_SUCCESS"},
 	enabledInThisExpansion = true
 })
 
@@ -130,15 +130,6 @@ function trinket:AttachToPlayerButton(playerButton)
 	function frame:ShouldQueryAuras(unitID, filter)
 		return filter == "HARMFUL"
 	end
-
-
-	function frame:CareAboutThisAura(unitID, filter, aura)
-		local spellId = aura.spellId
-		if spellId == 336139 then return true end
-
-		return not self.spellId and Data.cCdurationBySpellID[spellId]
-	end
-
 
 	function frame:NewAura(unitID, filter, aura)
 		if filter == "HELPFUL" then return end

@@ -343,7 +343,7 @@ local flags = {
 	HasDynamicSize = true
 }
 
-local events = {"ShouldQueryAuras", "CareAboutThisAura", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "UnitDied"}
+local events = {"ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "UnitDied"}
 
 local nonPriorityBuffs = BattleGroundEnemies:NewButtonModule({
 	moduleName = "NonPriorityBuffs",
