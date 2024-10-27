@@ -26,7 +26,7 @@ EditModeSystemSettingsDialog.AttachToSystemFrame = function(self, systemFrame)
 	local optionsPath = systemFrame:GetOptionsPath()
 	local pathString = table.concat(optionsPath, " ")
 	if pathString ~= currentSelection then
-		AceConfigDialog:Open("BattleGroundEnemies")
+		--AceConfigDialog:Open("BattleGroundEnemies")
 		AceConfigDialog:SelectGroup(unpack(optionsPath))
 		currentSelection = pathString
 	end
@@ -651,6 +651,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:IsBelowFrame(syste
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:IsVerticallyAlignedWithFrame(systemFrame)
+	BattleGroundEnemies:Debug("IsVerticallyAlignedWithFrame", systemFrame.system, systemFrame.playerButton.PlayerDetails.PlayerName)
 	local myLeft, myRight, myBottom, myTop = self:GetScaledSelectionSides();
 	local systemFrameLeft, systemFrameRight, systemFrameBottom, systemFrameTop = systemFrame:GetScaledSelectionSides();
 	return (myTop >= systemFrameBottom) and (myBottom <= systemFrameTop);
@@ -678,6 +679,7 @@ end
 
 -- Returns selection frame sides, adjusted for scale: left, right, bottom, top
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetScaledSelectionSides()
+	BattleGroundEnemies:Debug("GetScaledSelectionSides, self", self.system, self.playerButton.PlayerDetails.PlayerName)
 	local left, bottom, width, height = self.Selection:GetRect();
 	local scale = self:GetScale();
 	return left * scale, (left + width) * scale, bottom * scale, (bottom + height) * scale;
@@ -960,7 +962,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStart()
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStop()
-	BattleGroundEnemies:Debug("OnDragStop", self:GetPoint(1))
+	BattleGroundEnemies:Debug("OnDragStop", self.system, self.playerButton.PlayerDetails.PlayerName, self:GetPoint(1))
 
 	if self:CanBeMoved() then
 		BattleGroundEnemies.EditMode.EditModeManager:ClearSnapPreviewFrame();
