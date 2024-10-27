@@ -50,7 +50,6 @@ Modules\CombatIndicator.lua
 Modules\Covenant.lua
 Modules\DR.lua
 Modules\HealthBar.lua
-Modules\HighestActivePriority.lua
 Modules\Level.lua
 Modules\Name.lua
 Modules\ObjectiveAndRespawn.lua
@@ -58,7 +57,6 @@ Modules\Power.lua
 Modules\Racial.lua
 Modules\RaidTargetIcon.lua
 Modules\Role.lua
-Modules\SpecAndClass.lua
 Modules\SpecClassProirity.lua
 Modules\TargetIndicatorNumeric.lua
 Modules\TargetIndicatorSymbolic.lua
