@@ -216,7 +216,7 @@ local enemyDefault15man = {
 			Points = {
 				{
 					Point = "TOPRIGHT",
-					RelativeFrame = "Class",
+					RelativeFrame = "SpecClassPriorityOne",
 					RelativePoint = "TOPLEFT",
 					OffsetX = -2
 				}
@@ -397,12 +397,6 @@ Data.defaultSettings = {
 						}
 					},
 					ButtonModules = {
-						Class = {
-							Width = 52,
-						},
-						Spec = {
-							Width = 52,
-						},
 						SpecClassPriorityOne = {
 							Width = 52
 						},
@@ -620,7 +614,7 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "TOPRIGHT",
-									RelativeFrame = "Class",
+									RelativeFrame = "SpecClassPriorityOne",
 									RelativePoint = "TOPLEFT",
 									OffsetX= -2
 								}
@@ -780,12 +774,6 @@ Data.defaultSettings = {
 									OffsetX = 28,
 								},
 							},
-						},
-						Class = {
-							Width = 52,
-						},
-						Spec = {
-							Width = 52,
 						},
 						SpecClassPriorityOne = {
 							Width = 52
