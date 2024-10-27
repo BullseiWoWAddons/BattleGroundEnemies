@@ -226,7 +226,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 			if IsCataClassic then
 				respawmTime = 45
 			else
-				if C_PvP and C_PvP.IsSoloRBG() then
+				if C_PvP and C_PvP.IsSoloRBG and C_PvP.IsSoloRBG() then
 					respawmTime = 15
 				end
 			end
