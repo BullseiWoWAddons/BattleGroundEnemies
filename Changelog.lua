@@ -5,6 +5,36 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.0.5.0",
+		General = "New features and changes arrived",
+		Sections = {
+	
+			{
+				Header = "New Features:",
+				Entries = {
+					"Added an Editmode to the addon, it works similar to Blizzards Editmode so it enables you to drag and drop and snap frames to other frames. When you select a frame the options panel will jump to the setting of that particular module.",
+					"Added multiple keybind related features: By default you are now able to target the next or previous enemy or ally by scrolling over the allie or enemy frame. Also added a new keybinding settings to the blizzard keybinding section. You will now find BattleGroundEnemies there.",
+					"added Deephaul Crystal to bg buffs", 
+					"Added global module settings for DR tracker, you can now specify a specific icon to show up for each dr category. You can find this new setting at General > Modules",
+					"Added a feature requested by RealJig at GitHub: You can now select to automatically hide the default Blizzard raid frames in a bg. You can find this settings at General > Miscellaneous",
+					"Added the possibility to create individual subprofiles for player counts, this enables you finer control over positioning of your frames."
+				}
+			},
+			{
+				Header = "Changes:",
+				Entries = {
+					"Reworked the way the modules for spec and class and priority aura/interrupt work. They are now merged into one module to make it compatible with the new editmode. There are now two of this new modules, this will allow you to still see the class or spec of a player even if an aura is active, second module is disabled by default."
+				}
+			},
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed an error reported by Addonman on GitHub"
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.2.3",
 		General = "Update for The War Within",
 		Sections = {
