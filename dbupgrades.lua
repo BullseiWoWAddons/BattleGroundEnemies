@@ -69,6 +69,7 @@ function BattleGroundEnemies:UpgradeProfile(profile, profileName)
                     if oldSettings then
 
                         profile[playerType].playerCountConfigs = profile[playerType].playerCountConfigs or {}
+                        profile[playerType].playerCountConfigs[j] = profile[playerType].playerCountConfigs[j] or {}
 
                         oldSettings.minPlayerCount = minSizes[j]
                         oldSettings.maxPlayerCount = maxSizes[j]
