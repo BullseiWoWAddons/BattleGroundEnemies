@@ -1320,7 +1320,7 @@ function BattleGroundEnemies:OnetimeDebug(...)
 
 	local message = table.concat({ ... }, ", ")
 	if sentDebugMessages[message] then return end
-	
+
 	if not self.db then return end
 	if not self.db.profile then return end
 	if not self.db.profile.Debug then return end
@@ -1463,7 +1463,14 @@ end
 --CombatLogevents.SPELL_DISPEL = CombatLogevents.SPELL_AURA_REMOVED
 
 function CombatLogevents.SPELL_CAST_SUCCESS(self, srcGUID, srcName, destGUID, destName, spellId)
-	local playerButton = self:GetPlayerbuttonByGUID(srcGUID)
+	local playerButton
+	if srcGUID then
+		playerButton = self:GetPlayerbuttonByGUID(srcGUID)
+	else
+		if srcName then
+			playerButton = self:GetPlayerbuttonByName(srcName)
+		end
+	end
 	if playerButton and playerButton.isShown then
 		playerButton:DispatchEvent("SPELL_CAST_SUCCESS", srcGUID, srcName, destGUID, destName, spellId)
 
