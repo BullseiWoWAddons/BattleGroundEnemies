@@ -16,7 +16,7 @@ Data.changelog = {
 					"Added multiple keybind related features: By default you are now able to target the next or previous enemy or ally by scrolling over the allie or enemy frame. Also added a new keybinding settings to the blizzard keybinding section. You will now find BattleGroundEnemies there.",
 					"added Deephaul Crystal to bg buffs", 
 					"Added global module settings for DR tracker, you can now specify a specific icon to show up for each dr category. You can find this new setting at General > Modules",
-					"Added a feature requested by RealJig at GitHub: You can now select to automatically hide the default Blizzard raid frames in a bg. You can find this settings at General > Miscellaneous",
+					"Added a feature requested by RealJig at GitHub: You can now select to automatically hide the default Blizzard raid frames in a battleground. You can find this settings at General > Miscellaneous",
 					"Added the possibility to create individual subprofiles for player counts, this enables you finer control over positioning of your frames.",
 					"You can now specify a player count from 1 to 40 for the testmode",
 					"Added combat indicator to testmode"
