@@ -688,9 +688,9 @@ end
 function BattleGroundEnemies:DisableTestMode()
 	self.Testmode.Active = false
 	self.BattlegroundBuff = false
-	self.Allies:RemoveAllPlayersFromSource(self.consts.PlayerSources.FakePlayers)
-	self.Enemies:RemoveAllPlayersFromSource(self.consts.PlayerSources.FakePlayers)
 	FakePlayersOnUpdateFrame:Hide()
+	self.Allies:OnTestmodeDisabled()
+	self.Enemies:OnTestmodeDisabled()
 	self:Disable()
 	self:Information(L.TestmodeDisabled)
 end
@@ -852,6 +852,8 @@ do
 		self:Enable()
 
 		FakePlayersOnUpdateFrame:Show()
+		self.Allies:OnTestmodeEnabled()
+		self.Enemies:OnTestmodeEnabled()
 		self:Information(L.TestmodeEnabled)
 	end
 end
@@ -913,6 +915,9 @@ do
 							elseif n == 6 then
 								UpdateFakeRaidTargetIcons(playerButton)
 							end
+
+
+
 							UpdateFakeAuras(playerButton)
 						end
 						playerButton:UNIT_HEALTH()
@@ -920,6 +925,7 @@ do
 						if n == 6 then --toggle range
 							playerButton:UpdateRange(not playerButton.wasInRange)
 						end
+						playerButton:DispatchEvent("OnTestmodeTick")
 					end
 				end
 			end

@@ -102,6 +102,7 @@ local combatIndicator = BattleGroundEnemies:NewButtonModule({
 	moduleName = "CombatIndicator",
 	localizedModuleName = L.CombatIndicator,
 	defaultSettings = defaultSettings,
+	events = {"OnTestmodeEnabled", "OnTestmodeDisabled", "OnTestmodeTick"},
 	options = options,
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
@@ -213,10 +214,31 @@ function combatIndicator:AttachToPlayerButton(playerButton)
 	end
 
 	function playerButton.CombatIndicator:Disable()
+		self:DisableTicker()
+	end
+
+	function playerButton.CombatIndicator:DisableTicker()
 		if self.Ticker then
 			self.Ticker:Cancel()
 		end
 	end
+
+	function playerButton.CombatIndicator:OnTestmodeEnabled()
+		self.testmodeEnabled = true
+		self:DisableTicker()
+	end
+
+	function playerButton.CombatIndicator:OnTestmodeDisabled()
+		self.testmodeEnabled = false
+		self:Update(0)
+	end
+
+	function playerButton.CombatIndicator:OnTestmodeTick()
+		local newState = math.random(1,2)
+		self:Update(newState)
+	end
+
+
 
 	function playerButton.CombatIndicator:ApplyAllSettings()
 		self:CallFuncOnAllIconFrames(function(iconFrame)
@@ -228,7 +250,7 @@ function combatIndicator:AttachToPlayerButton(playerButton)
 		if self.Ticker then
 			self.Ticker:Cancel()
 		end
-		if self.config.UpdatePeriod then
+		if self.config.UpdatePeriod and not self.testmodeEnabled then
 			self.Ticker = CTimerNewTicker(self.config.UpdatePeriod, function()
 				self:Update()
 			end)

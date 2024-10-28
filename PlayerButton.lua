@@ -276,6 +276,26 @@ do
 		end
 	end
 
+	function buttonFunctions:CallExistingFuncOnAllButtonModuleFrames(funcName, ...)
+		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
+			local moduleFrameOnButton = self[moduleName]
+			if moduleFrameOnButton then
+				if moduleFrameOnButton and type(moduleFrameOnButton[funcName]) == "function" then
+					moduleFrameOnButton[funcName](moduleFrameOnButton, ...)
+				end
+ 			end
+		end
+	end
+
+	function buttonFunctions:CallFuncOnAllButtonModuleFrames(func)
+		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
+			local moduleFrameOnButton = self[moduleName]
+			if moduleFrameOnButton then
+				func(self, moduleFrameOnButton)
+ 			end
+		end
+	end
+
 	function buttonFunctions:SetModulePositions()
 		self:SetConfigShortCuts()
 		if not self:GetRect() then return end --the position of the button is not set yet

@@ -18,7 +18,8 @@ Data.changelog = {
 					"Added global module settings for DR tracker, you can now specify a specific icon to show up for each dr category. You can find this new setting at General > Modules",
 					"Added a feature requested by RealJig at GitHub: You can now select to automatically hide the default Blizzard raid frames in a bg. You can find this settings at General > Miscellaneous",
 					"Added the possibility to create individual subprofiles for player counts, this enables you finer control over positioning of your frames.",
-					"You can now specify a player count from 1 to 40 for the testmode"
+					"You can now specify a player count from 1 to 40 for the testmode",
+					"Added combat indicator to testmode"
 				}
 			},
 			{
@@ -32,7 +33,8 @@ Data.changelog = {
 				Header = "Bugfix",
 				Entries = {
 					"Fixed an error reported by Addonman on GitHub",
-					"Fixed DrTracker cooldown"
+					"Fixed DrTracker cooldown",
+					"Fixed racials and trinket in testmode"
 				}
 			}
 		}

@@ -279,6 +279,19 @@ local function CreateMainFrame(playerType)
 		self:CreateOrRemovePlayerButtons()
 	end
 
+	function mainframe:OnTestmodeEnabled()
+		for playerName, playerButton in pairs(self.Players) do
+			playerButton:DispatchEvent("OnTestmodeEnabled")
+		end
+	end
+
+	function mainframe:OnTestmodeDisabled()
+		for playerName, playerButton in pairs(self.Players) do
+			playerButton:DispatchEvent("OnTestmodeDisabled")
+		end
+		self:RemoveAllPlayersFromSource(BattleGroundEnemies.consts.PlayerSources.FakePlayers)
+	end
+
 	function mainframe:Enable()
 		--BattleGroundEnemies:LogToSavedVariables(self.PlayerType, "enabled")
 
@@ -677,15 +690,15 @@ local function CreateMainFrame(playerType)
 			mainframe:SetAttribute("_onleave",[[
 				self:ClearBindings()
 			]])
-		else	
+		else
 			mainframe:SetAttribute("_onenter",nil)
 			-- onleave, clear override binding
 			mainframe:SetAttribute("_onleave",nil)
 		end
 
-	
 
-		
+
+
 		--button:SetAttribute("type1", "macro")
 	end
 
