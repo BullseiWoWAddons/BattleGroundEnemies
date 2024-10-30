@@ -126,6 +126,12 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:AddPlayerToSource(source, playerT)
+		if not source.name then return end
+		if source.name == "" then return end
+
+		if not source.classTag then return end
+		if source.classTag == "" then return end
+
 		table_insert(self.PlayerSources[source], playerT)
 	end
 
