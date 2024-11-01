@@ -32,7 +32,7 @@ local defaultSettings = {
 
 }
 
-local options = function(location, playerType)
+local options = function(location)
 	return {
 		IconWidth = {
 			type = "range",
