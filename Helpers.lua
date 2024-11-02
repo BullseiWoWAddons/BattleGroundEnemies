@@ -5,6 +5,52 @@ local Data = select(2, ...)
 
 Data.Helpers =  {}
 
+
+
+--[[
+    Generates all permutations of the given input array.
+    
+    @param inputArr (table) The array for which permutations are to be generated.
+    @return (table) A table containing all permutations of the input array.
+    
+    Example usage:
+    local permutations = Data.Helpers.permgen({1, 2, 3})
+    -- permutations will be:
+    -- {
+    --     {1, 2, 3},
+    --     {1, 3, 2},
+    --     {2, 1, 3},
+    --     {2, 3, 1},
+    --     {3, 1, 2},
+    --     {3, 2, 1}
+    -- }
+]]
+Data.Helpers.permgen = function(inputArr)
+    local result = {}
+    
+    local function permute(arr, current)
+       if #arr == 0 then
+          table.insert(result, current)
+       else
+          for i = 1, #arr do
+             local newArr = {}
+             for j = 1, #arr do
+                if j ~= i then
+                   table.insert(newArr, arr[j])
+                end
+             end
+             local newCurrent = {unpack(current)}
+             table.insert(newCurrent, arr[i])
+             permute(newArr, newCurrent)
+          end
+       end
+    end
+    
+    permute(inputArr, {})
+    return result
+end
+
+
 ---comment
 ---@param rangeA table
 ---@param rangeB table

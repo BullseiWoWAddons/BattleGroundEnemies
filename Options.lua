@@ -24,6 +24,23 @@ local function GetAllModuleAnchors(moduleName)
 	return moduleAnchors
 end
 
+local function convertPermutations(permutations)
+    local result = {}
+
+    for _, perm in ipairs(permutations) do
+        local key = table.concat(perm, "_")
+        local values = {}
+
+        for _, role in ipairs(perm) do
+            table.insert(values, _G[role])
+        end
+
+        result[key] = values
+    end
+
+    return result
+end
+
 
 ---comment
 ---@param playerCountConfigs any
@@ -669,10 +686,79 @@ function Data.AddCooldownSettings(location)
 	}
 end
 
-function BattleGroundEnemies:AddModuleSettings(location, playerCountConfigDefault, playerType, condidtionFunc)
+--nice idea but it kinda sucks
+local function generateOverwritableOptions(location, options)
+	local newOptions = {}
+	for k,v in pairs(options) do
+		if v.type ~= "group" then
+			if v.name and v.name ~= " " then
+				local newK = "overWrite"..k
+				newOptions[newK] = {
+					type = "group",
+					name = "",
+					desc = L.overwrite_desc,
+					inline = true,
+					order = v.order or 1,
+					args = {}
+				}
+				newOptions[newK].args[newK] =  {
+					name = L.overwrite,
+					desc = L.overwrite_desc,
+					type = "toggle",
+					order = 1
+				}
+				print("k", k)
+				DevTools_Dump(v)
+				newOptions[newK].args[k] = v
+				newOptions[newK].args[k].order = 2
+				newOptions[newK].args[k].disabled = function()
+					return not location[newK]
+				end
+			end
+		else
+			newOptions[k] = v
+			newOptions[k].args = generateOverwritableOptions(location, v.args)
+		end
+	end
+	return newOptions
+end
+
+function BattleGroundEnemies:AddModuleSettings(location, options, moduleName)
+	local moduleOptions = type(options) == "function" and options(location) or options or {}
+	local args =  {
+		UsePlayerCountSpecificSettings = {
+			type = "toggle",
+			name = L.UsePlayerCountSpecificSettings,
+			desc = L.UsePlayerCountSpecificSettings_Desc,
+			width = "normal",
+			order = 3
+		},
+		ShowGeneralOptions = {
+			type = "execute",
+			name = L.UsePlayerCountSpecificSettings,
+			desc = L.UsePlayerCountSpecificSettings_Desc,
+			func = function()
+				local optionsPath = {"BattleGroundEnemies", "GeneralSettings", "ButtonModules", moduleName}
+				AceConfigDialog:SelectGroup(unpack(optionsPath))
+			end,
+			hidden  = function() return location.UsePlayerCountSpecificSettings end,
+			width = "normal",
+			order = 3
+		},
+		group = {
+			type = "group",
+			name = L.ModuleSpecificSettings,
+			hidden  = function() return not location.UsePlayerCountSpecificSettings end,
+			order = 4,
+			args = moduleOptions
+		}
+	}
+	return args
+end
+
+function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefault, playerType, condidtionFunc)
 	local temp = {}
 	for moduleName, moduleFrame in pairs(self.ButtonModules) do
-		
 
 		local locationn = location.ButtonModules[moduleName]
 
@@ -706,6 +792,7 @@ function BattleGroundEnemies:AddModuleSettings(location, playerCountConfigDefaul
 							return Data.SetOption(locationn, option, ...)
 						end,
 						disabled  = function() return not locationn.Enabled end,
+						hidden = moduleFrame.flags.FixedPosition,
 						order = 2,
 						args = Data.AddPositionSetting(locationn, moduleName, moduleFrame, playerType)
 					},
@@ -718,9 +805,9 @@ function BattleGroundEnemies:AddModuleSettings(location, playerCountConfigDefaul
 						set = function(option, ...)
 							return Data.SetOption(locationn, option, ...)
 						end,
-						disabled  = function() return not locationn.Enabled or not moduleFrame.options end,
-						order = 3,
-						args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn, playerType) or moduleFrame.options or {}
+						order = 4,
+						disabled = function() return not locationn.Enabled or not moduleFrame.options end,
+						args = BattleGroundEnemies:AddModuleSettings(locationn, moduleFrame.options, moduleName)
 					},
 					Reset = {
 						type = "execute",
@@ -731,13 +818,13 @@ function BattleGroundEnemies:AddModuleSettings(location, playerCountConfigDefaul
 							BattleGroundEnemies:NotifyChange()
 						end,
 						width = "full",
-						order = 4,
+						order = 5,
 					}
 				}
 			}
 		end
 
-		
+
 	end
 	return temp
 end
@@ -745,7 +832,7 @@ end
 function BattleGroundEnemies:AddGeneralModuleSettings()
 	local temp = {}
 	for moduleName, moduleFrame in pairs(self.ButtonModules) do
-		if moduleFrame.generalOptions then
+		if moduleFrame.options then
 			local locationn = BattleGroundEnemies.db.profile.ButtonModules[moduleName]
 			local defaults = BattleGroundEnemies.db.defaults.profile.ButtonModules[moduleName]
 
@@ -772,7 +859,7 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 							return Data.SetOption(locationn, option, ...)
 						end,
 						order = 3,
-						args = type(moduleFrame.generalOptions) == "function" and moduleFrame.generalOptions(locationn) or moduleFrame.generalOptions or {}
+						args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn) or moduleFrame.options or {}
 					},
 					Reset = {
 						type = "execute",
@@ -787,10 +874,10 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 					}
 				}
 			}
-			
+
 		end
 
-		
+
 	end
 	return temp
 end
@@ -1051,13 +1138,13 @@ local function addEnemyAndAllySettings(self, mainFrame)
 		table.insert(allPlayerCountConfigOptions, CHANNEL_CATEGORY_CUSTOM.." ".. L[playerType]..": ".. BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(customPlayerCountConfigs[k]))
 	end
 
-	
+
 
 
 	for i = 1, #thisPlayerCountConfigs do
 
 		local location = thisPlayerCountConfigs[i]
-	
+
 		local allConfigsWithoutCurrent = {}
 		local allPlayerCountConfigOptionsWithoutCurrent = {}
 		for j = 1, #allConfigs do
@@ -1368,11 +1455,11 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					type = "group",
 					name = L.ModuleSettings,
 					order = 8,
-					args = self:AddModuleSettings(location, playerCountConfigDefault, playerType, function(options) return not options.attachSettingsToButton end)
+					args = self:AddModulesSettings(location, playerCountConfigDefault, playerType, function(options) return not options.attachSettingsToButton end)
 				}
 			}
 		}
-		settings[BattleGroundEnemies[playerType]:GetPlayerCountConfigName(location)].args.ButtonSettings.args = self:AddModuleSettings(location, playerCountConfigDefault, playerType, function(options) return options.attachSettingsToButton end)
+		Mixin(settings[BattleGroundEnemies[playerType]:GetPlayerCountConfigName(location)].args.ButtonSettings.args, self:AddModulesSettings(location, playerCountConfigDefault, playerType, function(options) return options.attachSettingsToButton end))
 	end
 
 	local inputs = {
@@ -1585,7 +1672,29 @@ function BattleGroundEnemies:SetupOptions()
 								values = AceGUIWidgetLSMlists.font,
 								order = 5
 							},
-							
+							RoleSortingOrder = {
+								type = "select",
+								name = L.RoleSortingOrder,
+								desc = L.RoleSortingOrder_Desc,
+								values = function ()
+									local roles = Data.PlayerRoles
+									local allRolePermutations = Data.Helpers.permgen(roles)
+
+									local result = {}
+									for _, perm in ipairs(allRolePermutations) do
+										local key = table.concat(perm, "_")
+										local values = {}
+
+										for _, role in ipairs(perm) do
+											table.insert(values, _G[role])
+										end
+										result[key] = table.concat(values, " > ")
+									end
+
+									return result
+								end,
+								width = "double",
+							},
 							HideArenaframesIn = {
 								type = "group",
 								name = L.HideArenaframesIn,
@@ -1668,7 +1777,7 @@ function BattleGroundEnemies:SetupOptions()
 									}
 								}
 							},
-						
+
 						}
 					},
 					DataSettings = {

@@ -22,6 +22,8 @@ local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 
+Data.PlayerRoles = {"TANK", "HEALER", "DAMAGER"}
+
 Data.CyrillicToRomanian = { -- source Wikipedia: https://en.wikipedia.org/wiki/Romanization_of_Russian
 	["А"] = "a",
 	["а"] = "a",
@@ -1043,11 +1045,7 @@ Data.RolesToSpec = {HEALER = {}, TANK = {}, DAMAGER = {}} --for Testmode only
 Data.ClassList = {} -- For TBCC Testmode only
 
 do
-	local roleNameToRoleNumber = {
-		["DAMAGER"] = 3,
-		["HEALER"] = 1,
-		["TANK"] = 2
-	}
+
 	local specIdToRessource = {
 		--Death Knight
 		[250] = "RUNIC_POWER",	--Blood
@@ -1129,7 +1127,7 @@ do
 				for i = 1, GetNumSpecializationsForClassID(classID) do
 					local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version				
 
-					Data.Classes[classTag][maleSpecName] = {roleNumber = roleNameToRoleNumber[role], roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
+					Data.Classes[classTag][maleSpecName] = {roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
 					table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = maleSpecName}) --for testmode
 
 					--if specName == "Танцующий с ветром" then specName = "Танцующая с ветром" end -- fix for russian bug, fix added on 2017.08.27

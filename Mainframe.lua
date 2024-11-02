@@ -829,7 +829,7 @@ local function CreateMainFrame(playerType)
 			PlayerClassColor = RAID_CLASS_COLORS[classTag],
 			PlayerRace = race and LibRaces:GetRaceToken(race) or "Unknown", --delivers a locale independent token for relentless check
 			PlayerSpecName = spec,                                 --set to false since we use Mixin() and Mixin doesnt mixin nil values and therefore we dont overwrite values with nil
-			PlayerRoleNumber = specData and specData.roleNumber,
+			PlayerRole = specData and specData.roleID,
 			PlayerLevel = false,
 			isFakePlayer = false, --to set a base value, might be overwritten by mixin
 			PlayerArenaUnitID = nil --to set a base value, might be overwritten by mixin
@@ -912,14 +912,27 @@ local function CreateMainFrame(playerType)
 			local detailsPlayerA = playerA.PlayerDetails
 			local detailsPlayerB = playerB.PlayerDetails
 
-			if detailsPlayerA.PlayerRoleNumber and detailsPlayerB.PlayerRoleNumber then
-				if detailsPlayerA.PlayerRoleNumber == detailsPlayerB.PlayerRoleNumber then
+
+			--BattleGroundEnemies.db.profile.RoleSortingOrder is somethng like "HEALER_TANK_DAMAGER"
+
+			local roleT = {strsplit("_", BattleGroundEnemies.db.profile.RoleSortingOrder)}
+			local reverseRoleT = {}
+
+			for k,v in pairs(roleT) do
+				reverseRoleT[v] = k
+			end
+
+			local roleSortingNumerPlayerA = reverseRoleT[detailsPlayerA.PlayerRole]
+			local roleSortingNumerPlayerB = reverseRoleT[detailsPlayerB.PlayerRole]
+
+			if roleSortingNumerPlayerA and roleSortingNumerPlayerB then
+				if roleSortingNumerPlayerA == roleSortingNumerPlayerB then
 					if BlizzardsSortOrder[detailsPlayerA.PlayerClass] == BlizzardsSortOrder[detailsPlayerB.PlayerClass] then
 						if detailsPlayerA.PlayerName < detailsPlayerB.PlayerName then return true end
 					elseif BlizzardsSortOrder[detailsPlayerA.PlayerClass] < BlizzardsSortOrder[detailsPlayerB.PlayerClass] then
 						return true
 					end
-				elseif detailsPlayerA.PlayerRoleNumber < detailsPlayerB.PlayerRoleNumber then
+				elseif roleSortingNumerPlayerA < roleSortingNumerPlayerB then
 					return true
 				end
 			else
@@ -972,8 +985,7 @@ local function CreateMainFrame(playerType)
 
 			if BattleGroundEnemies.states.isInArena then
 				if (self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies) then
-					local usePlayerSortingByArenaUnitID = false
-					usePlayerSortingByArenaUnitID = true
+					local usePlayerSortingByArenaUnitID = true
 					for i = 1, #newPlayerOrder do
 						if not newPlayerOrder[i].PlayerDetails.PlayerArenaUnitID then
 							usePlayerSortingByArenaUnitID = false
