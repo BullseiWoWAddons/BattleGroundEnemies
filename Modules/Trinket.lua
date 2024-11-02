@@ -95,7 +95,7 @@ function trinket:AttachToPlayerButton(playerButton)
 			local trinketCD=Data.TrinketData[spellId].cd or 0
 			
 			-- If healer in retail reduce 2 min trinkets to 90 seconds.
-			if IsRetail and playerButton.PlayerDetails.PlayerRoleNumber == 1 and trinketCD == 120 then
+			if IsRetail and playerButton.PlayerDetails.PlayerRole == "HEALER" and trinketCD == 120 then
 				trinketCD=90
 			end
 			self:SetTrinketCooldown(GetTime(), trinketCD)
