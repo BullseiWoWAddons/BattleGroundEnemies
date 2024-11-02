@@ -40,15 +40,27 @@ local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 
+---@class MainFrame : Button
+---@field Players table<string, Button>
+---@field CurrentPlayerOrder table<number, Button>
+---@field InactivePlayerButtons table<number, Button>
+---@field NewPlayersDetails table<number, table>
+---@field PlayerType string
+---@field PlayerSources table<string, table>
+---@field NumPlayers number
+---@field Counter table<string, number>
+---@field PlayerCount FontString
+---@field ActiveProfile FontString
+---@return MainFrame
 local function CreateMainFrame(playerType)
 
+    --binding voodoo
+    -- how it works:
+    -- SecureHandlerEnterLeaveTemplate is necessary to add the secure onenter and onleave event handlers
+    -- the handler then sets the wheeldown and wheelup binding to execute a button click using the global button names
+    -- when mouswheel is scrolled up or down it triggers a button click and runs the onclick kook from SecureHandlerWrapScript gets execute, which then sets the macrotext
 
-	--binding voodoo
-	-- how it works:
-	-- SecureHandlerEnterLeaveTemplate is necessary to add the secure onenter and onleave event handlers
-	-- the handler then sets the wheeldown and wheelup binding to execute a button click using the global button names
-	-- when mouswheel is scrolled up or down it triggers a button click and runs the onclick kook from SecureHandlerWrapScript gets execute, which then sets the macrotext
-
+    ---@class MainFrame :Button
 	local mainframe = CreateFrame("Button","BGE"..playerType,BattleGroundEnemies,"SecureActionButtonTemplate, SecureHandlerEnterLeaveTemplate")
 	mainframe:EnableMouseWheel(true)
 	mainframe:SetAttribute("type4", "macro")
@@ -82,7 +94,7 @@ local function CreateMainFrame(playerType)
 	]])
 
 
-
+	--@class: PlayerButton[]
 	mainframe.Players = {}            --index = name, value = button(table), contains enemyButtons
 	mainframe.CurrentPlayerOrder = {} --index = number, value = playerButton(table)
 	mainframe.InactivePlayerButtons = {} --index = number, value = button(table)
@@ -126,11 +138,11 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:AddPlayerToSource(source, playerT)
-		if not source.name then return end
-		if source.name == "" then return end
+		if not playerT.name then return end
+		if playerT.name == "" then return end
 
-		if not source.classTag then return end
-		if source.classTag == "" then return end
+		if not playerT.classTag then return end
+		if playerT.classTag == "" then return end
 
 		table_insert(self.PlayerSources[source], playerT)
 	end
@@ -1032,6 +1044,7 @@ local function CreateMainFrame(playerType)
     return mainframe
 end
 
+--@class BattleGroundEnemies.Allies: AllyFrame
 BattleGroundEnemies.Allies = CreateMainFrame(BattleGroundEnemies.consts.PlayerTypes.Allies)
 BattleGroundEnemies.Allies.GUIDToAllyname = {}
 
@@ -1052,6 +1065,8 @@ end
 function BattleGroundEnemies.Allies:AddGroupMember(name, isLeader, isAssistant, classTag, unitID)
 	local raceName, raceFile, raceID = UnitRace(unitID)
 	local GUID = UnitGUID(unitID)
+
+	if not GUID then return end
 
 	if name and raceName and classTag then
 		local specName = BattleGroundEnemies.specCache[GUID]

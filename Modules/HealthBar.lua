@@ -111,6 +111,7 @@ local healthBar = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaultSettings,
 	options = options,
 	events = {"UpdateHealth", "PlayerDetailsChanged"},
+	flags = {FixedPosition = true},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
 })

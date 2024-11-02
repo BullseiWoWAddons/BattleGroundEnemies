@@ -59,7 +59,8 @@ local options = function(location)
 end
 
 local flags = {
-	SetZeroHeightWhenDisabled = true
+	SetZeroHeightWhenDisabled = true,
+	FixedPosition = true
 }
 
 local power = BattleGroundEnemies:NewButtonModule({
