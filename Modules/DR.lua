@@ -28,6 +28,8 @@ local defaultSettings = {
 	ActivePoints = 1,
 	DisplayType = "Frame",
 	IconSize = 20,
+	CustomCategoryIconsEnabled = false,
+	CustomCategoryIcons = {},
 	Cooldown = {
 		ShowNumber = true,
 		FontSize = 12,
@@ -49,83 +51,10 @@ local defaultSettings = {
 	Filtering_Filterlist = {},
 }
 
-local generalDefaults = {
-	CustomCategoryIconsEnabled = false,
-	CustomCategoryIcons = {}
-}
-
 local options = function(location)
-	return {
-		ContainerSettings = {
-			type = "group",
-			name = L.ContainerSettings,
-			order = 1,
-			get = function(option)
-				return Data.GetOption(location.Container, option)
-			end,
-			set = function(option, ...)
-				return Data.SetOption(location.Container, option, ...)
-			end,
-			args = Data.AddContainerSettings(location.Container),
-		},
-		DisplayType = {
-			type = "select",
-			name = L.DisplayType,
-			desc = L.DrTracking_DisplayType_Desc,
-			values = Data.DisplayType,
-			order = 2
-		},
-		CooldownTextSettings = {
-			type = "group",
-			name = L.Countdowntext,
-			get = function(option)
-				return Data.GetOption(location.Cooldown, option)
-			end,
-			set = function(option, ...)
-				return Data.SetOption(location.Cooldown, option, ...)
-			end,
-			order = 3,
-			args = Data.AddCooldownSettings(location.Cooldown)
-		},
-		Fake1 = Data.AddVerticalSpacing(6),
-		FilteringSettings = {
-			type = "group",
-			name = FILTER,
-			--desc = L.DrTrackingFilteringSettings_Desc,
-			--inline = true,
-			order = 4,
-			args = {
-				Filtering_Enabled = {
-					type = "toggle",
-					name = L.Filtering_Enabled,
-					desc = L.DrTrackingFiltering_Enabled_Desc,
-					width = 'normal',
-					order = 1
-				},
-				Filtering_Filterlist = {
-					type = "multiselect",
-					name = L.Filtering_Filterlist,
-					desc = L.DrTrackingFiltering_Filterlist_Desc,
-					disabled = function() return not location.Filtering_Enabled end,
-					get = function(option, key)
-						return location.Filtering_Filterlist[key]
-					end,
-					set = function(option, key, state) -- key = category name
-						location.Filtering_Filterlist[key] = state or nil
-					end,
-					values = Data.DrCategorys,
-					order = 2
-				}
-			}
-		}
-	}
-end
-
-
-local generalOptions = function(location)
-
 	local categories = DRList:GetCategories()
 	local categoryoptions = {}
+	local order = 1
 	for engCategory, localCategory in pairs(categories) do
 		categoryoptions[engCategory] = {
 			type = "select",
@@ -172,26 +101,90 @@ local generalOptions = function(location)
 			set = function(option, ...)
 				return Data.SetOption(location.CustomCategoryIcons, option, ...)
 			end,
+			order = order
 		}
-
+		order = order + 1
 	end
 
 	return {
+		DisplayType = {
+			type = "select",
+			name = L.DisplayType,
+			desc = L.DrTracking_DisplayType_Desc,
+			values = Data.DisplayType,
+			order = 1
+		},
 		CustomCategoryIconsEnabled = {
 			type = "toggle",
 			name = L.EnableCustomDRCategoryIcons,
 			desc = L.EnableCustomDRCategoryIcons_Desc,
-			order = 1
+			order = 2
 		},
 		CustomIconsSelect = {
 			type = "group",
 			name = "",
 			inline = true,
 			hidden = function ()
+				print("dafdsaf", location.CustomCategoryIconsEnabled)
 				return not location.CustomCategoryIconsEnabled
 			end,
-			order = 2,
+			order = 3,
 			args = categoryoptions
+		},
+		ContainerSettings = {
+			type = "group",
+			name = L.ContainerSettings,
+			order = 4,
+			get = function(option)
+				return Data.GetOption(location.Container, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.Container, option, ...)
+			end,
+			args = Data.AddContainerSettings(location.Container),
+		},
+		CooldownTextSettings = {
+			type = "group",
+			name = L.Countdowntext,
+			get = function(option)
+				return Data.GetOption(location.Cooldown, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.Cooldown, option, ...)
+			end,
+			order = 5,
+			args = Data.AddCooldownSettings(location.Cooldown)
+		},
+		Fake1 = Data.AddVerticalSpacing(6),
+		FilteringSettings = {
+			type = "group",
+			name = FILTER,
+			--desc = L.DrTrackingFilteringSettings_Desc,
+			--inline = true,
+			order = 7,
+			args = {
+				Filtering_Enabled = {
+					type = "toggle",
+					name = L.Filtering_Enabled,
+					desc = L.DrTrackingFiltering_Enabled_Desc,
+					width = 'normal',
+					order = 1
+				},
+				Filtering_Filterlist = {
+					type = "multiselect",
+					name = L.Filtering_Filterlist,
+					desc = L.DrTrackingFiltering_Filterlist_Desc,
+					disabled = function() return not location.Filtering_Enabled end,
+					get = function(option, key)
+						return location.Filtering_Filterlist[key]
+					end,
+					set = function(option, key, state) -- key = category name
+						location.Filtering_Filterlist[key] = state or nil
+					end,
+					values = Data.DrCategorys,
+					order = 2
+				}
+			}
 		}
 	}
 end
@@ -219,9 +212,7 @@ local dRTracking = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.DRTracking,
 	flags = flags,
 	defaultSettings = defaultSettings,
-	generalDefaults = generalDefaults,
 	options = options,
-	generalOptions = generalOptions,
 	events = {"AuraRemoved"},
 	enabledInThisExpansion = true
 })
