@@ -58,7 +58,7 @@ local spec = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = specDefaults,
 	options = nil,
 	events = events,
-	enabledInThisExpansion = not not GetSpecializationInfoByID
+	enabledInThisExpansion = not not GetSpecialization
 })
 
 
@@ -131,7 +131,7 @@ local function attachToPlayerButton(playerButton, type)
 				self.Icon:SetTexCoord(unpack(coords))
 			else
 				self.Icon:SetTexture(nil)
-			end	
+			end
 		else -- "Spec"
 			local specData = playerButton:GetSpecData()
 			if specData then

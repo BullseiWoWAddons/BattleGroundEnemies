@@ -1,4 +1,7 @@
-local AddonName, Data = ...
+---@type string
+local AddonName = ...
+---@class Data
+local Data = select(2, ...)
 local defaultLocale = {}
 
 
@@ -22,7 +25,7 @@ Data.L = setmetatable({}, { --key set by all non english clients, Table gets acc
             return defaultLocale[k]
         else
             C_Timer.After(3, function()
-                BattleGroundEnemies:OnetimeInformation("Missing localization entry for['"..k.."']. Please report this to the addon author.")
+                BattleGroundEnemies:OnetimeDebug("Missing localization entry for['"..k.."']. Please report this to the addon author.")
             end)
             return k
         end
@@ -33,7 +36,7 @@ local L = defaultLocale --set to L for curseforges system
 
 --@localization(locale="enUS", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@
 
-local L = Data.L;
+L = Data.L;
 
 if LOCALE_deDE then
 --@localization(locale="deDE", format="lua_additive_table", handle-subnamespaces="none", handle-unlocalized="ignore")@

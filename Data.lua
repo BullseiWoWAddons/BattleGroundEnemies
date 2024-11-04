@@ -1125,7 +1125,7 @@ do
 			Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}-- for Classic, TBCC Wrath, and any other expansions without specs and some brawls
 
 			
-			if GetNumSpecializationsForClassID and GetSpecializationInfoByID then --HasSpeccs
+			if GetNumSpecializationsForClassID and GetSpecializationInfoByID and GetSpecialization then --HasSpeccs
 				for i = 1, GetNumSpecializationsForClassID(classID) do
 					local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version				
 
