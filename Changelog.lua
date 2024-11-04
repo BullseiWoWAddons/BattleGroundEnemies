@@ -8,18 +8,18 @@ Data.changelog = {
 		Version = "11.0.5.0",
 		General = "New features and changes arrived",
 		Sections = {
-	
 			{
 				Header = "New Features:",
 				Entries = {
 					"Added an Editmode to the addon, it works similar to Blizzards Editmode so it enables you to drag and drop and snap frames to other frames. When you select a frame the options panel will jump to the setting of that particular module.",
-					"Added multiple keybind related features: By default you are now able to target the next or previous enemy or ally by scrolling over the allie or enemy frame. Also added a new keybinding settings to the blizzard keybinding section. You will now find BattleGroundEnemies there.",
+					"Added multiple keybind related features: By default you are now able to target the next or previous enemy or ally by scrolling over the ally or enemy frame. Also added 4 new keybinding settings to the blizzard keybinding section. You will now find BattleGroundEnemies there.",
 					"added Deephaul Crystal to bg buffs", 
 					"Added global module settings for DR tracker, you can now specify a specific icon to show up for each dr category. You can find this new setting at General > Modules",
 					"Added a feature requested by RealJig at GitHub: You can now select to automatically hide the default Blizzard raid frames in a battleground. You can find this settings at General > Miscellaneous",
 					"Added the possibility to create individual subprofiles for player counts, this enables you finer control over positioning of your frames.",
-					"You can now specify a player count from 1 to 40 for the testmode",
-					"Added combat indicator to testmode"
+					"You can now specify a player count from 1 to 40 for the testmode. This enabled you to ",
+					"Added combat indicator to testmode",
+					"Added a new option to choose the role sorting order as requested by Hoffahoff from CurseForge",
 				}
 			},
 			{
@@ -34,7 +34,8 @@ Data.changelog = {
 				Entries = {
 					"Fixed an error reported by Addonman on GitHub",
 					"Fixed DrTracker cooldown",
-					"Fixed racials and trinket in testmode"
+					"Fixed racials and trinket in testmode",
+					"Fixed error reported by xenoyearner on Curseforge"
 				}
 			}
 		}

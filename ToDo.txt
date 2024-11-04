@@ -3,3 +3,5 @@ make some of the settings specific to playercounts/faction global
 Work on cooldown tracking
 have to investigate why self.EnemyFaction is not set inside PLAYER_ENTERING_WORLD event handler
 i need to add a feature to not include alpha versions in the version check
+
+by default make all module settings global, add a checkbox to playersize settings to overwrite the global one

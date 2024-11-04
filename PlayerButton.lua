@@ -260,14 +260,20 @@ do
 
 	function buttonFunctions:SetModuleConfig(moduleName)
 		local moduleFrameOnButton = self[moduleName]
-		local moduleConfigOnButton = self.playerCountConfig.ButtonModules[moduleName]
+		local moduleConfigOnButton
 
-		moduleFrameOnButton.config = moduleConfigOnButton
+		if self.playerCountConfig.ButtonModules[moduleName].UsePlayerCountSpecificSettings then
+			moduleConfigOnButton = self.playerCountConfig.ButtonModules[moduleName]
+		else
+			moduleConfigOnButton = BattleGroundEnemies.db.profile.ButtonModules[moduleName]
+		end
+
 		if moduleConfigOnButton.Enabled and BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) then
 			moduleFrameOnButton.Enabled = true
 		else
 			moduleFrameOnButton.Enabled = false
 		end
+		moduleFrameOnButton.config = moduleConfigOnButton
 	end
 
 	function buttonFunctions:SetAllModuleConfigs()
@@ -1134,6 +1140,8 @@ end
 function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	--local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe)
 
+
+	--@class PlayerButton
 	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe, 'SecureUnitButtonTemplate')
 	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, L.Button, playerButton)
 	playerButton:RegisterForClicks('AnyUp')

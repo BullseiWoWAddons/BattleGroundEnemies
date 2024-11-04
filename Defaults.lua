@@ -17,7 +17,7 @@ local allieDefaults15man = {
 	BarColumns = 1,
 	BarHorizontalGrowdirection = "rightwards",
 	BarHorizontalSpacing = 100,
-
+	
 	PlayerCount = {
 		Enabled = true,
 		Text = {
@@ -33,6 +33,7 @@ local allieDefaults15man = {
 
 	ButtonModules = {
 		CastBar = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -44,6 +45,7 @@ local allieDefaults15man = {
 			},
 		},
 		Cooldowns = {
+			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -57,6 +59,7 @@ local allieDefaults15man = {
 			},
 		},
 		DRTracking = {
+			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -70,6 +73,7 @@ local allieDefaults15man = {
 			},
 		},
 		NonPriorityBuffs = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -86,6 +90,7 @@ local allieDefaults15man = {
 			},
 		},
 		NonPriorityDebuffs = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -101,6 +106,7 @@ local allieDefaults15man = {
 			}
 		},
 		PriorityBuffs = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = true,
 			Points = {
 				{
@@ -117,6 +123,7 @@ local allieDefaults15man = {
 			}
 		},
 		PriorityDebuffs = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = true,
 			Points = {
 				{
@@ -132,6 +139,7 @@ local allieDefaults15man = {
 			}
 		},
 		Racial = {
+			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPRIGHT",
@@ -142,6 +150,7 @@ local allieDefaults15man = {
 			}
 		},
 		Trinket = {
+			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPRIGHT",
@@ -189,6 +198,7 @@ local enemyDefault15man = {
 
 	ButtonModules = {
 		CastBar = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -200,6 +210,7 @@ local enemyDefault15man = {
 			}
 		},
 		Cooldowns = {
+			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -213,6 +224,7 @@ local enemyDefault15man = {
 			},
 		},
 		DRTracking = {
+			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPRIGHT",
@@ -227,6 +239,7 @@ local enemyDefault15man = {
 			}
 		},
 		NonPriorityBuffs = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -243,6 +256,7 @@ local enemyDefault15man = {
 			}
 		},
 		NonPriorityDebuffs = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -258,6 +272,7 @@ local enemyDefault15man = {
 			}
 		},
 		PriorityBuffs = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = true,
 			Points = {
 				{
@@ -274,6 +289,7 @@ local enemyDefault15man = {
 			}
 		},
 		PriorityDebuffs = {
+			UsePlayerCountSpecificSettings = true,
 			Enabled = true,
 			Points = {
 				{
@@ -289,6 +305,7 @@ local enemyDefault15man = {
 			},
 		},
 		Racial = {
+			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -299,6 +316,7 @@ local enemyDefault15man = {
 			}
 		},
 		Trinket = {
+			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -340,6 +358,8 @@ Data.defaultSettings = {
 		EnableMouseWheelPlayerTargeting = true,
 		UseBigDebuffsPriority = true,
 		ConvertCyrillic = true,
+
+		RoleSortingOrder = "HEALER_TANK_DAMAGER",
 
 		RBG = {
 			TargetCalling_SetMark = false,
@@ -398,9 +418,11 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						SpecClassPriorityOne = {
+							UsePlayerCountSpecificSettings = true,
 							Width = 52
 						},
 						CastBar = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -412,9 +434,11 @@ Data.defaultSettings = {
 							}
 						},
 						Covenant = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = false
 						},
 						Cooldowns = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -428,6 +452,7 @@ Data.defaultSettings = {
 							},
 						},
 						DRTracking = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPRIGHT",
@@ -444,6 +469,7 @@ Data.defaultSettings = {
 							}
 						},
 						healthBar = {
+							UsePlayerCountSpecificSettings = true,
 							HealthTextEnabled = true,
 							HealthTextType = "health",
 							HealthText = {
@@ -452,11 +478,13 @@ Data.defaultSettings = {
 							}
 						},
 						Name = {
+							UsePlayerCountSpecificSettings = true,
 							Text = {
 								JustifyV = "TOP"
 							}
 						},
 						NonPriorityBuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -473,6 +501,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityDebuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -488,9 +517,11 @@ Data.defaultSettings = {
 							}
 						},
 						Power = {
+							UsePlayerCountSpecificSettings = true,
 							Height = 8,
 						},
 						PriorityBuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -510,6 +541,7 @@ Data.defaultSettings = {
 							}
 						},
 						PriorityDebuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -528,6 +560,7 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -538,9 +571,11 @@ Data.defaultSettings = {
 							}
 						},
 						RaidTargetIcon = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = false
 						},
 						Trinket = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -587,6 +622,7 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						CastBar = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = false,
 							Points = {
 								{
@@ -598,6 +634,7 @@ Data.defaultSettings = {
 							}
 						},
 						Cooldowns = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -611,6 +648,7 @@ Data.defaultSettings = {
 							},
 						},
 						DRTracking = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPRIGHT",
@@ -625,6 +663,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityBuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -640,6 +679,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityDebuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -654,9 +694,11 @@ Data.defaultSettings = {
 							}
 						},
 						Power = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = false,
 						},
 						PriorityBuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -672,6 +714,7 @@ Data.defaultSettings = {
 							}
 						},
 						PriorityDebuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -686,6 +729,7 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -696,6 +740,7 @@ Data.defaultSettings = {
 							}
 						},
 						Trinket = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -765,6 +810,7 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						CastBar = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -776,12 +822,15 @@ Data.defaultSettings = {
 							},
 						},
 						SpecClassPriorityOne = {
+							UsePlayerCountSpecificSettings = true,
 							Width = 52
 						},
 						Covenant = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = false
 						},
 						Cooldowns = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPRIGHT",
@@ -795,6 +844,7 @@ Data.defaultSettings = {
 							},
 						},
 						DRTracking = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -811,6 +861,7 @@ Data.defaultSettings = {
 							}
 						},
 						healthBar = {
+							UsePlayerCountSpecificSettings = true,
 							HealthTextEnabled = true,
 							HealthTextType = "health",
 							HealthText = {
@@ -819,11 +870,13 @@ Data.defaultSettings = {
 							}
 						},
 						Name = {
+							UsePlayerCountSpecificSettings = true,
 							Text = {
 								JustifyV = "TOP"
 							}
 						},
 						NonPriorityBuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -840,6 +893,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityDebuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -855,9 +909,11 @@ Data.defaultSettings = {
 							}
 						},
 						Power = {
+							UsePlayerCountSpecificSettings = true,
 							Height = 8,
 						},
 						PriorityBuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -876,6 +932,7 @@ Data.defaultSettings = {
 							}
 						},
 						PriorityDebuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = true,
 							Points = {
 								{
@@ -893,6 +950,7 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPRIGHT",
@@ -903,9 +961,11 @@ Data.defaultSettings = {
 							}
 						},
 						RaidTargetIcon = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = false
 						},
 						Trinket = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPRIGHT",
@@ -954,6 +1014,7 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						CastBar = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = false,
 							Points = {
 								{
@@ -965,6 +1026,7 @@ Data.defaultSettings = {
 							}
 						},
 						Cooldowns = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -978,6 +1040,7 @@ Data.defaultSettings = {
 							},
 						},
 						DRTracking = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -991,6 +1054,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityBuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -1006,6 +1070,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityDebuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -1020,9 +1085,11 @@ Data.defaultSettings = {
 							}
 						},
 						Power = {
+							UsePlayerCountSpecificSettings = true,
 							Enabled = false,
 						},
 						PriorityBuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -1038,6 +1105,7 @@ Data.defaultSettings = {
 							}
 						},
 						PriorityDebuffs = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -1052,6 +1120,7 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPRIGHT",
@@ -1062,6 +1131,7 @@ Data.defaultSettings = {
 							}
 						},
 						Trinket = {
+							UsePlayerCountSpecificSettings = true,
 							Points = {
 								{
 									Point = "TOPRIGHT",
@@ -1084,8 +1154,5 @@ Data.defaultSettings = {
 			}
 		},
 		ButtonModules = {},
-		Layouts = {
-			
-		}
 	}
 }

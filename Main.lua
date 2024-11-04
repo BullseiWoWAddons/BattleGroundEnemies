@@ -491,8 +491,8 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 		copyModuleDefaultsIntoDefaults(customPlayerCountConfigGeneric, moduleName, moduleSetupTable.defaultSettings)
 	end
 
-	if moduleSetupTable.generalDefaults then
-		copyModuleDefaultsIntoDefaults(Data.defaultSettings.profile, moduleName, moduleSetupTable.generalDefaults)
+	if moduleSetupTable.defaultSettings then
+		copyModuleDefaultsIntoDefaults(Data.defaultSettings.profile, moduleName, moduleSetupTable.defaultSettings)
 	end
 
 
