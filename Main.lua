@@ -66,7 +66,7 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
-local HasSpeccs = not not GetSpecializationInfoByID  -- Mists of Pandaria
+local HasSpeccs = not not GetSpecialization  -- Mists of Pandaria
 local HasRBG = not not IsRatedBattleground
 
 local MaxLevel = GetMaxPlayerLevel()
@@ -1269,6 +1269,71 @@ do
 	end
 end
 
+function BattleGroundEnemies.Enemies:ChangeName(oldName, newName) --only used in arena when players switch from "arenaX" to a real name
+	local playerButton = self.Players[oldName]
+
+	if playerButton then
+		playerButton.PlayerDetails.PlayerName = newName
+		-- BattleGroundEnemies:LogToSavedVariables("name changed", oldName, newName)
+		playerButton:PlayerDetailsChanged()
+
+		self.Players[newName] = playerButton
+		self.Players[oldName] = nil
+	end
+end
+
+function BattleGroundEnemies.Enemies:CreateArenaEnemies()
+	-- BattleGroundEnemies:LogToSavedVariables("CreateArenaEnemies")
+	if not IsInArena then return end
+
+	self:BeforePlayerSourceUpdate(PlayerSources.ArenaPlayers)
+	for i = 1, 15 do --we can have 15 enemies in the Arena Brawl Packed House
+		local unitID = "arena" .. i
+
+
+		local _, classTag, specName
+		if GetArenaOpponentSpec and GetSpecializationInfoByID then --HasSpeccs
+			local specID, gender = GetArenaOpponentSpec(i)
+
+			if (specID and specID > 0) then
+				_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
+			end
+		else
+			classTag = select(2, UnitClass(unitID))
+		end
+		--BattleGroundEnemies:LogToSavedVariables("classTag", classTag)
+		--BattleGroundEnemies:LogToSavedVariables("specName", specName)
+
+
+		if classTag then
+			local playerName
+			local name = GetUnitName(unitID, true)
+			if name and name ~= UNKNOWN then
+				-- player has a real name, check if he is already shown as arenaX
+				self:ChangeName(unitID, name)
+				playerName = name
+			end
+
+			local raceName = UnitRace(unitID)
+			self:AddPlayerToSource(PlayerSources.ArenaPlayers, {
+				name = playerName,
+				raceName = raceName,
+				classTag = classTag,
+				specName = specName,
+				additionalData = { PlayerArenaUnitID = unitID }
+			})
+		end
+	end
+
+	self:AfterPlayerSourceUpdate()
+
+	for playerName, playerButton in pairs(self.Players) do
+		local playerDetails = playerButton.PlayerDetails
+		if playerDetails.PlayerArenaUnitID then
+			playerButton:UpdateAll(playerDetails.PlayerArenaUnitID)
+		end
+	end
+end
 
 --Notes about UnitIDs
 --priority of unitIDs:

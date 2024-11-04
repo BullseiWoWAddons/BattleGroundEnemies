@@ -5,7 +5,7 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
-		Version = "11.0.5.0",
+		Version = "11.0.5.1",
 		General = "New features and changes arrived",
 		Sections = {
 			{
@@ -36,6 +36,19 @@ Data.changelog = {
 					"Fixed DrTracker cooldown",
 					"Fixed racials and trinket in testmode",
 					"Fixed error reported by xenoyearner on Curseforge"
+				}
+			}
+		}
+	},
+	{
+		Version = "11.0.5.0",
+		General = "Fixed errors and removed message for missing localizations",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed error in new cataclysm patch 4.4.1",
+					"Removed message for missing localizations"
 				}
 			}
 		}
