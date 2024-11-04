@@ -2,6 +2,19 @@ local AddonName, Data = ...
 
 Data.changelog = {
 	{
+		Version = "11.0.5.0",
+		General = "Fixed errors and removed message for missing localizations",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed error in new cataclysm patch 4.4.1",
+					"Removed message for missing localizations"
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.2.3",
 		General = "Update for The War Within",
 		Sections = {

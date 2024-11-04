@@ -7,7 +7,7 @@ local CTimerNewTicker = C_Timer.NewTicker
 local SendAddonMessage = C_ChatInfo.SendAddonMessage
 local max = math.max
 
-local BGE_VERSION = "11.0.2.3"
+local BGE_VERSION = "11.0.5.0"
 local AddonPrefix = "BGE"
 local versionQueryString, versionResponseString = "Q^%s", "V^%s"
 local targetCallVolunteerQueryString = "TVQ^%s" -- wil be send to all the viewers to show if you are volunteering vor target calling
