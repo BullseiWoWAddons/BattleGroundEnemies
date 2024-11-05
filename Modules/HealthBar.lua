@@ -15,10 +15,13 @@ local HealthTextTypes = {
 	perc = COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_PERC
 }
 
+local generalDefaults = {
+	Texture = 'Blizzard Raid Bar',
+}
+
 local defaultSettings = {
 	Parent = "Button",
 	Enabled = true,
-	Texture = 'Blizzard Raid Bar',
 	Background = {0, 0, 0, 0.66},
 	HealthPrediction_Enabled = true,
 	HealthTextEnabled = false,
@@ -26,9 +29,6 @@ local defaultSettings = {
 	HealthText = {
 		FontSize = 17,
 		FontOutline = "",
-		FontColor = {1, 1, 1, 1},
-		EnableShadow = false,
-		ShadowColor = {0, 0, 0, 1},
 		JustifyH = "CENTER",
 		JustifyV = "TOP",
 	},
@@ -47,7 +47,7 @@ local defaultSettings = {
 	}
 }
 
-local options = function(location)
+local generalOptions = function(location)
 	return {
 		Texture = {
 			type = "select",
@@ -58,6 +58,11 @@ local options = function(location)
 			width = "normal",
 			order = 1
 		},
+	}
+end
+
+local options = function(location)
+	return {
 		Fake = Data.AddHorizontalSpacing(2),
 		Background = {
 			type = "color",
@@ -109,7 +114,9 @@ local healthBar = BattleGroundEnemies:NewButtonModule({
 	moduleName = "healthBar",
 	localizedModuleName = L.HealthBar,
 	defaultSettings = defaultSettings,
+	generalDefaults = generalDefaults,
 	options = options,
+	generalOptions = generalOptions,
 	events = {"UpdateHealth", "PlayerDetailsChanged"},
 	flags = {FixedPosition = true},
 	enabledInThisExpansion = true,

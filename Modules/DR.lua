@@ -22,6 +22,13 @@ local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 local DRList = LibStub("DRList-1.0")
 
+local generalDefaults = {
+	CustomCategoryIconsEnabled = false,
+	CustomCategoryIcons = {},
+	Filtering_Enabled = false,
+	Filtering_Filterlist = {},
+}
+
 local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
@@ -31,12 +38,7 @@ local defaultSettings = {
 	CustomCategoryIconsEnabled = false,
 	CustomCategoryIcons = {},
 	Cooldown = {
-		ShowNumber = true,
 		FontSize = 12,
-		FontOutline = "OUTLINE",
-		EnableShadow = false,
-		DrawSwipe = true,
-		ShadowColor = {0, 0, 0, 1},
 	},
 	Container = {
 		UseButtonHeightAsSize = true,
@@ -51,7 +53,8 @@ local defaultSettings = {
 	Filtering_Filterlist = {},
 }
 
-local options = function(location)
+
+local generalOptions = function(location)
 	local categories = DRList:GetCategories()
 	local categoryoptions = {}
 	local order = 1
@@ -131,31 +134,6 @@ local options = function(location)
 			order = 3,
 			args = categoryoptions
 		},
-		ContainerSettings = {
-			type = "group",
-			name = L.ContainerSettings,
-			order = 4,
-			get = function(option)
-				return Data.GetOption(location.Container, option)
-			end,
-			set = function(option, ...)
-				return Data.SetOption(location.Container, option, ...)
-			end,
-			args = Data.AddContainerSettings(location.Container),
-		},
-		CooldownTextSettings = {
-			type = "group",
-			name = L.Countdowntext,
-			get = function(option)
-				return Data.GetOption(location.Cooldown, option)
-			end,
-			set = function(option, ...)
-				return Data.SetOption(location.Cooldown, option, ...)
-			end,
-			order = 5,
-			args = Data.AddCooldownSettings(location.Cooldown)
-		},
-		Fake1 = Data.AddVerticalSpacing(6),
 		FilteringSettings = {
 			type = "group",
 			name = FILTER,
@@ -187,6 +165,39 @@ local options = function(location)
 			}
 		}
 	}
+
+end
+
+
+local options = function(location)
+	return {
+		ContainerSettings = {
+			type = "group",
+			name = L.ContainerSettings,
+			order = 4,
+			get = function(option)
+				return Data.GetOption(location.Container, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.Container, option, ...)
+			end,
+			args = Data.AddContainerSettings(location.Container),
+		},
+		CooldownTextSettings = {
+			type = "group",
+			name = L.Countdowntext,
+			get = function(option)
+				return Data.GetOption(location.Cooldown, option)
+			end,
+			set = function(option, ...)
+				return Data.SetOption(location.Cooldown, option, ...)
+			end,
+			order = 5,
+			args = Data.AddCooldownSettings(location.Cooldown)
+		},
+		Fake1 = Data.AddVerticalSpacing(6),
+
+	}
 end
 
 local dRstates = {
@@ -212,7 +223,9 @@ local dRTracking = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.DRTracking,
 	flags = flags,
 	defaultSettings = defaultSettings,
+	generalDefaults = generalDefaults,
 	options = options,
+	generalOptions = generalOptions,
 	events = {"AuraRemoved"},
 	enabledInThisExpansion = true
 })
@@ -240,7 +253,9 @@ local function createNewDrFrame(playerButton, container)
 	drFrame.Container = container
 
 	drFrame.ApplyChildFrameSettings = function(self)
+		print("1")
 		self.Cooldown:ApplyCooldownSettings(container.config.Cooldown, true , {0, 0, 0, 0.5})
+		print("2")
 		self:SetDisplayType()
 	end
 

@@ -12,6 +12,17 @@ local L = Data.L
 local CTimerNewTicker = C_Timer.NewTicker
 
 
+local generalDefaults = {
+	Combat = {
+		Enabled = true,
+		Icon = 132147
+	},
+	OutOfCombat = {
+		Enabled = true,
+		Icon = 132310
+	},
+	UpdatePeriod = 0.1
+}
 
 
 local defaultSettings = {
@@ -29,15 +40,6 @@ local defaultSettings = {
 			OffsetY = -15
 		}
 	},
-	Combat = {
-		Enabled = true,
-		Icon = 132147
-	},
-	OutOfCombat = {
-		Enabled = true,
-		Icon = 132310
-	},
-	UpdatePeriod = 0.1
 }
 
 local Icons = { --one of the two (or both) must be enabled, otherwise u won't see an icon
@@ -45,7 +47,8 @@ local Icons = { --one of the two (or both) must be enabled, otherwise u won't se
 	"OutOfCombat"
 }
 
-local options = function(location)
+
+local generalOptions = function(location)
 	local t = {}
 	for i = 1, #Icons do
 		t[Icons[i]] = {
@@ -102,8 +105,9 @@ local combatIndicator = BattleGroundEnemies:NewButtonModule({
 	moduleName = "CombatIndicator",
 	localizedModuleName = L.CombatIndicator,
 	defaultSettings = defaultSettings,
+	generalDefaults = generalDefaults,
 	events = {"OnTestmodeEnabled", "OnTestmodeDisabled", "OnTestmodeTick"},
-	options = options,
+	generalOptions = generalOptions,
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
 })

@@ -83,7 +83,24 @@ function BattleGroundEnemies:UpgradeProfile(profile, profileName)
         end
     end
 
-    profile.dbVersion = 1
+    if not profile.dbVersion or profile.dbVersion < 2 then
+
+
+        --[[         --in version 2 the format chagned from 
+            
+             BattleGroundEnemies.db.profile.Font to BattleGroundEnemies.db.profile.Text.Font
+        ]]
+        
+        if profile.Font then
+            profile.Text.Font = profile.Font 
+            profile.Font = nil
+        end
+
+        
+        didStuff = true
+    end
+
+    profile.dbVersion = 2
 
     if didStuff then
         C_Timer.After(20, function()

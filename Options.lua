@@ -596,93 +596,22 @@ function Data.AddNormalTextSettings(location)
 			order = 2
 		},
 		Fake = Data.AddVerticalSpacing(3),
-		FontColor = {
-			type = "color",
-			name = L.Fontcolor,
-			desc = L.Fontcolor_Desc,
-			hasAlpha = true,
-			order = 4
-		},
-		EnableShadow = {
-			type = "toggle",
-			name = L.FontShadow_Enabled,
-			desc = L.FontShadow_Enabled_Desc,
-			order = 5
-		},
-		ShadowColor = {
-			type = "color",
-			name = L.FontShadowColor,
-			desc = L.FontShadowColor_Desc,
-			disabled = function()
-				return not location.EnableShadow
-			end,
-			hasAlpha = true,
-			order = 6
-		}
 	}
 end
 
 
 function Data.AddCooldownSettings(location)
 	return {
-		ShowNumber = {
-			type = "toggle",
-			name = L.ShowNumbers,
-			desc = L.ShowNumbers_Desc,
-			order = 1
+		FontSize = {
+			type = "range",
+			name = L.FontSize,
+			desc = L.FontSize_Desc,
+			min = 6,
+			max = 40,
+			step = 1,
+			width = "normal",
+			order = 3
 		},
-		asdfasdf = {
-			type = "group",
-			name = "",
-			desc = "",
-			disabled = function()
-				return not location.ShowNumber
-			end,
-			inline = true,
-			order = 2,
-			args = {
-				FontSize = {
-					type = "range",
-					name = L.FontSize,
-					desc = L.FontSize_Desc,
-					min = 6,
-					max = 40,
-					step = 1,
-					width = "normal",
-					order = 3
-				},
-				FontOutline = {
-					type = "select",
-					name = L.Font_Outline,
-					desc = L.Font_Outline_Desc,
-					values = FontOutlines,
-					order = 4
-				},
-				Fake1 = Data.AddVerticalSpacing(5),
-				EnableShadow = {
-					type = "toggle",
-					name = L.FontShadow_Enabled,
-					desc = L.FontShadow_Enabled_Desc,
-					order = 6
-				},
-				ShadowColor = {
-					type = "color",
-					name = L.FontShadowColor,
-					desc = L.FontShadowColor_Desc,
-					disabled = function()
-						return not location.EnableShadow
-					end,
-					hasAlpha = true,
-					order = 7
-				},
-				DrawSwipe = {
-					type = "toggle",
-					name = L.Enable_DrawSwipe,
-					desc = L.Enable_DrawSwipe_Desc,
-					order = 8
-				}
-			}
-		}
 	}
 end
 
@@ -723,37 +652,9 @@ local function generateOverwritableOptions(location, options)
 	return newOptions
 end
 
-function BattleGroundEnemies:AddModuleSettings(location, options, moduleName)
+function BattleGroundEnemies:AddModuleOptions(location, options, moduleName)
 	local moduleOptions = type(options) == "function" and options(location) or options or {}
-	local args =  {
-		UsePlayerCountSpecificSettings = {
-			type = "toggle",
-			name = L.UsePlayerCountSpecificSettings,
-			desc = L.UsePlayerCountSpecificSettings_Desc,
-			width = "normal",
-			order = 3
-		},
-		ShowGeneralOptions = {
-			type = "execute",
-			name = L.UsePlayerCountSpecificSettings,
-			desc = L.UsePlayerCountSpecificSettings_Desc,
-			func = function()
-				local optionsPath = {"BattleGroundEnemies", "GeneralSettings", "ButtonModules", moduleName}
-				AceConfigDialog:SelectGroup(unpack(optionsPath))
-			end,
-			hidden  = function() return location.UsePlayerCountSpecificSettings end,
-			width = "normal",
-			order = 3
-		},
-		group = {
-			type = "group",
-			name = L.ModuleSpecificSettings,
-			hidden  = function() return not location.UsePlayerCountSpecificSettings end,
-			order = 4,
-			args = moduleOptions
-		}
-	}
-	return args
+	return moduleOptions
 end
 
 function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefault, playerType, condidtionFunc)
@@ -782,6 +683,18 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 						width = "normal",
 						order = 1
 					},
+					ShowGeneralOptions = {
+						type = "execute",
+						name = L.ShowGeneralOptions,
+						desc = L.ShowGeneralOptions_Desc,
+						func = function()
+							local optionsPath = {"BattleGroundEnemies", "GeneralSettings", "ButtonModules", moduleName}
+							AceConfigDialog:SelectGroup(unpack(optionsPath))
+						end,
+						hidden = not BattleGroundEnemies.ButtonModules[moduleName].generalOptions,
+						width = "normal",
+						order = 2
+					},
 					PositionSetting = {
 						type = "group",
 						name = L.Position .. " " .. L.AND .. " " .. L.Size,
@@ -793,7 +706,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 						end,
 						disabled  = function() return not locationn.Enabled end,
 						hidden = moduleFrame.flags.FixedPosition,
-						order = 2,
+						order = 3,
 						args = Data.AddPositionSetting(locationn, moduleName, moduleFrame, playerType)
 					},
 					ModuleSettings = {
@@ -807,7 +720,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 						end,
 						order = 4,
 						disabled = function() return not locationn.Enabled or not moduleFrame.options end,
-						args = BattleGroundEnemies:AddModuleSettings(locationn, moduleFrame.options, moduleName)
+						args = BattleGroundEnemies:AddModuleOptions(locationn, moduleFrame.options, moduleName)
 					},
 					Reset = {
 						type = "execute",
@@ -836,6 +749,9 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 			local locationn = BattleGroundEnemies.db.profile.ButtonModules[moduleName]
 			local defaults = BattleGroundEnemies.db.defaults.profile.ButtonModules[moduleName]
 
+
+			local moduleOptions = type(moduleFrame.generalOptions) == "function" and moduleFrame.generalOptions(locationn) or moduleFrame.generalOptions or {}
+
 			temp[moduleName]  = {
 				type = "group",
 				name = moduleFrame.localizedModuleName,
@@ -847,20 +763,9 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 					return Data.SetOption(locationn, option, ...)
 				end,
 				disabled = function() return not BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) end,
+				hidden = not moduleFrame.generalOptions,
 				childGroups = "tab",
 				args = {
-					ModuleSettings = {
-						type = "group",
-						name = L.ModuleSpecificSettings,
-						get =  function(option)
-							return Data.GetOption(locationn, option)
-						end,
-						set = function(option, ...)
-							return Data.SetOption(locationn, option, ...)
-						end,
-						order = 3,
-						args = type(moduleFrame.options) == "function" and moduleFrame.options(locationn) or moduleFrame.options or {}
-					},
 					Reset = {
 						type = "execute",
 						name = L.ResetModule,
@@ -870,14 +775,15 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 							BattleGroundEnemies:NotifyChange()
 						end,
 						width = "full",
-						order = 4,
+						order = 1,
 					}
 				}
 			}
-
+			for k,v in pairs(moduleOptions) do
+				temp[moduleName].args[k] = v
+				temp[moduleName].args[k].order = temp[moduleName].args[k].order + 1
+			end
 		end
-
-
 	end
 	return temp
 end
@@ -1664,14 +1570,6 @@ function BattleGroundEnemies:SetupOptions()
 								width = "normal",
 								order = 4
 							},
-							Font = {
-								type = "select",
-								name = L.Font,
-								desc = L.Font_Desc,
-								dialogControl = "LSM30_Font",
-								values = AceGUIWidgetLSMlists.font,
-								order = 5
-							},
 							RoleSortingOrder = {
 								type = "select",
 								name = L.RoleSortingOrder,
@@ -1801,6 +1699,75 @@ function BattleGroundEnemies:SetupOptions()
 						args = self:AddGeneralModuleSettings(),
 						order = 6
 					},
+					CooldownSettings = {
+						type = "group",
+						name = L.Cooldown,
+						get = function(option)
+							return Data.GetOption(location.Cooldown, option)
+						end,
+						set = function(option, ...)
+							return Data.SetOption(location.Cooldown, option, ...)
+						end,
+						args = {
+							ShowNumber = {
+								type = "toggle",
+								name = L.ShowNumbers,
+								desc = L.ShowNumbers_Desc,
+								order = 1
+							},
+							DrawSwipe = {
+								type = "toggle",
+								name = L.Enable_DrawSwipe,
+								desc = L.Enable_DrawSwipe_Desc,
+								order = 2
+							}
+						},
+						order = 6
+					},
+					TextSettings = {
+						type = "group",
+						name = L.TextSettings,
+						get = function(option)
+							return Data.GetOption(location.Text, option)
+						end,
+						set = function(option, ...)
+							return Data.SetOption(location.Text, option, ...)
+						end,
+						args = {
+							Font = {
+								type = "select",
+								name = L.Font,
+								desc = L.Font_Desc,
+								dialogControl = "LSM30_Font",
+								values = AceGUIWidgetLSMlists.font,
+								order = 1
+							},
+							FontColor = {
+								type = "color",
+								name = L.Fontcolor,
+								desc = L.Fontcolor_Desc,
+								hasAlpha = true,
+								order = 2
+							},
+							EnableShadow = {
+								type = "toggle",
+								name = L.FontShadow_Enabled,
+								desc = L.FontShadow_Enabled_Desc,
+								order = 3
+							},
+							ShadowColor = {
+								type = "color",
+								name = L.FontShadowColor,
+								desc = L.FontShadowColor_Desc,
+								disabled = function()
+									return not location.Text.EnableShadow
+								end,
+								hasAlpha = true,
+								order = 4
+							}
+						},
+						order = 7
+					}
 				}
 			},
 			EnemySettings = {

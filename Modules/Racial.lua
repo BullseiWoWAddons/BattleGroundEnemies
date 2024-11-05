@@ -21,12 +21,7 @@ local defaultSettings = {
 	UseButtonHeightAsWidth = true,
 	ActivePoints = 1,
 	Cooldown = {
-		ShowNumber = true,
 		FontSize = 12,
-		FontOutline = "OUTLINE",
-		EnableShadow = false,
-		DrawSwipe = true,
-		ShadowColor = {0, 0, 0, 1},
 	},
 	Filtering_Enabled = false,
 	Filtering_Filterlist = {}, --key = spellId, value = spellName or false

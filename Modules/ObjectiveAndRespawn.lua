@@ -33,19 +33,11 @@ local defaultSettings = {
 		}
 	},
 	Cooldown = {
-		ShowNumber = true,
 		FontSize = 12,
-		FontOutline = "OUTLINE",
-		EnableShadow = false,
-		ShadowColor = {0, 0, 0, 1},
 	},
 	Text = {
 		FontSize = 17,
 		FontOutline = "THICKOUTLINE",
-		FontColor = {1, 1, 1, 1},
-		EnableShadow = false,
-		DrawSwipe = true,
-		ShadowColor = {0, 0, 0, 1}
 	}
 }
 

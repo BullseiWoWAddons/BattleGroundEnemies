@@ -14,12 +14,7 @@ local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
 	Cooldown = {
-		ShowNumber = true,
 		FontSize = 12,
-		FontOutline = "OUTLINE",
-		EnableShadow = false,
-		DrawSwipe = true,
-		ShadowColor = {0, 0, 0, 1},
 	},
     Width = 36,
 	ActivePoints = 1,

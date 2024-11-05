@@ -260,13 +260,14 @@ do
 
 	function buttonFunctions:SetModuleConfig(moduleName)
 		local moduleFrameOnButton = self[moduleName]
-		local moduleConfigOnButton
+		local moduleConfigOnButton = {}
 
-		if self.playerCountConfig.ButtonModules[moduleName].UsePlayerCountSpecificSettings then
-			moduleConfigOnButton = self.playerCountConfig.ButtonModules[moduleName]
-		else
-			moduleConfigOnButton = BattleGroundEnemies.db.profile.ButtonModules[moduleName]
-		end
+		local playerSizeModuleConfig = self.playerCountConfig.ButtonModules[moduleName]
+
+		local globalModuleConfig = BattleGroundEnemies.db.profile.ButtonModules[moduleName] or {}
+
+		Mixin(moduleConfigOnButton, globalModuleConfig, playerSizeModuleConfig)
+	
 
 		if moduleConfigOnButton.Enabled and BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) then
 			moduleFrameOnButton.Enabled = true

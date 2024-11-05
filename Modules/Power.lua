@@ -13,12 +13,14 @@ local UnitPowerMax = UnitPowerMax
 local UnitPowerType = UnitPowerType
 local math_random = math.random
 
+local generalDefaults = {
+	Texture = 'Blizzard Raid Bar',
+}
 
 local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
 	Height = 5,
-	Texture = 'Blizzard Raid Bar',
 	Background = {0, 0, 0, 0.66},
 	ActivePoints = 2,
 	Points = {
@@ -34,6 +36,22 @@ local defaultSettings = {
 		}
 	}
 }
+
+
+
+local generalOptions = function(location)
+	return {
+		Texture = {
+			type = "select",
+			name = L.BarTexture,
+			desc = L.HealthBar_Texture_Desc,
+			dialogControl = 'LSM30_Statusbar',
+			values = AceGUIWidgetLSMlists.statusbar,
+			width = "normal",
+			order = 1
+		},
+	}
+end
 
 local options = function(location)
 	return {
@@ -68,7 +86,9 @@ local power = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.PowerBar,
 	flags = flags,
 	defaultSettings = defaultSettings,
+	generalDefaults = generalDefaults,
 	options = options,
+	generalOptions = generalOptions,
 	events = {"UnitIdUpdate", "UpdatePower", "PlayerDetailsChanged"},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true

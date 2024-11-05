@@ -32,6 +32,7 @@ Data.changelog = {
 			{
 				Header = "Bugfix",
 				Entries = {
+					"Fixed a bug related to the factions not being set correctly, which caused an error",
 					"Fixed an error reported by Addonman on GitHub",
 					"Fixed DrTracker cooldown",
 					"Fixed racials and trinket in testmode",

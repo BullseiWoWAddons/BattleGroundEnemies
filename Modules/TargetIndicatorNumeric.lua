@@ -29,9 +29,6 @@ local defaultSettings = {
 	Text = {
 		FontSize = 13,
 		FontOutline = "",
-		FontColor = {1, 1, 1, 1},
-		EnableShadow = true,
-		ShadowColor = {0, 0, 0, 1},
 		JustifyH = "RIGHT",
 		JustifyV = "MIDDLE"
 	}

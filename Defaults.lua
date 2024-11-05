@@ -23,9 +23,6 @@ local allieDefaults15man = {
 		Text = {
 			FontSize = 14,
 			FontOutline = "OUTLINE",
-			FontColor = {1, 1, 1, 1},
-			EnableShadow = false,
-			ShadowColor = {0, 0, 0, 1},
 			JustifyV = "MIDDLE",
 			JustifyH = "LEFT"
 		}
@@ -33,7 +30,6 @@ local allieDefaults15man = {
 
 	ButtonModules = {
 		CastBar = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -45,7 +41,6 @@ local allieDefaults15man = {
 			},
 		},
 		Cooldowns = {
-			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -59,7 +54,6 @@ local allieDefaults15man = {
 			},
 		},
 		DRTracking = {
-			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -73,7 +67,6 @@ local allieDefaults15man = {
 			},
 		},
 		NonPriorityBuffs = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -90,7 +83,6 @@ local allieDefaults15man = {
 			},
 		},
 		NonPriorityDebuffs = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -106,7 +98,6 @@ local allieDefaults15man = {
 			}
 		},
 		PriorityBuffs = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = true,
 			Points = {
 				{
@@ -123,7 +114,6 @@ local allieDefaults15man = {
 			}
 		},
 		PriorityDebuffs = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = true,
 			Points = {
 				{
@@ -139,7 +129,6 @@ local allieDefaults15man = {
 			}
 		},
 		Racial = {
-			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPRIGHT",
@@ -150,7 +139,6 @@ local allieDefaults15man = {
 			}
 		},
 		Trinket = {
-			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPRIGHT",
@@ -188,9 +176,6 @@ local enemyDefault15man = {
 		Text = {
 			FontSize = 14,
 			FontOutline = "OUTLINE",
-			FontColor = {1, 1, 1, 1},
-			EnableShadow = false,
-			ShadowColor = {0, 0, 0, 1},
 			JustifyV = "MIDDLE",
 			JustifyH = "LEFT"
 		}
@@ -198,7 +183,6 @@ local enemyDefault15man = {
 
 	ButtonModules = {
 		CastBar = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -210,7 +194,6 @@ local enemyDefault15man = {
 			}
 		},
 		Cooldowns = {
-			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -224,7 +207,6 @@ local enemyDefault15man = {
 			},
 		},
 		DRTracking = {
-			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPRIGHT",
@@ -239,7 +221,6 @@ local enemyDefault15man = {
 			}
 		},
 		NonPriorityBuffs = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -256,7 +237,6 @@ local enemyDefault15man = {
 			}
 		},
 		NonPriorityDebuffs = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = false,
 			Points = {
 				{
@@ -272,7 +252,6 @@ local enemyDefault15man = {
 			}
 		},
 		PriorityBuffs = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = true,
 			Points = {
 				{
@@ -289,7 +268,6 @@ local enemyDefault15man = {
 			}
 		},
 		PriorityDebuffs = {
-			UsePlayerCountSpecificSettings = true,
 			Enabled = true,
 			Points = {
 				{
@@ -305,7 +283,6 @@ local enemyDefault15man = {
 			},
 		},
 		Racial = {
-			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -316,7 +293,6 @@ local enemyDefault15man = {
 			}
 		},
 		Trinket = {
-			UsePlayerCountSpecificSettings = true,
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -335,7 +311,6 @@ local enemyDefault15man = {
 
 Data.defaultSettings = {
 	profile = {
-		Font = "PT Sans Narrow Bold",
 		Locked = false,
 		Debug = false,
 
@@ -360,6 +335,19 @@ Data.defaultSettings = {
 		ConvertCyrillic = true,
 
 		RoleSortingOrder = "HEALER_TANK_DAMAGER",
+
+		Cooldown = {
+			ShowNumber = true,
+			FontOutline = "OUTLINE",
+			DrawSwipe = true,
+		},
+
+		Text = {
+			Font = "PT Sans Narrow Bold",
+			FontColor = {1, 1, 1, 1},
+			EnableShadow = false,
+			ShadowColor = {0, 0, 0, 1}
+		},
 
 		RBG = {
 			TargetCalling_SetMark = false,
@@ -409,21 +397,16 @@ Data.defaultSettings = {
 						Text = {
 							FontSize = 14,
 							FontOutline = "OUTLINE",
-							FontColor = {1, 1, 1, 1},
-							EnableShadow = false,
-							ShadowColor = {0, 0, 0, 1},
 							JustifyV = "MIDDLE",
 							JustifyH = "LEFT"
 						}
 					},
 					ButtonModules = {
 						SpecClassPriorityOne = {
-							UsePlayerCountSpecificSettings = true,
-							Width = 52
+											Width = 52
 						},
 						CastBar = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "RIGHT",
@@ -434,12 +417,10 @@ Data.defaultSettings = {
 							}
 						},
 						Covenant = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = false
+											Enabled = false
 						},
 						Cooldowns = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Racial",
@@ -452,8 +433,7 @@ Data.defaultSettings = {
 							},
 						},
 						DRTracking = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Button",
@@ -469,8 +449,7 @@ Data.defaultSettings = {
 							}
 						},
 						healthBar = {
-							UsePlayerCountSpecificSettings = true,
-							HealthTextEnabled = true,
+											HealthTextEnabled = true,
 							HealthTextType = "health",
 							HealthText = {
 								FontSize = 18,
@@ -478,14 +457,12 @@ Data.defaultSettings = {
 							}
 						},
 						Name = {
-							UsePlayerCountSpecificSettings = true,
-							Text = {
+											Text = {
 								JustifyV = "TOP"
 							}
 						},
 						NonPriorityBuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -501,8 +478,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityDebuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -517,12 +493,10 @@ Data.defaultSettings = {
 							}
 						},
 						Power = {
-							UsePlayerCountSpecificSettings = true,
-							Height = 8,
+											Height = 8,
 						},
 						PriorityBuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -541,8 +515,7 @@ Data.defaultSettings = {
 							}
 						},
 						PriorityDebuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -560,8 +533,7 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Trinket",
@@ -571,12 +543,10 @@ Data.defaultSettings = {
 							}
 						},
 						RaidTargetIcon = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = false
+											Enabled = false
 						},
 						Trinket = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
@@ -613,17 +583,13 @@ Data.defaultSettings = {
 						Text = {
 							FontSize = 14,
 							FontOutline = "OUTLINE",
-							FontColor = {1, 1, 1, 1},
-							EnableShadow = false,
-							ShadowColor = {0, 0, 0, 1},
 							JustifyV = "MIDDLE",
 							JustifyH = "LEFT"
 						}
 					},
 					ButtonModules = {
 						CastBar = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = false,
+											Enabled = false,
 							Points = {
 								{
 									Point = "RIGHT",
@@ -634,8 +600,7 @@ Data.defaultSettings = {
 							}
 						},
 						Cooldowns = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Racial",
@@ -648,8 +613,7 @@ Data.defaultSettings = {
 							},
 						},
 						DRTracking = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "SpecClassPriorityOne",
@@ -663,8 +627,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityBuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "BOTTOMRIGHT",
 									RelativeFrame = "PriorityDebuffs",
@@ -679,8 +642,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityDebuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "BOTTOMRIGHT",
 									RelativeFrame = "NonPriorityBuffs",
@@ -694,12 +656,10 @@ Data.defaultSettings = {
 							}
 						},
 						Power = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = false,
+											Enabled = false,
 						},
 						PriorityBuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "BOTTOMRIGHT",
 									RelativeFrame = "DRTracking",
@@ -714,8 +674,7 @@ Data.defaultSettings = {
 							}
 						},
 						PriorityDebuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "BOTTOMRIGHT",
 									RelativeFrame = "PriorityBuffs",
@@ -729,8 +688,7 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Trinket",
@@ -740,8 +698,7 @@ Data.defaultSettings = {
 							}
 						},
 						Trinket = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
@@ -801,17 +758,13 @@ Data.defaultSettings = {
 						Text = {
 							FontSize = 14,
 							FontOutline = "OUTLINE",
-							FontColor = {1, 1, 1, 1},
-							EnableShadow = false,
-							ShadowColor = {0, 0, 0, 1},
 							JustifyV = "MIDDLE",
 							JustifyH = "LEFT"
 						}
 					},
 					ButtonModules = {
 						CastBar = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "LEFT",
@@ -822,16 +775,13 @@ Data.defaultSettings = {
 							},
 						},
 						SpecClassPriorityOne = {
-							UsePlayerCountSpecificSettings = true,
-							Width = 52
+											Width = 52
 						},
 						Covenant = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = false
+											Enabled = false
 						},
 						Cooldowns = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Button",
@@ -844,8 +794,7 @@ Data.defaultSettings = {
 							},
 						},
 						DRTracking = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
@@ -861,8 +810,7 @@ Data.defaultSettings = {
 							}
 						},
 						healthBar = {
-							UsePlayerCountSpecificSettings = true,
-							HealthTextEnabled = true,
+											HealthTextEnabled = true,
 							HealthTextType = "health",
 							HealthText = {
 								FontSize = 18,
@@ -870,14 +818,12 @@ Data.defaultSettings = {
 							}
 						},
 						Name = {
-							UsePlayerCountSpecificSettings = true,
-							Text = {
+											Text = {
 								JustifyV = "TOP"
 							}
 						},
 						NonPriorityBuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -893,8 +839,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityDebuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -909,12 +854,10 @@ Data.defaultSettings = {
 							}
 						},
 						Power = {
-							UsePlayerCountSpecificSettings = true,
-							Height = 8,
+											Height = 8,
 						},
 						PriorityBuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -932,8 +875,7 @@ Data.defaultSettings = {
 							}
 						},
 						PriorityDebuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = true,
+											Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -950,8 +892,7 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Trinket",
@@ -961,12 +902,10 @@ Data.defaultSettings = {
 							}
 						},
 						RaidTargetIcon = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = false
+											Enabled = false
 						},
 						Trinket = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "SpecClassPriorityOne",
@@ -1005,17 +944,13 @@ Data.defaultSettings = {
 						Text = {
 							FontSize = 14,
 							FontOutline = "OUTLINE",
-							FontColor = {1, 1, 1, 1},
-							EnableShadow = false,
-							ShadowColor = {0, 0, 0, 1},
 							JustifyV = "MIDDLE",
 							JustifyH = "LEFT"
 						}
 					},
 					ButtonModules = {
 						CastBar = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = false,
+											Enabled = false,
 							Points = {
 								{
 									Point = "LEFT",
@@ -1026,8 +961,7 @@ Data.defaultSettings = {
 							}
 						},
 						Cooldowns = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Racial",
@@ -1040,8 +974,7 @@ Data.defaultSettings = {
 							},
 						},
 						DRTracking = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
@@ -1054,8 +987,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityBuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "BOTTOMLEFT",
 									RelativeFrame = "PriorityDebuffs",
@@ -1070,8 +1002,7 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityDebuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "BOTTOMLEFT",
 									RelativeFrame = "NonPriorityBuffs",
@@ -1085,12 +1016,10 @@ Data.defaultSettings = {
 							}
 						},
 						Power = {
-							UsePlayerCountSpecificSettings = true,
-							Enabled = false,
+											Enabled = false,
 						},
 						PriorityBuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "BOTTOMLEFT",
 									RelativeFrame = "DRTracking",
@@ -1105,8 +1034,7 @@ Data.defaultSettings = {
 							}
 						},
 						PriorityDebuffs = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "BOTTOMLEFT",
 									RelativeFrame = "PriorityBuffs",
@@ -1120,8 +1048,7 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Trinket",
@@ -1131,8 +1058,7 @@ Data.defaultSettings = {
 							}
 						},
 						Trinket = {
-							UsePlayerCountSpecificSettings = true,
-							Points = {
+											Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "SpecClassPriorityOne",

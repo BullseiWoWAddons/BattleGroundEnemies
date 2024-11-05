@@ -491,8 +491,8 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 		copyModuleDefaultsIntoDefaults(customPlayerCountConfigGeneric, moduleName, moduleSetupTable.defaultSettings)
 	end
 
-	if moduleSetupTable.defaultSettings then
-		copyModuleDefaultsIntoDefaults(Data.defaultSettings.profile, moduleName, moduleSetupTable.defaultSettings)
+	if moduleSetupTable.generalDefaults then
+		copyModuleDefaultsIntoDefaults(Data.defaultSettings.profile, moduleName, moduleSetupTable.generalDefaults)
 	end
 
 
@@ -1077,8 +1077,15 @@ function BattleGroundEnemies.CropImage(texture, width, height, hasTexcoords)
 	end
 end
 
-local function ApplyFontStringSettings(fs, settings)
-	fs:SetFont(LSM:Fetch("font", BattleGroundEnemies.db.profile.Font), settings.FontSize, settings.FontOutline)
+local function ApplyFontStringSettings(fs, settings, isCooldown)
+	local globals = Mixin({}, BattleGroundEnemies.db.profile.Text)
+	if isCooldown then
+		globals = Mixin({}, globals, BattleGroundEnemies.db.profile.Cooldown)
+	end
+
+	local configTable = Mixin({}, globals, settings)
+
+	fs:SetFont(LSM:Fetch("font", configTable.Font), configTable.FontSize, configTable.FontOutline)
 
 
 	--idk why, but without this the SetJustifyH and SetJustifyV dont seem to work sometimes even tho GetJustifyH returns the new, correct value
@@ -1086,32 +1093,35 @@ local function ApplyFontStringSettings(fs, settings)
 	fs:GetStringHeight()
 	fs:GetStringWidth()
 
-	if settings.JustifyH then
-		fs:SetJustifyH(settings.JustifyH)
+	if configTable.JustifyH then
+		fs:SetJustifyH(configTable.JustifyH)
 	end
 
-	if settings.JustifyV then
-		fs:SetJustifyV(settings.JustifyV)
+	if configTable.JustifyV then
+		fs:SetJustifyV(configTable.JustifyV)
 	end
 
-	if settings.WordWrap ~= nil then
-		fs:SetWordWrap(settings.WordWrap)
+	if configTable.WordWrap ~= nil then
+		fs:SetWordWrap(configTable.WordWrap)
 	end
 
-	if settings.FontColor then
-		fs:SetTextColor(unpack(settings.FontColor))
+	if configTable.FontColor then
+		fs:SetTextColor(unpack(configTable.FontColor))
 	end
 
-	fs:EnableShadowColor(settings.EnableShadow, settings.ShadowColor)
+	fs:EnableShadowColor(configTable.EnableShadow, configTable.ShadowColor)
 end
 
 local function ApplyCooldownSettings(self, config, cdReverse, swipeColor)
+	local configTable = Mixin({}, BattleGroundEnemies.db.profile.Cooldown, config)
+	DevTools_Dump(configTable)
 	self:SetReverse(cdReverse)
-	self:SetDrawSwipe(config.DrawSwipe)
+	self:SetDrawSwipe(configTable.DrawSwipe)
+	self:SetDrawEdge(configTable.DrawSwipe)
 	if swipeColor then self:SetSwipeColor(unpack(swipeColor)) end
-	self:SetHideCountdownNumbers(not config.ShowNumber)
+	self:SetHideCountdownNumbers(not configTable.ShowNumber)
 	if self.Text then
-		self.Text:ApplyFontStringSettings(config)
+		self.Text:ApplyFontStringSettings(config, true)
 	end
 end
 
