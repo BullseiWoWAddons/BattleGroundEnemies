@@ -652,7 +652,7 @@ local function generateOverwritableOptions(location, options)
 	return newOptions
 end
 
-function BattleGroundEnemies:AddModuleOptions(location, options, moduleName)
+function BattleGroundEnemies:GetModuleOptions(location, options)
 	local moduleOptions = type(options) == "function" and options(location) or options or {}
 	return moduleOptions
 end
@@ -720,7 +720,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 						end,
 						order = 4,
 						disabled = function() return not locationn.Enabled or not moduleFrame.options end,
-						args = BattleGroundEnemies:AddModuleOptions(locationn, moduleFrame.options, moduleName)
+						args = BattleGroundEnemies:GetModuleOptions(locationn, moduleFrame.options)
 					},
 					Reset = {
 						type = "execute",
@@ -750,7 +750,7 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 			local defaults = BattleGroundEnemies.db.defaults.profile.ButtonModules[moduleName]
 
 
-			local moduleOptions = type(moduleFrame.generalOptions) == "function" and moduleFrame.generalOptions(locationn) or moduleFrame.generalOptions or {}
+			local moduleOptions = self:GetModuleOptions(locationn, moduleFrame.generalOptions)
 
 			temp[moduleName]  = {
 				type = "group",
