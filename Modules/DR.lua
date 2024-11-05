@@ -128,7 +128,6 @@ local generalOptions = function(location)
 			name = "",
 			inline = true,
 			hidden = function ()
-				print("dafdsaf", location.CustomCategoryIconsEnabled)
 				return not location.CustomCategoryIconsEnabled
 			end,
 			order = 3,
@@ -253,9 +252,7 @@ local function createNewDrFrame(playerButton, container)
 	drFrame.Container = container
 
 	drFrame.ApplyChildFrameSettings = function(self)
-		print("1")
 		self.Cooldown:ApplyCooldownSettings(container.config.Cooldown, true , {0, 0, 0, 0.5})
-		print("2")
 		self:SetDisplayType()
 	end
 

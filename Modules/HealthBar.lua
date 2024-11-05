@@ -63,7 +63,6 @@ end
 
 local options = function(location)
 	return {
-		Fake = Data.AddHorizontalSpacing(2),
 		Background = {
 			type = "color",
 			name = L.BarBackground,

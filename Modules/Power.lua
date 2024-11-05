@@ -55,16 +55,6 @@ end
 
 local options = function(location)
 	return {
-		Texture = {
-			type = "select",
-			name = L.BarTexture,
-			desc = L.PowerBar_Texture_Desc,
-			dialogControl = 'LSM30_Statusbar',
-			values = AceGUIWidgetLSMlists.statusbar,
-			width = "normal",
-			order = 3
-		},
-		Fake = Data.AddHorizontalSpacing(4),
 		Background = {
 			type = "color",
 			name = L.BarBackground,

@@ -1114,7 +1114,6 @@ end
 
 local function ApplyCooldownSettings(self, config, cdReverse, swipeColor)
 	local configTable = Mixin({}, BattleGroundEnemies.db.profile.Cooldown, config)
-	DevTools_Dump(configTable)
 	self:SetReverse(cdReverse)
 	self:SetDrawSwipe(configTable.DrawSwipe)
 	self:SetDrawEdge(configTable.DrawSwipe)

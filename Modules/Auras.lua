@@ -490,9 +490,7 @@ local function createNewAuraFrame(playerButton, container)
 
 		--self.count:ApplyFontStringSettings(conf.StackText)
 		local cooldownConfig = conf.Cooldown
-		print("3424")
 		self.cooldown:ApplyCooldownSettings(cooldownConfig, true, {0, 0, 0, 0.5})
-		print("12345")
 		if container.filter == "HELPFUL" then
 			self.Stealable:SetSize(conf.Container.IconSize + 3, conf.Container.IconSize + 3)
 		end

@@ -9,6 +9,10 @@ local CreateFrame = CreateFrame
 local GameTooltip = GameTooltip
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
+local generalDefaults = {
+    showSpecIfExists = true,
+    showHighestPriority = true
+}
 
 local defaultSettings = {
 	Enabled = true,
@@ -26,26 +30,30 @@ local defaultSettings = {
 		}
 	},
     UseButtonHeightAsHeight = true,
-    showSpecIfExists = true,
-    showHighestPriority = true
 }
 
-local options = function(location)
+local generalOptions = function (location)
 	return {
-        showSpecIfExists = {
+		showSpecIfExists = {
 			type = "toggle",
 			name = L.ShowSpecIfExists,
 			desc = L.ShowSpecIfExists_Desc,
 			width = "normal",
 			order = 1
 		},
-        showHighestPriority = {
+		showHighestPriority = {
 			type = "toggle",
 			name = L.showHighestPriority,
 			desc = L.showHighestPriority_Desc,
 			width = "normal",
 			order = 2
 		},
+	}
+	
+end
+
+local options = function(location)
+	return {
 		CooldownTextSettings = {
 			type = "group",
 			name = L.Countdowntext,
@@ -66,7 +74,9 @@ local SpecClassPriorityOne = BattleGroundEnemies:NewButtonModule({
 	moduleName = "SpecClassPriorityOne",
 	localizedModuleName = L.SpecClassPriorityOne,
 	defaultSettings = defaultSettings,
+	generalDefaults = generalDefaults,
 	options = options,
+	generalOptions = generalOptions,
 	events = {"PlayerDetailsChanged", "ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
 	enabledInThisExpansion = true
 })
@@ -83,8 +93,10 @@ local SpecClassPriorityTwo = BattleGroundEnemies:NewButtonModule({
                 RelativePoint = "BOTTOMLEFT",
             }
         }
-    }) ,
+    }),
+	generalDefaults = generalDefaults,
 	options = options,
+	generalOptions = generalOptions,
 	events = {"PlayerDetailsChanged", "ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
 	enabledInThisExpansion = true
 })
