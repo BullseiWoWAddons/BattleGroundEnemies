@@ -8,6 +8,10 @@ local L = Data.L
 local MaxLevel = GetMaxPlayerLevel()
 
 
+local generalDefaults = {
+	OnlyShowIfNotMaxLevel = true,
+}
+
 local defaultSettings = {
 	Enabled = false,
 	Parent = "healthBar",
@@ -22,7 +26,6 @@ local defaultSettings = {
 			OffsetY = 2
 		}
 	},
-	OnlyShowIfNotMaxLevel = true,
 	Text = {
 		FontSize = 18,
 		FontOutline = "",
@@ -30,13 +33,19 @@ local defaultSettings = {
 	}
 }
 
-local options = function(location)
+local generalOptions = function (location)
 	return {
 		OnlyShowIfNotMaxLevel = {
 			type = "toggle",
 			name = L.LevelText_OnlyShowIfNotMaxLevel,
 			order = 2
-		},
+		}
+	}
+end
+
+local options = function(location)
+	return {
+
 		LevelTextTextSettings = {
 			type = "group",
 			name = L.TextSettings,
@@ -57,7 +66,9 @@ local level = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Level",
 	localizedModuleName = LEVEL,
 	defaultSettings = defaultSettings,
+	generalDefaults = generalDefaults,
 	options = options,
+	generalOptions = generalOptions,
 	events = {"UnitIdUpdate"},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
