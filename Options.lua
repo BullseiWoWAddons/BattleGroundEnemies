@@ -832,19 +832,19 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			},
 			Fake = Data.AddHorizontalSpacing(3),
 			Fake1 = Data.AddHorizontalSpacing(4),
-			-- CopySettings = {
-			-- 	type = "execute",
-			-- 	name = L.CopySettings:format(L[oppositePlayerType]),
-			-- 	desc = L.CopySettings_Desc:format(L[oppositePlayerType])..L.NotAvailableInCombat,
-			-- 	disabled = InCombatLockdown,
-			-- 	func = function()
-			-- 		BattleGroundEnemies.db.profile[playerType] = CopyTable(BattleGroundEnemies.db.profile[oppositePlayerType])
-			-- 		BattleGroundEnemies:NotifyChange()
-			-- 	end,
-			-- 	confirm = function() return L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]) end,
-			-- 	width = "double",
-			-- 	order = 6
-			-- },
+			CopySettings = {
+				type = "execute",
+				name = L.CopySettings:format(L[oppositePlayerType]),
+				desc = L.CopySettings_Desc:format(L[oppositePlayerType])..L.NotAvailableInCombat,
+				disabled = InCombatLockdown,
+				func = function()
+					BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
+					BattleGroundEnemies:NotifyChange()
+				end,
+				confirm = function() return L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]) end,
+				width = "double",
+				order = 6
+			},
 			RangeIndicator_Settings = {
 				type = "group",
 				name = L.RangeIndicator_Settings,

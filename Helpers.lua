@@ -85,7 +85,6 @@ local oppositeHorizontalPoints = {
     TOPRIGHT = "TOPLEFT",
     RIGHT = "LEFT",
     BOTTOMRIGHT = "BOTTOMLEFT"
-
 }
 
 function Data.Helpers.getOppositeHorizontalPoint(point)

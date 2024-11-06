@@ -220,6 +220,71 @@ end
 
 local auraFilters = { "HELPFUL", "HARMFUL" }
 
+function BattleGroundEnemies:FlipButtonModuleSettingsHorizontally(moduleName, dbLocation)
+	local newSettings = {}
+
+	local moduleFrame = self.ButtonModules[moduleName]
+	if not moduleFrame or moduleFrame.attachSettingsToButton then
+		newSettings = CopyTable(dbLocation, false)
+	else
+		for k,v in pairs(dbLocation) do
+			if type(v) == "table" then
+				if k == "Points" then
+					local newPointsData = CopyTable(v, false)
+					for i = 1, #v do
+						local pointsData = v[i]
+						if pointsData.Point then
+							newPointsData[i].Point = Data.Helpers.getOppositeHorizontalPoint(pointsData.Point) or pointsData.Point
+						end
+						if pointsData.RelativePoint then
+							newPointsData[i].RelativePoint = Data.Helpers.getOppositeHorizontalPoint(pointsData.RelativePoint) or pointsData.RelativePoint
+						end
+						if pointsData.OffsetX then
+							newPointsData[i].OffsetX = -pointsData.OffsetX
+						end
+					end
+					newSettings[k] = newPointsData
+				elseif k == "Container" then
+					local newContainerSettings = CopyTable(v, false)
+					local newHorizontalGrowDirection
+	
+					local horizontalGrowdirection = v.HorizontalGrowDirection
+					if horizontalGrowdirection then
+						newHorizontalGrowDirection = Data.Helpers.getOppositeDirection(horizontalGrowdirection) or horizontalGrowdirection
+					end
+					newContainerSettings.HorizontalGrowDirection = newHorizontalGrowDirection
+					newSettings[k] = newContainerSettings
+				else
+					newSettings[k] = self:FlipButtonModuleSettingsHorizontally(moduleName, v)
+				end
+			else
+				newSettings[k] = v
+			end
+		end
+	end
+
+	return newSettings
+end
+
+function BattleGroundEnemies:FlipSettingsHorizontallyRecursive(dblocation)
+	local dbLocationFlippedHorizontally = {}
+	for k,v in pairs(dblocation) do
+		if type(v) == "table" then
+			if k == "ButtonModules" then
+				dbLocationFlippedHorizontally[k] = {}
+				for moduleName, moduleSettings in pairs(v) do
+					dbLocationFlippedHorizontally[k][moduleName] = self:FlipButtonModuleSettingsHorizontally(moduleName, moduleSettings)
+				end
+			else
+				dbLocationFlippedHorizontally[k] = self:FlipSettingsHorizontallyRecursive(v)
+			end
+		else
+			dbLocationFlippedHorizontally[k] = v
+		end
+	end
+	return dbLocationFlippedHorizontally
+end
+
 
 local function CreateFakeAura(filter)
 	local foundA = Data.FoundAuras[filter]
