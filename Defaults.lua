@@ -50,7 +50,7 @@ local allieDefaults15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "rightwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			},
 		},
 		DRTracking = {
@@ -63,7 +63,7 @@ local allieDefaults15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "rightwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			},
 		},
 		NonPriorityBuffs = {
@@ -79,7 +79,7 @@ local allieDefaults15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "rightwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			},
 		},
 		NonPriorityDebuffs = {
@@ -94,7 +94,7 @@ local allieDefaults15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "rightwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			}
 		},
 		PriorityBuffs = {
@@ -110,7 +110,7 @@ local allieDefaults15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "rightwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			}
 		},
 		PriorityDebuffs = {
@@ -125,7 +125,7 @@ local allieDefaults15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "rightwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			}
 		},
 		Racial = {
@@ -203,7 +203,7 @@ local enemyDefault15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "rightwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			},
 		},
 		DRTracking = {
@@ -217,7 +217,7 @@ local enemyDefault15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "leftwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			}
 		},
 		NonPriorityBuffs = {
@@ -233,7 +233,7 @@ local enemyDefault15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "leftwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			}
 		},
 		NonPriorityDebuffs = {
@@ -248,7 +248,7 @@ local enemyDefault15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "leftwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			}
 		},
 		PriorityBuffs = {
@@ -264,7 +264,7 @@ local enemyDefault15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "leftwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			}
 		},
 		PriorityDebuffs = {
@@ -279,7 +279,7 @@ local enemyDefault15man = {
 			},
 			Container = {
 				HorizontalGrowDirection = "leftwards",
-				VerticalGrowdirection = "upwards",
+				VerticalGrowdirection = "downwards",
 			},
 		},
 		Racial = {
@@ -403,10 +403,10 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						SpecClassPriorityOne = {
-											Width = 52
+							Width = 52
 						},
 						CastBar = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "RIGHT",
@@ -417,10 +417,10 @@ Data.defaultSettings = {
 							}
 						},
 						Covenant = {
-											Enabled = false
+							Enabled = false
 						},
 						Cooldowns = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Racial",
@@ -429,11 +429,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							},
 						},
 						DRTracking = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Button",
@@ -449,7 +449,7 @@ Data.defaultSettings = {
 							}
 						},
 						healthBar = {
-											HealthTextEnabled = true,
+							HealthTextEnabled = true,
 							HealthTextType = "health",
 							HealthText = {
 								FontSize = 18,
@@ -457,12 +457,12 @@ Data.defaultSettings = {
 							}
 						},
 						Name = {
-											Text = {
+							Text = {
 								JustifyV = "TOP"
 							}
 						},
 						NonPriorityBuffs = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -474,11 +474,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						NonPriorityDebuffs = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -489,14 +489,14 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						Power = {
-											Height = 8,
+							Height = 8,
 						},
 						PriorityBuffs = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -511,11 +511,11 @@ Data.defaultSettings = {
 								IconSize = 25,
 								IconsPerRow = 8,
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						PriorityDebuffs = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMRIGHT",
@@ -529,11 +529,11 @@ Data.defaultSettings = {
 								IconSize = 25,
 								IconsPerRow = 8,
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						Racial = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Trinket",
@@ -543,10 +543,10 @@ Data.defaultSettings = {
 							}
 						},
 						RaidTargetIcon = {
-											Enabled = false
+							Enabled = false
 						},
 						Trinket = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
@@ -589,7 +589,7 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						CastBar = {
-											Enabled = false,
+							Enabled = false,
 							Points = {
 								{
 									Point = "RIGHT",
@@ -600,7 +600,7 @@ Data.defaultSettings = {
 							}
 						},
 						Cooldowns = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Racial",
@@ -609,11 +609,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							},
 						},
 						DRTracking = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "SpecClassPriorityOne",
@@ -623,11 +623,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						NonPriorityBuffs = {
-											Points = {
+							Points = {
 								{
 									Point = "BOTTOMRIGHT",
 									RelativeFrame = "PriorityDebuffs",
@@ -638,11 +638,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						NonPriorityDebuffs = {
-											Points = {
+							Points = {
 								{
 									Point = "BOTTOMRIGHT",
 									RelativeFrame = "NonPriorityBuffs",
@@ -652,14 +652,14 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						Power = {
-											Enabled = false,
+							Enabled = false,
 						},
 						PriorityBuffs = {
-											Points = {
+							Points = {
 								{
 									Point = "BOTTOMRIGHT",
 									RelativeFrame = "DRTracking",
@@ -670,11 +670,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						PriorityDebuffs = {
-											Points = {
+							Points = {
 								{
 									Point = "BOTTOMRIGHT",
 									RelativeFrame = "PriorityBuffs",
@@ -684,11 +684,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "leftwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						Racial = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Trinket",
@@ -698,7 +698,7 @@ Data.defaultSettings = {
 							}
 						},
 						Trinket = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
@@ -764,7 +764,7 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						CastBar = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "LEFT",
@@ -775,13 +775,13 @@ Data.defaultSettings = {
 							},
 						},
 						SpecClassPriorityOne = {
-											Width = 52
+							Width = 52
 						},
 						Covenant = {
-											Enabled = false
+							Enabled = false
 						},
 						Cooldowns = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Button",
@@ -790,11 +790,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							},
 						},
 						DRTracking = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
@@ -810,7 +810,7 @@ Data.defaultSettings = {
 							}
 						},
 						healthBar = {
-											HealthTextEnabled = true,
+							HealthTextEnabled = true,
 							HealthTextType = "health",
 							HealthText = {
 								FontSize = 18,
@@ -818,7 +818,7 @@ Data.defaultSettings = {
 							}
 						},
 						Name = {
-											Text = {
+							Text = {
 								JustifyV = "TOP"
 							}
 						},
@@ -835,11 +835,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						NonPriorityDebuffs = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -850,14 +850,14 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						Power = {
-											Height = 8,
+							Height = 8,
 						},
 						PriorityBuffs = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -871,11 +871,11 @@ Data.defaultSettings = {
 								UseButtonHeightAsSize = false,
 								IconSize = 25,
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						PriorityDebuffs = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
 									Point = "BOTTOMLEFT",
@@ -888,11 +888,11 @@ Data.defaultSettings = {
 								UseButtonHeightAsSize = false,
 								IconSize = 25,
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						Racial = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Trinket",
@@ -902,10 +902,10 @@ Data.defaultSettings = {
 							}
 						},
 						RaidTargetIcon = {
-											Enabled = false
+							Enabled = false
 						},
 						Trinket = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "SpecClassPriorityOne",
@@ -950,7 +950,7 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						CastBar = {
-											Enabled = false,
+							Enabled = false,
 							Points = {
 								{
 									Point = "LEFT",
@@ -961,7 +961,7 @@ Data.defaultSettings = {
 							}
 						},
 						Cooldowns = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Racial",
@@ -970,11 +970,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							},
 						},
 						DRTracking = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPLEFT",
 									RelativeFrame = "Button",
@@ -983,11 +983,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						NonPriorityBuffs = {
-											Points = {
+							Points = {
 								{
 									Point = "BOTTOMLEFT",
 									RelativeFrame = "PriorityDebuffs",
@@ -998,11 +998,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						NonPriorityDebuffs = {
-											Points = {
+							Points = {
 								{
 									Point = "BOTTOMLEFT",
 									RelativeFrame = "NonPriorityBuffs",
@@ -1012,14 +1012,14 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						Power = {
-											Enabled = false,
+							Enabled = false,
 						},
 						PriorityBuffs = {
-											Points = {
+							Points = {
 								{
 									Point = "BOTTOMLEFT",
 									RelativeFrame = "DRTracking",
@@ -1030,11 +1030,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						PriorityDebuffs = {
-											Points = {
+							Points = {
 								{
 									Point = "BOTTOMLEFT",
 									RelativeFrame = "PriorityBuffs",
@@ -1044,11 +1044,11 @@ Data.defaultSettings = {
 							},
 							Container = {
 								HorizontalGrowDirection = "rightwards",
-								VerticalGrowdirection = "upwards",
+								VerticalGrowdirection = "downwards",
 							}
 						},
 						Racial = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "Trinket",
@@ -1058,7 +1058,7 @@ Data.defaultSettings = {
 							}
 						},
 						Trinket = {
-											Points = {
+							Points = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "SpecClassPriorityOne",
