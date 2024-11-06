@@ -286,7 +286,7 @@ function BattleGroundEnemies:FlipSettingsHorizontallyRecursive(dblocation)
 end
 
 
-local function CreateFakeAura(filter)
+local function CreateFakeAura(filter, durationFactor)
 	local foundA = Data.FoundAuras[filter]
 
 	local auraTable
@@ -327,8 +327,8 @@ local function CreateFakeAura(filter)
 		canApplyAura = canApplyAura or auraToSend.canApplyAura,
 		charges = nil,
 		dispelName = auraToSend.dispelName,
-		duration = auraToSend.duration,
-		expirationTime = GetTime() + auraToSend.duration,
+		duration = auraToSend.duration * durationFactor,
+		expirationTime = GetTime() + (auraToSend.duration * durationFactor),
 		icon = auraToSend.icon,
 		isBossAura = auraToSend.isBossAura,
 		isFromPlayerOrPlayerPet = castByPlayer or auraToSend.isFromPlayerOrPlayerPet,
@@ -364,7 +364,7 @@ local function UpdateFakeAuras(playerButton)
 
 		local createNewAura = not playerButton.isDead
 		if createNewAura then
-			local newFakeAura = CreateFakeAura(filter)
+			local newFakeAura = CreateFakeAura(filter, BattleGroundEnemies.Editmode.Active and 500 or 1)
 			if newFakeAura then
 				local categoryNewAura = DRList:GetCategoryBySpellID(IsClassic and newFakeAura.name or newFakeAura
 					.spellId)
@@ -741,6 +741,7 @@ function BattleGroundEnemies:EnableEditmode()
 	self:EnableTestMode()
 	BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
 	self:Information(L.EditmodeEnabled)
+	self:Information(L.EditModeIntroduction)
 end
 
 function BattleGroundEnemies:DisableEditmode()
