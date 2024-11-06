@@ -27,7 +27,7 @@ Data.Helpers =  {}
 ]]
 Data.Helpers.permgen = function(inputArr)
     local result = {}
-    
+
     local function permute(arr, current)
        if #arr == 0 then
           table.insert(result, current)
@@ -45,7 +45,7 @@ Data.Helpers.permgen = function(inputArr)
           end
        end
     end
-    
+
     permute(inputArr, {})
     return result
 end
