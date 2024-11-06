@@ -238,6 +238,10 @@ function combatIndicator:AttachToPlayerButton(playerButton)
 	end
 
 	function playerButton.CombatIndicator:OnTestmodeTick()
+		if not self.testmodeEnabled then
+			self:DisableTicker()
+			self.testmodeEnabled = true
+		end
 		local newState = math.random(1,2)
 		self:Update(newState)
 	end
