@@ -353,8 +353,8 @@ local function CreateMainFrame(playerType)
 
 		self:SetSize(conf.BarWidth, 30)
 		self:SetScale(conf.Framescale)
-
 		self:ClearAllPoints()
+
 		if not conf.Position_X and not conf.Position_Y then
 			self:SetPoint("CENTER", UIParent, "CENTER")
 		else
@@ -368,6 +368,13 @@ local function CreateMainFrame(playerType)
 		self.ActiveProfile:ApplyFontStringSettings(conf.PlayerCount.Text)
 
 		self.ActiveProfile:SetText(L[self.PlayerType]..": ".. self:GetPlayerCountConfigNameLocalized(self.playerCountConfig))
+
+
+		if BattleGroundEnemies.Testmode.Active then
+			self.ActiveProfile:Show()
+		else
+			self.ActiveProfile:Hide()
+		end
 
 		self:SortPlayers(true) --force repositioning
 
