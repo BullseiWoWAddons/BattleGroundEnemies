@@ -15,13 +15,13 @@ local math_random = math.random
 
 local generalDefaults = {
 	Texture = 'Blizzard Raid Bar',
+	Background = {0, 0, 0, 0.66},
 }
 
 local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
 	Height = 5,
-	Background = {0, 0, 0, 0.66},
 	ActivePoints = 2,
 	Points = {
 		{
@@ -50,18 +50,13 @@ local generalOptions = function(location)
 			width = "normal",
 			order = 1
 		},
-	}
-end
-
-local options = function(location)
-	return {
 		Background = {
 			type = "color",
 			name = L.BarBackground,
 			desc = L.PowerBar_Background_Desc,
 			hasAlpha = true,
 			width = "normal",
-			order = 5
+			order = 2
 		}
 	}
 end
@@ -77,7 +72,6 @@ local power = BattleGroundEnemies:NewButtonModule({
 	flags = flags,
 	defaultSettings = defaultSettings,
 	generalDefaults = generalDefaults,
-	options = options,
 	generalOptions = generalOptions,
 	events = {"UnitIdUpdate", "UpdatePower", "PlayerDetailsChanged"},
 	enabledInThisExpansion = true,
