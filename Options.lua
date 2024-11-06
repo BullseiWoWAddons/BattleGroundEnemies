@@ -692,8 +692,19 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 							AceConfigDialog:SelectGroup(unpack(optionsPath))
 						end,
 						hidden = not BattleGroundEnemies.ButtonModules[moduleName].generalOptions,
-						width = "normal",
+						width = "full",
 						order = 2
+					},
+					Reset = {
+						type = "execute",
+						name = L.ResetModule,
+						desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location)),
+						func = function()
+							location.ButtonModules[moduleName] = CopyTable(playerCountConfigDefault.ButtonModules[moduleName])
+							BattleGroundEnemies:NotifyChange()
+						end,
+						width = "full",
+						order = 3,
 					},
 					PositionSetting = {
 						type = "group",
@@ -706,7 +717,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 						end,
 						disabled  = function() return not locationn.Enabled end,
 						hidden = moduleFrame.flags.FixedPosition,
-						order = 3,
+						order = 4,
 						args = Data.AddPositionSetting(locationn, moduleName, moduleFrame, playerType)
 					},
 					ModuleSettings = {
@@ -718,21 +729,12 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 						set = function(option, ...)
 							return Data.SetOption(locationn, option, ...)
 						end,
-						order = 4,
-						disabled = function() return not locationn.Enabled or not moduleFrame.options end,
-						args = BattleGroundEnemies:GetModuleOptions(locationn, moduleFrame.options)
-					},
-					Reset = {
-						type = "execute",
-						name = L.ResetModule,
-						desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location)),
-						func = function()
-							location.ButtonModules[moduleName] = CopyTable(playerCountConfigDefault.ButtonModules[moduleName])
-							BattleGroundEnemies:NotifyChange()
-						end,
-						width = "full",
 						order = 5,
-					}
+						disabled = function() return not locationn.Enabled or not moduleFrame.options end,
+						args = BattleGroundEnemies:GetModuleOptions(locationn, moduleFrame.options),
+						childGroups = "tab"
+					},
+			
 				}
 			}
 		end
