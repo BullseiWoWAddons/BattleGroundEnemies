@@ -43,8 +43,8 @@ local generalOptions = function (location)
 		},
 		showHighestPriority = {
 			type = "toggle",
-			name = L.showHighestPriority,
-			desc = L.showHighestPriority_Desc,
+			name = L.ShowHighestPriority,
+			desc = L.ShowHighestPriority_Desc,
 			width = "normal",
 			order = 2
 		},

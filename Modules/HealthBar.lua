@@ -17,13 +17,13 @@ local HealthTextTypes = {
 
 local generalDefaults = {
 	Texture = 'Blizzard Raid Bar',
+	HealthPrediction_Enabled = true,
 }
 
 local defaultSettings = {
 	Parent = "Button",
 	Enabled = true,
 	Background = {0, 0, 0, 0.66},
-	HealthPrediction_Enabled = true,
 	HealthTextEnabled = false,
 	HealthTextType = "health",
 	HealthText = {
@@ -58,6 +58,12 @@ local generalOptions = function(location)
 			width = "normal",
 			order = 1
 		},
+		HealthPrediction_Enabled = {
+			type = "toggle",
+			name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
+			width = "normal",
+			order = 2,
+		},
 	}
 end
 
@@ -72,12 +78,6 @@ local options = function(location)
 			order = 3
 		},
 		Fake1 = Data.AddVerticalSpacing(4),
-		HealthPrediction_Enabled = {
-			type = "toggle",
-			name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
-			width = "normal",
-			order = 5,
-		},
 		HealthTextEnabled = {
 			type = "toggle",
 			name = L.HealthTextEnabled,

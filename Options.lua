@@ -60,10 +60,10 @@ end
 local function isValidPlayerCountRange(playerType, playerCountConfigs, inputs, profileToIgnore)
 	local min = inputs.MinPlayerCount
 	local max = inputs.MaxPlayerCount
-	if not min then return false, "min can't be undefined" end
-	if not max then return false, "max can't be undefined" end
+	if not min then return false, L.MinCantBeUndefined end
+	if not max then return false, L.MaxCantBeUndefined end
 
-	if min > max then return false, "max needs to be equal or greater than min" end
+	if min > max then return false, L.MaxNeedsToBeEqualOrGreater end
 
 	for i = 1, #playerCountConfigs do
 		local playerCountConfig = playerCountConfigs[i]
@@ -77,7 +77,7 @@ local function isValidPlayerCountRange(playerType, playerCountConfigs, inputs, p
 				max = max
 			}
 			if Data.Helpers.AreOverlappingRanges(newRange, range) then
-				return false, "Range overlapping with: ".. BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(playerCountConfig)
+				return false, L.RangeOverlapping:format(BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(playerCountConfig))
 			end
 		end
 	end
@@ -685,8 +685,8 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 					},
 					ShowGeneralOptions = {
 						type = "execute",
-						name = L.ShowGeneralOptions,
-						desc = L.ShowGeneralOptions_Desc,
+						name = L.JumpToGeneralOptions,
+						desc = L.JumpToGeneralOptions_Desc,
 						func = function()
 							local optionsPath = {"BattleGroundEnemies", "GeneralSettings", "ButtonModules", moduleName}
 							AceConfigDialog:SelectGroup(unpack(optionsPath))
@@ -836,6 +836,19 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				type = "execute",
 				name = L.CopySettings:format(L[oppositePlayerType]),
 				desc = L.CopySettings_Desc:format(L[oppositePlayerType])..L.NotAvailableInCombat,
+				disabled = InCombatLockdown,
+				func = function()
+					BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
+					BattleGroundEnemies:NotifyChange()
+				end,
+				confirm = function() return L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]) end,
+				width = "double",
+				order = 6
+			},
+			CopySettingFlip = {
+				type = "execute",
+				name = L.CopySettingsFlip:format(L[oppositePlayerType]),
+				desc = L.CopySettingsFlip_Desc:format(L[oppositePlayerType])..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
 				func = function()
 					BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
@@ -1553,8 +1566,8 @@ function BattleGroundEnemies:SetupOptions()
 						args = {
 							EnableMouseWheelPlayerTargeting = {
 								type = "toggle",
-								name = L.EnableMouseWheelPlayerTargeting,
-								desc = L.EnableMouseWheelPlayerTargeting_Desc,
+								name = L.MouseWheelPlayerTargeting,
+								desc = L.MouseWheelPlayerTargeting_Desc,
 								order = 1
 							},
 							ShowTooltips = {
