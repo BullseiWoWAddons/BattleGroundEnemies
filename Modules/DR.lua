@@ -27,16 +27,14 @@ local generalDefaults = {
 	CustomCategoryIcons = {},
 	Filtering_Enabled = false,
 	Filtering_Filterlist = {},
+	DisplayType = "Frame",
 }
 
 local defaultSettings = {
 	Enabled = true,
 	Parent = "Button",
 	ActivePoints = 1,
-	DisplayType = "Frame",
 	IconSize = 20,
-	CustomCategoryIconsEnabled = false,
-	CustomCategoryIcons = {},
 	Cooldown = {
 		FontSize = 12,
 	},
@@ -49,8 +47,6 @@ local defaultSettings = {
 		VerticalGrowdirection = "downwards",
 		VerticalSpacing = 1,
 	},
-	Filtering_Enabled = false,
-	Filtering_Filterlist = {},
 }
 
 
