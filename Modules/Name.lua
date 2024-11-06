@@ -8,6 +8,10 @@ local Data = select(2, ...)
 
 local L = Data.L
 
+local generalDefaults = {
+	ShowRealmnames = true
+}
+
 local defaultSettings = {
 	Enabled = true,
 	Parent = "healthBar",
@@ -33,10 +37,9 @@ local defaultSettings = {
 		JustifyV = "MIDDLE",
 		WordWrap = false
 	},
-	ShowRealmnames = true
 }
 
-local options = function(location)
+local generalOptions = function(location)
 	return {
 		ShowRealmnames = {
 			type = "toggle",
@@ -44,7 +47,12 @@ local options = function(location)
 			desc = L.ShowRealmnames_Desc,
 			width = "normal",
 			order = 2
-		},
+		}
+	}
+end
+
+local options = function(location)
+	return {
 		TextSettings = {
 			type = "group",
 			name = L.TextSettings,
@@ -61,10 +69,14 @@ local options = function(location)
 	}
 end
 
+
+
 local name = BattleGroundEnemies:NewButtonModule({
 	moduleName = "Name",
 	localizedModuleName = L.Name,
+	generalDefaults = generalDefaults,
 	defaultSettings = defaultSettings,
+	generalOptions = generalOptions,
 	options = options,
 	events = {"PlayerDetailsChanged"},
 	enabledInThisExpansion = true,
