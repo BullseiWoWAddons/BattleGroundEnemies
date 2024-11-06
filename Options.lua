@@ -1693,12 +1693,6 @@ function BattleGroundEnemies:SetupOptions()
 							},
 						}
 					},
-					ButtonModules = {
-						type = "group",
-						name = L.Modules,
-						args = self:AddGeneralModuleSettings(),
-						order = 6
-					},
 					CooldownSettings = {
 						type = "group",
 						name = L.Cooldown,
@@ -1749,11 +1743,12 @@ function BattleGroundEnemies:SetupOptions()
 								hasAlpha = true,
 								order = 2
 							},
+							Fake = Data.AddVerticalSpacing(3),
 							EnableShadow = {
 								type = "toggle",
 								name = L.FontShadow_Enabled,
 								desc = L.FontShadow_Enabled_Desc,
-								order = 3
+								order = 4
 							},
 							ShadowColor = {
 								type = "color",
@@ -1763,10 +1758,16 @@ function BattleGroundEnemies:SetupOptions()
 									return not location.Text.EnableShadow
 								end,
 								hasAlpha = true,
-								order = 4
+								order = 5
 							}
 						},
 						order = 7
+					},
+					ButtonModules = {
+						type = "group",
+						name = L.Modules,
+						args = self:AddGeneralModuleSettings(),
+						order = 8
 					}
 				}
 			},
