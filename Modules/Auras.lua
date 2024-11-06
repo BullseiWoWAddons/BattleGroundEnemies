@@ -42,7 +42,7 @@ local defaults = {
 		IconsPerRow = 8,
 		HorizontalGrowDirection = "leftwards",
 		HorizontalSpacing = 2,
-		VerticalGrowdirection = "upwards",
+		VerticalGrowdirection = "downwards",
 		VerticalSpacing = 1,
 	},
 	Coloring_Enabled = true,
