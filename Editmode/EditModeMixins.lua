@@ -640,7 +640,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetScaledSelection
 	return left * scale, (left + width) * scale, bottom * scale, (bottom + height) * scale;
 end
 
-local SELECTION_PADDING = 2;
+local SELECTION_PADDING = 0; --custom, is 2 uually
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetSelectionOffset(point, forYOffset)
 	local function GetLeftOffset()
@@ -929,7 +929,6 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStop()
 			--BattleGroundEnemies:Debug("1")
 			BattleGroundEnemies.CustomEditModeMagnetismManager:ApplyMagnetism(self);  --meses up when trieying to align under the button
 		end
-		-- messes up frame at the bottom above actionbar 
 		BattleGroundEnemies.EditMode.EditModeManager:OnSystemPositionChange(self);
 	end
 end
