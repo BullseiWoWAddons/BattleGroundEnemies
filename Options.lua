@@ -745,7 +745,7 @@ end
 function BattleGroundEnemies:AddGeneralModuleSettings()
 	local temp = {}
 	for moduleName, moduleFrame in pairs(self.ButtonModules) do
-		if moduleFrame.options then
+		if moduleFrame.generalOptions then
 			local locationn = BattleGroundEnemies.db.profile.ButtonModules[moduleName]
 			local defaults = BattleGroundEnemies.db.defaults.profile.ButtonModules[moduleName]
 
