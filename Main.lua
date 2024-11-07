@@ -364,7 +364,7 @@ local function UpdateFakeAuras(playerButton)
 
 		local createNewAura = not playerButton.isDead
 		if createNewAura then
-			local newFakeAura = CreateFakeAura(filter, BattleGroundEnemies.Editmode.Active and 500 or 1)
+			local newFakeAura = CreateFakeAura(filter, BattleGroundEnemies.Editmode.Active and 5 or 1)
 			if newFakeAura then
 				local categoryNewAura = DRList:GetCategoryBySpellID(IsClassic and newFakeAura.name or newFakeAura
 					.spellId)
@@ -709,6 +709,8 @@ local function SetupTrinketAndRacialData()
 		end
 	end
 end
+
+
 
 function BattleGroundEnemies.ToggleTestmodeOnUpdate()
 	local enabled = not FakePlayersOnUpdateFrame:IsShown()
