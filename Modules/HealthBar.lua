@@ -17,18 +17,17 @@ local HealthTextTypes = {
 
 local generalDefaults = {
 	Texture = 'Blizzard Raid Bar',
+	Background = {0, 0, 0, 0.66},
 	HealthPrediction_Enabled = true,
 }
 
 local defaultSettings = {
 	Parent = "Button",
 	Enabled = true,
-	Background = {0, 0, 0, 0.66},
 	HealthTextEnabled = false,
 	HealthTextType = "health",
 	HealthText = {
 		FontSize = 17,
-		FontOutline = "",
 		JustifyH = "CENTER",
 		JustifyV = "TOP",
 	},
@@ -58,6 +57,14 @@ local generalOptions = function(location)
 			width = "normal",
 			order = 1
 		},
+		Background = {
+			type = "color",
+			name = L.BarBackground,
+			desc = L.HealthBar_Background_Desc,
+			hasAlpha = true,
+			width = "normal",
+			order = 3
+		},
 		HealthPrediction_Enabled = {
 			type = "toggle",
 			name = COMPACT_UNIT_FRAME_PROFILE_DISPLAYHEALPREDICTION,
@@ -69,14 +76,6 @@ end
 
 local options = function(location)
 	return {
-		Background = {
-			type = "color",
-			name = L.BarBackground,
-			desc = L.HealthBar_Background_Desc,
-			hasAlpha = true,
-			width = "normal",
-			order = 3
-		},
 		Fake1 = Data.AddVerticalSpacing(4),
 		HealthTextEnabled = {
 			type = "toggle",
