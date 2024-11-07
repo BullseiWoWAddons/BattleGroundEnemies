@@ -47,7 +47,7 @@ local options = function(location)
 
 		LevelTextTextSettings = {
 			type = "group",
-			name = L.TextSettings,
+			name = L.Text,
 			get = function(option)
 				return Data.GetOption(location.Text, option)
 			end,

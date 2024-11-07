@@ -44,7 +44,7 @@ local options = function(location)
 	return {
 		TextSettings = {
 			type = "group",
-			name = L.TextSettings,
+			name = L.Text,
 			inline = true,
 			order = 4,
 			get = function(option)

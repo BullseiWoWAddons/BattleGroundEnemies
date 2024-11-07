@@ -37,7 +37,7 @@ local options = function(location, playerType)
 	return {
 		TextSettings = {
 			type = "group",
-			name = L.TextSettings,
+			name = L.Text,
 			inline = true,
 			order = 4,
 			get = function(option)

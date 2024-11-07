@@ -1271,7 +1271,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 								},
 								PlayerCountTextSettings = {
 									type = "group",
-									name = L.TextSettings,
+									name = L.Text,
 									disabled = function() return not location.PlayerCount.Enabled end,
 									get = function(option)
 										return Data.GetOption(location.PlayerCount.Text, option)
@@ -1727,7 +1727,7 @@ function BattleGroundEnemies:SetupOptions()
 					},
 					TextSettings = {
 						type = "group",
-						name = L.TextSettings,
+						name = L.Text,
 						get = function(option)
 							return Data.GetOption(location.Text, option)
 						end,
