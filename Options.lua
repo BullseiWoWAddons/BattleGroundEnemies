@@ -629,7 +629,6 @@ local function generateOverwritableOptions(location, options)
 					order = 1
 				}
 				print("k", k)
-				DevTools_Dump(v)
 				newOptions[newK].args[k] = v
 				newOptions[newK].args[k].order = 2
 				newOptions[newK].args[k].disabled = function()
