@@ -631,7 +631,7 @@ Data.defaultSettings = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "SpecClassPriorityOne",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX= -2
 								}
 							},
