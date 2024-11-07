@@ -110,13 +110,13 @@ Data.DisplayType = {
 	Countdowntext = L.Countdowntext,
 }
 
-Data.DrCategorys = {
-	disorient = L.DR_Disorient,
-	incapacitate = L.DR_Incapacitate,
-	knockback = L.DR_Knockback,
-	silence  = L.DR_Silence,
-	stun = L.DR_Stun
-}
+-- Data.DrCategorys = {
+-- 	disorient = L.DR_Disorient,
+-- 	incapacitate = L.DR_Incapacitate,
+-- 	knockback = L.DR_Knockback,
+-- 	silence  = L.DR_Silence,
+-- 	stun = L.DR_Stun
+-- }
 
 Data.DebuffTypes = {
 	HELPFUL = {
