@@ -848,8 +848,21 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					end
 					return phrase:format(L[playerType], L[oppositePlayerType])
 				end,
-				width = "full",
+				width = "double",
 				order = 3
+			},
+			LoadDefaults = {
+				type = "execute",
+				name = L.RestoreDefault,
+				func = function()
+					BattleGroundEnemies.db.profile[playerType] = CopyTable(BattleGroundEnemies.db.defaults.profile[playerType], false)
+					BattleGroundEnemies:NotifyChange()
+				end,
+				confirm = function ()
+					return "Are you sure?"
+				end,
+				width = "double",
+				order = 4
 			},
 			RangeIndicator_Settings = {
 				type = "group",
@@ -1096,7 +1109,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					desc = "test",
 					order = 1
 				},
-				Fake = Data.AddHorizontalSpacing(2),
+				Fake = Data.AddVerticalSpacing(2),
 				CopySettings = {
 					type = "select",
 					name = L.CopySettings,
@@ -1146,6 +1159,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					confirm = function ()
 						return "Are you sure?"
 					end,
+					width = "double",
 					order = 4
 				},
 				blub = {
