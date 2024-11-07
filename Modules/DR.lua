@@ -154,7 +154,7 @@ local generalOptions = function(location)
 					set = function(option, key, state) -- key = category name
 						location.Filtering_Filterlist[key] = state or nil
 					end,
-					values = Data.DrCategorys,
+					values = DRList:GetCategories(),
 					order = 2
 				}
 			}
