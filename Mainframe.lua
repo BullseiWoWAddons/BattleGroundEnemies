@@ -301,6 +301,7 @@ local function CreateMainFrame(playerType)
 		for playerName, playerButton in pairs(self.Players) do
 			playerButton:DispatchEvent("OnTestmodeEnabled")
 		end
+		self.ActiveProfile:Show()
 	end
 
 	function mainframe:OnTestmodeDisabled()
@@ -308,6 +309,7 @@ local function CreateMainFrame(playerType)
 			playerButton:DispatchEvent("OnTestmodeDisabled")
 		end
 		self:RemoveAllPlayersFromSource(BattleGroundEnemies.consts.PlayerSources.FakePlayers)
+		self.ActiveProfile:Hide()
 	end
 
 	function mainframe:Enable()
@@ -369,13 +371,6 @@ local function CreateMainFrame(playerType)
 
 		self.ActiveProfile:SetText(L[self.PlayerType]..": ".. self:GetPlayerCountConfigNameLocalized(self.playerCountConfig))
 
-
-		if BattleGroundEnemies.Testmode.Active then
-			self.ActiveProfile:Show()
-		else
-			self.ActiveProfile:Hide()
-		end
-
 		self:SortPlayers(true) --force repositioning
 
 		for name, playerButton in pairs(self.Players) do
@@ -391,7 +386,7 @@ local function CreateMainFrame(playerType)
 		self:UpdatePlayerCount()
 		self:CheckEnableState()
 	end
-
+	
 	function mainframe:GetPlayerCountsFromConfig(playerCountConfig)
 		if type(playerCountConfig) ~= "table" then
 			error("playerCountConfig must be a table")
@@ -1054,8 +1049,8 @@ local function CreateMainFrame(playerType)
 	mainframe.PlayerCount:SetJustifyV("MIDDLE")
 
 	mainframe.ActiveProfile = BattleGroundEnemies.MyCreateFontString(mainframe)
-	mainframe.ActiveProfile:SetPoint("TOPLEFT", mainframe, "BOTTOMLEFT")
-	mainframe.ActiveProfile:SetPoint("TOPRIGHT", mainframe, "BOTTOMRIGHT")
+	mainframe.ActiveProfile:SetPoint("BOTTOMLEFT", mainframe.PlayerCount, "TOPLEFT")
+	mainframe.ActiveProfile:SetPoint("BOTTOMRIGHT", mainframe.PlayerCount, "TOPRIGHT")
 	mainframe.ActiveProfile:SetHeight(30)
 	mainframe.ActiveProfile:SetJustifyH("LEFT")
 	mainframe.ActiveProfile:SetJustifyV("MIDDLE")
