@@ -1366,7 +1366,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				},
 				ModuleSettings = {
 					type = "group",
-					name = L.ModuleSettings,
+					name = L.Modules,
 					order = 8,
 					args = self:AddModulesSettings(location, playerCountConfigDefault, playerType, function(options) return not options.attachSettingsToButton end)
 				}
