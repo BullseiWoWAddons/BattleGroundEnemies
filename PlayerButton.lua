@@ -1144,7 +1144,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 
 	--@class PlayerButton
 	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe, 'SecureUnitButtonTemplate')
-	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, L.Button, playerButton)
+	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, "playerButton", L.Button, playerButton)
 	playerButton:RegisterForClicks('AnyUp')
 	playerButton:SetPropagateMouseMotion(true) --to send the mouse wheel event to the other frame behind it (the mainframe)
 	playerButton:Hide()
@@ -1219,7 +1219,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 			local moduleOnFrame = moduleFrame:AttachToPlayerButton(playerButton)
 			if moduleOnFrame then
 				if not moduleFrame.attachSettingsToButton then
-					BattleGroundEnemies.EditMode.EditModeManager:AddFrame(moduleOnFrame, moduleFrame.localizedModuleName, playerButton)
+					BattleGroundEnemies.EditMode.EditModeManager:AddFrame(moduleOnFrame, moduleName, moduleFrame.localizedModuleName, playerButton)
 				end
 			end
 

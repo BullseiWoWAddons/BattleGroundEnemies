@@ -209,7 +209,7 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemLoad()
 
 
 
-	self.Selection:SetGetLabelTextFunction(function() return self:GetSystemName(); end);
+	self.Selection:SetGetLabelTextFunction(function() return self:GetLocalizedSystemName(); end);
 	--self:SetupSettingsDialogAnchor();
 	self.snappedFrames = {};
 	self.downKeys = {};
@@ -931,6 +931,11 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnDragStop()
 		end
 		BattleGroundEnemies.EditMode.EditModeManager:OnSystemPositionChange(self);
 	end
+end
+
+function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetLocalizedSystemName()
+	--custom
+	return self.systemLocalized;
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetSystemName()
