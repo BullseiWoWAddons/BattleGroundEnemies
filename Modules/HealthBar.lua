@@ -76,7 +76,6 @@ end
 
 local options = function(location)
 	return {
-		Fake1 = Data.AddVerticalSpacing(4),
 		HealthTextEnabled = {
 			type = "toggle",
 			name = L.HealthTextEnabled,
