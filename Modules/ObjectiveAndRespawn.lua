@@ -76,7 +76,7 @@ local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.ObjectiveAndRespawnTimer,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "UnitDied", "ArenaOpponentShown", "ArenaOpponentHidden"},
+	events = {"ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "UnitDied", "UnitIsAlive", "ArenaOpponentShown", "ArenaOpponentHidden"},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
 })
@@ -187,6 +187,13 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 
 		if not BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then return end -- This player is not shown on arena enemy so we dont care
 		if BattleGroundEnemies.BattleGroundDebuffs then self:SearchForDebuffs(aura) end
+	end
+
+	function frame:UnitIsAlive()
+		--BattleGroundEnemies:Debug("UnitIsAlive")
+		if self.ActiveRespawnTimer then
+			self.Cooldown:Clear()
+		end
 	end
 
 	function frame:UnitDied()

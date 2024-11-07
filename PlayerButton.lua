@@ -584,6 +584,13 @@ do
 		self.isDead = true
 	end
 
+	function buttonFunctions:PlayerIsAlive()
+		self:DispatchEvent("UnitIsAlive")
+		self.isDead = false
+	end
+
+	
+
 	local maxHealths = {} --key = playerbutton, value = {}
 	local deadPlayers = {}
 
@@ -634,9 +641,9 @@ do
 		self:DispatchEvent("UpdateHealth", unitID, health, maxHealth)
 		if unitID then
 			if UnitIsDeadOrGhost(unitID) then
-				self:PlayerDied()
+				self:PlayerIsAlive()
 			else
-				self.isDead = false
+				self:PlayerDied()
 			end
 		else
 			-- we are in testmode
