@@ -33,7 +33,7 @@ local allieDefaults15man = {
 			Points = {
 				{
 					Point = "LEFT",
-					RelativeFrame = "Button",
+					RelativeFrame = "SpecClassPriorityOne",
 					RelativePoint = "RIGHT",
 					OffsetX = 28,
 				},
@@ -55,9 +55,9 @@ local allieDefaults15man = {
 		DRTracking = {
 			Points = {
 				{
-					Point = "TOPLEFT",
-					RelativeFrame = "Button",
-					RelativePoint = "TOPRIGHT",
+					Point = "BOTTOMLEFT",
+					RelativeFrame = "SpecClassPriorityOne",
+					RelativePoint = "BOTTOMRIGHT",
 				}
 			},
 			Container = {
@@ -69,11 +69,11 @@ local allieDefaults15man = {
 			Enabled = false,
 			Points = {
 				{
-					Point = "BOTTOMLEFT",
+					Point = "TOPLEFT",
 					RelativeFrame = "PriorityDebuffs",
-					RelativePoint = "BOTTOMRIGHT",
+					RelativePoint = "TOPRIGHT",
 					OffsetX = 2,
-					OffsetY = 1
+					OffsetY = 0
 				}
 			},
 			Container = {
@@ -85,9 +85,9 @@ local allieDefaults15man = {
 			Enabled = false,
 			Points = {
 				{
-					Point = "BOTTOMLEFT",
+					Point = "TOPLEFT",
 					RelativeFrame = "NonPriorityBuffs",
-					RelativePoint = "BOTTOMRIGHT",
+					RelativePoint = "TOPRIGHT",
 					OffsetX = 8
 				}
 			},
@@ -100,11 +100,11 @@ local allieDefaults15man = {
 			Enabled = true,
 			Points = {
 				{
-					Point = "BOTTOMLEFT",
+					Point = "TOPLEFT",
 					RelativeFrame = "DRTracking",
-					RelativePoint = "BOTTOMRIGHT",
+					RelativePoint = "TOPRIGHT",
 					OffsetX = 2,
-					OffsetY = 1
+					OffsetY = 0
 				}
 			},
 			Container = {
@@ -116,9 +116,9 @@ local allieDefaults15man = {
 			Enabled = true,
 			Points = {
 				{
-					Point = "BOTTOMLEFT",
+					Point = "TOPLEFT",
 					RelativeFrame = "PriorityBuffs",
-					RelativePoint = "BOTTOMRIGHT",
+					RelativePoint = "TOPRIGHT",
 					OffsetX = 8
 				}
 			},
@@ -137,11 +137,20 @@ local allieDefaults15man = {
 				}
 			}
 		},
+		SpecClassPriorityOne = {
+			Points = {
+				{
+					Point = "TOPLEFT",
+					RelativeFrame = "Button",
+					RelativePoint = "TOPRIGHT",
+				}
+			}
+		},
 		Trinket = {
 			Points = {
 				{
 					Point = "TOPRIGHT",
-					RelativeFrame = "SpecClassPriorityOne",
+					RelativeFrame = "Button",
 					RelativePoint = "TOPLEFT",
 					OffsetX = -1
 				}
@@ -207,9 +216,9 @@ local enemyDefault15man = {
 		DRTracking = {
 			Points = {
 				{
-					Point = "TOPRIGHT",
+					Point = "BOTTOMRIGHT",
 					RelativeFrame = "SpecClassPriorityOne",
-					RelativePoint = "TOPLEFT",
+					RelativePoint = "BOTTOMLEFT",
 					OffsetX = -2
 				}
 			},
@@ -222,11 +231,11 @@ local enemyDefault15man = {
 			Enabled = false,
 			Points = {
 				{
-					Point = "BOTTOMRIGHT",
+					Point = "TOPRIGHT",
 					RelativeFrame = "PriorityDebuffs",
-					RelativePoint = "BOTTOMLEFT",
+					RelativePoint = "TOPLEFT",
 					OffsetX = -2,
-					OffsetY = 1
+					OffsetY = 0
 				}
 			},
 			Container = {
@@ -238,9 +247,9 @@ local enemyDefault15man = {
 			Enabled = false,
 			Points = {
 				{
-					Point = "BOTTOMRIGHT",
+					Point = "TOPRIGHT",
 					RelativeFrame = "NonPriorityBuffs",
-					RelativePoint = "BOTTOMLEFT",
+					RelativePoint = "TOPLEFT",
 					OffsetX = -8
 				}
 			},
@@ -253,11 +262,11 @@ local enemyDefault15man = {
 			Enabled = true,
 			Points = {
 				{
-					Point = "BOTTOMRIGHT",
+					Point = "TOPRIGHT",
 					RelativeFrame = "DRTracking",
-					RelativePoint = "BOTTOMLEFT",
+					RelativePoint = "TOPLEFT",
 					OffsetX = -2,
-					OffsetY = 1
+					OffsetY = 0
 				}
 			},
 			Container = {
@@ -269,9 +278,9 @@ local enemyDefault15man = {
 			Enabled = true,
 			Points = {
 				{
-					Point = "BOTTOMRIGHT",
+					Point = "TOPRIGHT",
 					RelativeFrame = "PriorityBuffs",
-					RelativePoint = "BOTTOMLEFT",
+					RelativePoint = "TOPLEFT",
 					OffsetX = -8
 				}
 			},
@@ -287,6 +296,15 @@ local enemyDefault15man = {
 					RelativeFrame = "Trinket",
 					RelativePoint = "TOPRIGHT",
 					OffsetX = 1
+				}
+			}
+		},
+		SpecClassPriorityOne = {
+			Points = {
+				{
+					Point = "TOPRIGHT",
+					RelativeFrame = "Button",
+					RelativePoint = "TOPLEFT",
 				}
 			}
 		},
@@ -462,11 +480,11 @@ Data.defaultSettings = {
 							Enabled = true,
 							Points = {
 								{
-									Point = "BOTTOMRIGHT",
+									Point = "TOPRIGHT",
 									RelativeFrame = "PriorityDebuffs",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX = -2,
-									OffsetY = 1
+									OffsetY = 0
 								}
 							},
 							Container = {
@@ -478,9 +496,9 @@ Data.defaultSettings = {
 							Enabled = true,
 							Points = {
 								{
-									Point = "BOTTOMRIGHT",
+									Point = "TOPRIGHT",
 									RelativeFrame = "NonPriorityBuffs",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX = -8
 								}
 							},
@@ -496,11 +514,11 @@ Data.defaultSettings = {
 							Enabled = true,
 							Points = {
 								{
-									Point = "BOTTOMRIGHT",
+									Point = "TOPRIGHT",
 									RelativeFrame = "DRTracking",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX = -2,
-									OffsetY = 1
+									OffsetY = 0
 								}
 							},
 							Container = {
@@ -515,9 +533,9 @@ Data.defaultSettings = {
 							Enabled = true,
 							Points = {
 								{
-									Point = "BOTTOMRIGHT",
+									Point = "TOPRIGHT",
 									RelativeFrame = "PriorityBuffs",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX = -8
 								}
 							},
@@ -613,7 +631,7 @@ Data.defaultSettings = {
 								{
 									Point = "TOPRIGHT",
 									RelativeFrame = "SpecClassPriorityOne",
-									RelativePoint = "TOPLEFT",
+									RelativePoint = "BOTTOMLEFT",
 									OffsetX= -2
 								}
 							},
@@ -625,11 +643,11 @@ Data.defaultSettings = {
 						NonPriorityBuffs = {
 							Points = {
 								{
-									Point = "BOTTOMRIGHT",
+									Point = "TOPRIGHT",
 									RelativeFrame = "PriorityDebuffs",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX = -2,
-									OffsetY = 1
+									OffsetY = 0
 								}
 							},
 							Container = {
@@ -640,9 +658,9 @@ Data.defaultSettings = {
 						NonPriorityDebuffs = {
 							Points = {
 								{
-									Point = "BOTTOMRIGHT",
+									Point = "TOPRIGHT",
 									RelativeFrame = "NonPriorityBuffs",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX = -8
 								}
 							},
@@ -657,11 +675,11 @@ Data.defaultSettings = {
 						PriorityBuffs = {
 							Points = {
 								{
-									Point = "BOTTOMRIGHT",
+									Point = "TOPRIGHT",
 									RelativeFrame = "DRTracking",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX = -2,
-									OffsetY = 1
+									OffsetY = 0
 								}
 							},
 							Container = {
@@ -672,9 +690,9 @@ Data.defaultSettings = {
 						PriorityDebuffs = {
 							Points = {
 								{
-									Point = "BOTTOMRIGHT",
+									Point = "TOPRIGHT",
 									RelativeFrame = "PriorityBuffs",
-									RelativePoint = "BOTTOMLEFT",
+									RelativePoint = "TOPLEFT",
 									OffsetX = -8
 								}
 							},
@@ -763,14 +781,21 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "LEFT",
-									RelativeFrame = "Button",
+									RelativeFrame = "SpecClassPriorityOne",
 									RelativePoint = "RIGHT",
 									OffsetX = 28,
 								},
 							},
 						},
 						SpecClassPriorityOne = {
-							Width = 52
+							Width = 52,
+							Points = {
+								{
+									Point = "TOPLEFT",
+									RelativeFrame = "Button",
+									RelativePoint = "TOPRIGHT",
+								}
+							}
 						},
 						Covenant = {
 							Enabled = false
@@ -818,14 +843,14 @@ Data.defaultSettings = {
 							}
 						},
 						NonPriorityBuffs = {
-											Enabled = true,
+							Enabled = true,
 							Points = {
 								{
-									Point = "BOTTOMLEFT",
+									Point = "TOPLEFT",
 									RelativeFrame = "PriorityDebuffs",
-									RelativePoint = "BOTTOMRIGHT",
+									RelativePoint = "TOPRIGHT",
 									OffsetX = 2,
-									OffsetY = 1
+									OffsetY = 0
 								}
 							},
 							Container = {
@@ -837,9 +862,9 @@ Data.defaultSettings = {
 							Enabled = true,
 							Points = {
 								{
-									Point = "BOTTOMLEFT",
+									Point = "TOPLEFT",
 									RelativeFrame = "NonPriorityBuffs",
-									RelativePoint = "BOTTOMRIGHT",
+									RelativePoint = "TOPRIGHT",
 									OffsetX = 8
 								}
 							},
@@ -855,11 +880,11 @@ Data.defaultSettings = {
 							Enabled = true,
 							Points = {
 								{
-									Point = "BOTTOMLEFT",
+									Point = "TOPLEFT",
 									RelativeFrame = "DRTracking",
-									RelativePoint = "BOTTOMRIGHT",
+									RelativePoint = "TOPRIGHT",
 									OffsetX = 2,
-									OffsetY = 1
+									OffsetY = 0
 								}
 							},
 							Container = {
@@ -873,9 +898,9 @@ Data.defaultSettings = {
 							Enabled = true,
 							Points = {
 								{
-									Point = "BOTTOMLEFT",
+									Point = "TOPLEFT",
 									RelativeFrame = "PriorityBuffs",
-									RelativePoint = "BOTTOMRIGHT",
+									RelativePoint = "TOPRIGHT",
 									OffsetX = 8
 								}
 							},
@@ -903,7 +928,7 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "TOPRIGHT",
-									RelativeFrame = "SpecClassPriorityOne",
+									RelativeFrame = "Button",
 									RelativePoint = "TOPLEFT",
 									OffsetX = -1
 								}
@@ -948,7 +973,7 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "LEFT",
-									RelativeFrame = "Button",
+									RelativeFrame = "SpecClassPriorityOne",
 									RelativePoint = "RIGHT",
 									OffsetX = 28,
 								}
@@ -971,7 +996,7 @@ Data.defaultSettings = {
 							Points = {
 								{
 									Point = "TOPLEFT",
-									RelativeFrame = "Button",
+									RelativeFrame = "SpecClassPriorityOne",
 									RelativePoint = "TOPRIGHT",
 								}
 							},
@@ -983,11 +1008,11 @@ Data.defaultSettings = {
 						NonPriorityBuffs = {
 							Points = {
 								{
-									Point = "BOTTOMLEFT",
+									Point = "TOPLEFT",
 									RelativeFrame = "PriorityDebuffs",
-									RelativePoint = "BOTTOMRIGHT",
+									RelativePoint = "TOPRIGHT",
 									OffsetX = 2,
-									OffsetY = 1
+									OffsetY = 0
 								}
 							},
 							Container = {
@@ -998,9 +1023,9 @@ Data.defaultSettings = {
 						NonPriorityDebuffs = {
 							Points = {
 								{
-									Point = "BOTTOMLEFT",
+									Point = "TOPLEFT",
 									RelativeFrame = "NonPriorityBuffs",
-									RelativePoint = "BOTTOMRIGHT",
+									RelativePoint = "TOPRIGHT",
 									OffsetX = 8
 								}
 							},
@@ -1015,11 +1040,11 @@ Data.defaultSettings = {
 						PriorityBuffs = {
 							Points = {
 								{
-									Point = "BOTTOMLEFT",
+									Point = "TOPLEFT",
 									RelativeFrame = "DRTracking",
-									RelativePoint = "BOTTOMRIGHT",
+									RelativePoint = "TOPRIGHT",
 									OffsetX = 2,
-									OffsetY = 1
+									OffsetY = 0
 								}
 							},
 							Container = {
@@ -1030,9 +1055,9 @@ Data.defaultSettings = {
 						PriorityDebuffs = {
 							Points = {
 								{
-									Point = "BOTTOMLEFT",
+									Point = "TOPLEFT",
 									RelativeFrame = "PriorityBuffs",
-									RelativePoint = "BOTTOMRIGHT",
+									RelativePoint = "TOPRIGHT",
 									OffsetX = 8
 								}
 							},
@@ -1051,11 +1076,20 @@ Data.defaultSettings = {
 								}
 							}
 						},
+						SpecClassPriorityOne = {
+							Points = {
+								{
+									Point = "TOPLEFT",
+									RelativeFrame = "Button",
+									RelativePoint = "TOPRIGHT",
+								}
+							}
+						},
 						Trinket = {
 							Points = {
 								{
 									Point = "TOPRIGHT",
-									RelativeFrame = "SpecClassPriorityOne",
+									RelativeFrame = "Button",
 									RelativePoint = "TOPLEFT",
 									OffsetX = -1
 								}
