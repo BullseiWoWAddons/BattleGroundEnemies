@@ -689,7 +689,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 					},
 					Reset = {
 						type = "execute",
-						name = L.ResetModule,
+						name = L.RestoreDefault,
 						desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location)),
 						func = function()
 							location.ButtonModules[moduleName] = CopyTable(playerCountConfigDefault.ButtonModules[moduleName])
@@ -762,7 +762,7 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 				args = {
 					Reset = {
 						type = "execute",
-						name = L.ResetModule,
+						name = L.RestoreDefault,
 						desc = L.ResetGeneralModule_Desc,
 						func = function()
 							BattleGroundEnemies.db.profile.ButtonModules[moduleName] = CopyTable(defaults)
@@ -1710,17 +1710,27 @@ function BattleGroundEnemies:SetupOptions()
 							return Data.SetOption(location.Cooldown, option, ...)
 						end,
 						args = {
+							Reset = {
+								type = "execute",
+								name = L.RestoreDefault,
+								func = function()
+									location.Cooldown = CopyTable(BattleGroundEnemies.db.defaults.profile.Cooldown)
+									BattleGroundEnemies:NotifyChange()
+								end,
+								width = "full",
+								order = 1,
+							},
 							ShowNumber = {
 								type = "toggle",
 								name = L.ShowNumbers,
 								desc = L.ShowNumbers_Desc,
-								order = 1
+								order = 2
 							},
 							DrawSwipe = {
 								type = "toggle",
 								name = L.Enable_DrawSwipe,
 								desc = L.Enable_DrawSwipe_Desc,
-								order = 2
+								order = 3
 							}
 						},
 						order = 6
@@ -1735,35 +1745,45 @@ function BattleGroundEnemies:SetupOptions()
 							return Data.SetOption(location.Text, option, ...)
 						end,
 						args = {
+							Reset = {
+								type = "execute",
+								name = L.RestoreDefault,
+								func = function()
+									location.Text = CopyTable(BattleGroundEnemies.db.defaults.profile.Text)
+									BattleGroundEnemies:NotifyChange()
+								end,
+								width = "full",
+								order = 1,
+							},
 							Font = {
 								type = "select",
 								name = L.Font,
 								desc = L.Font_Desc,
 								dialogControl = "LSM30_Font",
 								values = AceGUIWidgetLSMlists.font,
-								order = 1
+								order = 2
 							},
 							FontColor = {
 								type = "color",
 								name = L.Fontcolor,
 								desc = L.Fontcolor_Desc,
 								hasAlpha = true,
-								order = 2
+								order = 3
 							},
-							Fake = Data.AddVerticalSpacing(3),
+							Fake = Data.AddVerticalSpacing(4),
 							FontOutline = {
 								type = "select",
 								name = L.Font_Outline,
 								desc = L.Font_Outline_Desc,
 								values = FontOutlines,
-								order = 4
+								order = 5
 							},
-							Fake1 = Data.AddVerticalSpacing(5),
+							Fake1 = Data.AddVerticalSpacing(6),
 							EnableShadow = {
 								type = "toggle",
 								name = L.FontShadow_Enabled,
 								desc = L.FontShadow_Enabled_Desc,
-								order = 6
+								order = 7
 							},
 							ShadowColor = {
 								type = "color",
@@ -1773,7 +1793,7 @@ function BattleGroundEnemies:SetupOptions()
 									return not location.Text.EnableShadow
 								end,
 								hasAlpha = true,
-								order = 7
+								order = 8
 							}
 						},
 						order = 7
