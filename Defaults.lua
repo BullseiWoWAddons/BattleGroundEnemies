@@ -22,7 +22,6 @@ local allieDefaults15man = {
 		Enabled = true,
 		Text = {
 			FontSize = 14,
-			FontOutline = "OUTLINE",
 			JustifyV = "MIDDLE",
 			JustifyH = "LEFT"
 		}
@@ -175,7 +174,6 @@ local enemyDefault15man = {
 		Enabled = true,
 		Text = {
 			FontSize = 14,
-			FontOutline = "OUTLINE",
 			JustifyV = "MIDDLE",
 			JustifyH = "LEFT"
 		}
@@ -338,13 +336,13 @@ Data.defaultSettings = {
 
 		Cooldown = {
 			ShowNumber = true,
-			FontOutline = "OUTLINE",
 			DrawSwipe = true,
 		},
 
 		Text = {
 			Font = "PT Sans Narrow Bold",
 			FontColor = {1, 1, 1, 1},
+			FontOutline = "",
 			EnableShadow = false,
 			ShadowColor = {0, 0, 0, 1}
 		},
@@ -396,7 +394,6 @@ Data.defaultSettings = {
 						Enabled = false,
 						Text = {
 							FontSize = 14,
-							FontOutline = "OUTLINE",
 							JustifyV = "MIDDLE",
 							JustifyH = "LEFT"
 						}
@@ -582,7 +579,6 @@ Data.defaultSettings = {
 						Enabled = true,
 						Text = {
 							FontSize = 14,
-							FontOutline = "OUTLINE",
 							JustifyV = "MIDDLE",
 							JustifyH = "LEFT"
 						}
@@ -757,7 +753,6 @@ Data.defaultSettings = {
 						Enabled = false,
 						Text = {
 							FontSize = 14,
-							FontOutline = "OUTLINE",
 							JustifyV = "MIDDLE",
 							JustifyH = "LEFT"
 						}
@@ -943,7 +938,6 @@ Data.defaultSettings = {
 						Enabled = true,
 						Text = {
 							FontSize = 14,
-							FontOutline = "OUTLINE",
 							JustifyV = "MIDDLE",
 							JustifyH = "LEFT"
 						}

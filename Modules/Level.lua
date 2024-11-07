@@ -28,7 +28,6 @@ local defaultSettings = {
 	},
 	Text = {
 		FontSize = 18,
-		FontOutline = "",
 		JustifyH = "LEFT"
 	}
 }

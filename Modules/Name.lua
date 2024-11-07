@@ -32,7 +32,6 @@ local defaultSettings = {
 	},
 	Text = {
 		FontSize = 13,
-		FontOutline = "",
 		JustifyH = "LEFT",
 		JustifyV = "MIDDLE",
 		WordWrap = false

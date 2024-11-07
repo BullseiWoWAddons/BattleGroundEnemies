@@ -37,7 +37,6 @@ local defaultSettings = {
 	},
 	Text = {
 		FontSize = 17,
-		FontOutline = "THICKOUTLINE",
 	}
 }
 

@@ -587,15 +587,7 @@ function Data.AddNormalTextSettings(location)
 			step = 1,
 			width = "normal",
 			order = 1
-		},
-		FontOutline = {
-			type = "select",
-			name = L.Font_Outline,
-			desc = L.Font_Outline_Desc,
-			values = FontOutlines,
-			order = 2
-		},
-		Fake = Data.AddVerticalSpacing(3),
+		}
 	}
 end
 
@@ -837,7 +829,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			CopySettings = {
 				type = "execute",
 				name = L.CopySettings:format(L[oppositePlayerType]),
-				desc = L.CopySettings_Desc:format(L[oppositePlayerType])..L.NotAvailableInCombat,
+				desc = L.CopySettings_Desc:format(L[oppositePlayerType]).." "..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
 				func = function()
 					BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
@@ -850,7 +842,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			CopySettingFlip = {
 				type = "execute",
 				name = L.CopySettingsFlip:format(L[oppositePlayerType]),
-				desc = L.CopySettingsFlip_Desc:format(L[oppositePlayerType])..L.NotAvailableInCombat,
+				desc = L.CopySettingsFlip_Desc:format(L[oppositePlayerType]).." "..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
 				func = function()
 					BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
@@ -936,7 +928,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			KeybindSettings = {
 				type = "group",
 				name = KEY_BINDINGS,
-				desc = L.KeybindSettings_Desc..L.NotAvailableInCombat,
+				desc = L.KeybindSettings_Desc.." "..L.NotAvailableInCombat,
 				disabled = InCombatLockdown,
 				--childGroups = "tab",
 				order = 8,
@@ -1252,7 +1244,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						Framescale = {
 							type = "range",
 							name = L.Framescale,
-							desc = L.Framescale_Desc..L.NotAvailableInCombat,
+							desc = L.Framescale_Desc.." "..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							min = 0.3,
 							max = 2,
@@ -1305,7 +1297,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						BarWidth = {
 							type = "range",
 							name = L.Width,
-							desc = L.BarWidth_Desc..L.NotAvailableInCombat,
+							desc = L.BarWidth_Desc.." "..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							min = 1,
 							max = 400,
@@ -1315,7 +1307,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						BarHeight = {
 							type = "range",
 							name = L.Height,
-							desc = L.BarHeight_Desc..L.NotAvailableInCombat,
+							desc = L.BarHeight_Desc.." "..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							min = 1,
 							max = 100,
@@ -1325,7 +1317,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						BarVerticalGrowdirection = {
 							type = "select",
 							name = L.VerticalGrowdirection,
-							desc = L.VerticalGrowdirection_Desc..L.NotAvailableInCombat,
+							desc = L.VerticalGrowdirection_Desc.." "..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							values = Data.VerticalDirections,
 							order = 3
@@ -1333,7 +1325,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						BarVerticalSpacing = {
 							type = "range",
 							name = L.VerticalSpacing,
-							desc = L.VerticalSpacing..L.NotAvailableInCombat,
+							desc = L.VerticalSpacing.." "..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							min = 0,
 							max = 100,
@@ -1343,7 +1335,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						BarColumns = {
 							type = "range",
 							name = L.Columns,
-							desc = L.Columns_Desc..L.NotAvailableInCombat,
+							desc = L.Columns_Desc.." "..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							min = 1,
 							max = 4,
@@ -1353,7 +1345,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						BarHorizontalGrowdirection = {
 							type = "select",
 							name = L.VerticalGrowdirection,
-							desc = L.VerticalGrowdirection_Desc..L.NotAvailableInCombat,
+							desc = L.VerticalGrowdirection_Desc.." "..L.NotAvailableInCombat,
 							hidden = function() return location.BarColumns < 2 end,
 							disabled = InCombatLockdown,
 							values = Data.HorizontalDirections,
@@ -1362,7 +1354,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						BarHorizontalSpacing = {
 							type = "range",
 							name = L.HorizontalSpacing,
-							desc = L.HorizontalSpacing..L.NotAvailableInCombat,
+							desc = L.HorizontalSpacing.." "..L.NotAvailableInCombat,
 							hidden = function() return location.BarColumns < 2 end,
 							disabled = InCombatLockdown,
 							min = 0,
@@ -1759,11 +1751,19 @@ function BattleGroundEnemies:SetupOptions()
 								order = 2
 							},
 							Fake = Data.AddVerticalSpacing(3),
+							FontOutline = {
+								type = "select",
+								name = L.Font_Outline,
+								desc = L.Font_Outline_Desc,
+								values = FontOutlines,
+								order = 4
+							},
+							Fake1 = Data.AddVerticalSpacing(5),
 							EnableShadow = {
 								type = "toggle",
 								name = L.FontShadow_Enabled,
 								desc = L.FontShadow_Enabled_Desc,
-								order = 4
+								order = 6
 							},
 							ShadowColor = {
 								type = "color",
@@ -1773,7 +1773,7 @@ function BattleGroundEnemies:SetupOptions()
 									return not location.Text.EnableShadow
 								end,
 								hasAlpha = true,
-								order = 5
+								order = 7
 							}
 						},
 						order = 7
