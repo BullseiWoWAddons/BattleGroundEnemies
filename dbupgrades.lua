@@ -90,13 +90,13 @@ function BattleGroundEnemies:UpgradeProfile(profile, profileName)
             
              BattleGroundEnemies.db.profile.Font to BattleGroundEnemies.db.profile.Text.Font
         ]]
-        
+
         if profile.Font then
-            profile.Text.Font = profile.Font 
+            profile.Text.Font = profile.Font
             profile.Font = nil
         end
 
-        
+
         didStuff = true
     end
 
