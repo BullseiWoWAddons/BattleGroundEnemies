@@ -4,6 +4,7 @@ local AddonName = ...
 local Data = select(2, ...)
 
 ---@class BattleGroundEnemies
+local BattleGroundEnemies = BattleGroundEnemies
 
 
 local AceGUI = LibStub("AceGUI-3.0")
