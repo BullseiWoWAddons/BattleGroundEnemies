@@ -39,6 +39,19 @@ local defaultSettings = {
 
 
 
+local options = function (location)
+	return {
+		Height = {
+			type = "range",
+			name = L.Height,
+			min = 1,
+			max = 50,
+			step = 1,
+			order = 1
+		},
+	}
+end
+
 local generalOptions = function(location)
 	return {
 		Texture = {
@@ -48,7 +61,7 @@ local generalOptions = function(location)
 			dialogControl = 'LSM30_Statusbar',
 			values = AceGUIWidgetLSMlists.statusbar,
 			width = "normal",
-			order = 1
+			order = 2
 		},
 		Background = {
 			type = "color",
@@ -56,7 +69,7 @@ local generalOptions = function(location)
 			desc = L.PowerBar_Background_Desc,
 			hasAlpha = true,
 			width = "normal",
-			order = 2
+			order = 3
 		}
 	}
 end
@@ -72,6 +85,7 @@ local power = BattleGroundEnemies:NewButtonModule({
 	flags = flags,
 	defaultSettings = defaultSettings,
 	generalDefaults = generalDefaults,
+	options = options,
 	generalOptions = generalOptions,
 	events = {"UnitIdUpdate", "UpdatePower", "PlayerDetailsChanged"},
 	enabledInThisExpansion = true,
