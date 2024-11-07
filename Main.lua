@@ -217,6 +217,9 @@ local function UpdateFakeRaidTargetIcons(playerButton)
 end
 
 
+function BattleGroundEnemies:IsTestmodeOrEditmodeActive()
+	return self.Testmode.Active or self.Editmode.Active
+end
 
 local auraFilters = { "HELPFUL", "HARMFUL" }
 
