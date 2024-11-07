@@ -725,7 +725,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 						args = BattleGroundEnemies:GetModuleOptions(locationn, moduleFrame.options),
 						childGroups = "tab"
 					},
-			
+
 				}
 			}
 		end
@@ -788,7 +788,6 @@ local function addEnemyAndAllySettings(self, mainFrame)
 	local settings = {}
 	local location = BattleGroundEnemies.db.profile[playerType]
 
-
 	settings.GeneralSettings = {
 		type = "group",
 		name = GENERAL,
@@ -823,33 +822,34 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				width = "full",
 				order = 2
 			},
-			Fake = Data.AddHorizontalSpacing(3),
-			Fake1 = Data.AddHorizontalSpacing(4),
 			CopySettings = {
-				type = "execute",
-				name = L.CopySettings:format(L[oppositePlayerType]),
-				desc = L.CopySettings_Desc:format(L[oppositePlayerType]).." "..L.NotAvailableInCombat,
-				disabled = InCombatLockdown,
-				func = function()
-					BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
+				type = "select",
+				name = L.CopySettings,
+				desc = L.Normal.."\n".. L.CopySettingsNormal_Desc.."\n\n"..L.Mirrored..'\n' ..L.CopySettingsMirrored_Desc,
+				get = function() return "" end,
+				set = function(option, value)
+					if value == "normal" then
+						BattleGroundEnemies.db.profile[playerType] = CopyTable(BattleGroundEnemies.db.profile[oppositePlayerType], false)
+					elseif value == "Mirrored" then
+						BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
+					end
 					BattleGroundEnemies:NotifyChange()
 				end,
-				confirm = function() return L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]) end,
-				width = "double",
-				order = 6
-			},
-			CopySettingFlip = {
-				type = "execute",
-				name = L.CopySettingsFlip:format(L[oppositePlayerType]),
-				desc = L.CopySettingsFlip_Desc:format(L[oppositePlayerType]).." "..L.NotAvailableInCombat,
-				disabled = InCombatLockdown,
-				func = function()
-					BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
-					BattleGroundEnemies:NotifyChange()
+				values = {
+					Normal = L.Normal..": ".. L[oppositePlayerType],
+					Mirrored = L.Mirrored..": "..L[oppositePlayerType]
+				},
+				confirm = function(t, value)
+					local phrase
+					if value == "Mirrored" then
+						phrase = L.OverwriteMirroredConfirm
+					elseif value == "Normal" then
+						phrase = L.OverwriteNormalConfirm
+					end
+					return phrase:format(L[playerType], L[oppositePlayerType])
 				end,
-				confirm = function() return L.ConfirmProfileOverride:format(L[playerType], L[oppositePlayerType]) end,
-				width = "double",
-				order = 6
+				width = "full",
+				order = 3
 			},
 			RangeIndicator_Settings = {
 				type = "group",
