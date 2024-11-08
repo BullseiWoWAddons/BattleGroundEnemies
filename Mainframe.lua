@@ -353,16 +353,7 @@ local function CreateMainFrame(playerType)
 
 		local conf = self.playerCountConfig
 
-		self:SetSize(conf.BarWidth, 30)
-		self:SetScale(conf.Framescale)
-		self:ClearAllPoints()
 
-		if not conf.Position_X and not conf.Position_Y then
-			self:SetPoint("CENTER", UIParent, "CENTER")
-		else
-			local scale = self:GetEffectiveScale()
-			self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", conf.Position_X / scale, conf.Position_Y / scale)
-		end
 		self:SetPlayerCountJustifyV(conf.BarVerticalGrowdirection)
 
 		self.PlayerCount:ApplyFontStringSettings(conf.PlayerCount.Text)
@@ -753,14 +744,25 @@ local function CreateMainFrame(playerType)
 			offsetDirectionX = -1
 		end
 
+		self:SetScale(config.Framescale)
+		self:ClearAllPoints()
+
+	
+		local scale = self:GetEffectiveScale()
+
+		
+
+		self:ClearAllPoints()
 		if growDownwards then
 			pointY = "TOP"
 			relPointY = "TOP"
 			offsetDirectionY = -1
+			self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", config.Position_X / scale, config.Position_Y / scale)
 		else
 			pointY = "BOTTOM"
 			relPointY = "BOTTOM"
 			offsetDirectionY = 1
+			self:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", config.Position_X / scale, config.Position_Y / scale)
 		end
 
 		local point = pointY .. pointX
@@ -802,10 +804,20 @@ local function CreateMainFrame(playerType)
 		end
 		if playerCount > 0 then
 			local lastButton = orderedPlayers[playerCount]
-			local bottom = lastButton:GetBottom()
-			self:SetSize(barWidth, self:GetTop() - bottom)
-		end
+			local firstButton = orderedPlayers[1]
 
+			local topButton = orderedPlayers[playerCount]
+			local bottomButton = orderedPlayers[1]
+
+			if growDownwards then
+				topButton = firstButton
+				bottomButton = lastButton
+			else
+				topButton = lastButton
+				bottomButton = firstButton
+			end
+			self:SetSize(barWidth, topButton:GetTop() - bottomButton:GetBottom())
+		end
 	end
 
 	function mainframe:BeforePlayerUpdate()
@@ -1054,6 +1066,7 @@ local function CreateMainFrame(playerType)
 	mainframe.ActiveProfile:SetHeight(30)
 	mainframe.ActiveProfile:SetJustifyH("LEFT")
 	mainframe.ActiveProfile:SetJustifyV("MIDDLE")
+
 
     return mainframe
 end
