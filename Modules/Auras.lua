@@ -121,6 +121,7 @@ local function AddFilteringSettings(location, filter)
 			end,
 			disabled = function() return not location.Enabled end,
 			order = 2,
+			childGroups = "tab",
 			args = {
 				Mode = {
 					type = "select",
@@ -291,6 +292,7 @@ local function AddGeneralAuraSettings(location, filter, isPriorityContainer)
 			end,
 			hidden = isPriorityContainer,
 			order = 9,
+			childGroups = "tab",
 			args = AddFilteringSettings(location.Filtering, filter)
 		}
 	}
