@@ -1366,19 +1366,14 @@ end
 
 function BattleGroundEnemies:ProfileChanged()
 	self:UpgradeProfile(self.db.profile, self.db:GetCurrentProfile())
-	self:ApplyProfile()
-end
-
-function BattleGroundEnemies:ProfileReset()
-	self:SetCurrentDbVerion(self.db.profile)
-	self:ApplyProfile()
-end
-
-function BattleGroundEnemies:ApplyProfile()
 	self:SetupOptions()
 	self:ApplyAllSettings()
 end
 
+function BattleGroundEnemies:ProfileReset()
+	self:SetCurrentDbVerion(self.db.profile)
+	BattleGroundEnemies:NotifyChange()
+end
 
 
 local timer = nil
