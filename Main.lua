@@ -1298,7 +1298,7 @@ do
 
 		self.db.RegisterCallback(self, "OnProfileChanged", "ProfileChanged")
 		self.db.RegisterCallback(self, "OnProfileCopied", "ProfileChanged")
-		self.db.RegisterCallback(self, "OnProfileReset", "ProfileChanged")
+		self.db.RegisterCallback(self, "OnProfileReset", "ProfileReset")
 
 		if self.db.profile then
 			if not self.db.profile.Debug then
@@ -1365,9 +1365,21 @@ function BattleGroundEnemies:NotifyChange()
 end
 
 function BattleGroundEnemies:ProfileChanged()
+	self:UpgradeProfile(self.db.profile, self.db:GetCurrentProfile())
+	self:ApplyProfile()
+end
+
+function BattleGroundEnemies:ProfileReset()
+	self:SetCurrentDbVerion(self.db.profile)
+	self:ApplyProfile()
+end
+
+function BattleGroundEnemies:ApplyProfile()
 	self:SetupOptions()
 	self:ApplyAllSettings()
 end
+
+
 
 local timer = nil
 function BattleGroundEnemies:ApplyAllSettings()

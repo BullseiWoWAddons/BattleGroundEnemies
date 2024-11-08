@@ -6,6 +6,8 @@ local Data = select(2, ...)
 ---@class BattleGroundEnemies
 local BattleGroundEnemies = BattleGroundEnemies
 
+local currentDBVersion = 2
+
 local MergeTable = MergeTable or function(destination, source)
 	for k, v in pairs(source) do
 		destination[k] = v;
@@ -25,6 +27,10 @@ local function MergeTableDeep(destination, source)
             end
         end
 	end
+end
+
+function BattleGroundEnemies:SetCurrentDbVerion(profile)
+    profile.dbVersion = currentDBVersion
 end
 
 function BattleGroundEnemies:UpgradeProfile(profile, profileName)
@@ -86,21 +92,20 @@ function BattleGroundEnemies:UpgradeProfile(profile, profileName)
     if not profile.dbVersion or profile.dbVersion < 2 then
 
 
-        --[[         --in version 2 the format chagned from 
+        --[[         --in version 2 the format changed from 
             
              BattleGroundEnemies.db.profile.Font to BattleGroundEnemies.db.profile.Text.Font
         ]]
 
-        if profile.Font then
-            profile.Text.Font = profile.Font
-            profile.Font = nil
-        end
+        C_Timer.After(20, function()
+            BattleGroundEnemies:Information("profile ".. profileName.." is not compatible with the current version of BattleGroundEnemies due to the fact that many options got merged into a single one its not possible to convert it. It will be reset to default settings")
+            BattleGroundEnemies.db:ResetProfile()
+            BattleGroundEnemies:ProfileReset()
+        end)
 
-
-        didStuff = true
     end
 
-    profile.dbVersion = 2
+    self:SetCurrentDbVerion(profile)
 
     if didStuff then
         C_Timer.After(20, function()
