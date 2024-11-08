@@ -13,7 +13,7 @@ Data.changelog = {
 				Entries = {
 					"Added an Editmode to the addon, it works similar to Blizzards Editmode so it enables you to drag and drop and snap frames to other frames. When you select a frame the options panel will jump to the setting of that particular module.",
 					"Made most of the settings global, meaning they apply no matter if its an enemy or ally and no matter the player count.",
-					"Added an option to copy over all settings from allies to enemies and vice versa, one button will horizontally mirror the frames",
+					"Added an option to copy over all settings from allies to enemies and vice versa, You can also choose to mirror the settings visually",
 					"Added multiple keybind related features: By default you are now able to target the next or previous enemy or ally by scrolling over the ally or enemy frame. Also added 4 new keybinding settings to the blizzard keybinding section. You will now find BattleGroundEnemies there.",
 					"Added Deephaul Crystal to bg buffs",
 					"Added new global module settings for DR tracker, you can now specify a specific icon to show up for each dr category. You can find this new setting at General > Modules",

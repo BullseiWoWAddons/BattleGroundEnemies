@@ -828,7 +828,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				desc = L.Normal.."\n".. L.CopySettingsNormal_Desc.."\n\n"..L.Mirrored..'\n' ..L.CopySettingsMirrored_Desc,
 				get = function() return "" end,
 				set = function(option, value)
-					if value == "normal" then
+					if value == "Normal" then
 						BattleGroundEnemies.db.profile[playerType] = CopyTable(BattleGroundEnemies.db.profile[oppositePlayerType], false)
 					elseif value == "Mirrored" then
 						BattleGroundEnemies.db.profile[playerType] = BattleGroundEnemies:FlipSettingsHorizontallyRecursive(BattleGroundEnemies.db.profile[oppositePlayerType])
@@ -1546,7 +1546,7 @@ function BattleGroundEnemies:SetupOptions()
 			},
 			GeneralSettings = {
 				type = "group",
-				name = L.GeneralSettings,
+				name = L.GENERAL,
 				desc = L.GeneralSettings_Desc,
 				order = 2,
 				args = {
