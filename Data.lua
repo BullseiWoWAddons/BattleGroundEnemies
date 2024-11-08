@@ -167,8 +167,6 @@ Data.VerticalDirections = {
 }
 
 
-
-
 Data.Interruptdurations = {
 	[6552]	= 4,   -- [Warrior] Pummel
 	[96231]	= 4,  -- [Paladin] Rebuke
