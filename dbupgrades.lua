@@ -35,6 +35,7 @@ end
 
 function BattleGroundEnemies:UpgradeProfile(profile, profileName)
     local didStuff = false
+    local beSilent = not profile.dbVersion
     if not profile.dbVersion or profile.dbVersion < 1 then
 
 
@@ -98,9 +99,11 @@ function BattleGroundEnemies:UpgradeProfile(profile, profileName)
         ]]
 
         C_Timer.After(20, function()
-            BattleGroundEnemies:Information("profile ".. profileName.." is not compatible with the current version of BattleGroundEnemies due to the fact that many options got merged into a single one its not possible to convert it. It will be reset to default settings")
+            if not beSilent then
+                BattleGroundEnemies:Information("profile ".. profileName.." is not compatible with the current version of BattleGroundEnemies due to the fact that many options got merged into a single one its not possible to convert it. It will be reset to default settings")
+            end
+
             BattleGroundEnemies.db:ResetProfile()
-            BattleGroundEnemies:ProfileReset()
         end)
 
     end
@@ -109,7 +112,9 @@ function BattleGroundEnemies:UpgradeProfile(profile, profileName)
 
     if didStuff then
         C_Timer.After(20, function()
-            BattleGroundEnemies:Information("profile ".. profileName.." saved varaibles upgraded to new format")
+            if not beSilent then
+                BattleGroundEnemies:Information("profile ".. profileName.." saved varaibles upgraded to new format")
+            end
         end)
     end
     return didStuff
