@@ -1,3 +1,4 @@
 Add castbars to testmode
 Work on cooldown tracking
 i need to add a feature to not include alpha versions in the version check
+Add localization for 1-5 spielerdesc (mouseover 1-5 spieler)
