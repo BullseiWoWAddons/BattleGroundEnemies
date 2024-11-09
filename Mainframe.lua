@@ -377,7 +377,7 @@ local function CreateMainFrame(playerType)
 		self:UpdatePlayerCount()
 		self:CheckEnableState()
 	end
-	
+
 	function mainframe:GetPlayerCountsFromConfig(playerCountConfig)
 		if type(playerCountConfig) ~= "table" then
 			error("playerCountConfig must be a table")
@@ -747,10 +747,7 @@ local function CreateMainFrame(playerType)
 		self:SetScale(config.Framescale)
 		self:ClearAllPoints()
 
-	
 		local scale = self:GetEffectiveScale()
-
-		
 
 		self:ClearAllPoints()
 		if growDownwards then
