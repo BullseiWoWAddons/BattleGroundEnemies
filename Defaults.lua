@@ -385,6 +385,11 @@ Data.defaultSettings = {
 			RangeIndicator_Everything = true,
 			RangeIndicator_Frames = {},
 
+
+			ActionButtonUseKeyDown = false,
+			UseClique = false,
+
+
 			LeftButtonType = "Target",
 			LeftButtonValue = "",
 			RightButtonType = "Focus",
@@ -743,6 +748,9 @@ Data.defaultSettings = {
 			RangeIndicator_Alpha = 0.55,
 			RangeIndicator_Everything = true,
 			RangeIndicator_Frames = {},
+
+			ActionButtonUseKeyDown = false,
+			UseClique = false,
 
 			LeftButtonType = "Target",
 			LeftButtonValue = "",
