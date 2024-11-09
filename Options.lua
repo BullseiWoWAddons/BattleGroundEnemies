@@ -24,6 +24,44 @@ local function GetAllModuleAnchors(moduleName)
 	return moduleAnchors
 end
 
+
+
+
+local function getDefaultSettingsForGroup(group, defaults)
+	local newSettings = {}
+	local groupSettings = group.args
+	for childKey, childGroup in pairs(groupSettings) do
+		if childGroup.type == "group" then
+			if childGroup.get or childGroup.set then
+				return error("can't reset that since we don't know where the defaults live")
+			else
+				Mixin(newSettings, getDefaultSettingsForGroup(childGroup, defaults))
+			end
+		else
+			if type(defaults[childKey]) == "table" then
+				newSettings[childKey] = CopyTable(defaults[childKey], false)
+			else
+				newSettings[childKey] = defaults[childKey]
+			end
+		end
+	end
+	return newSettings
+end
+
+local addResetFunctionForgroup = function(dbLocation, defaults)
+	local function func(info)
+		local option = CopyTable(info.options, false)
+		for i = 1, #info -1 do
+			option = option.args[info[i]]
+		end
+		local defaultsForGroup = getDefaultSettingsForGroup(option, defaults)
+
+		Mixin(dbLocation, defaultsForGroup)
+		BattleGroundEnemies:NotifyChange()
+	end
+	return func
+end
+
 local function convertPermutations(permutations)
     local result = {}
 
@@ -870,11 +908,18 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				desc = L.RangeIndicator_Settings_Desc,
 				order = 7,
 				args = {
+					Reset = {
+						type = "execute",
+						name = L.RestoreDefault,
+						func = addResetFunctionForgroup(location, BattleGroundEnemies.db.defaults.profile[playerType]),
+						width = "full",
+						order = 1,
+					},
 					RangeIndicator_Enabled = {
 						type = "toggle",
 						name = L.RangeIndicator_Enabled,
 						desc = L.RangeIndicator_Enabled_Desc,
-						order = 1
+						order = 2
 					},
 					RangeIndicator_Range = {
 						type = "select",
@@ -901,7 +946,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							return ranges
 						end,
 						width = "half",
-						order = 2
+						order = 3
 					},
 					RangeIndicator_Alpha = {
 						type = "range",
@@ -911,9 +956,9 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						min = 0,
 						max = 1,
 						step = 0.05,
-						order = 3
+						order = 4
 					},
-					Fake = Data.AddVerticalSpacing(4),
+					Fake = Data.AddVerticalSpacing(5),
 					RangeIndicator_Everything = {
 						type = "toggle",
 						name = L.RangeIndicator_Everything,
@@ -929,7 +974,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							return location.RangeIndicator_Frames[key]
 						end,
 						set = function(option, key, state)
-							Data.SetOption(location.RangeIndicator_Frames, key, state)
+							location.RangeIndicator_Frames[key] = state
 						end,
 						width = "double",
 						values = function() return GetAllModuleFrames() end,
@@ -945,23 +990,30 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				--childGroups = "tab",
 				order = 8,
 				args = {
+					Reset = {
+						type = "execute",
+						name = L.RestoreDefault,
+						func = addResetFunctionForgroup(location, BattleGroundEnemies.db.defaults.profile[playerType]),
+						width = "full",
+						order = 1,
+					},
 					ActionButtonUseKeyDown = {
 						type = "toggle",
 						name = ACTION_BUTTON_USE_KEY_DOWN,
 						desc = OPTION_TOOLTIP_ACTION_BUTTON_USE_KEY_DOWN,
-						order = 1,
+						order = 2,
 					},
 					UseClique = {
 						type = "toggle",
 						name = L.EnableClique,
 						desc = L.EnableClique_Desc,
-						order = 2,
+						order = 3,
 						hidden = playerType == "Enemies"
 					},
 					LeftButton = {
 						type = "group",
 						name = KEY_BUTTON1,
-						order = 3,
+						order = 4,
 						disabled = function() return location.UseClique end,
 						args = {
 							LeftButtonType = {
@@ -978,14 +1030,13 @@ local function addEnemyAndAllySettings(self, mainFrame)
 								multiline = true,
 								width = 'double',
 								order = 2
-							},
-
+							}
 						}
 					},
 					RightButton = {
 						type = "group",
 						name = KEY_BUTTON2,
-						order = 4,
+						order = 5,
 						disabled = function() return location.UseClique end,
 						args = {
 							RightButtonType = {
@@ -1002,17 +1053,15 @@ local function addEnemyAndAllySettings(self, mainFrame)
 								multiline = true,
 								width = 'double',
 								order = 2
-							},
-
+							}
 						}
 					},
 					MiddleButton = {
 						type = "group",
 						name = KEY_BUTTON3,
-						order = 5,
+						order = 6,
 						disabled = function() return location.UseClique end,
 						args = {
-
 							MiddleButtonType = {
 								type = "select",
 								name = KEY_BUTTON3,
@@ -1571,11 +1620,18 @@ function BattleGroundEnemies:SetupOptions()
 						name = MISCELLANEOUS,
 						order = 4,
 						args = {
+							Reset = {
+								type = "execute",
+								name = L.RestoreDefault,
+								func = addResetFunctionForgroup(BattleGroundEnemies.db.profile, BattleGroundEnemies.db.defaults.profile),
+								width = "full",
+								order = 1,
+							},
 							EnableMouseWheelPlayerTargeting = {
 								type = "toggle",
 								name = L.MouseWheelPlayerTargeting,
 								desc = L.MouseWheelPlayerTargeting_Desc,
-								order = 1
+								order = 2
 							},
 							ShowTooltips = {
 								type = "toggle",
@@ -1704,12 +1760,19 @@ function BattleGroundEnemies:SetupOptions()
 						childGroups = "tab",
 						order = 5,
 						args = {
+							Reset = {
+								type = "execute",
+								name = L.RestoreDefault,
+								func = addResetFunctionForgroup(BattleGroundEnemies.db.profile, BattleGroundEnemies.db.defaults.profile),
+								width = "full",
+								order = 1,
+							},
 							UseBigDebuffsPriority = {
 								type = "toggle",
 								name = L.UseBigDebuffsPriority,
 								desc = L.UseBigDebuffsPriority_Desc:format(L.Buffs, L.Debuffs, L.HighestPriorityAura),
 								width = "full",
-								order = 7
+								order = 2
 							},
 						}
 					},
