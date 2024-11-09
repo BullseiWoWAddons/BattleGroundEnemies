@@ -27,15 +27,17 @@ end
 
 
 
-local function getDefaultSettingsForGroup(group, defaults)
+local function getDefaultSettingsForGroup(group, defaults, ignoreChildGroups)
 	local newSettings = {}
 	local groupSettings = group.args
-	for childKey, childGroup in pairs(groupSettings) do
-		if childGroup.type == "group" then
-			if childGroup.get or childGroup.set then
-				return error("can't reset that since we don't know where the defaults live")
-			else
-				Mixin(newSettings, getDefaultSettingsForGroup(childGroup, defaults))
+	for childKey, childData in pairs(groupSettings) do
+		if childData.type == "group" then
+			if not ignoreChildGroups then
+				if childData.get or childData.set then
+					return error("can't reset that since we don't know where the defaults live")
+				else
+					Mixin(newSettings, getDefaultSettingsForGroup(childData, defaults))
+				end
 			end
 		else
 			if type(defaults[childKey]) == "table" then
@@ -48,13 +50,13 @@ local function getDefaultSettingsForGroup(group, defaults)
 	return newSettings
 end
 
-local addResetFunctionForgroup = function(dbLocation, defaults)
+local addResetFunctionForgroup = function(dbLocation, defaults, ignoreChildGroups)
 	local function func(info)
 		local option = CopyTable(info.options, false)
 		for i = 1, #info -1 do
 			option = option.args[info[i]]
 		end
-		local defaultsForGroup = getDefaultSettingsForGroup(option, defaults)
+		local defaultsForGroup = getDefaultSettingsForGroup(option, defaults, ignoreChildGroups)
 
 		Mixin(dbLocation, defaultsForGroup)
 		BattleGroundEnemies:NotifyChange()
@@ -1292,7 +1294,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 								return isValidPlayerCountRange(playerType, thisPlayerCountConfigs, tempInputs, location)
 							end,
 							order = 5
-						},
+						}
 					}
 				},
 				MainFrameSettings = {
@@ -1356,6 +1358,13 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					--childGroups = "tab",
 					order = 7,
 					args = {
+						Reset = {
+							type = "execute",
+							name = L.RestoreDefault,
+							func = addResetFunctionForgroup(location, playerCountConfigDefault, true),
+							width = "full",
+							order = 1,
+						},
 						BarWidth = {
 							type = "range",
 							name = L.Width,
@@ -1364,7 +1373,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							min = 1,
 							max = 400,
 							step = 1,
-							order = 1
+							order = 2
 						},
 						BarHeight = {
 							type = "range",
@@ -1374,7 +1383,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							min = 1,
 							max = 100,
 							step = 1,
-							order = 2
+							order = 3
 						},
 						BarVerticalGrowdirection = {
 							type = "select",
@@ -1382,7 +1391,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							desc = L.VerticalGrowdirection_Desc.." "..L.NotAvailableInCombat,
 							disabled = InCombatLockdown,
 							values = Data.VerticalDirections,
-							order = 3
+							order = 4
 						},
 						BarVerticalSpacing = {
 							type = "range",
@@ -1392,7 +1401,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							min = 0,
 							max = 100,
 							step = 1,
-							order = 4
+							order = 5
 						},
 						BarColumns = {
 							type = "range",
@@ -1402,7 +1411,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							min = 1,
 							max = 4,
 							step = 1,
-							order = 5
+							order = 6
 						},
 						BarHorizontalGrowdirection = {
 							type = "select",
@@ -1411,7 +1420,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							hidden = function() return location.BarColumns < 2 end,
 							disabled = InCombatLockdown,
 							values = Data.HorizontalDirections,
-							order = 6
+							order = 7
 						},
 						BarHorizontalSpacing = {
 							type = "range",
@@ -1422,7 +1431,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							min = 0,
 							max = 400,
 							step = 1,
-							order = 7
+							order = 8
 						}
 					}
 				},
