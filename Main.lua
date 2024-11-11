@@ -1935,7 +1935,7 @@ local function checkEffectiveEnableStateForArenaFrames()
 	end
 end
 
-function BattleGroundEnemies:ResetCombatLogScanninningTables()
+function BattleGroundEnemies:ResetCombatLogScanniningTables()
 	self.SearchedGUIDs = self.SearchedGUIDs or {}
 	self.PlayerGUIDs = {}
 end
@@ -2221,7 +2221,7 @@ BattleGroundEnemies.PARTY_LEADER_CHANGED = BattleGroundEnemies.GROUP_ROSTER_UPDA
 
 --Fires when the player logs in, /reloads the UI or zones between map instances. Basically whenever the loading screen appears.
 function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
-	self:ResetCombatLogScanninningTables()
+	self:ResetCombatLogScanniningTables()
 	if self.Testmode.Active then --disable testmode
 		self:DisableTestMode()
 	end
