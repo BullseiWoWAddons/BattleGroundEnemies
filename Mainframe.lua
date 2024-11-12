@@ -356,9 +356,9 @@ local function CreateMainFrame(playerType)
 
 		self:SetPlayerCountJustifyV(conf.BarVerticalGrowdirection)
 
-		self.PlayerCount:ApplyFontStringSettings(conf.PlayerCount.Text)
+		self.PlayerCount:ApplyFontStringSettings(BattleGroundEnemies.db.profile.PlayerCount.Text)
 
-		self.ActiveProfile:ApplyFontStringSettings(conf.PlayerCount.Text)
+		self.ActiveProfile:ApplyFontStringSettings(BattleGroundEnemies.db.profile.PlayerCount.Text)
 
 		self.ActiveProfile:SetText(L[self.PlayerType]..": ".. self:GetPlayerCountConfigNameLocalized(self.playerCountConfig))
 
@@ -398,7 +398,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:SelectPlayerCountProfile(forceUpdate)
-		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
+		self.playerTypeConfig = BattleGroundEnemies.db.profile[self.PlayerType]
 		local maxNumPlayers = math_max(self.NumPlayers or 0)
 		--BattleGroundEnemies:LogToSavedVariables("SelectPlayerCountProfile", MaxNumPlayers)
 		if not maxNumPlayers then return end
@@ -410,10 +410,10 @@ local function CreateMainFrame(playerType)
 		end
 
 		local playerCountConfigs
-		if self.config.CustomPlayerCountConfigsEnabled then
-			playerCountConfigs = self.config.customPlayerCountConfigs
+		if self.playerTypeConfig.CustomPlayerCountConfigsEnabled then
+			playerCountConfigs = self.playerTypeConfig.customPlayerCountConfigs
 		else
-			playerCountConfigs = self.config.playerCountConfigs
+			playerCountConfigs = self.playerTypeConfig.playerCountConfigs
 		end
 
 		local foundProfilesForPlayerCount = {}
@@ -455,7 +455,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:CheckEnableState()
-		if self.config.Enabled and self.playerCountConfig and self.playerCountConfig.Enabled then
+		if self.playerTypeConfig.Enabled and self.playerCountConfig and self.playerCountConfig.Enabled then
 			if BattleGroundEnemies.states.isInArena and not BattleGroundEnemies.db.profile.ShowBGEInArena then
 				return self:Disable()
 			end
@@ -603,7 +603,7 @@ local function CreateMainFrame(playerType)
 					if TimeSinceLastOnUpdate > UpdatePeroid then
 						if BattleGroundEnemies.states.userIsAlive then
 							if playerButton ~= BattleGroundEnemies.UserButton then
-								--BattleGroundEnemies:Debug(IsItemInRange(self.config.RangeIndicator_Range, allyButton.unitID), self.config.RangeIndicator_Range, allyButton.unitID)
+								--BattleGroundEnemies:Debug(IsItemInRange(self.playerTypeConfig.RangeIndicator_Range, allyButton.unitID), self.playerTypeConfig.RangeIndicator_Range, allyButton.unitID)
 								playerButton:UpdateRangeViaLibRangeCheck(playerButton.unitID)
 							else
 								playerButton:UpdateRange(true)

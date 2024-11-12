@@ -20,11 +20,6 @@ local allieDefaults15man = {
 	
 	PlayerCount = {
 		Enabled = true,
-		Text = {
-			FontSize = 14,
-			JustifyV = "MIDDLE",
-			JustifyH = "LEFT"
-		}
 	},
 
 	ButtonModules = {
@@ -181,11 +176,6 @@ local enemyDefault15man = {
 
 	PlayerCount = {
 		Enabled = true,
-		Text = {
-			FontSize = 14,
-			JustifyV = "MIDDLE",
-			JustifyH = "LEFT"
-		}
 	},
 
 	ButtonModules = {
@@ -350,6 +340,14 @@ Data.defaultSettings = {
 		UseBigDebuffsPriority = true,
 		ConvertCyrillic = true,
 
+		PlayerCount = {
+			Text = {
+				FontSize = 14,
+				JustifyV = "MIDDLE",
+				JustifyH = "LEFT"
+			}
+		},
+
 		RoleSortingOrder = "HEALER_TANK_DAMAGER",
 
 		Cooldown = {
@@ -415,11 +413,6 @@ Data.defaultSettings = {
 
 					PlayerCount = {
 						Enabled = false,
-						Text = {
-							FontSize = 14,
-							JustifyV = "MIDDLE",
-							JustifyH = "LEFT"
-						}
 					},
 					ButtonModules = {
 						SpecClassPriorityOne = {
@@ -600,11 +593,6 @@ Data.defaultSettings = {
 
 					PlayerCount = {
 						Enabled = true,
-						Text = {
-							FontSize = 14,
-							JustifyV = "MIDDLE",
-							JustifyH = "LEFT"
-						}
 					},
 					ButtonModules = {
 						CastBar = {
@@ -777,11 +765,6 @@ Data.defaultSettings = {
 
 					PlayerCount = {
 						Enabled = false,
-						Text = {
-							FontSize = 14,
-							JustifyV = "MIDDLE",
-							JustifyH = "LEFT"
-						}
 					},
 					ButtonModules = {
 						CastBar = {
@@ -969,11 +952,6 @@ Data.defaultSettings = {
 
 					PlayerCount = {
 						Enabled = true,
-						Text = {
-							FontSize = 14,
-							JustifyV = "MIDDLE",
-							JustifyH = "LEFT"
-						}
 					},
 					ButtonModules = {
 						CastBar = {
