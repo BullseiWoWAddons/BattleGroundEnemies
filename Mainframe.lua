@@ -141,8 +141,8 @@ local function CreateMainFrame(playerType)
 		if not playerT.name then return end
 		if playerT.name == "" then return end
 
-		if not playerT.classTag then return end
-		if playerT.classTag == "" then return end
+		if not playerT.classToken then return end
+		if playerT.classToken == "" then return end
 
 		table_insert(self.PlayerSources[source], playerT)
 	end
@@ -169,8 +169,8 @@ local function CreateMainFrame(playerType)
 			-- local specName = scoreInfo.talentSpec
 			-- local raceName = scoreInfo.raceName
 
-			if scoreInfo.classToken and arenaPlayerInfo.classTag then
-				if scoreInfo.faction == BattleGroundEnemies.EnemyFaction and scoreInfo.classToken == arenaPlayerInfo.classTag and scoreInfo.talentSpec == arenaPlayerInfo.specName then --specname/talentSpec can be nil for old expansions
+			if scoreInfo.classToken and arenaPlayerInfo.classToken then
+				if scoreInfo.faction == BattleGroundEnemies.EnemyFaction and scoreInfo.classToken == arenaPlayerInfo.classToken and scoreInfo.talentSpec == arenaPlayerInfo.specName then --specname/talentSpec can be nil for old expansions
 					if foundPlayer then
 						return false                                                                                                                                        -- we already had a match but found a second player that matches, unlucky
 					end
@@ -238,7 +238,7 @@ local function CreateMainFrame(playerType)
 						table.insert(newPlayers, {
 							name = scoreboardEnemy.name,
 							raceName = scoreboardEnemy.raceName,
-							classTag = scoreboardEnemy.classToken,
+							classToken = scoreboardEnemy.classToken,
 							specName = scoreboardEnemy.talentSpec
 						})
 					end
@@ -288,10 +288,10 @@ local function CreateMainFrame(playerType)
 			local newPlayer = newPlayers[i]
 			local name = newPlayer.name
 			local raceName = newPlayer.raceName
-			local classTag = newPlayer.classTag
+			local classToken = newPlayer.classToken
 			local specName = newPlayer.specName
 			local additionalData = newPlayer.additionalData
-			self:CreateOrUpdatePlayerDetails(name, raceName, classTag, specName, additionalData)
+			self:CreateOrUpdatePlayerDetails(name, raceName, classToken, specName, additionalData)
 		end
 		self:SetPlayerCount(#newPlayers)
 		self:CreateOrRemovePlayerButtons()
@@ -494,7 +494,7 @@ local function CreateMainFrame(playerType)
 
 
 		local isEnemy = self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies
-		BattleGroundEnemies:SetEnemyFaction(BattleGroundEnemies.EnemyFaction or (BattleGroundEnemies.UserFaction == "Horde" and 1 or 0))
+		BattleGroundEnemies:SetAllyFaction(BattleGroundEnemies.AllyFaction or (BattleGroundEnemies.UserFaction == "Horde" and 1 or 0))
 
 		if self.playerCountConfig and self.playerCountConfig.PlayerCount.Enabled then
 			self.PlayerCount:Show()
@@ -821,14 +821,14 @@ local function CreateMainFrame(playerType)
 		wipe(self.NewPlayersDetails)
 	end
 
-	function mainframe:CreateOrUpdatePlayerDetails(name, race, classTag, specName, additionalData)
+	function mainframe:CreateOrUpdatePlayerDetails(name, race, classToken, specName, additionalData)
 		local spec = false
 		if specName and specName ~= "" then
 			spec = specName
 		end
 		local specData
-		if classTag and spec then
-			local t = Data.Classes[classTag]
+		if classToken and spec then
+			local t = Data.Classes[classToken]
 			if t then
 				specData = t[spec]
 			end
@@ -836,8 +836,8 @@ local function CreateMainFrame(playerType)
 
 		local playerDetails = {
 			PlayerName = name,
-			PlayerClass = string.upper(classTag),                  --apparently it can happen that we get a lowercase "druid" from GetBattlefieldScore() in TBCC, IsTBCC
-			PlayerClassColor = RAID_CLASS_COLORS[classTag],
+			PlayerClass = string.upper(classToken),                  --apparently it can happen that we get a lowercase "druid" from GetBattlefieldScore() in TBCC, IsTBCC
+			PlayerClassColor = RAID_CLASS_COLORS[classToken],
 			PlayerRace = race and LibRaces:GetRaceToken(race) or "Unknown", --delivers a locale independent token for relentless check
 			PlayerSpecName = spec,                                 --set to false since we use Mixin() and Mixin doesnt mixin nil values and therefore we dont overwrite values with nil
 			PlayerRole = specData and specData.roleID,
@@ -849,7 +849,7 @@ local function CreateMainFrame(playerType)
 			Mixin(playerDetails, additionalData)
 		end
 
-		-- BattleGroundEnemies:LogToSavedVariables("CreateOrUpdatePlayerDetails", name, race, classTag, specName, additionalData)
+		-- BattleGroundEnemies:LogToSavedVariables("CreateOrUpdatePlayerDetails", name, race, classToken, specName, additionalData)
 		local playerButton = self.Players[name]
 		if playerButton then --already existing
 			local currentDetails = playerButton.PlayerDetails
@@ -1063,6 +1063,7 @@ local function CreateMainFrame(playerType)
 	mainframe.ActiveProfile:SetHeight(30)
 	mainframe.ActiveProfile:SetJustifyH("LEFT")
 	mainframe.ActiveProfile:SetJustifyV("MIDDLE")
+	mainframe.ActiveProfile:Hide()
 
 
     return mainframe
@@ -1086,19 +1087,19 @@ function BattleGroundEnemies.Allies:GroupInSpecT_Update(event, GUID, unitID, inf
 	BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 end
 
-function BattleGroundEnemies.Allies:AddGroupMember(name, isLeader, isAssistant, classTag, unitID)
+function BattleGroundEnemies.Allies:AddGroupMember(name, isLeader, isAssistant, classToken, unitID)
 	local raceName, raceFile, raceID = UnitRace(unitID)
 	local GUID = UnitGUID(unitID)
 
 	if not GUID then return end
 
-	if name and raceName and classTag then
+	if name and raceName and classToken then
 		local specName = BattleGroundEnemies.specCache[GUID]
 
 		self:AddPlayerToSource(BattleGroundEnemies.consts.PlayerSources.GroupMembers, {
 			name = name,
 			raceName = raceName,
-			classTag = classTag,
+			classToken = classToken,
 			specName = specName,
 			additionalData = {
 				isGroupLeader = isLeader,
@@ -1188,21 +1189,21 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 		local unitID = "arena" .. i
 
 
-		local _, classTag, specName
+		local _, classToken, specName
 		if GetArenaOpponentSpec and GetSpecializationInfoByID then --HasSpeccs
 			local specID, gender = GetArenaOpponentSpec(i)
 
 			if (specID and specID > 0) then
-				_, specName, _, _, _, classTag, _ = GetSpecializationInfoByID(specID, gender)
+				_, specName, _, _, _, classToken, _ = GetSpecializationInfoByID(specID, gender)
 			end
 		else
-			classTag = select(2, UnitClass(unitID))
+			classToken = select(2, UnitClass(unitID))
 		end
-		--BattleGroundEnemies:LogToSavedVariables("classTag", classTag)
+		--BattleGroundEnemies:LogToSavedVariables("classToken", classToken)
 		--BattleGroundEnemies:LogToSavedVariables("specName", specName)
 
 
-		if classTag then
+		if classToken then
 			local playerName
 			local name = GetUnitName(unitID, true)
 			if name and name ~= UNKNOWN then
@@ -1215,7 +1216,7 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 			self:AddPlayerToSource(BattleGroundEnemies.consts.PlayerSources.ArenaPlayers, {
 				name = playerName,
 				raceName = raceName,
-				classTag = classTag,
+				classToken = classToken,
 				specName = specName,
 				additionalData = { PlayerArenaUnitID = unitID }
 			})

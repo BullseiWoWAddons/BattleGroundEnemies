@@ -250,7 +250,7 @@ function BattleGroundEnemies:FlipButtonModuleSettingsHorizontally(moduleName, db
 				elseif k == "Container" then
 					local newContainerSettings = CopyTable(v, false)
 					local newHorizontalGrowDirection
-	
+
 					local horizontalGrowdirection = v.HorizontalGrowDirection
 					if horizontalGrowdirection then
 						newHorizontalGrowDirection = Data.Helpers.getOppositeDirection(horizontalGrowdirection) or horizontalGrowdirection
@@ -609,8 +609,8 @@ end
 
 function BattleGroundEnemies:GetColoredName(playerDetails)
 	local name = playerDetails.PlayerName
-	local classTag = playerDetails.PlayerClass
-	local tbl = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[classTag] or RAID_CLASS_COLORS[classTag] or GRAY_FONT_COLOR
+	local classToken = playerDetails.PlayerClass
+	local tbl = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[classToken] or RAID_CLASS_COLORS[classToken] or GRAY_FONT_COLOR
 	return ("|cFF%02x%02x%02x%s|r"):format(tbl.r * 255, tbl.g * 255, tbl.b * 255, name)
 end
 
@@ -771,15 +771,15 @@ do
 
 	function BattleGroundEnemies:FillFakePlayerData(amount, mainFrame, role)
 		for i = 1, amount do
-			local name, classTag, specName
+			local name, classToken, specName
 
 			if HasSpeccs then
 				local randomSpec
 				randomSpec = Data.RolesToSpec[role][math_random(1, #Data.RolesToSpec[role])]
-				classTag = randomSpec.classTag
+				classToken = randomSpec.classToken
 				specName = randomSpec.specName
 			else
-				classTag = Data.ClassList[math_random(1, #Data.ClassList)]
+				classToken = Data.ClassList[math_random(1, #Data.ClassList)]
 			end
 			local nameprefix = mainFrame.PlayerType == self.consts.PlayerTypes.Enemies and "Enemy" or "Ally"
 			name = L[nameprefix] .. counter .. "-Realm" .. counter
@@ -787,7 +787,7 @@ do
 			mainFrame:AddPlayerToSource(self.consts.PlayerSources.FakePlayers, {
 				name = name,
 				raceName = nil,
-				classTag = classTag,
+				classToken = classToken,
 				specName = specName,
 				additionalData = {
 					isFakePlayer = true,
@@ -1620,7 +1620,7 @@ function BattleGroundEnemies:UpdateEnemiesFromCombatlogScanning()
 				self.Enemies:AddPlayerToSource(self.consts.PlayerSources.CombatLog, {
 					name = data.name,
 					raceName = data.race,
-					classTag = data.classToken,
+					classToken = data.classToken,
 					specName = scoreInfo and scoreInfo.talentSpec,
 				})
 			end
@@ -2075,33 +2075,35 @@ local function parseBattlefieldScore(index)
 		if not type(scoreInfo) == "table" then return end
 		result = scoreInfo
 	else
-		local _, name, faction, race, classTag, specName
+		local _, name, faction, race, classToken, specName
 		if HasSpeccs then
 			--name, killingBlows, honorableKills, deaths, honorGained, faction, rank, race, class, classToken, damageDone, healingDone = GetBattlefieldScore(index)
-			name, _, _, _, _, faction, race, _, classTag, _, _, _, _, _, _, specName = GetBattlefieldScore(index)
+			name, _, _, _, _, faction, race, _, classToken, _, _, _, _, _, _, specName = GetBattlefieldScore(index)
 		else
-			name, _, _, _, _, faction, _, race, _, classTag = GetBattlefieldScore(index)
+			name, _, _, _, _, faction, _, race, _, classToken = GetBattlefieldScore(index)
 		end
 		result = {
 			name = name,
 			faction = faction,
 			raceName = race,
-			classToken = classTag,
+			classToken = classToken,
 			talentSpec = specName
 		}
 	end
 	return result
 end
 
-function BattleGroundEnemies:SetEnemyFaction(enemyFaction)
-	self.EnemyFaction = enemyFaction
-	self.AllyFaction = enemyFaction == 0 and 1 or 0
+function BattleGroundEnemies:SetAllyFaction(allyFaction)
+	self.EnemyFaction = allyFaction == 0 and 1 or 0
+	self.AllyFaction = allyFaction
 end
+
+
 
 function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 	--BattleGroundEnemies:LogToSavedVariables("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug(GetCurrentMapAreaID())
-	-- self:Debug("UPDATE_BATTLEFIELD_SCORE")
+	self:Debug("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
 	-- self:Debug("C_PvP.IsInBrawl", C_PvP.IsInBrawl())
 	-- self:Debug("GetCurrentMapAreaID", GetCurrentMapAreaID())
@@ -2110,7 +2112,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
 	--self:Debug("IsRatedBG", IsRatedBG)
 
-	self:SetEnemyFaction(self.EnemyFaction or 0) --set fallback value, have to investigate why self.EnemyFaction is not set inside PLAYER_ENTERING_WORLD event handler
+	self:SetAllyFaction(self.AllyFaction or 0) --set fallback value, have to investigate why self.EnemyFaction is not set inside PLAYER_ENTERING_WORLD event handler
 
 	local _, _, _, _, numEnemies = GetBattlefieldTeamInfo(self.EnemyFaction)
 	local _, _, _, _, numAllies = GetBattlefieldTeamInfo(self.AllyFaction)
@@ -2142,7 +2144,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 		local faction = score.faction
 
 		if name == self.UserDetails.PlayerName and faction == self.EnemyFaction then
-			self:SetEnemyFaction(self.AllyFaction)
+			self:SetAllyFaction(self.EnemyFaction)
 		end
 	end
 
@@ -2188,11 +2190,11 @@ function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 
 	if IsInRaid() then
 		for i = 1, numGroupMembers do -- the player itself only shows up here when he is in a raid
-			local name, rank, subgroup, level, localizedClass, classTag, zone, online, isDead, role, isML, combatRole =
+			local name, rank, subgroup, level, localizedClass, classToken, zone, online, isDead, role, isML, combatRole =
 				GetRaidRosterInfo(i)
 
-			if name and name ~= self.UserDetails.PlayerName and rank and classTag then
-				self.Allies:AddGroupMember(name, rank == 2, rank == 1, classTag, "raid" .. i)
+			if name and name ~= self.UserDetails.PlayerName and rank and classToken then
+				self.Allies:AddGroupMember(name, rank == 2, rank == 1, classToken, "raid" .. i)
 			end
 		end
 	else
@@ -2201,10 +2203,10 @@ function BattleGroundEnemies:GROUP_ROSTER_UPDATE()
 			local unitID = "party" .. i
 			local name = GetUnitName(unitID, true)
 
-			local classTag = select(2, UnitClass(unitID))
+			local classToken = select(2, UnitClass(unitID))
 
-			if name and classTag then
-				self.Allies:AddGroupMember(name, UnitIsGroupLeader(unitID), UnitIsGroupAssistant(unitID), classTag,
+			if name and classToken then
+				self.Allies:AddGroupMember(name, UnitIsGroupLeader(unitID), UnitIsGroupAssistant(unitID), classToken,
 					unitID)
 			end
 		end
@@ -2235,15 +2237,9 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	local _, zone = IsInInstance()
 	if zone == "pvp" or zone == "arena" then
 		if GetBattlefieldArenaFaction then
-			local MyBgFaction = GetBattlefieldArenaFaction() -- returns the playered faction 0 for horde, 1 for alliance, doesnt exist in TBC
-			self:Debug("MyBgFaction:", MyBgFaction)
-			if MyBgFaction == 0 then
-				self:SetEnemyFaction(1)  -- Enemy is alliance
-			else
-				self:SetEnemyFaction(0) --Enemy is Horde
-			end
+			self:SetAllyFaction(GetBattlefieldArenaFaction()) -- returns the playered faction 0 for horde, 1 for alliance, doesnt exist in TBC)
 		else
-			self:SetEnemyFaction(0) -- set a dummy value, we get data later from GetBattlefieldScore()
+			self:SetAllyFaction(1) -- set a dummy value, we get data later from GetBattlefieldScore()
 		end
 
 		if zone == "arena" then

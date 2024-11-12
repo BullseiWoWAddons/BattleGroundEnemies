@@ -1116,26 +1116,26 @@ do
 
 
 	for classID = 1, GetNumClasses() do --example classes[EnglishClass][SpecName].
-		local _, classTag = GetClassInfo(classID)
-		if classTag then
-			Data.Classes[classTag] = {Ressource = ClassRessources[classTag]}-- for Classic, TBCC Wrath, and any other expansions without specs and some brawls
+		local _, classToken = GetClassInfo(classID)
+		if classToken then
+			Data.Classes[classToken] = {Ressource = ClassRessources[classToken]}-- for Classic, TBCC Wrath, and any other expansions without specs and some brawls
 
 			
 			if GetNumSpecializationsForClassID and GetSpecializationInfoByID and GetSpecialization then --HasSpeccs
 				for i = 1, GetNumSpecializationsForClassID(classID) do
 					local specID,maleSpecName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 2) -- male version				
 
-					Data.Classes[classTag][maleSpecName] = {roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
-					table.insert(Data.RolesToSpec[role], {classTag = classTag, specName = maleSpecName}) --for testmode
+					Data.Classes[classToken][maleSpecName] = {roleID = role, specID = specID, specIcon = icon, Ressource = specIdToRessource[specID]}
+					table.insert(Data.RolesToSpec[role], {classToken = classToken, specName = maleSpecName}) --for testmode
 
 					--if specName == "Танцующий с ветром" then specName = "Танцующая с ветром" end -- fix for russian bug, fix added on 2017.08.27
 					local specID,specName,_,icon,role = GetSpecializationInfoForClassID(classID, i, 3) -- female version
-					if not Data.Classes[classTag][specName] then --there is a female version of that specName
-						Data.Classes[classTag][specName] = Data.Classes[classTag][maleSpecName]
+					if not Data.Classes[classToken][specName] then --there is a female version of that specName
+						Data.Classes[classToken][specName] = Data.Classes[classToken][maleSpecName]
 					end
 				end
 			else
-				table.insert(Data.ClassList, classTag)
+				table.insert(Data.ClassList, classToken)
 			end
 		end
 	end
