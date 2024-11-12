@@ -1145,7 +1145,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			type = "group",
 			name = BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location),
 			desc = BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location).."desc",
-			disabled = function() return not mainFrame.config.Enabled end,
+			disabled = function() return not mainFrame.playerTypeConfig.Enabled end,
 			get =  function(option)
 				return Data.GetOption(location, option)
 			end,
@@ -1317,7 +1317,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						},
 						PlayerCount = {
 							type = "group",
-							name = L.PlayerCount,
+							name = "",
 							get = function(option)
 								return Data.GetOption(location.PlayerCount, option)
 							end,
@@ -1332,20 +1332,6 @@ local function addEnemyAndAllySettings(self, mainFrame)
 									name = L.PlayerCount,
 									desc = L.PlayerCount_Enabled_Desc,
 									order = 1
-								},
-								PlayerCountTextSettings = {
-									type = "group",
-									name = L.Text,
-									disabled = function() return not location.PlayerCount.Enabled end,
-									get = function(option)
-										return Data.GetOption(location.PlayerCount.Text, option)
-									end,
-									set = function(option, ...)
-										return Data.SetOption(location.PlayerCount.Text, option, ...)
-									end,
-									inline = true,
-									order = 2,
-									args = Data.AddNormalTextSettings(location.PlayerCount.Text)
 								}
 							}
 						}
@@ -1883,11 +1869,23 @@ function BattleGroundEnemies:SetupOptions()
 						},
 						order = 7
 					},
+					PlayerCount = {
+						type = "group",
+						name = L.PlayerCount,
+						get = function(option)
+							return Data.GetOption(location.PlayerCount.Text, option)
+						end,
+						set = function(option, ...)
+							return Data.SetOption(location.PlayerCount.Text, option, ...)
+						end,
+						order = 8,
+						args = Data.AddNormalTextSettings(location.PlayerCount.Text)
+					},
 					ButtonModules = {
 						type = "group",
 						name = L.Modules,
 						args = self:AddGeneralModuleSettings(),
-						order = 8
+						order = 9
 					}
 				}
 			},
