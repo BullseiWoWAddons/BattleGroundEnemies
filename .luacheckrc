@@ -190,6 +190,7 @@ globals = {
 	"GetBattlefieldScore",
 	"GetBattlefieldTeamInfo",
 	"GetBuildInfo",
+	"GetClassAtlas",
 	"GetClassInfo",
 	"GetCVar",
 	"GetCVarBool",
