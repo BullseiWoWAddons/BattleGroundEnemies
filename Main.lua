@@ -2103,7 +2103,7 @@ end
 function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 	--BattleGroundEnemies:LogToSavedVariables("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug(GetCurrentMapAreaID())
-	self:Debug("UPDATE_BATTLEFIELD_SCORE")
+	-- self:Debug("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
 	-- self:Debug("C_PvP.IsInBrawl", C_PvP.IsInBrawl())
 	-- self:Debug("GetCurrentMapAreaID", GetCurrentMapAreaID())
