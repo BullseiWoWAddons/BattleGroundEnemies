@@ -604,19 +604,29 @@ local FontOutlines = {
 	["THICKOUTLINE"] = L.Thick,
 }
 
-function Data.AddNormalTextSettings(location)
+function Data.AddNormalTextSettings(location, defaults)
 	return {
+		Reset = {
+			type = "execute",
+			name = L.RestoreDefault,
+			func = addResetFunctionForgroup(location, defaults),
+			width = "full",
+			hidden = not defaults,
+			order = 1,
+		},
 		JustifyH = {
 			type = "select",
 			name = L.JustifyH,
 			desc = L.JustifyH_Desc,
-			values = JustifyHValues
+			values = JustifyHValues,
+			order = 2
 		},
 		JustifyV = {
 			type = "select",
 			name = L.JustifyV,
 			desc = L.JustifyV_Desc,
-			values = JustifyVValues
+			values = JustifyVValues,
+			order = 3
 		},
 		FontSize = {
 			type = "range",
@@ -626,7 +636,7 @@ function Data.AddNormalTextSettings(location)
 			max = 40,
 			step = 1,
 			width = "normal",
-			order = 1
+			order = 4
 		}
 	}
 end
@@ -1879,7 +1889,7 @@ function BattleGroundEnemies:SetupOptions()
 							return Data.SetOption(location.PlayerCount.Text, option, ...)
 						end,
 						order = 8,
-						args = Data.AddNormalTextSettings(location.PlayerCount.Text)
+						args = Data.AddNormalTextSettings(location.PlayerCount.Text, BattleGroundEnemies.db.defaults.profile.PlayerCount.Text)
 					},
 					ButtonModules = {
 						type = "group",
