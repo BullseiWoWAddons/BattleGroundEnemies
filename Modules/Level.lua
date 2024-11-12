@@ -44,7 +44,6 @@ end
 
 local options = function(location)
 	return {
-
 		LevelTextTextSettings = {
 			type = "group",
 			name = L.Text,
