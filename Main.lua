@@ -1375,17 +1375,21 @@ function BattleGroundEnemies:ProfileReset()
 	BattleGroundEnemies:NotifyChange()
 end
 
-
 local timer = nil
-function BattleGroundEnemies:ApplyAllSettings()
+function BattleGroundEnemies:ApplyAllSettingsDebounce()
 	if timer then timer:Cancel() end -- use a timer to apply changes after 0.2 second, this prevents the UI from getting laggy when the user uses a slider option
 	timer = CTimerNewTicker(0.2, function()
-		BattleGroundEnemies.Allies:SelectPlayerCountProfile(true)
-		BattleGroundEnemies.Enemies:SelectPlayerCountProfile(true)
-		BattleGroundEnemies:ToggleArenaFrames()
-		BattleGroundEnemies:ToggleRaidFrames()
+		BattleGroundEnemies:ApplyAllSettings()
 		timer = nil
 	end, 1)
+end
+
+
+function BattleGroundEnemies:ApplyAllSettings()
+	BattleGroundEnemies.Allies:SelectPlayerCountProfile(true)
+	BattleGroundEnemies.Enemies:SelectPlayerCountProfile(true)
+	BattleGroundEnemies:ToggleArenaFrames()
+	BattleGroundEnemies:ToggleRaidFrames()
 end
 
 BattleGroundEnemies.DebugText = BattleGroundEnemies.DebugText or ""

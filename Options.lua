@@ -499,7 +499,7 @@ function Data.SetOption(location, option, ...)
 	--DevTool:AddData(CopyTable(location) , "location")
 	--DevTool:AddData(CopyTable(option) , "option")
 	location[option[#option]] = value
-	BattleGroundEnemies:ApplyAllSettings()
+	BattleGroundEnemies:ApplyAllSettingsDebounce()
 
 
 	--BattleGroundEnemies.db.profile[key] = value
