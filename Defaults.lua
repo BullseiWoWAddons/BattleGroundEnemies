@@ -133,6 +133,9 @@ local allieDefaults15man = {
 			}
 		},
 		SpecClassPriorityOne = {
+			Cooldown = {
+				FontSize = 20,
+			},
 			Points = {
 				{
 					Point = "TOPLEFT",
@@ -290,6 +293,9 @@ local enemyDefault15man = {
 			}
 		},
 		SpecClassPriorityOne = {
+			Cooldown = {
+				FontSize = 20,
+			},
 			Points = {
 				{
 					Point = "TOPRIGHT",
