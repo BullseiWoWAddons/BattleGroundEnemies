@@ -1600,7 +1600,7 @@ function BattleGroundEnemies:SetupOptions()
 			},
 			GeneralSettings = {
 				type = "group",
-				name = L.GENERAL,
+				name = GENERAL,
 				desc = L.GeneralSettings_Desc,
 				order = 2,
 				args = {
