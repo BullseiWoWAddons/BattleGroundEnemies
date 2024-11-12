@@ -8,6 +8,7 @@ local L = Data.L
 local CreateFrame = CreateFrame
 local GameTooltip = GameTooltip
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+local GetClassAtlas = GetClassAtlas
 
 local generalDefaults = {
     showSpecIfExists = true,
@@ -49,7 +50,7 @@ local generalOptions = function (location)
 			order = 2
 		},
 	}
-	
+
 end
 
 local options = function(location)
@@ -232,7 +233,7 @@ local function attachToPlayerButton(playerButton)
 	end
 
 	function frame:ShouldQueryAuras(unitID, filter)
-		return self.config.showHighestPriority 
+		return self.config.showHighestPriority
 	end
 
 	function frame:BeforeFullAuraUpdate(filter)
@@ -273,12 +274,18 @@ local function attachToPlayerButton(playerButton)
             self.SpecClassIcon:SetTexture(specData.specIcon)
 			self.ShowsSpec = true
         else
-            local coords = CLASS_ICON_TCOORDS[playerDetails.PlayerClass]
-			if playerDetails.PlayerClass and coords then
-				self.SpecClassIcon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
-				self.SpecClassIcon:SetTexCoord(unpack(coords))
+
+			local classIconAtlas = GetClassAtlas and GetClassAtlas(playerDetails.PlayerClass)
+			if ( classIconAtlas ) then
+				self.SpecClassIcon:SetAtlas(classIconAtlas)
 			else
-				self.SpecClassIcon:SetTexture(nil)
+				local coords = CLASS_ICON_TCOORDS[playerDetails.PlayerClass]
+				if playerDetails.PlayerClass and coords then
+					self.SpecClassIcon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
+					self.SpecClassIcon:SetTexCoord(unpack(coords))
+				else
+					self.SpecClassIcon:SetTexture(nil)
+				end
 			end
         end
 		self:CropImage()

@@ -28,6 +28,7 @@ Data.changelog = {
 				Header = "Changes:",
 				Entries = {
 					"Reworked the way the modules for spec and class and priority aura/interrupt work. They are now merged into one module to make it compatible with the new editmode. There are now two of this new modules, this will allow you to still see the class or spec of a player even if an aura is active, second module is disabled by default.",
+					"New spec class priority module now offers more modern class icons",
 					"Set respawn time to 15 seconds for solo rated battlegrounds."
 				}
 			},
