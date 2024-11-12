@@ -197,7 +197,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:UnitDied()
-		if (BattleGroundEnemies.IsRatedBG or (BattleGroundEnemies.Testmode.Active)) then
+		if (BattleGroundEnemies.IsRatedBG or BattleGroundEnemies.IsSoloRBG or (BattleGroundEnemies.Testmode.Active)) then
 		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
 				self:Show()
@@ -209,7 +209,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 			if IsCataClassic then
 				respawmTime = 45
 			else
-				if C_PvP and C_PvP.IsSoloRBG and C_PvP.IsSoloRBG() then
+				if BattleGroundEnemies.IsSoloRBG then
 					respawmTime = 15
 				end
 			end
