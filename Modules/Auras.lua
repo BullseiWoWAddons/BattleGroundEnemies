@@ -111,7 +111,7 @@ local function AddFilteringSettings(location, filter)
 		},
 		FilterSettings = {
 			type = "group",
-			name = L.FilterSettings,
+			name = "",
 			desc = L.AurasFilteringSettings_Desc,
 			get = function(option)
 				return Data.GetOption(location, option)
@@ -121,6 +121,7 @@ local function AddFilteringSettings(location, filter)
 			end,
 			disabled = function() return not location.Enabled end,
 			order = 2,
+			inline = true,
 			childGroups = "tab",
 			args = {
 				Mode = {
