@@ -267,7 +267,7 @@ do
 		local globalModuleConfig = BattleGroundEnemies.db.profile.ButtonModules[moduleName] or {}
 
 		Mixin(moduleConfigOnButton, globalModuleConfig, playerSizeModuleConfig)
-	
+
 
 		if moduleConfigOnButton.Enabled and BattleGroundEnemies:IsModuleEnabledOnThisExpansion(moduleName) then
 			moduleFrameOnButton.Enabled = true
@@ -568,28 +568,29 @@ do
 		end
 	end
 
-	function buttonFunctions:PlayerDied()
-		if self.PlayerDetails.isFakePlayer then
-			if BattleGroundEnemies.Testmode.FakePlayerAuras[self] then
-				wipe(BattleGroundEnemies.Testmode.FakePlayerAuras
-					[self])
+	function buttonFunctions:PlayerIsDead()
+		if not self.isDead then
+			if self.PlayerDetails.isFakePlayer then
+				if BattleGroundEnemies.Testmode.FakePlayerAuras[self] then
+					wipe(BattleGroundEnemies.Testmode.FakePlayerAuras
+						[self])
+				end
+				if BattleGroundEnemies.Testmode.FakePlayerDRs[self] then
+					wipe(BattleGroundEnemies.Testmode.FakePlayerDRs
+						[self])
+				end
 			end
-			if BattleGroundEnemies.Testmode.FakePlayerDRs[self] then
-				wipe(BattleGroundEnemies.Testmode.FakePlayerDRs
-					[self])
-			end
+			self:DispatchEvent("UnitDied")
+			self.isDead = true
 		end
-
-		self:DispatchEvent("UnitDied")
-		self.isDead = true
 	end
 
 	function buttonFunctions:PlayerIsAlive()
-		self:DispatchEvent("UnitIsAlive")
-		self.isDead = false
+		if self.isDead then
+			self:DispatchEvent("UnitRevived")
+			self.isDead = false
+		end
 	end
-
-	
 
 	local maxHealths = {} --key = playerbutton, value = {}
 	local deadPlayers = {}
@@ -609,7 +610,6 @@ do
 		local health = math_random(0, 100)
 		if health == 0 then
 			deadPlayers[self] = now
-			self:PlayerDied()
 			return 0
 		else
 			return math_floor((health / 100) * maxHealth)
@@ -640,10 +640,10 @@ do
 
 		self:DispatchEvent("UpdateHealth", unitID, health, maxHealth)
 		if unitID then
-			if UnitIsDeadOrGhost(unitID) then
-				self:PlayerIsAlive()
+			if UnitIsDeadOrGhost(unitID) or health == 0 then
+				self:PlayerIsDead()
 			else
-				self:PlayerDied()
+				self:PlayerIsAlive()
 			end
 		else
 			-- we are in testmode

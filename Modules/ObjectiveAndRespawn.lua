@@ -76,7 +76,7 @@ local objectiveAndRespawn = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = L.ObjectiveAndRespawnTimer,
 	defaultSettings = defaultSettings,
 	options = options,
-	events = {"ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "UnitDied", "UnitIsAlive", "ArenaOpponentShown", "ArenaOpponentHidden"},
+	events = {"ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "UnitDied", "UnitRevived", "ArenaOpponentShown", "ArenaOpponentHidden"},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
 })

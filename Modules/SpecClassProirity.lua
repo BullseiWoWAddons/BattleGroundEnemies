@@ -200,11 +200,13 @@ local function attachToPlayerButton(playerButton)
 		end
 
 		if highestPrioritySpell then
+			frame.SpecClassIcon:Hide()
 			frame.DisplayedAura = highestPrioritySpell
 			frame.PriorityIcon:Show()
 			frame.PriorityIcon:SetTexture(highestPrioritySpell.icon)
 			frame.Cooldown:SetCooldown(highestPrioritySpell.expirationTime - highestPrioritySpell.duration, highestPrioritySpell.duration)
 		else
+			frame.SpecClassIcon:Show()
 			frame.DisplayedAura = false
 			frame.PriorityIcon:Hide()
 			frame.Cooldown:Clear()
