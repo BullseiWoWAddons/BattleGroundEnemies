@@ -416,7 +416,10 @@ Data.defaultSettings = {
 					},
 					ButtonModules = {
 						SpecClassPriorityOne = {
-							Width = 52
+							Width = 52,
+							Cooldown = {
+								FontSize = 26,
+							},
 						},
 						CastBar = {
 							Enabled = true,
@@ -546,6 +549,9 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
+							Cooldown = {
+								FontSize = 26,
+							},
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -559,6 +565,9 @@ Data.defaultSettings = {
 							Enabled = false
 						},
 						Trinket = {
+							Cooldown = {
+								FontSize = 26,
+							},
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -780,6 +789,9 @@ Data.defaultSettings = {
 						},
 						SpecClassPriorityOne = {
 							Width = 52,
+							Cooldown = {
+								FontSize = 26,
+							},
 							Points = {
 								{
 									Point = "TOPLEFT",
@@ -903,6 +915,9 @@ Data.defaultSettings = {
 							}
 						},
 						Racial = {
+							Cooldown = {
+								FontSize = 26,
+							},
 							Points = {
 								{
 									Point = "TOPRIGHT",
@@ -916,6 +931,9 @@ Data.defaultSettings = {
 							Enabled = false
 						},
 						Trinket = {
+							Cooldown = {
+								FontSize = 26,
+							},
 							Points = {
 								{
 									Point = "TOPRIGHT",
