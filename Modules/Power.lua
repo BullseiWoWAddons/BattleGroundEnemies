@@ -16,6 +16,7 @@ local math_random = math.random
 local generalDefaults = {
 	Texture = 'Blizzard Raid Bar',
 	Background = {0, 0, 0, 0.66},
+	OnlyShowForHealers = false
 }
 
 local defaultSettings = {
@@ -61,7 +62,7 @@ local generalOptions = function(location)
 			dialogControl = 'LSM30_Statusbar',
 			values = AceGUIWidgetLSMlists.statusbar,
 			width = "normal",
-			order = 2
+			order = 1
 		},
 		Background = {
 			type = "color",
@@ -69,8 +70,15 @@ local generalOptions = function(location)
 			desc = L.PowerBar_Background_Desc,
 			hasAlpha = true,
 			width = "normal",
+			order = 2
+		},
+		OnlyShowForHealers = {
+			type = "toggle",
+			name = L.OnlyShowForHealers,
+			desc = L.OnlyShowForHealers_Desc,
+			width = 'normal',
 			order = 3
-		}
+		},
 	}
 end
 
@@ -136,6 +144,13 @@ function power:AttachToPlayerButton(playerButton)
 		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		if not playerDetails.PlayerClass then return end
+		if not playerDetails.PlayerRole then return end
+
+		if playerDetails.PlayerRole == "HEALER" or not self.config.OnlyShowForHealers then
+			self:SetHeight(self.config.Height or 0.01)
+		else
+			self:SetHeight(0.01)
+		end
 		
 		local powerToken
 		if playerDetails.PlayerClass then
@@ -167,6 +182,7 @@ function power:AttachToPlayerButton(playerButton)
 	function playerButton.Power:ApplyAllSettings()
 		-- power
 		self:SetHeight(self.config.Height or 0.01)
+
 		self:SetStatusBarTexture(LSM:Fetch("statusbar", self.config.Texture))--self.healthBar:SetStatusBarTexture(137012)
 		self.Background:SetVertexColor(unpack(self.config.Background))
 		self:PlayerDetailsChanged()
