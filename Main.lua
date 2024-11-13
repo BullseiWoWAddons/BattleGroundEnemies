@@ -159,7 +159,6 @@ BattleGroundEnemies.Editmode = {
 
 BattleGroundEnemies.ButtonModules = {}   --contains moduleFrames, key is the module name
 BattleGroundEnemies.states = {
-	currentTarget = false,
 	isInArena = false,
 	isInBattleground = false,
 	userIsAlive = false,
