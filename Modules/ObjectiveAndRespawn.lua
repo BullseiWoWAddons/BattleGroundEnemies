@@ -130,7 +130,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 	function frame:SearchForDebuffs(aura)
 		--BattleGroundEnemies:Debug("Läüft")
-		local battleGroundDebuffs = BattleGroundEnemies.BattleGroundDebuffs
+		local battleGroundDebuffs = BattleGroundEnemies.states.battleGroundDebuffs
 		local value
 		if battleGroundDebuffs then
 			for i = 1, #battleGroundDebuffs do
@@ -193,7 +193,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		if not self.continue then return end
 
 		if not BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then return end -- This player is not shown on arena enemy so we dont care
-		if BattleGroundEnemies.BattleGroundDebuffs then self:SearchForDebuffs(aura) end
+		if BattleGroundEnemies.states.battleGroundDebuffs then self:SearchForDebuffs(aura) end
 	end
 
 	function frame:UnitRevived()
@@ -230,9 +230,9 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 
 	function frame:ArenaOpponentShown()
 		BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "ArenaOpponentShown")
-		if BattleGroundEnemies.BattlegroundBuff then
+		if BattleGroundEnemies.states.battlegroundBuff then
 			BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "has buff")
-			self.Icon:SetTexture(GetSpellTexture(BattleGroundEnemies.BattlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]))
+			self.Icon:SetTexture(GetSpellTexture(BattleGroundEnemies.states.battlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]))
 			self:Show()
 		end
 

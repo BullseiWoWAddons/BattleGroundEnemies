@@ -143,8 +143,8 @@ local previousCvarRaidOptionIsShown = GetCVar("raidOptionIsShown")
 
 
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
---BattleGroundEnemies.BattlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
-BattleGroundEnemies.BattleGroundDebuffs = {} --contains battleground specific debbuffs to watchout for of the current active battlefield
+--BattleGroundEnemies.states.battlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
+BattleGroundEnemies.states.battleGroundDebuffs = {} --contains battleground specific debbuffs to watchout for of the current active battlefield
 BattleGroundEnemies.currentTarget = false
 BattleGroundEnemies.currentFocus = false
 
@@ -167,8 +167,9 @@ BattleGroundEnemies.states = {
 	currentMapID = false,
 	isRatedBG = false,
 	isSoloRBG = false,
+	battlegroundBuff = false, --contains the battleground specific enemy buff to watchout for of the current active battlefield
+	battleGroundDebuffs = {}--contains battleground specific debbuffs to watchout for of the current active battlefield
 }
-
 
 BattleGroundEnemies.UserFaction = UnitFactionGroup("player")
 BattleGroundEnemies.UserButton = false   --the button of the Player himself
@@ -759,7 +760,7 @@ end
 
 function BattleGroundEnemies:DisableTestMode()
 	self.Testmode.Active = false
-	self.BattlegroundBuff = false
+	self.states.battlegroundBuff = false
 	FakePlayersOnUpdateFrame:Hide()
 	self.Allies:OnTestmodeDisabled()
 	self.Enemies:OnTestmodeDisabled()
@@ -867,7 +868,7 @@ do
 		local mandomm = math_random(1, #mapIDs)
 		local randomMapID = mapIDs[mandomm]
 
-		self.BattlegroundBuff = Data.BattlegroundspezificBuffs[randomMapID]
+		self.states.battlegroundBuff = Data.BattlegroundspezificBuffs[randomMapID]
 
 		for i = 1, #auraFilters do
 			local filter = auraFilters[i]
@@ -2018,12 +2019,12 @@ function BattleGroundEnemies:UpdateMapID()
 	--	SetMapToCurrentZone() apparently removed in 8.0
 	local mapID = GetBestMapForUnit('player')
 	if mapID and mapID ~= -1 and mapID ~= 0 then -- when this values occur the map ID is not real
-		self.BattlegroundBuff = Data.BattlegroundspezificBuffs[mapID]
-		self.BattleGroundDebuffs = Data.BattlegroundspezificDebuffs[mapID]
+		self.states.battlegroundBuff = Data.BattlegroundspezificBuffs[mapID]
+		self.states.battleGroundDebuffs = Data.BattlegroundspezificDebuffs[mapID]
 		self.states.currentMapID = mapID
 	else
-		self.BattleGroundDebuffs = false
-		self.BattlegroundBuff = false
+		self.states.battleGroundDebuffs = false
+		self.states.battlegroundBuff = false
 		self.states.currentMapID = false
 		C_Timer.After(2, function() --Delay this check, since its happening sometimes that this data is not ready yet
 			self:UpdateMapID()
