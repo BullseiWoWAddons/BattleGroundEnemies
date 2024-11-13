@@ -138,8 +138,16 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:AddPlayerToSource(source, playerT)
-		if not playerT.name then return end
-		if playerT.name == "" then return end
+		BattleGroundEnemies:LogTablesToSavedVariables("AddPlayerToSource", self.PlayerType, playerT.name)
+		if playerT.name then
+			if playerT.name == "" then return end
+		else
+			--only allow no name if its a arena prep enemy
+			if not playerT.additionalData then return end
+			if not playerT.additionalData.PlayerArenaUnitID then return end
+		end
+
+
 
 		if not playerT.classToken then return end
 		if playerT.classToken == "" then return end
@@ -225,7 +233,7 @@ local function CreateMainFrame(playerType)
 					end
 				else --in BattleGround
 					if numScoreboardEnemies == 0 then
-						if self.IsRatedBG and IsRetail then
+						if BattleGroundEnemies.states.isRatedBG and IsRetail then
 							newPlayers = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.CombatLog]
 						end
 					else
@@ -328,7 +336,7 @@ local function CreateMainFrame(playerType)
 			end
 
 
-			if BattleGroundEnemies.states.isInArena or BattleGroundEnemies.states.IsInBattleground then
+			if BattleGroundEnemies.states.isInArena or BattleGroundEnemies.states.isInBattleground then
 				BattleGroundEnemies:CheckForArenaEnemies()
 			end
 		end
@@ -459,7 +467,7 @@ local function CreateMainFrame(playerType)
 			if BattleGroundEnemies.states.isInArena and not BattleGroundEnemies.db.profile.ShowBGEInArena then
 				return self:Disable()
 			end
-			if BattleGroundEnemies.states.IsInBattleground and not BattleGroundEnemies.db.profile.ShowBGEInBattleground then
+			if BattleGroundEnemies.states.isInBattleground and not BattleGroundEnemies.db.profile.ShowBGEInBattleground then
 				return self:Disable()
 			end
 			self:Enable()
