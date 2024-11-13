@@ -640,14 +640,14 @@ do
 
 		self:DispatchEvent("UpdateHealth", unitID, health, maxHealth)
 		if unitID then
-			if UnitIsDeadOrGhost(unitID) or health == 0 then
+			if UnitIsDeadOrGhost(unitID) then
 				self:PlayerIsDead()
 			else
 				self:PlayerIsAlive()
 			end
-		else
+		elseif health == 0 then
 			-- we are in testmode
-			self.isDead = health == 0
+			self:PlayerIsDead()
 		end
 	end
 
