@@ -5,6 +5,25 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.0.5.2",
+		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
+		Sections = {
+			{
+				Header = "New Features:",
+				Entries = {
+					"Added a feature requested by snakefizz from curseforge: You can now enable an option to only show the power bar for healers.",
+					"Added a feature requested by snakefizz from curseforge: You can now enable an option to hide the numeric target indicator number when its 0."
+				}
+			},
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed the addon not showing frames in arena prep room. Thanks at zaldun at curseforge for the report.",
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.5.1",
 		General = "Tons of new features and changes arrived aiming to make the addon much easier to setup by trimming down the settings and by adding the new editmode. Checkout the full list below if you wanna know more :). Unfortunately due to many settings being global now it means that the settings will get reset to defaults. Since the changes are quite signifficant please let me know if you are facing any problems.",
 		Sections = {
