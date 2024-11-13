@@ -6,6 +6,10 @@ local Data = select(2, ...)
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
 
+local generalDefaults = {
+	HideWhenZero = false,
+}
+
 local defaultSettings = {
 	Enabled = true,
 	Parent = "healthBar",
@@ -33,6 +37,18 @@ local defaultSettings = {
 	}
 }
 
+local generalOptions = function(location, playerType)
+	return {
+		HideWhenZero = {
+			type = "toggle",
+			name = L.HideWhenZero,
+			desc = L.TargetIndicatorNumericHideWhenZero_Desc,
+			width = 'normal',
+			order = 1
+		}
+	}
+end
+
 local options = function(location, playerType)
 	return {
 		TextSettings = {
@@ -55,7 +71,9 @@ local targetIndicatorNumeric = BattleGroundEnemies:NewButtonModule({
 	moduleName = "TargetIndicatorNumeric",
 	localizedModuleName = L.TargetIndicatorNumeric,
 	defaultSettings = defaultSettings,
+	generalDefaults = generalDefaults,
 	options = options,
+	generalOptions = generalOptions,
 	events = {"UpdateTargetIndicators"},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
@@ -71,14 +89,18 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 		end
 
 		local enemyTargets = i
-
 		
-		self:SetText(enemyTargets)
+		if enemyTargets == 0 and self.config.HideWhenZero then
+			self:SetText("")
+		else
+			self:SetText(enemyTargets)
+		end
 	end
 
 	playerButton.TargetIndicatorNumeric.ApplyAllSettings = function(self)
 		self:ApplyFontStringSettings(self.config.Text)
 		self:SetText(0)
+		self:UpdateTargetIndicators()
 	end
 
 	playerButton.TargetIndicatorNumeric.Reset = function(self)
