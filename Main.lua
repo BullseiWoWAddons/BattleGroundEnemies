@@ -143,8 +143,6 @@ local previousCvarRaidOptionIsShown = GetCVar("raidOptionIsShown")
 
 
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
---BattleGroundEnemies.states.battlegroundBuff --contains the battleground specific enemy buff to watchout for of the current active battlefield
-BattleGroundEnemies.states.battleGroundDebuffs = {} --contains battleground specific debbuffs to watchout for of the current active battlefield
 BattleGroundEnemies.currentTarget = false
 BattleGroundEnemies.currentFocus = false
 
@@ -161,6 +159,7 @@ BattleGroundEnemies.Editmode = {
 
 BattleGroundEnemies.ButtonModules = {}   --contains moduleFrames, key is the module name
 BattleGroundEnemies.states = {
+	currentTarget = false,
 	isInArena = false,
 	isInBattleground = false,
 	userIsAlive = false,
