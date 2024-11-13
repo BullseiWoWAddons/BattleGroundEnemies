@@ -75,7 +75,7 @@ local generalOptions = function(location)
 		OnlyShowForHealers = {
 			type = "toggle",
 			name = L.OnlyShowForHealers,
-			desc = L.OnlyShowForHealers_Desc,
+			desc = L.PowerBar_OnlyShowForHealers_Desc,
 			width = 'normal',
 			order = 3
 		},

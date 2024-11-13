@@ -42,7 +42,7 @@ local generalOptions = function(location, playerType)
 		HideWhenZero = {
 			type = "toggle",
 			name = L.HideWhenZero,
-			desc = L.TargetIndicatorNumericHideWhenZero_Desc,
+			desc = L.TargetIndicatorNumeric_HideWhenZero_Desc,
 			width = 'normal',
 			order = 1
 		}
