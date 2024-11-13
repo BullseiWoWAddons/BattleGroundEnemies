@@ -159,14 +159,14 @@ BattleGroundEnemies.Editmode = {
 	Active = false
 }
 
-BattleGroundEnemies.IsRatedBG = false
-BattleGroundEnemies.IsSoloRBG = false
-BattleGroundEnemies.CurrentMapID = false --contains the map id of the current active battleground
 BattleGroundEnemies.ButtonModules = {}   --contains moduleFrames, key is the module name
 BattleGroundEnemies.states = {
 	isInArena = false,
-	IsInBattleground = false,
-	userIsAlive = false
+	isInBattleground = false,
+	userIsAlive = false,
+	currentMapID = false,
+	isRatedBG = false,
+	isSoloRBG = false,
 }
 
 
@@ -1458,7 +1458,7 @@ function BattleGroundEnemies:LogToSavedVariables(...)
 	self.db.profile.log = self.db.profile.log or {}
 
 	local text = stringifyMultitArgs(...)
-	self:OnetimeInformation(text)
+	self:Debug(...)
 	text = stringifyMultitArgs(getTimestamp(), text)
 
 	table_insert(self.db.profile.log, text)
@@ -1737,7 +1737,7 @@ function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
 		BattleGroundEnemies.currentTarget = playerButton
 
 
-		if BattleGroundEnemies.IsRatedBG and self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then -- i am the target caller
+		if BattleGroundEnemies.states.isRatedBG and self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then -- i am the target caller
 			SetRaidTarget("target", 8)
 		end
 	else
@@ -1947,7 +1947,7 @@ end
 
 function BattleGroundEnemies:ToggleArenaFrames()
 	if InCombatLockdown() then return self:QueueForUpdateAfterCombat(self, "ToggleArenaFrames") end
-	if (BattleGroundEnemies.states.isInArena and self.db.profile.DisableArenaFramesInArena) or (BattleGroundEnemies.states.IsInBattleground and self.db.profile.DisableArenaFramesInBattleground) then return disableArenaFrames() end
+	if (BattleGroundEnemies.states.isInArena and self.db.profile.DisableArenaFramesInArena) or (BattleGroundEnemies.states.isInBattleground and self.db.profile.DisableArenaFramesInBattleground) then return disableArenaFrames() end
 
 	checkEffectiveEnableStateForArenaFrames()
 end
@@ -1962,7 +1962,7 @@ local function disableRaidFrames()
 end
 
 function BattleGroundEnemies:ToggleRaidFrames()
-	if (BattleGroundEnemies.states.isInArena and self.db.profile.DisableRaidFramesInArena) or (BattleGroundEnemies.states.IsInBattleground and self.db.profile.DisableRaidFramesInBattleground) then return disableRaidFrames() end
+	if (BattleGroundEnemies.states.isInArena and self.db.profile.DisableRaidFramesInArena) or (BattleGroundEnemies.states.isInBattleground and self.db.profile.DisableRaidFramesInBattleground) then return disableRaidFrames() end
 
 	restoreShowRaidFrameCVar()
 end
@@ -1981,7 +1981,7 @@ function BattleGroundEnemies:ThrottleUpdateArenaPlayers()
 end
 
 function BattleGroundEnemies:UpdateArenaPlayers()
-	-- BattleGroundEnemies:LogToSavedVariables("UpdateArenaPlayers")
+	--BattleGroundEnemies:LogToSavedVariables("UpdateArenaPlayers")
 	self.Enemies:CreateArenaEnemies()
 
 	if #BattleGroundEnemies.Enemies.CurrentPlayerOrder > 1 or #BattleGroundEnemies.Allies.CurrentPlayerOrder > 1 then --this ensures that we checked for enemies and the flag carrier will be shown (if its an enemy)
@@ -2020,11 +2020,11 @@ function BattleGroundEnemies:UpdateMapID()
 	if mapID and mapID ~= -1 and mapID ~= 0 then -- when this values occur the map ID is not real
 		self.BattlegroundBuff = Data.BattlegroundspezificBuffs[mapID]
 		self.BattleGroundDebuffs = Data.BattlegroundspezificDebuffs[mapID]
-		self.CurrentMapID = mapID
+		self.states.currentMapID = mapID
 	else
 		self.BattleGroundDebuffs = false
 		self.BattlegroundBuff = false
-		self.CurrentMapID = false
+		self.states.currentMapID = false
 		C_Timer.After(2, function() --Delay this check, since its happening sometimes that this data is not ready yet
 			self:UpdateMapID()
 		end)
@@ -2102,7 +2102,7 @@ end
 
 
 function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
-	--BattleGroundEnemies:LogToSavedVariables("UPDATE_BATTLEFIELD_SCORE")
+	-- BattleGroundEnemies:LogToSavedVariables("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug(GetCurrentMapAreaID())
 	-- self:Debug("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
@@ -2246,12 +2246,12 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 		if zone == "arena" then
 			BattleGroundEnemies.states.isInArena = true
 		else
-			BattleGroundEnemies.states.IsInBattleground = true
+			BattleGroundEnemies.states.isInBattleground = true
 			if HasRBG then
 				C_Timer.After(5,
 					function()        --Delay this check, since its happening sometimes that this data is not ready yet
-						self.IsRatedBG = IsRatedBattleground()
-						self.IsSoloRBG = C_PvP and C_PvP.IsSoloRBG and C_PvP.IsSoloRBG()
+						self.states.isRatedBG = IsRatedBattleground()
+						self.states.IsSoloRBG = C_PvP and C_PvP.IsSoloRBG and C_PvP.IsSoloRBG()
 
 						self:UPDATE_BATTLEFIELD_SCORE() --trigger the function again because since 10.0.0 UPDATE_BATTLEFIELD_SCORE doesnt fire reguralry anymore and RequestBattlefieldScore doesnt trigger the event
 					end)
@@ -2268,7 +2268,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 		self.states.userIsAlive = true
 	else
 		BattleGroundEnemies.states.isInArena = false
-		BattleGroundEnemies.states.IsInBattleground = false
+		BattleGroundEnemies.states.isInBattleground = false
 		self:Disable()
 	end
 

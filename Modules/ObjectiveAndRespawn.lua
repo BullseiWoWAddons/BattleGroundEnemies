@@ -135,7 +135,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		if battleGroundDebuffs then
 			for i = 1, #battleGroundDebuffs do
 				if aura.spellId == battleGroundDebuffs[i] then
-					if BattleGroundEnemies.CurrentMapID == 417 then -- 417 is Kotmogu, we scan for orb debuffs
+					if BattleGroundEnemies.states.currentMapID == 417 then -- 417 is Kotmogu, we scan for orb debuffs
 	
 						if aura.points and type(aura.points) == "table" then
 							if aura.points[2] then
@@ -208,7 +208,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	function frame:UnitDied()
 		BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "UnitDied")
 
-		if (BattleGroundEnemies.IsRatedBG or BattleGroundEnemies.IsSoloRBG or (BattleGroundEnemies.Testmode.Active)) then
+		if (BattleGroundEnemies.states.isRatedBG or BattleGroundEnemies.states.isSoloRBG or (BattleGroundEnemies.Testmode.Active)) then
 		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
 				self:Show()
@@ -220,7 +220,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 			if IsCataClassic then
 				respawmTime = 45
 			else
-				if BattleGroundEnemies.IsSoloRBG then
+				if BattleGroundEnemies.states.isSoloRBG then
 					respawmTime = 15
 				end
 			end

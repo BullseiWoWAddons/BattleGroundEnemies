@@ -219,7 +219,7 @@ do
 			newIndex = GetRaidTargetIndex(unit)
 			if newIndex then
 				if newIndex == 8 and (not self.RaidTargetIconIndex or self.RaidTargetIconIndex ~= 8) then
-					if BattleGroundEnemies.IsRatedBG and BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationEnable then
+					if BattleGroundEnemies.states.isRatedBG and BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationEnable then
 						local path = LSM:Fetch("sound",
 							BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationSound, true)
 						if path then
@@ -697,7 +697,7 @@ do
 
 		local enemyTargets = i
 
-		if BattleGroundEnemies.IsRatedBG then
+		if BattleGroundEnemies.states.isRatedBG then
 			if isAlly then
 				if BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Enabled then
 					if enemyTargets >= (BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Amount or 1) then
