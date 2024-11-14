@@ -201,7 +201,8 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 
 		--BattleGroundEnemies:Debug("UnitRevived")
 		if self.ActiveRespawnTimer then
-			self.Cooldown:Clear()
+			self.Cooldown:Clear() -- this doesn't seem to trigger OnCooldownDone for some reason, i am sure it used to in the past
+			frame:Reset()
 		end
 	end
 
