@@ -310,6 +310,13 @@ local function CreateMainFrame(playerType)
 			playerButton:DispatchEvent("OnTestmodeEnabled")
 		end
 		self.ActiveProfile:Show()
+
+		if self.CurrentPlayerOrder[1] then
+			BattleGroundEnemies:HandleTargetChanged(self.CurrentPlayerOrder[1])
+		end
+		if self.CurrentPlayerOrder[2] then
+			BattleGroundEnemies:HandleFocusChanged(self.CurrentPlayerOrder[2])
+		end
 	end
 
 	function mainframe:OnTestmodeDisabled()
@@ -317,6 +324,8 @@ local function CreateMainFrame(playerType)
 			playerButton:DispatchEvent("OnTestmodeDisabled")
 		end
 		self:RemoveAllPlayersFromSource(BattleGroundEnemies.consts.PlayerSources.FakePlayers)
+
+
 		self.ActiveProfile:Hide()
 	end
 
@@ -811,8 +820,8 @@ local function CreateMainFrame(playerType)
 			local lastButton = orderedPlayers[playerCount]
 			local firstButton = orderedPlayers[1]
 
-			local topButton = orderedPlayers[playerCount]
-			local bottomButton = orderedPlayers[1]
+			local topButton
+			local bottomButton
 
 			if growDownwards then
 				topButton = firstButton

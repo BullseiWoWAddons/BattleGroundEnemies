@@ -1711,9 +1711,7 @@ local function IamTargetcaller()
 	end
 end
 
-
-function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
-	local playerButton = self:GetPlayerbuttonByUnitID("target")
+function BattleGroundEnemies:HandleTargetChanged(newTarget)
 	--BattleGroundEnemies:LogToSavedVariables("playerButton target", playerButton, GetUnitName("target", true))
 	if BattleGroundEnemies.currentTarget then
 		if BattleGroundEnemies.currentTarget.PlayerIsEnemy then
@@ -1725,15 +1723,15 @@ function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
 		BattleGroundEnemies.currentTarget.MyTarget:Hide()
 	end
 
-	if playerButton then --i target an existing player
+	if newTarget then --i target an existing player
 		if self.UserButton then
-			if playerButton.PlayerIsEnemy then
-				playerButton:UpdateEnemyUnitID("Target", "target")
+			if newTarget.PlayerIsEnemy then
+				newTarget:UpdateEnemyUnitID("Target", "target")
 			end
-			self.UserButton:IsNowTargeting(playerButton)
+			self.UserButton:IsNowTargeting(newTarget)
 		end
-		playerButton.MyTarget:Show()
-		BattleGroundEnemies.currentTarget = playerButton
+		newTarget.MyTarget:Show()
+		BattleGroundEnemies.currentTarget = newTarget
 
 
 		if BattleGroundEnemies.states.isRatedBG and self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then -- i am the target caller
@@ -1744,10 +1742,12 @@ function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
 	end
 end
 
+function BattleGroundEnemies:PLAYER_TARGET_CHANGED()
+	self:HandleTargetChanged(self:GetPlayerbuttonByUnitID("target"))
+end
 
+function BattleGroundEnemies:HandleFocusChanged(newFocus)
 
-function BattleGroundEnemies:PLAYER_FOCUS_CHANGED()
-	local playerButton = self:GetPlayerbuttonByUnitID("focus")
 	--BattleGroundEnemies:LogToSavedVariables("playerButton focus", playerButton, GetUnitName("focus", true))
 	if BattleGroundEnemies.currentFocus then
 		if BattleGroundEnemies.currentFocus.PlayerIsEnemy then
@@ -1755,15 +1755,19 @@ function BattleGroundEnemies:PLAYER_FOCUS_CHANGED()
 		end
 		BattleGroundEnemies.currentFocus.MyFocus:Hide()
 	end
-	if playerButton then
-		if playerButton.PlayerIsEnemy then
-			playerButton:UpdateEnemyUnitID("Focus", "focus")
+	if newFocus then
+		if newFocus.PlayerIsEnemy then
+			newFocus:UpdateEnemyUnitID("Focus", "focus")
 		end
-		playerButton.MyFocus:Show()
-		BattleGroundEnemies.currentFocus = playerButton
+		newFocus.MyFocus:Show()
+		BattleGroundEnemies.currentFocus = newFocus
 	else
 		BattleGroundEnemies.currentFocus = false
 	end
+end
+
+function BattleGroundEnemies:PLAYER_FOCUS_CHANGED()
+	self:HandleFocusChanged(self:GetPlayerbuttonByUnitID("focus"))
 end
 
 
