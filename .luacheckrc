@@ -157,6 +157,7 @@ globals = {
 	"CreateFrame",
 	"CreateObjectPool",
 	"DebuffTypeColor",
+	"DELETE",
 	"DoesTemplateExist",
 	"EditModeSystemSelectionLayout",
 	"EditModeSystemSelectionMixin",

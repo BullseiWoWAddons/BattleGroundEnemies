@@ -694,7 +694,7 @@ local function generateOverwritableOptions(location, options)
 end
 
 function BattleGroundEnemies:GetModuleOptions(location, options)
-	local moduleOptions = type(options) == "function" and options(location) or options or {}
+	local moduleOptions = type(options) == "function" and options(location) or options
 	return moduleOptions
 end
 
@@ -703,6 +703,9 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 	for moduleName, moduleFrame in pairs(self.ButtonModules) do
 
 		local locationn = location.ButtonModules[moduleName]
+
+		local moduleOptions = BattleGroundEnemies:GetModuleOptions(locationn, moduleFrame.options)
+
 
 		if condidtionFunc(moduleFrame) then
 			temp[moduleName]  = {
@@ -761,7 +764,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 						order = 4,
 						args = Data.AddPositionSetting(locationn, moduleName, moduleFrame, playerType)
 					},
-					ModuleSettings = {
+					ModuleSettings = moduleOptions and {
 						type = "group",
 						name = L.ModuleSpecificSettings,
 						get =  function(option)
@@ -771,8 +774,8 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 							return Data.SetOption(locationn, option, ...)
 						end,
 						order = 5,
-						disabled = function() return not locationn.Enabled or not moduleFrame.options end,
-						args = BattleGroundEnemies:GetModuleOptions(locationn, moduleFrame.options),
+						disabled = function() return not locationn.Enabled end,
+						args = moduleOptions,
 						childGroups = "tab"
 					},
 
@@ -822,9 +825,11 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 					}
 				}
 			}
-			for k,v in pairs(moduleOptions) do
-				temp[moduleName].args[k] = v
-				temp[moduleName].args[k].order = temp[moduleName].args[k].order + 1
+			if moduleOptions then
+				for k,v in pairs(moduleOptions) do
+					temp[moduleName].args[k] = v
+					temp[moduleName].args[k].order = temp[moduleName].args[k].order + 1
+				end
 			end
 		end
 	end
@@ -1277,7 +1282,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						},
 						DeletePlayerCountProfile = {
 							type = "execute",
-							name = "X",
+							name = DELETE,
 							desc = L.DeletePlayerCountProfile_Desc .. ": " ..L[playerType]..": "..BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location),
 							func = function()
 								table.remove(thisPlayerCountConfigs, i)
@@ -1411,8 +1416,8 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						},
 						BarHorizontalGrowdirection = {
 							type = "select",
-							name = L.VerticalGrowdirection,
-							desc = L.VerticalGrowdirection_Desc.." "..L.NotAvailableInCombat,
+							name = L.HorizontalGrowdirection,
+							desc = L.HorizontalGrowdirection_Desc.." "..L.NotAvailableInCombat,
 							hidden = function() return location.BarColumns < 2 end,
 							disabled = InCombatLockdown,
 							values = Data.HorizontalDirections,

@@ -279,7 +279,7 @@ local function AddFilteringSettings(location, filter)
 	}
 end
 
-local function AddGeneralAuraSettings(location, filter, isPriorityContainer)
+local function AddGeneralAuraSettings(location, filter)
 	return {
 		FilteringSettings = {
 			type = "group",
@@ -291,7 +291,6 @@ local function AddGeneralAuraSettings(location, filter, isPriorityContainer)
 			set = function(option, ...)
 				return Data.SetOption(location.Filtering, option, ...)
 			end,
-			hidden = isPriorityContainer,
 			order = 9,
 			childGroups = "tab",
 			args = AddFilteringSettings(location.Filtering, filter)
@@ -330,19 +329,19 @@ local function AddAuraSettings(location, filter, isPriorityContainer)
 end
 
 local generalNonPriorityBuffOptions = function(location)
-	return AddGeneralAuraSettings(location, "HELPFUL", false)
+	return AddGeneralAuraSettings(location, "HELPFUL")
 end
 
 local generalNonPriorityDebuffOptions = function(location)
-	return AddGeneralAuraSettings(location, "HARMFUL", false)
+	return AddGeneralAuraSettings(location, "HARMFUL")
 end
 
 local generalPriorityBuffOptions = function(location)
-	return AddGeneralAuraSettings(location, "HELPFUL", true)
+	return AddGeneralAuraSettings(location, "HELPFUL")
 end
 
 local generalPriorityDebuffOptions = function(location)
-	return AddGeneralAuraSettings(location, "HARMFUL", true)
+	return AddGeneralAuraSettings(location, "HARMFUL")
 end
 
 local nonPriorityBuffOptions = function(location)
@@ -397,7 +396,6 @@ local priorityBuffs = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaults,
 	generalDefaults = generalDefaults,
 	options = priorityBuffOptions,
-	generalOptions = generalPriorityBuffOptions,
 	events = events,
 	enabledInThisExpansion = true
 })
@@ -408,7 +406,6 @@ local priorityDebuffs = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaults,
 	generalDefaults = generalDefaults,
 	options = priorityDebuffOptions,
-	generalOptions = generalPriorityDebuffOptions,
 	events = events,
 	enabledInThisExpansion = true
 })
