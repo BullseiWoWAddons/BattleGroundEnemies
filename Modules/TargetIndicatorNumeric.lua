@@ -83,12 +83,13 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 	playerButton.TargetIndicatorNumeric = BattleGroundEnemies.MyCreateFontString(playerButton)
 
 	function playerButton.TargetIndicatorNumeric:UpdateTargetIndicators()
-		local i = 0
-		for enemyButton in pairs(playerButton.UnitIDs.TargetedByEnemy) do
-			i = i + 1
-		end
+		local enemyTargets = 0
 
-		local enemyTargets = i
+		if playerButton.UnitIDs and playerButton.UnitIDs.TargetedByEnemy then
+			for enemyButton in pairs(playerButton.UnitIDs.TargetedByEnemy) do
+				enemyTargets = enemyTargets + 1
+			end
+		end
 		
 		if enemyTargets == 0 and self.config.HideWhenZero then
 			self:SetText("")
@@ -99,7 +100,6 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 
 	playerButton.TargetIndicatorNumeric.ApplyAllSettings = function(self)
 		self:ApplyFontStringSettings(self.config.Text)
-		self:SetText(0)
 		self:UpdateTargetIndicators()
 	end
 
