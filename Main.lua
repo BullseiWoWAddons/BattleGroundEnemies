@@ -2254,7 +2254,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 				C_Timer.After(5,
 					function()        --Delay this check, since its happening sometimes that this data is not ready yet
 						self.states.isRatedBG = IsRatedBattleground()
-						self.states.IsSoloRBG = C_PvP and C_PvP.IsSoloRBG and C_PvP.IsSoloRBG()
+						self.states.isSoloRBG = C_PvP and C_PvP.IsSoloRBG and C_PvP.IsSoloRBG()
 
 						self:UPDATE_BATTLEFIELD_SCORE() --trigger the function again because since 10.0.0 UPDATE_BATTLEFIELD_SCORE doesnt fire reguralry anymore and RequestBattlefieldScore doesnt trigger the event
 					end)

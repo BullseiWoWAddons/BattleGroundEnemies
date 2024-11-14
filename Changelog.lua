@@ -21,6 +21,7 @@ Data.changelog = {
 				Header = "Bugfix",
 				Entries = {
 					"Fixed bug regarding dead players in testmode",
+					"Fixed typo which caused respawn timer to not show up in solo rbg"
 				}
 			}
 		}
