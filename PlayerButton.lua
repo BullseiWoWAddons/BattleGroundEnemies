@@ -645,9 +645,12 @@ do
 			else
 				self:PlayerIsAlive()
 			end
-		elseif health == 0 then
-			-- we are in testmode
-			self:PlayerIsDead()
+		else -- we are in testmode
+			if health == 0 then
+				self:PlayerIsDead()
+			else
+				self:PlayerIsAlive()
+			end
 		end
 	end
 

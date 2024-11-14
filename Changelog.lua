@@ -5,6 +5,27 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.0.5.4",
+		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
+		Sections = {
+			{
+				Header = "Changes:",
+				Entries = {
+					"Hide tab for non existing module specfic settings",
+					"borders for my target and focus are now shown around enemies at beginning of the testmode",
+					"Label the button to delete the custom player count profile with Delete instead of X",
+					"Correctly label the settings for the button horizontal grow direction"
+				}
+			},
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed bug regarding dead players in testmode",
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.5.3",
 		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
 		Sections = {
