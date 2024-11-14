@@ -138,7 +138,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:AddPlayerToSource(source, playerT)
-		BattleGroundEnemies:LogTablesToSavedVariables("AddPlayerToSource", self.PlayerType, playerT.name)
+		--BattleGroundEnemies:LogTablesToSavedVariables("AddPlayerToSource", self.PlayerType, playerT.name)
 		if playerT.name then
 			if playerT.name == "" then return end
 		else
