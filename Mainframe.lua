@@ -751,36 +751,16 @@ local function CreateMainFrame(playerType)
 
 		local rowsPerColumn = math.ceil(playerCount / columns)
 
-		local pointX, offsetX, offsetY, pointY, relPointY, offsetDirectionX, offsetDirectionY
+		local offsetX, offsetY
 
-		if growRightwards then
-			pointX = "LEFT"
-			offsetDirectionX = 1
-		else
-			pointX = "RIGHT"
-			offsetDirectionX = -1
-		end
+		local point, offsetDirectionX, offsetDirectionY = Data.Helpers.getContainerAnchorPointForConfig(growRightwards, growDownwards)
 
 		self:SetScale(config.Framescale)
 		self:ClearAllPoints()
 
 		local scale = self:GetEffectiveScale()
 
-		self:ClearAllPoints()
-		if growDownwards then
-			pointY = "TOP"
-			relPointY = "TOP"
-			offsetDirectionY = -1
-			self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", config.Position_X / scale, config.Position_Y / scale)
-		else
-			pointY = "BOTTOM"
-			relPointY = "BOTTOM"
-			offsetDirectionY = 1
-			self:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", config.Position_X / scale, config.Position_Y / scale)
-		end
-
-		local point = pointY .. pointX
-		local relpoint = relPointY .. pointX
+		self:SetPoint(point, UIParent, "BOTTOMLEFT", config.Position_X / scale, config.Position_Y / scale)
 
 		local column = 1
 		local row = 1
@@ -803,7 +783,7 @@ local function CreateMainFrame(playerType)
 
 
 				playerButton:ClearAllPoints()
-				playerButton:SetPoint(point, self, relpoint, offsetX, offsetY)
+				playerButton:SetPoint(point, self, point, offsetX, offsetY)
 
 				playerButton:SetModulePositions()
 

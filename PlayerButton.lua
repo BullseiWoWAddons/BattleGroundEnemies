@@ -134,8 +134,21 @@ do
 		parent:StopMovingOrSizing()
 		if not InCombatLockdown() then
 			local scale = self:GetEffectiveScale()
-			self.playerCountConfig.Position_X = parent:GetLeft() * scale
-			self.playerCountConfig.Position_Y = parent:GetTop() * scale
+
+			local growDownwards = (self.playerCountConfig.BarVerticalGrowdirection == "downwards")
+			local growRightwards = (self.playerCountConfig.BarHorizontalGrowdirection == "rightwards")
+
+			if growDownwards then
+				self.playerCountConfig.Position_Y = parent:GetTop() * scale
+			else
+				self.playerCountConfig.Position_Y = parent:GetBottom() * scale
+			end
+
+			if growRightwards then
+				self.playerCountConfig.Position_X = parent:GetLeft() * scale
+			else
+				self.playerCountConfig.Position_X = parent:GetRight() * scale
+			end
 		end
 	end
 

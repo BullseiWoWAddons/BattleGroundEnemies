@@ -1446,6 +1446,10 @@ function BattleGroundEnemies:Debug(...)
 end
 
 function BattleGroundEnemies:LogTablesToSavedVariables(...)
+	if not self.db then return end
+	if not self.db.profile then return end
+	if not self.db.profile.Debug then return end
+	self.db.profile.log = self.db.profile.log or {}
 	local tables = { ... }
 	table.insert(self.db.profile.log, { timestamp = getTimestamp(), data = tables })
 end
@@ -2116,7 +2120,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
 	--self:Debug("IsRatedBG", IsRatedBG)
 
-	self:SetAllyFaction(self.AllyFaction or 0) --set fallback value, have to investigate why self.EnemyFaction is not set inside PLAYER_ENTERING_WORLD event handler
+	self:SetAllyFaction(self.AllyFaction or 0) --set fallback value
 
 	local _, _, _, _, numEnemies = GetBattlefieldTeamInfo(self.EnemyFaction)
 	local _, _, _, _, numAllies = GetBattlefieldTeamInfo(self.AllyFaction)

@@ -99,3 +99,26 @@ local oppositeHorizontalDirections = {
 function Data.Helpers.getOppositeDirection(direction)
     if oppositeHorizontalDirections[direction] then return oppositeHorizontalDirections[direction] end
 end
+
+
+function Data.Helpers.getContainerAnchorPointForConfig(growRightwards, growDownwards)
+    local pointX, pointY, offsetDirectionX, offsetDirectionY
+    if growRightwards then
+        pointX = "LEFT"
+        offsetDirectionX = 1
+    else
+        pointX = "RIGHT"
+        offsetDirectionX = -1
+    end
+
+    if growDownwards then
+        pointY = "TOP"
+        offsetDirectionY = -1
+    else
+        pointY = "BOTTOM"
+        offsetDirectionY = 1
+    end
+    local point = pointY .. pointX
+
+    return point, offsetDirectionX, offsetDirectionY
+end
