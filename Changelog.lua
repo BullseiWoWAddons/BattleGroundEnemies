@@ -20,8 +20,11 @@ Data.changelog = {
 			{
 				Header = "Bugfix",
 				Entries = {
+					"Auras will now be reset once no available unitID is assigned to a player",
 					"Fixed bug regarding dead players in testmode",
-					"Fixed typo which caused respawn timer to not show up in solo rbg"
+					"Fixed typo which caused respawn timer to not show up in solo rbg",
+					"Fixed bug which caused button positions not getting saved properly when not growing down and right",
+					"Fixed a bug regarding the option to hide raidframes, which caused raidframes to be enabled on login. Thanks to TheCheat54 from Curseforge for the report"
 				}
 			}
 		}
