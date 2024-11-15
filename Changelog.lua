@@ -6,7 +6,7 @@ local Data = select(2, ...)
 Data.changelog = {
 	{
 		Version = "11.0.5.4",
-		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
+		General = "This version mostly is just a minor bugfix and beautifying update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
 		Sections = {
 			{
 				Header = "Changes:",
