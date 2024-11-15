@@ -874,8 +874,8 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					Data.SetOption(location, option, ...)
 					BattleGroundEnemies:NotifyChange()
 				end,
-				width = "full",
-				order = 2
+				order = 2,
+				width = "double",
 			},
 			CopySettings = {
 				type = "select",
@@ -903,7 +903,6 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					end
 					return phrase:format(L[playerType], L[oppositePlayerType])
 				end,
-				width = "double",
 				order = 3
 			},
 			LoadDefaults = {
@@ -916,7 +915,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				confirm = function ()
 					return "Are you sure?"
 				end,
-				width = "double",
+				width = 1.6,
 				order = 4
 			},
 			RangeIndicator_Settings = {
@@ -1175,7 +1174,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					desc = "test",
 					order = 1
 				},
-				Fake = Data.AddVerticalSpacing(2),
+				--Fake = Data.AddVerticalSpacing(2),
 				CopySettings = {
 					type = "select",
 					name = L.CopySettings,
@@ -1191,7 +1190,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					confirm = function()
 						return L.ConfirmProfileOverride:format(L[playerType]..": "..BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location), L[playerType]..": "..BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location))
 					end,
-					width = "double",
+					width = 1.5,
 					order = 3
 				},
 				LoadFromDefaultPlayerCountProfile = {
@@ -1225,7 +1224,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					confirm = function ()
 						return "Are you sure?"
 					end,
-					width = "double",
+					width = 1.5,
 					order = 4
 				},
 				blub = {
