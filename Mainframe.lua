@@ -568,23 +568,14 @@ local function CreateMainFrame(playerType)
 					playerButton:DeleteActiveUnitID()
 				end
 			end
-
-			if playerButton.Auras then
-				if playerButton.Auras.HELPFUL then
-					wipe(playerButton.Auras.HELPFUL)
-				end
-				if playerButton.Auras.HARMFUL then
-					wipe(playerButton.Auras.HARMFUL)
-				end
-			end
-
-			playerButton.unitID = nil
-			playerButton.unit = nil
 		else --no recycleable buttons remaining => create a new one
 			self.buttonCounter = (self.buttonCounter or 0) + 1
 			playerButton = BattleGroundEnemies:CreatePlayerButton(self, self.buttonCounter)
 		end
 
+		playerButton.UnitIDs = { TargetedByEnemy = {} }
+		playerButton.unitID = nil
+		playerButton.unit = nil
 
 		playerButton.PlayerDetails = playerDetails
 		-- BattleGroundEnemies:LogToSavedVariables("PlayerDetailsChanged")
@@ -632,8 +623,11 @@ local function CreateMainFrame(playerType)
 			end
 		end
 
-		playerButton:UNIT_AURA()
+
 		playerButton:Show()
+
+		playerButton:WipeAllAuras()
+
 
 		self.Players[playerButton.PlayerDetails.PlayerName] = playerButton
 

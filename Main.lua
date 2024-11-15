@@ -138,9 +138,7 @@ BattleGroundEnemies.consts.PlayerTypes = {
 	Enemies = "Enemies"
 }
 
-local previousCvarRaidOptionIsShown = GetCVar("raidOptionIsShown")
-
-
+local previousCvarRaidOptionIsShown
 
 --variables used in multiple functions, if a variable is only used by one function its declared above that function
 BattleGroundEnemies.currentTarget = false
@@ -1451,7 +1449,10 @@ function BattleGroundEnemies:LogTablesToSavedVariables(...)
 	if not self.db.profile.Debug then return end
 	self.db.profile.log = self.db.profile.log or {}
 	local tables = { ... }
-	table.insert(self.db.profile.log, { timestamp = getTimestamp(), data = tables })
+	local copy= CopyTable(tables, false)
+
+
+	table.insert(self.db.profile.log, { timestamp = getTimestamp(), data = copy })
 end
 
 function BattleGroundEnemies:LogToSavedVariables(...)
@@ -1960,11 +1961,14 @@ function BattleGroundEnemies:ToggleArenaFrames()
 end
 
 local function restoreShowRaidFrameCVar()
+	if not previousCvarRaidOptionIsShown then return end --we didn't modify it so no need to restore it
 	SetCVar("raidOptionIsShown", previousCvarRaidOptionIsShown)
 end
 
 local function disableRaidFrames()
-	previousCvarRaidOptionIsShown = GetCVar("raidOptionIsShown")
+	if previousCvarRaidOptionIsShown == nil then
+		previousCvarRaidOptionIsShown =  GetCVar("raidOptionIsShown")
+	end
 	SetCVar("raidOptionIsShown", false)
 end
 
