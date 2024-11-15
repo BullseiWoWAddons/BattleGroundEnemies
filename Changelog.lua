@@ -11,9 +11,9 @@ Data.changelog = {
 			{
 				Header = "Changes:",
 				Entries = {
-					"Hide tab for non existing module specfic settings",
-					"Borders for my target and focus are now shown around enemies at beginning of the testmode",
-					"Label the button to delete the custom player count profile with Delete instead of X",
+					"Hide tab for non existing module specfic settings. Thanks to Squimbert from GitHub for the feedback",
+					"Borders for my target and focus are now shown around enemies at beginning of the testmode. Thanks to Squimbert from GitHub for the feedback",
+					"Label the button to delete the custom player count profile with Delete instead of X. Thanks to Squimbert from GitHub for the feedback.",
 					"Correctly label the settings for the button horizontal grow direction"
 				}
 			},
