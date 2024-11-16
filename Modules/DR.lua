@@ -113,21 +113,28 @@ local generalOptions = function(location)
 			values = Data.DisplayType,
 			order = 1
 		},
-		CustomCategoryIconsEnabled = {
-			type = "toggle",
-			name = L.EnableCustomDRCategoryIcons,
-			desc = L.EnableCustomDRCategoryIcons_Desc,
-			order = 2
-		},
 		CustomIconsSelect = {
 			type = "group",
-			name = "",
-			inline = true,
-			hidden = function ()
-				return not location.CustomCategoryIconsEnabled
-			end,
-			order = 3,
-			args = categoryoptions
+			name = L.Icons,
+			order = 2,
+			args = {
+				CustomCategoryIconsEnabled = {
+					type = "toggle",
+					name = L.EnableCustomDRCategoryIcons,
+					desc = L.EnableCustomDRCategoryIcons_Desc,
+					order = 1
+				},
+				CustomCategoryIcons = {
+					type = "group",
+					name = L.CustomDRCategoryIcons,
+					inline = true,
+					order = 2,
+					args = categoryoptions,
+					disabled = function ()
+						return not location.CustomCategoryIconsEnabled
+					end,
+				}
+			}
 		},
 		FilteringSettings = {
 			type = "group",
