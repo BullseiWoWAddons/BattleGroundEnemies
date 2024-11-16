@@ -417,7 +417,7 @@ local function CreateMainFrame(playerType)
 	function mainframe:SelectPlayerCountProfile(forceUpdate)
 		self.playerTypeConfig = BattleGroundEnemies.db.profile[self.PlayerType]
 		local maxNumPlayers = math_max(self.NumPlayers or 0)
-		BattleGroundEnemies:Debug("SelectPlayerCountProfile", MaxNumPlayers)
+		BattleGroundEnemies:Debug("SelectPlayerCountProfile", maxNumPlayers)
 		if not maxNumPlayers then return end
 		if maxNumPlayers == 0 then return self:NoActivePlayercountProfile() end
 
