@@ -344,7 +344,7 @@ Data.defaultSettings = {
 		MyFocus_Color = {0, 0.988235294117647, 0.729411764705882, 1},
 		MyFocus_BorderSize = 2,
 		ShowTooltips = true,
-		EnableMouseWheelPlayerTargeting = true,
+		EnableMouseWheelPlayerTargeting = false,
 		UseBigDebuffsPriority = true,
 		ConvertCyrillic = true,
 

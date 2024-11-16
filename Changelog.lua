@@ -7,12 +7,18 @@ local Data = select(2, ...)
 Data.changelog = {
 	{
 		Version = "11.0.5.5",
-		General = "This version mostly is just a minor bugfix update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
+		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
 		Sections = {
 			{
 				Header = "New features:",
 				Entries = {
 					"Added an option to hide the highest priority aura on priority buffs and debuffs modules."
+				}
+			},
+			{
+				Header = "Changes:",
+				Entries = {
+					"Mouse wheel scrolling through frames is now disabled by default. You can enable it in the general settings. Thanks to MartyrTV1 for the feedback",
 				}
 			},
 			{
