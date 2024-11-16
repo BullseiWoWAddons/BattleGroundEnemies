@@ -178,23 +178,23 @@ do
 				end
 			end
 		end
-		--BattleGroundEnemies:LogToSavedVariables("UpdateAll", unitID, updateStuffWithEvents)
+		--BattleGroundEnemies:Debug("UpdateAll", unitID, updateStuffWithEvents)
 		if not unitID then return end
-		--BattleGroundEnemies:LogToSavedVariables("UpdateAll", 1)
+		--BattleGroundEnemies:Debug("UpdateAll", 1)
 
 		if not UnitExists(unitID) then return end
 
 		--this further checks dont seem necessary since they dont seem to rule out any other unitiDs (all unit ids that exist also are a button and are also this frame)
 
 
-		--[[ BattleGroundEnemies:LogToSavedVariables("UpdateAll", 2)
+		--[[ BattleGroundEnemies:Debug("UpdateAll", 2)
 
 		local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
 
 		if not playerButton then return end
-		BattleGroundEnemies:LogToSavedVariables("UpdateAll", 3)
+		BattleGroundEnemies:Debug("UpdateAll", 3)
 		if playerButton ~= self then return	end
-		BattleGroundEnemies:LogToSavedVariables("UpdateAll", 4) ]]
+		BattleGroundEnemies:Debug("UpdateAll", 4) ]]
 
 
 		if updateStuffWithEvents then
@@ -350,7 +350,7 @@ do
 									else
 										-- the module we are depending on hasn't been set yet
 										allModulesSet = false
-										--BattleGroundEnemies:LogToSavedVariables("moduleName", moduleName, "isnt set yet")
+										--BattleGroundEnemies:Debug("moduleName", moduleName, "isnt set yet")
 									end
 								else
 									return print("error", relativeFrame, "for module", moduleName, "doesnt exist")
@@ -401,7 +401,7 @@ do
 			i = i + 1
 
 			-- if i > 10 then
-			-- 	BattleGroundEnemies:LogToSavedVariables("something went wrong in SetModulePositions")
+			-- 	BattleGroundEnemies:Debug("something went wrong in SetModulePositions")
 			-- end
 		until allModulesSet or i > 10 --maxium of 10 tries
 	end
@@ -1096,7 +1096,7 @@ do
 	end
 
 	function buttonFunctions:IsNowTargeting(playerButton)
-		--BattleGroundEnemies:LogToSavedVariables("IsNowTargeting", self.PlayerName, self.unitID, playerButton.PlayerName)
+		--BattleGroundEnemies:Debug("IsNowTargeting", self.PlayerName, self.unitID, playerButton.PlayerName)
 		self.Target = playerButton
 
 		if not self:IsEnemyToMe(playerButton) then return end --we only care of the other player is of opposite faction
@@ -1105,7 +1105,7 @@ do
 	end
 
 	function buttonFunctions:IsNoLongerTarging(playerButton)
-		--BattleGroundEnemies:LogToSavedVariables("IsNoLongerTarging", self.PlayerName, self.unitID, playerButton.PlayerName)
+		--BattleGroundEnemies:Debug("IsNoLongerTarging", self.PlayerName, self.unitID, playerButton.PlayerName)
 		self.Target = nil
 
 		if not self:IsEnemyToMe(playerButton) then return end --we only care of the other player is of opposite faction
@@ -1114,7 +1114,7 @@ do
 	end
 
 	function buttonFunctions:UpdateTarget()
-		--BattleGroundEnemies:LogToSavedVariables("UpdateTarget", self.PlayerName, self.unitID)
+		--BattleGroundEnemies:Debug("UpdateTarget", self.PlayerName, self.unitID)
 
 		local oldTargetPlayerButton = self.Target
 		local newTargetPlayerButton
@@ -1125,7 +1125,7 @@ do
 
 
 		if oldTargetPlayerButton then
-			--BattleGroundEnemies:LogToSavedVariables("UpdateTarget", "oldTargetPlayerButton", self.PlayerName, self.unitID, oldTargetPlayerButton.PlayerName, oldTargetPlayerButton.unitID)
+			--BattleGroundEnemies:Debug("UpdateTarget", "oldTargetPlayerButton", self.PlayerName, self.unitID, oldTargetPlayerButton.PlayerName, oldTargetPlayerButton.unitID)
 
 			if newTargetPlayerButton and oldTargetPlayerButton == newTargetPlayerButton then return end
 			self:IsNoLongerTarging(oldTargetPlayerButton)
@@ -1134,7 +1134,7 @@ do
 		--player didnt have a target before or the player targets a new player
 
 		if newTargetPlayerButton then --player targets an existing player and not for example a pet or a NPC
-			--BattleGroundEnemies:LogToSavedVariables("UpdateTarget", "newTargetPlayerButton", self.PlayerName, self.unitID, newTargetPlayerButton.PlayerName, newTargetPlayerButton.unitID)
+			--BattleGroundEnemies:Debug("UpdateTarget", "newTargetPlayerButton", self.PlayerName, self.unitID, newTargetPlayerButton.PlayerName, newTargetPlayerButton.unitID)
 			self:IsNowTargeting(newTargetPlayerButton)
 		end
 	end

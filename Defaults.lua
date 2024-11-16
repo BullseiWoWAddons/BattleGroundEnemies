@@ -325,6 +325,8 @@ Data.defaultSettings = {
 	profile = {
 		Locked = false,
 		Debug = false,
+		DebugToSV = false,
+		DebugToChat = false,
 
 		shareActiveProfile = false,
 

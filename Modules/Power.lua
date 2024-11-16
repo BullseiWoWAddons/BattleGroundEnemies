@@ -120,7 +120,7 @@ function power:AttachToPlayerButton(playerButton)
 	end
 
 	function playerButton.Power:CheckForNewPowerColor(powerToken)
-		--BattleGroundEnemies:LogToSavedVariables("CheckForNewPowerColor", powerToken)
+		--BattleGroundEnemies:Debug("CheckForNewPowerColor", powerToken)
 
 		if self.powerToken ~= powerToken then
 			local color = PowerBarColor[powerToken]
@@ -168,7 +168,7 @@ function power:AttachToPlayerButton(playerButton)
 	
 	
 	function playerButton.Power:UpdatePower(unitID)
-		--BattleGroundEnemies:LogToSavedVariables("UpdatePower", unitID, powerToken)
+		--BattleGroundEnemies:Debug("UpdatePower", unitID, powerToken)
 		if unitID then
 			self:UpdateMinMaxValues(UnitPowerMax(unitID))
 			self:SetValue(UnitPower(unitID))

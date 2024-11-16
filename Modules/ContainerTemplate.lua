@@ -138,7 +138,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 	function f:FindInputByAttribute(attribute, value)
 		for i = 1, #self.inputs do
 			if self.inputs[i][attribute] == value then
-				return self.inputs[i]
+				return self.inputs[i], i
 			end
 		end
 	end
@@ -146,6 +146,10 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 	function f:UpdateInput(input, inputData)
 		Mixin(input, inputData)
 		return input
+	end
+
+	function f:RemoveFromInput(index)
+		return table.remove(self.inputs, index)
 	end
 
 	function f:Reset()

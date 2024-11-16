@@ -1240,8 +1240,8 @@ function BattleGroundEnemies.MyCreateCooldown(parent)
 end
 
 function BattleGroundEnemies:Disable()
+	BattleGroundEnemies:Debug("BattleGroundEnemies disabled")
 	self.enabled = false
-	--BattleGroundEnemies:LogToSavedVariables("BattleGroundEnemies disabled")
 	self:UnregisterEvents()
 	self:Hide()
 	RequestFrame:Hide()
@@ -1251,8 +1251,8 @@ function BattleGroundEnemies:Disable()
 end
 
 function BattleGroundEnemies:Enable()
+	BattleGroundEnemies:Debug("BattleGroundEnemies enabled")
 	self.enabled = true
-	--BattleGroundEnemies:LogToSavedVariables("BattleGroundEnemies enabled")
 
 	self:RegisterEvents()
 	if self.Testmode.Active then
@@ -1434,38 +1434,23 @@ function BattleGroundEnemies:Debug(...)
 	if not self.db.profile then return end
 	if not self.db.profile.Debug then return end
 
-	if not self.debugFrame then
-		self.debugFrame = CreatedebugFrame()
+	if self.db.profile.DebugToChat then
+		if not self.debugFrame then
+			self.debugFrame = CreatedebugFrame()
+		end
+
+		local text = stringifyMultitArgs(getTimestamp(), ...)
+
+		self.debugFrame:AddMessage(text)
 	end
 
-	local text = stringifyMultitArgs(getTimestamp(), ...)
+	if self.db.profile.DebugToSV then
+		self.db.profile.log = self.db.profile.log or {}
+		local t = { ... }
+		local copy= CopyTable(t, false)
 
-	self.debugFrame:AddMessage(text)
-end
-
-function BattleGroundEnemies:LogTablesToSavedVariables(...)
-	if not self.db then return end
-	if not self.db.profile then return end
-	if not self.db.profile.Debug then return end
-	self.db.profile.log = self.db.profile.log or {}
-	local tables = { ... }
-	local copy= CopyTable(tables, false)
-
-
-	table.insert(self.db.profile.log, { timestamp = getTimestamp(), data = copy })
-end
-
-function BattleGroundEnemies:LogToSavedVariables(...)
-	if not self.db then return end
-	if not self.db.profile then return end
-	if not self.db.profile.Debug then return end
-	self.db.profile.log = self.db.profile.log or {}
-
-	local text = stringifyMultitArgs(...)
-	self:Debug(...)
-	text = stringifyMultitArgs(getTimestamp(), text)
-
-	table_insert(self.db.profile.log, text)
+		table.insert(self.db.profile.log, {[getTimestamp()] = copy })
+	end
 end
 
 local sentMessages = {}
@@ -1484,7 +1469,7 @@ end
 
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
-	--BattleGroundEnemies:LogToSavedVariables("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
+	BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 	--unitEvent can be: "seen", "unseen", "destroyed", "cleared"
 	--self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 
@@ -1717,7 +1702,7 @@ local function IamTargetcaller()
 end
 
 function BattleGroundEnemies:HandleTargetChanged(newTarget)
-	--BattleGroundEnemies:LogToSavedVariables("playerButton target", playerButton, GetUnitName("target", true))
+	BattleGroundEnemies:Debug("playerButton target", GetUnitName("target", true))
 	if BattleGroundEnemies.currentTarget then
 		if BattleGroundEnemies.currentTarget.PlayerIsEnemy then
 			BattleGroundEnemies.currentTarget:UpdateEnemyUnitID("Target", false)
@@ -1753,7 +1738,7 @@ end
 
 function BattleGroundEnemies:HandleFocusChanged(newFocus)
 
-	--BattleGroundEnemies:LogToSavedVariables("playerButton focus", playerButton, GetUnitName("focus", true))
+	--BattleGroundEnemies:Debug("playerButton focus", playerButton, GetUnitName("focus", true))
 	if BattleGroundEnemies.currentFocus then
 		if BattleGroundEnemies.currentFocus.PlayerIsEnemy then
 			BattleGroundEnemies.currentFocus:UpdateEnemyUnitID("Focus", false)
@@ -1907,7 +1892,7 @@ function BattleGroundEnemies:UNIT_TARGET(unitID)
 
 
 	if playerButton and playerButton ~= self.UserButton then --we use Player_target_changed for the player
-		--self:LogToSavedVariables("UNIT_TARGET", unitID, playerButton.PlayerDetails.PlayerName)
+		--self:Debug("UNIT_TARGET", unitID, playerButton.PlayerDetails.PlayerName)
 		playerButton:UpdateTarget()
 	end
 end
@@ -1992,7 +1977,7 @@ function BattleGroundEnemies:ThrottleUpdateArenaPlayers()
 end
 
 function BattleGroundEnemies:UpdateArenaPlayers()
-	--BattleGroundEnemies:LogToSavedVariables("UpdateArenaPlayers")
+	BattleGroundEnemies:Debug("UpdateArenaPlayers")
 	self.Enemies:CreateArenaEnemies()
 
 	if #BattleGroundEnemies.Enemies.CurrentPlayerOrder > 1 or #BattleGroundEnemies.Allies.CurrentPlayerOrder > 1 then --this ensures that we checked for enemies and the flag carrier will be shown (if its an enemy)
@@ -2011,10 +1996,10 @@ function BattleGroundEnemies:UpdateArenaPlayers()
 end
 
 function BattleGroundEnemies:CheckForArenaEnemies()
-	--BattleGroundEnemies:LogToSavedVariables("CheckForArenaEnemies")
+	BattleGroundEnemies:Debug("CheckForArenaEnemies")
 
 	-- returns valid data on PLAYER_ENTERING_WORLD
-	--self:Debug(numArenaOpponents)
+	self:Debug(GetNumArenaOpponents())
 	if GetNumArenaOpponents() == 0 then
 		C_Timer.After(2, function() self:ThrottleUpdateArenaPlayers() end)
 	else
@@ -2028,6 +2013,8 @@ BattleGroundEnemies.PLAYER_UNGHOST = BattleGroundEnemies.PlayerAlive --player is
 function BattleGroundEnemies:UpdateMapID()
 	--	SetMapToCurrentZone() apparently removed in 8.0
 	local mapID = GetBestMapForUnit('player')
+	BattleGroundEnemies:Debug("UpdateMapID", mapID)
+
 	if mapID and mapID ~= -1 and mapID ~= 0 then -- when this values occur the map ID is not real
 		self.states.battlegroundBuff = Data.BattlegroundspezificBuffs[mapID]
 		self.states.battleGroundDebuffs = Data.BattlegroundspezificDebuffs[mapID]
@@ -2043,6 +2030,7 @@ function BattleGroundEnemies:UpdateMapID()
 end
 
 local function parseBattlefieldScore(index)
+	BattleGroundEnemies:Debug("parseBattlefieldScore", index)
 	local result
 	if C_PvP and C_PvP.GetScoreInfo then
 		local scoreInfo = C_PvP.GetScoreInfo(index)
@@ -2089,6 +2077,7 @@ local function parseBattlefieldScore(index)
 	else
 		local _, name, faction, race, classToken, specName
 		if HasSpeccs then
+			BattleGroundEnemies:Debug("HasSpeccs")
 			--name, killingBlows, honorableKills, deaths, honorGained, faction, rank, race, class, classToken, damageDone, healingDone = GetBattlefieldScore(index)
 			name, _, _, _, _, faction, race, _, classToken, _, _, _, _, _, _, specName = GetBattlefieldScore(index)
 		else
@@ -2106,6 +2095,7 @@ local function parseBattlefieldScore(index)
 end
 
 function BattleGroundEnemies:SetAllyFaction(allyFaction)
+	BattleGroundEnemies:Debug("SetAllyFaction", allyFaction)
 	self.EnemyFaction = allyFaction == 0 and 1 or 0
 	self.AllyFaction = allyFaction
 end
@@ -2113,7 +2103,7 @@ end
 
 
 function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
-	-- BattleGroundEnemies:LogToSavedVariables("UPDATE_BATTLEFIELD_SCORE")
+	BattleGroundEnemies:Debug("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug(GetCurrentMapAreaID())
 	-- self:Debug("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
@@ -2142,12 +2132,15 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
 	local battlefieldScores = {}
 	local numScores = GetNumBattlefieldScores()
+	BattleGroundEnemies:Debug("numScores", numScores)
 	for i = 1, numScores do
 		local score = parseBattlefieldScore(i)
 		if score then
 			table.insert(battlefieldScores, score)
 		end
 	end
+
+	BattleGroundEnemies:Debug("battlefieldScores", battlefieldScores)
 
 	--see if our faciton in BG changed
 	for i = 1, #battlefieldScores do
@@ -2239,6 +2232,7 @@ BattleGroundEnemies.PARTY_LEADER_CHANGED = BattleGroundEnemies.GROUP_ROSTER_UPDA
 
 --Fires when the player logs in, /reloads the UI or zones between map instances. Basically whenever the loading screen appears.
 function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
+	BattleGroundEnemies:Debug("PLAYER_ENTERING_WORLD")
 	self:ResetCombatLogScanniningTables()
 	if self.Testmode.Active then --disable testmode
 		self:DisableTestMode()
@@ -2247,6 +2241,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	self.Enemies:RemoveAllPlayersFromAllSources()
 	self.Allies:RemoveAllPlayersFromSource(self.consts.PlayerSources.Scoreboard)
 	local _, zone = IsInInstance()
+	BattleGroundEnemies:Debug("zone", zone)
 	if zone == "pvp" or zone == "arena" then
 		if GetBattlefieldArenaFaction then
 			self:SetAllyFaction(GetBattlefieldArenaFaction()) -- returns the playered faction 0 for horde, 1 for alliance, doesnt exist in TBC)
@@ -2270,12 +2265,6 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 		end
 
 		self:Enable()
-
-		-- self:Debug("PLAYER_ENTERING_WORLD")
-		-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
-		-- self:Debug("C_PvP.IsInBrawl", C_PvP.IsInBrawl())
-		-- self:Debug("GetCurrentMapAreaID", GetCurrentMapAreaID())
-
 		self.states.userIsAlive = true
 	else
 		BattleGroundEnemies.states.isInArena = false
