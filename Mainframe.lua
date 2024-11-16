@@ -369,6 +369,8 @@ local function CreateMainFrame(playerType)
 		end
 
 		local conf = self.playerCountConfig
+		if not conf then return end
+
 
 
 		self:SetPlayerCountJustifyV(conf.BarVerticalGrowdirection)
