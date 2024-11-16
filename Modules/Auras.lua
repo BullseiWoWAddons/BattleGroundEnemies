@@ -15,6 +15,7 @@ local UnitAffectingCombat = UnitAffectingCombat
 local UnitName = UnitName
 
 local generalDefaults = {
+		HideHighestPriority = false,
 		Filtering = {
 		Enabled = true,
 		Mode = "Custom",
@@ -279,7 +280,7 @@ local function AddFilteringSettings(location, filter)
 	}
 end
 
-local function AddGeneralAuraSettings(location, filter)
+local function addGeneralAuraSettings(location, filter)
 	return {
 		FilteringSettings = {
 			type = "group",
@@ -294,6 +295,18 @@ local function AddGeneralAuraSettings(location, filter)
 			order = 9,
 			childGroups = "tab",
 			args = AddFilteringSettings(location.Filtering, filter)
+		}
+	}
+end
+
+local function addGeneralPriorityAuraSettings(location, filter)
+	return {
+		HideHighestPriority = {
+			type = "toggle",
+			name = L.HideHighestPriority,
+			desc = L.HideHighestPriority_Desc,
+			width = 'normal',
+			order = 1
 		}
 	}
 end
@@ -329,19 +342,19 @@ local function AddAuraSettings(location, filter, isPriorityContainer)
 end
 
 local generalNonPriorityBuffOptions = function(location)
-	return AddGeneralAuraSettings(location, "HELPFUL")
+	return addGeneralAuraSettings(location, "HELPFUL")
 end
 
 local generalNonPriorityDebuffOptions = function(location)
-	return AddGeneralAuraSettings(location, "HARMFUL")
+	return addGeneralAuraSettings(location, "HARMFUL")
 end
 
 local generalPriorityBuffOptions = function(location)
-	return AddGeneralAuraSettings(location, "HELPFUL")
+	return addGeneralPriorityAuraSettings(location, "HELPFUL")
 end
 
 local generalPriorityDebuffOptions = function(location)
-	return AddGeneralAuraSettings(location, "HARMFUL")
+	return addGeneralPriorityAuraSettings(location, "HARMFUL")
 end
 
 local nonPriorityBuffOptions = function(location)
@@ -396,6 +409,7 @@ local priorityBuffs = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaults,
 	generalDefaults = generalDefaults,
 	options = priorityBuffOptions,
+	generalOptions = generalPriorityBuffOptions,
 	events = events,
 	enabledInThisExpansion = true
 })
@@ -406,6 +420,7 @@ local priorityDebuffs = BattleGroundEnemies:NewButtonModule({
 	defaultSettings = defaults,
 	generalDefaults = generalDefaults,
 	options = priorityDebuffOptions,
+	generalOptions = generalPriorityDebuffOptions,
 	events = events,
 	enabledInThisExpansion = true
 })
@@ -544,6 +559,9 @@ local function AttachToPlayerButton(playerButton, filterr, isPriorityContainer)
 
 	function auraContainer:BeforeFullAuraUpdate(filter)
 		if not (filter == self.filter) then return end
+		if self.isPriorityContainer then
+			self.highestPriority = 0
+		end
 		self:ResetInputs()
 	end
 
@@ -641,11 +659,25 @@ local function AttachToPlayerButton(playerButton, filterr, isPriorityContainer)
 
 		if not auraContainer:CareAboutThisAura(unitID, filter, aura) then return end
 
+		if aura.Priority and self.isPriorityContainer then
+			if aura.Priority > self.highestPriority then
+				self.highestPriority = aura.Priority
+			end
+		end
+
 		self:NewInput(aura)
 	end
 
 	function auraContainer:AfterFullAuraUpdate(filter)
 		if not (filter == self.filter) then return end
+		if self.config.HideHighestPriority then
+			-- remove it from inputs
+
+			local input, index = self:FindInputByAttribute("Priority", self.highestPriority)
+			if input then
+				self:RemoveFromInput(index)
+			end
+		end
 		self:Display()
 	end
 
