@@ -1299,9 +1299,7 @@ do
 		self.db.RegisterCallback(self, "OnProfileReset", "ProfileReset")
 
 		if self.db.profile then
-			if not self.db.profile.Debug then
-				self.db.profile.log = nil
-			end
+			self.db.profile.log = nil
 		end
 
 		BattleGroundEnemies:UpgradeProfiles(self.db)
