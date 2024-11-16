@@ -18,7 +18,7 @@ Data.changelog = {
 			{
 				Header = "Changes:",
 				Entries = {
-					"Mouse wheel scrolling through frames is now disabled by default. You can enable it in the general settings. Thanks to MartyrTV1 for the feedback.",
+					"Mouse wheel scrolling through frames is now disabled by default. You can enable it in the general settings. I am sorry for the problems this may have caused due to the interference with mouseover keybindings. Thanks to MartyrTV1 for the feedback.",
 					"Moved custom DR category icons selection into its own settings group for cleaner look"
 				}
 			},
