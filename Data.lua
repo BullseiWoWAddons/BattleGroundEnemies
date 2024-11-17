@@ -187,7 +187,7 @@ Data.Interruptdurations = {
 	[116705]= 4, -- [Monk] Spear Hand Strike
 	[106839]= 4, -- [Feral] Skull Bash
 	[93985]	= 4,  -- [Feral] Skull Bash
-	[351338] = 4 -- [Evoker] Quell
+	[351338]= 4 -- [Evoker] Quell
 }
 
 -- for spellId, lockoutDuration in pairs(Data.Interruptdurations) do
