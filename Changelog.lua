@@ -6,6 +6,18 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.0.5.6",
+		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed an issue with the stack text not showing up for allies on the objective."
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.5.5",
 		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
 		Sections = {
