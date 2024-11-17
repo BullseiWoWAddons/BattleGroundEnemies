@@ -6,6 +6,24 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.0.5.7",
+		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed wrong labling for targeting next or previous ally in the keybindng section",
+				}
+			},
+			{
+				Header = "Changes",
+				Entries = {
+					"Added Evoker Quell to list of interruptss",
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.5.6",
 		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
 		Sections = {
