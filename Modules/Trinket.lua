@@ -139,7 +139,7 @@ function trinket:AttachToPlayerButton(playerButton)
 		end
 
 
-		--BattleGroundEnemies:Debug(operation, spellId)
+		--self:Debug(operation, spellId)
 		local continue = not self.spellId and Data.cCdurationBySpellID[spellId]
 		if not continue then return end
 

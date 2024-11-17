@@ -102,7 +102,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 
 
 	frame.Cooldown:SetScript("OnCooldownDone", function()
-		BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "OnCooldownDone")
+		frame:Debug("OnCooldownDone")
 
 		frame:Reset()
 	end)
@@ -129,26 +129,27 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		self.Cooldown:ApplyCooldownSettings(conf.Cooldown, true, {0, 0, 0, 0.75})
 	end
 	function frame:SearchForDebuffs(aura)
-		--BattleGroundEnemies:Debug("Läüft")
+		self:Debug("SearchForDebuffs")
 		local battleGroundDebuffs = BattleGroundEnemies.states.battleGroundDebuffs
 		local value
 		if battleGroundDebuffs then
 			for i = 1, #battleGroundDebuffs do
 				if aura.spellId == battleGroundDebuffs[i] then
+					self:Debug("found debuff", aura.spellId)
 					if BattleGroundEnemies.states.currentMapID == 417 then -- 417 is Kotmogu, we scan for orb debuffs
 	
 						if aura.points and type(aura.points) == "table" then
 							if aura.points[2] then
 								if not self.shownValue then
-									--BattleGroundEnemies:Debug("hier")
+									self:Debug("hier")
 									--player just got the debuff
 									self.Icon:SetTexture(GetSpellTexture(aura.spellId))
 									self:Show()
-									--BattleGroundEnemies:Debug("Texture set")
+									--self:Debug("Texture set")
 								end
 								value = aura.points[2]
 									--values for orb debuff:
-									--BattleGroundEnemies:Debug(value1, value2, value3, value4)
+									--frame:Debug(value1, value2, value3, value4)
 									-- value1 = Reduces healing received by value1
 									-- value2 = Increases damage taken by value2
 									-- value3 = Increases damage done by value3
@@ -183,21 +184,26 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:BeforeFullAuraUpdate(filter)
+		self:Debug("BeforeFullAuraUpdate")
 		if filter == "HARMFUL" then
 			self.continue = true
 		end
 	end
 
 	function frame:NewAura(unitID, filter, aura)
+		--self:Debug("NewAura", unitID, filter, self.continue, BattleGroundEnemies.ArenaIDToPlayerButton)
+
 		if filter ~= "HARMFUL" then return end
 		if not self.continue then return end
+
+		self:Debug("NewAura", 2)
 
 		if not BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then return end -- This player is not shown on arena enemy so we dont care
 		if BattleGroundEnemies.states.battleGroundDebuffs then self:SearchForDebuffs(aura) end
 	end
 
 	function frame:UnitRevived()
-		BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "UnitRevived")
+		self:Debug("UnitRevived")
 
 		--BattleGroundEnemies:Debug("UnitRevived")
 		if self.ActiveRespawnTimer then
@@ -207,10 +213,10 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:UnitDied()
-		BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "UnitDied")
+		self:Debug("UnitDied")
 
 		if (BattleGroundEnemies.states.isRatedBG or BattleGroundEnemies.states.isSoloRBG or (BattleGroundEnemies.Testmode.Active)) then
-		--BattleGroundEnemies:Debug("UnitIsDead SetCooldown")
+			self:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
 				self:Show()
 				self.Icon:SetTexture(GetSpellTexture(8326))
@@ -230,9 +236,9 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:ArenaOpponentShown()
-		BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "ArenaOpponentShown")
+		self:Debug("ArenaOpponentShown")
 		if BattleGroundEnemies.states.battlegroundBuff then
-			BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "has buff")
+			self:Debug("has battlegroundBuff")
 			self.Icon:SetTexture(GetSpellTexture(BattleGroundEnemies.states.battlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]))
 			self:Show()
 		end
@@ -241,7 +247,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:ArenaOpponentHidden()
-		BattleGroundEnemies:Debug(playerButton.PlayerDetails.PlayerName, "ArenaOpponentHidden")
+		self:Debug("ArenaOpponentHidden")
 		self:Reset()
 	end
 	playerButton.ObjectiveAndRespawn = frame

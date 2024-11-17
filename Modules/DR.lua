@@ -126,7 +126,7 @@ local generalOptions = function(location)
 				},
 				CustomCategoryIcons = {
 					type = "group",
-					name = L.CustomDRCategoryIcons,
+					name = "",
 					inline = true,
 					order = 2,
 					args = categoryoptions,
@@ -152,7 +152,7 @@ local generalOptions = function(location)
 				},
 				Filtering_Filterlist = {
 					type = "multiselect",
-					name = L.Filtering_Filterlist,
+					name = "",
 					desc = L.DrTrackingFiltering_Filterlist_Desc,
 					disabled = function() return not location.Filtering_Enabled end,
 					get = function(option, key)
@@ -324,7 +324,7 @@ function dRTracking:AttachToPlayerButton(playerButton)
 
 	function container:AuraRemoved(spellId, spellName)
 		local config = self.config
-		--BattleGroundEnemies:Debug(operation, spellId)
+		--self:Debug(operation, spellId)
 
 		--local drCat = DRList:GetCategoryBySpellID(IsClassic and spellName or spellId) --no longer needed, classic seems to support spellIDs now
 		local drCat = DRList:GetCategoryBySpellID(spellId)
@@ -332,23 +332,23 @@ function dRTracking:AttachToPlayerButton(playerButton)
 		if not drCat then return end
 
 		local drTrackingEnabled = not config.Filtering_Enabled or config.Filtering_Filterlist[drCat]
+		if not drTrackingEnabled then return end
 
-		if drTrackingEnabled then
-			local input = self:FindInputByAttribute("drCat", drCat)
-			if input then
-				input = self:UpdateInput(input, {spellId = spellId})
-			else
-				input = self:NewInput({
-					drCat = drCat,
-					spellId = spellId
-				})
-			end
-
-			input.status = (input.status or 0) + 1
-
-			input.startTime = GetTime()
-			self:Display()
+		local input = self:FindInputByAttribute("drCat", drCat)
+		if input then
+			input = self:UpdateInput(input, {spellId = spellId})
+		else
+			input = self:NewInput({
+				drCat = drCat,
+				spellId = spellId
+			})
 		end
+
+		input.status = (input.status or 0) + 1
+
+		input.startTime = GetTime()
+		self:Display()
+	
 	end
 
 	playerButton.DRTracking = container

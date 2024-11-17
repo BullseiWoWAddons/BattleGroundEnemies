@@ -564,14 +564,10 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 
 
 	--not used
-	--[[ moduleFrame:SetScript("OnEvent", function(self, event, ...)
-		BattleGroundEnemies:Debug("BattleGroundEnemies module event", moduleName, event, ...)
-		self[event](self, ...)
-	end)
-
-	moduleFrame.Debug = function(self, ...)
-		BattleGroundEnemies:Debug("UnitInCombat module debug", moduleName, ...)
-	end ]]
+	-- moduleFrame:SetScript("OnEvent", function(self, event, ...)
+	-- 	BattleGroundEnemies:Debug("BattleGroundEnemies module event", moduleName, event, ...)
+	-- 	self[event](self, ...)
+	-- end)
 
 	self.ButtonModules[moduleName] = moduleFrame
 	return moduleFrame
@@ -1445,9 +1441,8 @@ function BattleGroundEnemies:Debug(...)
 	if self.db.profile.DebugToSV then
 		self.db.profile.log = self.db.profile.log or {}
 		local t = { ... }
-		local copy= CopyTable(t, false)
 
-		table.insert(self.db.profile.log, {[getTimestamp()] = copy })
+		table.insert(self.db.profile.log, {[getTimestamp()] = t })
 	end
 end
 
@@ -1469,7 +1464,7 @@ end
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 	BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 	--unitEvent can be: "seen", "unseen", "destroyed", "cleared"
-	--self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
+	self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 
 	if unitEvent == "cleared" then --"unseen", "cleared" or "destroyed"
 		local playerButton = self.ArenaIDToPlayerButton[unitID]
@@ -1981,10 +1976,10 @@ function BattleGroundEnemies:UpdateArenaPlayers()
 	if #BattleGroundEnemies.Enemies.CurrentPlayerOrder > 1 or #BattleGroundEnemies.Allies.CurrentPlayerOrder > 1 then --this ensures that we checked for enemies and the flag carrier will be shown (if its an enemy)
 		for i = 1, GetNumArenaOpponents() do
 			local unitID = "arena" .. i
-			--BattleGroundEnemies:Debug(UnitName(unitID))
+			BattleGroundEnemies:Debug(unitID, UnitName(unitID))
 			local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
 			if playerButton then
-				--BattleGroundEnemies:Debug("Button exists")
+				BattleGroundEnemies:Debug("Button exists for", unitID)
 				playerButton:ArenaOpponentShown(unitID)
 			end
 		end

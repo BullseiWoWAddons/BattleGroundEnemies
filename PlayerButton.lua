@@ -890,7 +890,7 @@ do
 			local filter = auraFilters[i]
 			self:DispatchEvent("BeforeFullAuraUpdate", filter)
 			for _, aura in pairs(self.Auras[filter]) do
-				self:DispatchEvent("NewAura", unitID, filter, CopyTable(aura))
+				self:DispatchEvent("NewAura", unitID, filter, aura)
 			end
 			self:DispatchEvent("AfterFullAuraUpdate", filter)
 		end
@@ -902,7 +902,13 @@ do
 	function buttonFunctions:UNIT_AURA(unitID, second)
 		if not self.isShown then return end
 		local now = GetTime()
-		if self.lastAuraUpdate and self.lastAuraUpdate == now then return end --this event will fire for the same player multiple times if lets say he is shown on nameplate and on target frame
+		if self.lastAuraUpdate and self.lastAuraUpdate == now then  --this event will fire for the same player multiple times if lets say he is shown on nameplate and on target frame
+			if unitID and BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then
+				return self:SendAllAurasToModules(unitID)
+			else
+				return
+			end
+		end
 
 		local updatedAuraInfos = {
 			addedAuras = {},
@@ -1056,7 +1062,7 @@ do
 		end
 
 		self:SendAllAurasToModules(unitID)
-	
+
 		self.lastAuraUpdate = now
 	end
 
@@ -1264,6 +1270,10 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 			playerButton[moduleName].GetConfig = function(self)
 				self.config = playerButton.playerCountConfig.ButtonModules[moduleName]
 				return self.config
+			end
+
+			playerButton[moduleName].Debug = function(self, ...)
+				BattleGroundEnemies:Debug(moduleName, playerButton.PlayerDetails and playerButton.PlayerDetails.PlayerName, ...)
 			end
 
 			playerButton[moduleName].GetOptionsPath = function(self)
