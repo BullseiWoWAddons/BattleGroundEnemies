@@ -62,7 +62,7 @@ local function CreateMainFrame(playerType)
 
     ---@class MainFrame :Button
 	local mainframe = CreateFrame("Button","BGE"..playerType,BattleGroundEnemies,"SecureActionButtonTemplate, SecureHandlerEnterLeaveTemplate")
-	mainframe:EnableMouseWheel(true)
+
 	mainframe:SetAttribute("type4", "macro")
 	mainframe:SetAttribute("type5", "macro")
 	mainframe:RegisterForClicks(GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp")
@@ -92,7 +92,6 @@ local function CreateMainFrame(playerType)
 				nextTargetName)
 		self:SetAttribute("playerIndex", nextPlayerIndex)
 	]])
-
 
 	--@class: PlayerButton[]
 	mainframe.Players = {}            --index = name, value = button(table), contains enemyButtons
@@ -709,6 +708,7 @@ local function CreateMainFrame(playerType)
 
 		if BattleGroundEnemies.db.profile.EnableMouseWheelPlayerTargeting then
 			--SecureHandlerEnterLeaveTemplate ads _onenter and _onleave functionality
+			mainframe:EnableMouseWheel(true)
 			mainframe:SetAttribute("_onenter",[[
 				self:SetBindingClick(true, "MOUSEWHEELUP",self:GetName(), "Button4")
 				self:SetBindingClick(true, "MOUSEWHEELDOWN",self:GetName(), "Button5")
@@ -718,6 +718,7 @@ local function CreateMainFrame(playerType)
 				self:ClearBindings()
 			]])
 		else
+			mainframe:EnableMouseWheel(false)
 			mainframe:SetAttribute("_onenter",nil)
 			-- onleave, clear override binding
 			mainframe:SetAttribute("_onleave",nil)

@@ -78,10 +78,10 @@ end
 
 -- binding definitions
 --BINDING_HEADER_BATTLEGROUNDENEMIES = "BattleGroundEnemies"
-_G["BINDING_NAME_CLICK BGEAllies:Button4"] = L.TargetNextAlly
-_G["BINDING_NAME_CLICK BGEAllies:Button5"] = L.TargetPreviousAlly
-_G["BINDING_NAME_CLICK BGEEnemies:Button4"] = L.TargetNextEnemy
-_G["BINDING_NAME_CLICK BGEEnemies:Button5"] = L.TargetPreviousEnemy
+_G["BINDING_NAME_CLICK BGEAllies:Button4"] = L.TargetPreviousAlly
+_G["BINDING_NAME_CLICK BGEAllies:Button5"] = L.TargetNextAlly
+_G["BINDING_NAME_CLICK BGEEnemies:Button4"] = L.TargetPreviousEnemy
+_G["BINDING_NAME_CLICK BGEEnemies:Button5"] = L.TargetNextEnemy
 
 
 if not GetUnitName then
