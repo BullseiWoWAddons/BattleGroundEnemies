@@ -174,7 +174,7 @@ Data.Interruptdurations = {
 	[147362]= 3, -- [Hunter] Countershot
 	[187707]= 3, -- [Hunter] Muzzle
 	[1766]	= 5,   -- [Rogue] Kick
-	[183752]= 3, -- [DH] Consume Magic
+	[183752]= 3, -- [DH] Consume Magic, Disrupt since  8.0.1
 	[47528]	= 3,  -- [DK] Mind Freeze
 	[91802]	= 2,  -- [DK] Shambling Rush
 	[57994]	= 3,  -- [Shaman] Wind Shear
@@ -187,6 +187,7 @@ Data.Interruptdurations = {
 	[116705]= 4, -- [Monk] Spear Hand Strike
 	[106839]= 4, -- [Feral] Skull Bash
 	[93985]	= 4,  -- [Feral] Skull Bash
+	[351338] = 4 -- [Evoker] Quell
 }
 
 -- for spellId, lockoutDuration in pairs(Data.Interruptdurations) do
