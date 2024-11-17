@@ -327,6 +327,7 @@ Data.defaultSettings = {
 		Debug = false,
 		DebugToSV = false,
 		DebugToChat = false,
+		DebugToChat_AddTimestamp = false,
 
 		shareActiveProfile = false,
 

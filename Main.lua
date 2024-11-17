@@ -1433,7 +1433,13 @@ function BattleGroundEnemies:Debug(...)
 			self.debugFrame = CreatedebugFrame()
 		end
 
-		local text = stringifyMultitArgs(getTimestamp(), ...)
+		local text
+		if self.db.profile.DebugToChat_AddTimestamp then
+			text = stringifyMultitArgs(getTimestamp(), ...)
+		else
+			text = stringifyMultitArgs(...)
+		end
+
 
 		self.debugFrame:AddMessage(text)
 	end
