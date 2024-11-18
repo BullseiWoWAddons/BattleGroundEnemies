@@ -24,7 +24,7 @@ Data.changelog = {
 			{
 				Header = "Changes",
 				Entries = {
-					"Added Evoker Quell to list of interruptss",
+					"Added Evoker Quell to list of interrupts",
 				}
 			}
 		}
