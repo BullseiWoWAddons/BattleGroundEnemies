@@ -127,6 +127,10 @@ local function CreateMainFrame(playerType)
 		self:AfterPlayerSourceUpdate()
 	end
 
+	function mainframe:Debug(...)
+		BattleGroundEnemies:Debug(self.PlayerType, ...)
+	end
+
 	function mainframe:RemoveAllPlayersFromSource(source)
 		self:BeforePlayerSourceUpdate(source)
 		self:AfterPlayerSourceUpdate()
@@ -378,9 +382,9 @@ local function CreateMainFrame(playerType)
 
 		self.ActiveProfile:ApplyFontStringSettings(BattleGroundEnemies.db.profile.PlayerCount.Text)
 
-		self.ActiveProfile:SetText(L[self.PlayerType]..": ".. self:GetPlayerCountConfigNameLocalized(self.playerCountConfig))
+		self.ActiveProfile:SetText(L[self.PlayerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(self.playerCountConfig, self.playerTypeConfig.CustomPlayerCountConfigsEnabled))
 
-		self:SortPlayers(true) --force repositioning
+		
 
 		for name, playerButton in pairs(self.Players) do
 			playerButton:ApplyButtonSettings()
@@ -391,6 +395,8 @@ local function CreateMainFrame(playerType)
 		for number, playerButton in pairs(self.InactivePlayerButtons) do
 			playerButton:ApplyButtonSettings()
 		end
+
+		self:SortPlayers(true) --force repositioning
 
 		self:UpdatePlayerCount()
 		self:CheckEnableState()
@@ -435,7 +441,7 @@ local function CreateMainFrame(playerType)
 		if #foundProfilesForPlayerCount > 1 then
 			local overlappingProfilesString = ""
 			for i = 1, #foundProfilesForPlayerCount do
-				local overlappingIndexShownName = self:GetPlayerCountConfigNameLocalized(foundProfilesForPlayerCount[i])
+				local overlappingIndexShownName = BattleGroundEnemies:GetPlayerCountConfigNameLocalized(foundProfilesForPlayerCount[i])
 				overlappingProfilesString = overlappingProfilesString .. "and " .. overlappingIndexShownName
 			end
 			self:NoActivePlayercountProfile()
@@ -712,6 +718,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:ButtonPositioning()
+		self:Debug("ButtonPositioning")
 		local orderedPlayers = self.CurrentPlayerOrder
 
 		local config = self.playerCountConfig
