@@ -125,6 +125,10 @@ do
         end
 	end
 
+	function buttonFunctions:Debug(...)
+		return BattleGroundEnemies:Debug(self.PlayerName, ...)
+	end 
+
 	function buttonFunctions:OnDragStart()
 		return BattleGroundEnemies.db.profile.Locked or self:GetParent():StartMoving()
 	end
@@ -400,9 +404,9 @@ do
 
 			i = i + 1
 
-			-- if i > 10 then
-			-- 	BattleGroundEnemies:Debug("something went wrong in SetModulePositions")
-			-- end
+			if i > 10 then
+				self:Debug("something went wrong in SetModulePositions")
+			end
 		until allModulesSet or i > 10 --maxium of 10 tries
 	end
 
@@ -410,7 +414,7 @@ do
 		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
 		self.playerCountConfig = BattleGroundEnemies[self.PlayerType].playerCountConfig
 		if self.playerCountConfig then
-			self.basePath = {"BattleGroundEnemies", self.PlayerIsEnemy and "EnemySettings" or "AllySettings", self.MainFrame:GetPlayerCountConfigName(self.playerCountConfig) }
+			self.basePath = {"BattleGroundEnemies", self.PlayerIsEnemy and "EnemySettings" or "AllySettings", BattleGroundEnemies:GetPlayerCountConfigName(self.playerCountConfig) }
 		else
 			self.basePath = {}
 		end
