@@ -834,7 +834,7 @@ local function CreateMainFrame(playerType)
 		local playerDetails = {
 			PlayerName = name,
 			PlayerClass = string.upper(classToken),                  --apparently it can happen that we get a lowercase "druid" from GetBattlefieldScore() in TBCC, IsTBCC
-			PlayerClassColor = RAID_CLASS_COLORS[classToken],
+			PlayerClassColor = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[classToken],
 			PlayerRace = race and LibRaces:GetRaceToken(race) or "Unknown", --delivers a locale independent token for relentless check
 			PlayerSpecName = spec,                                 --set to false since we use Mixin() and Mixin doesnt mixin nil values and therefore we dont overwrite values with nil
 			PlayerRole = specData and specData.roleID,
