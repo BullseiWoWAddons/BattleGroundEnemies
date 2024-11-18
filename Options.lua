@@ -2103,6 +2103,62 @@ function BattleGroundEnemies:SetupOptions()
 					-- 	desc = L.EnableProfileSharing_Desc
 					-- }
 				}
+			},
+			DebugOptions = {
+				type = "group",
+				name = "Debug",
+				childGroups = "tab",
+				order = 8,
+				hidden = not self.db.profile.Debug,
+				args = {
+					DebugToSV = {
+						type = "toggle",
+						name = "Debug to SV",                                                         -- DebugToSV = false,
+																										--DebugToChat = false,
+																									--	DebugToChat_AddTimestamp = false,
+
+						order = 1,
+					},
+					DebugToSV_ResetOnPlayerLogin = {
+						type = "toggle",
+						name = "Debug to Chat",
+						desc = L.ExportButton_Desc,
+						hidden = function ()
+							return not self.db.profile.DebugToSV
+						end,
+						order = 2,
+					},
+					DebugToChat = {
+						type = "toggle",
+						name = "Debug to Chat",
+	
+						order = 3,
+					},
+					DebugToChat_AddTimestamp = {
+						type = "toggle",
+						name = "Debug to Chat",
+						desc = L.ExportButton_Desc,
+						hidden = function ()
+							return not self.db.profile.DebugToChat
+						end,
+						order = 4,
+					},
+					ReseSVtLog = {
+						type = "execute",
+						name = "Reset Saved variables log",
+						desc = L.ImportButton_Desc,
+						func = function()
+							self.db.profile.log = {}
+						end,
+						order = 5,
+					},
+				
+					-- shareActiveProfile = {
+					-- 	type = "toggle",
+					-- 	name = L.EnableProfileSharing,
+					-- 	desc = L.EnableProfileSharing_Desc
+					-- }
+				}
 			}
 		}
 	}

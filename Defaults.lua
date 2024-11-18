@@ -326,8 +326,10 @@ Data.defaultSettings = {
 		Locked = false,
 		Debug = false,
 		DebugToSV = false,
+		DebugToSV_ResetOnPlayerLogin = true,
 		DebugToChat = false,
 		DebugToChat_AddTimestamp = false,
+		
 
 		shareActiveProfile = false,
 
