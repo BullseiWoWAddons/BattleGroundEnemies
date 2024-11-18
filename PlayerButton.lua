@@ -486,6 +486,7 @@ do
 				if moduleFrameOnButton.Reset then moduleFrameOnButton:Reset() end
 			end
 		end
+		self:SetBindings()
 	end
 
 	do
@@ -496,6 +497,8 @@ do
 		}
 
 		function buttonFunctions:SetBindings()
+			self:Debug("SetBindings")
+			if not self.config then return end
 			local setupUsualAttributes = true
 			--use a table to track changes and compare them to GetAttribute
 			--set baseline
@@ -739,6 +742,7 @@ do
 	end
 
 	function buttonFunctions:UpdateRange(inRange, forceUpdate)
+		if not self.config then return end
 		--BattleGroundEnemies:Information("UpdateRange", inRange, self.PlayerName, self.config.RangeIndicator_Enabled, self.config.RangeIndicator_Alpha)
 
 		if not self.config.RangeIndicator_Enabled then return end
@@ -1285,7 +1289,5 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 			playerButton[moduleName].moduleName = moduleName
 		end
 	end
-
-	playerButton:ApplyButtonSettings()
 	return playerButton
 end

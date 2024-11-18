@@ -384,17 +384,6 @@ local function CreateMainFrame(playerType)
 
 		self.ActiveProfile:SetText(L[self.PlayerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(self.playerCountConfig, self.playerTypeConfig.CustomPlayerCountConfigsEnabled))
 
-		
-
-		for name, playerButton in pairs(self.Players) do
-			playerButton:ApplyButtonSettings()
-			playerButton:SetBindings()
-		end
-
-
-		for number, playerButton in pairs(self.InactivePlayerButtons) do
-			playerButton:ApplyButtonSettings()
-		end
 
 		self:SortPlayers(true) --force repositioning
 
@@ -772,6 +761,8 @@ local function CreateMainFrame(playerType)
 
 				playerButton:ClearAllPoints()
 				playerButton:SetPoint(point, self, point, offsetX, offsetY)
+
+				playerButton:ApplyButtonSettings()
 
 				playerButton:SetModulePositions()
 

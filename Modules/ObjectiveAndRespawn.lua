@@ -111,6 +111,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	-- end)
 
 	function frame:Reset()
+		self:Debug("Reset")
 		self:Hide()
 		self.Icon:SetTexture()
 		if self.AuraText:GetFont() then self:HideText() end
@@ -118,6 +119,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:HideText()
+		self:Debug("HideText")
 		self.AuraText:SetText("")
 		self.shownValue = false
 	end
@@ -228,7 +230,9 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 				respawmTime = 45
 			else
 				if BattleGroundEnemies.states.isSoloRBG then
-					respawmTime = 16
+					if BattleGroundEnemies.states.currentMapID ~= 2345 then
+						respawmTime = 16
+					end
 				end
 			end
 			self.Cooldown:SetCooldown(GetTime(), respawmTime) --overwrite an already active timer
