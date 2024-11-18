@@ -608,7 +608,7 @@ function Data.AddNormalTextSettings(location, defaults)
 	return {
 		Reset = {
 			type = "execute",
-			name = L.RestoreDefault,
+			name = SETTINGS_DEFAULTS,
 			func = addResetFunctionForgroup(location, defaults),
 			width = "full",
 			hidden = not defaults,
@@ -741,7 +741,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 					},
 					Reset = {
 						type = "execute",
-						name = L.RestoreDefault,
+						name = SETTINGS_DEFAULTS,
 						desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location)),
 						func = function()
 							location.ButtonModules[moduleName] = CopyTable(playerCountConfigDefault.ButtonModules[moduleName])
@@ -814,7 +814,7 @@ function BattleGroundEnemies:AddGeneralModuleSettings()
 				args = {
 					Reset = {
 						type = "execute",
-						name = L.RestoreDefault,
+						name = SETTINGS_DEFAULTS,
 						desc = L.ResetGeneralModule_Desc,
 						func = function()
 							BattleGroundEnemies.db.profile.ButtonModules[moduleName] = CopyTable(defaults)
@@ -859,7 +859,6 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			Enabled = {
 				type = "toggle",
 				name = ENABLE,
-				desc = "test",
 				order = 1
 			},
 			CustomPlayerCountConfigsEnabled = {
@@ -907,7 +906,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			},
 			LoadDefaults = {
 				type = "execute",
-				name = L.RestoreDefault,
+				name = SETTINGS_DEFAULTS,
 				func = function()
 					BattleGroundEnemies.db.profile[playerType] = CopyTable(BattleGroundEnemies.db.defaults.profile[playerType], false)
 					BattleGroundEnemies:NotifyChange()
@@ -926,7 +925,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				args = {
 					Reset = {
 						type = "execute",
-						name = L.RestoreDefault,
+						name = SETTINGS_DEFAULTS,
 						func = addResetFunctionForgroup(location, BattleGroundEnemies.db.defaults.profile[playerType]),
 						width = "full",
 						order = 1,
@@ -1008,7 +1007,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				args = {
 					Reset = {
 						type = "execute",
-						name = L.RestoreDefault,
+						name = SETTINGS_DEFAULTS,
 						func = addResetFunctionForgroup(location, BattleGroundEnemies.db.defaults.profile[playerType]),
 						width = "full",
 						order = 1,
@@ -1171,7 +1170,6 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				Enabled = {
 					type = "toggle",
 					name = ENABLE,
-					desc = "test",
 					order = 1
 				},
 				--Fake = Data.AddVerticalSpacing(2),
@@ -1195,7 +1193,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				},
 				LoadFromDefaultPlayerCountProfile = {
 					type = "select",
-					name = L.RestoreDefault,
+					name = SETTINGS_DEFAULTS,
 				 	get = function() return "" end,
 						-- set = function(option, value)
 						-- 	value = Data[playerType.."RangeToItemID"][value]
@@ -1360,7 +1358,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					args = {
 						Reset = {
 							type = "execute",
-							name = L.RestoreDefault,
+							name = SETTINGS_DEFAULTS,
 							func = addResetFunctionForgroup(location, playerCountConfigDefault, true),
 							width = "full",
 							order = 1,
@@ -1631,7 +1629,7 @@ function BattleGroundEnemies:SetupOptions()
 						args = {
 							Reset = {
 								type = "execute",
-								name = L.RestoreDefault,
+								name = SETTINGS_DEFAULTS,
 								func = addResetFunctionForgroup(BattleGroundEnemies.db.profile, BattleGroundEnemies.db.defaults.profile),
 								width = "full",
 								order = 1,
@@ -1771,7 +1769,7 @@ function BattleGroundEnemies:SetupOptions()
 						args = {
 							Reset = {
 								type = "execute",
-								name = L.RestoreDefault,
+								name = SETTINGS_DEFAULTS,
 								func = addResetFunctionForgroup(BattleGroundEnemies.db.profile, BattleGroundEnemies.db.defaults.profile),
 								width = "full",
 								order = 1,
@@ -1797,7 +1795,7 @@ function BattleGroundEnemies:SetupOptions()
 						args = {
 							Reset = {
 								type = "execute",
-								name = L.RestoreDefault,
+								name = SETTINGS_DEFAULTS,
 								func = function()
 									location.Cooldown = CopyTable(BattleGroundEnemies.db.defaults.profile.Cooldown)
 									BattleGroundEnemies:NotifyChange()
@@ -1832,7 +1830,7 @@ function BattleGroundEnemies:SetupOptions()
 						args = {
 							Reset = {
 								type = "execute",
-								name = L.RestoreDefault,
+								name = SETTINGS_DEFAULTS,
 								func = function()
 									location.Text = CopyTable(BattleGroundEnemies.db.defaults.profile.Text)
 									BattleGroundEnemies:NotifyChange()
