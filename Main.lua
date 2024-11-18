@@ -601,10 +601,10 @@ function BattleGroundEnemies:ShowTooltip(owner, func)
 	end
 end
 
-function BattleGroundEnemies:GetColoredName(playerDetails)
-	local name = playerDetails.PlayerName
-	local classToken = playerDetails.PlayerClass
-	local tbl = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[classToken] or RAID_CLASS_COLORS[classToken] or GRAY_FONT_COLOR
+function BattleGroundEnemies:GetColoredName(playerButton)
+	if not playerButton.PlayerDetails then return end
+	local name = playerButton.PlayerDetails.PlayerName
+	local tbl = playerButton.PlayerDetails.PlayerClassColor
 	return ("|cFF%02x%02x%02x%s|r"):format(tbl.r * 255, tbl.g * 255, tbl.b * 255, name)
 end
 

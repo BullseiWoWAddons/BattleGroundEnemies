@@ -89,8 +89,8 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 		return
 	end
 
-	local function coloredNameVersion(playerDetails, version)
-		local coloredName = BattleGroundEnemies:GetColoredName(playerDetails)
+	local function coloredNameVersion(allyButton, version)
+		local coloredName = BattleGroundEnemies:GetColoredName(allyButton)
 		if version ~= "" then
 			version = ("|cFFCCCCCC(%s%s)|r"):format(version, "")
 		end
@@ -122,7 +122,7 @@ SlashCmdList.BattleGroundEnemiesVersion = function()
 			end
 			v = playerData[allyName].version
 		end
-		table.insert(t, coloredNameVersion(allyButton.PlayerDetails, v))
+		table.insert(t, coloredNameVersion(allyButton, v))
 	end
 
 

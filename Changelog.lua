@@ -10,6 +10,12 @@ Data.changelog = {
 		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
 		Sections = {
 			{
+				Header = "New features:",
+				Entries = {
+					"Added support for CUSTOM_CLASS_COLORS to be used by healthbars and the target indicator symbols."
+				}
+			},
+			{
 				Header = "Bugfix",
 				Entries = {
 					"Fixed wrong labling for targeting next or previous ally in the keybindng section",
