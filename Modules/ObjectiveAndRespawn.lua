@@ -228,7 +228,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 				respawmTime = 45
 			else
 				if BattleGroundEnemies.states.isSoloRBG then
-					respawmTime = 15
+					respawmTime = 16
 				end
 			end
 			self.Cooldown:SetCooldown(GetTime(), respawmTime) --overwrite an already active timer
