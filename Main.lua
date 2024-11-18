@@ -1588,7 +1588,7 @@ function CombatLogevents.UNIT_DIED(self, srcGUID, srcName, destGUID, destName, _
 	--self:Debug("subevent", destName, "UNIT_DIED")
 	local playerButton = self:GetPlayerbuttonByGUID(destGUID)
 	if playerButton then
-		playerButton:PlayerIsDead()
+		playerButton:UpdateHealth(nil, 0, 1)
 	end
 end
 

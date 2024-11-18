@@ -639,6 +639,15 @@ do
 		return maxHealths[self]
 	end
 
+	function buttonFunctions:UpdateHealth(unitID, health, maxHealth)
+		self:DispatchEvent("UpdateHealth", unitID, health, maxHealth)
+		if unitID and UnitIsDeadOrGhost(unitID) or health == 0 then
+			self:PlayerIsDead()
+		else
+			self:PlayerIsAlive()
+		end
+	end
+
 	function buttonFunctions:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
 		if not self.isShown then return end
 		local health
@@ -651,20 +660,7 @@ do
 			maxHealth = UnitHealthMax(unitID)
 		end
 
-		self:DispatchEvent("UpdateHealth", unitID, health, maxHealth)
-		if unitID then
-			if UnitIsDeadOrGhost(unitID) then
-				self:PlayerIsDead()
-			else
-				self:PlayerIsAlive()
-			end
-		else -- we are in testmode
-			if health == 0 then
-				self:PlayerIsDead()
-			else
-				self:PlayerIsAlive()
-			end
-		end
+		self:UpdateHealth(unitID, health, maxHealth)
 	end
 
 	function buttonFunctions:ApplyRangeIndicatorSettings()
