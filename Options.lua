@@ -24,7 +24,14 @@ local function GetAllModuleAnchors(moduleName)
 	return moduleAnchors
 end
 
+local function overWriteSettigsKeepPlayerCount(t, k, v)
+	local minPlayers, maxPlayers = BattleGroundEnemies:GetPlayerCountsFromConfig(t[k])
 
+	t[k] = CopyTable(v)
+	t[k].minPlayerCount = minPlayers
+	t[k].maxPlayerCount = maxPlayers
+	BattleGroundEnemies:NotifyChange()
+end
 
 
 local function getDefaultSettingsForGroup(group, defaults, ignoreChildGroups)
@@ -91,13 +98,12 @@ local function sortByMinPlayerCount(playerCountConfigs)
 end
 
 ---comment
----@param playerType any
 ---@param playerCountConfigs any
 ---@param inputs any
 ---@param profileToIgnore any
 ---@return boolean
 ---@return string?
-local function isValidPlayerCountRange(playerType, playerCountConfigs, inputs, profileToIgnore)
+local function isValidPlayerCountRange(playerCountConfigs, isCustom, inputs, profileToIgnore)
 	local min = inputs.MinPlayerCount
 	local max = inputs.MaxPlayerCount
 	if not min then return false, L.MinCantBeUndefined end
@@ -117,7 +123,7 @@ local function isValidPlayerCountRange(playerType, playerCountConfigs, inputs, p
 				max = max
 			}
 			if Data.Helpers.AreOverlappingRanges(newRange, range) then
-				return false, L.RangeOverlapping:format(BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(playerCountConfig))
+				return false, L.RangeOverlapping:format(BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountConfig, isCustom))
 			end
 		end
 	end
@@ -742,7 +748,7 @@ function BattleGroundEnemies:AddModulesSettings(location, playerCountConfigDefau
 					Reset = {
 						type = "execute",
 						name = SETTINGS_DEFAULTS,
-						desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location)),
+						desc = L.ResetModule_Desc:format(L[playerType], BattleGroundEnemies:GetPlayerCountConfigNameLocalized(location)),
 						func = function()
 							location.ButtonModules[moduleName] = CopyTable(playerCountConfigDefault.ButtonModules[moduleName])
 							BattleGroundEnemies:NotifyChange()
@@ -1099,47 +1105,55 @@ local function addEnemyAndAllySettings(self, mainFrame)
 		}
 	}
 
-	local isCustomProfile
+	local isCustomProfileEnabled
 	local playerCountConfigs = BattleGroundEnemies.db.profile[playerType].playerCountConfigs
 	local customPlayerCountConfigs = BattleGroundEnemies.db.profile[playerType].customPlayerCountConfigs
 	local thisPlayerCountConfigs
+
+
+	local allDbLocations = {}
+	local allPlayerCountConfigOptionsNames = {}
+	local numBasicProfile = #playerCountConfigs
+	for i = 1, #playerCountConfigs do
+		table.insert(allDbLocations, playerCountConfigs[i])
+		table.insert(allPlayerCountConfigOptionsNames, L[playerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountConfigs[i], false))
+
+	end
+
 	if BattleGroundEnemies.db.profile[playerType].CustomPlayerCountConfigsEnabled then
-		isCustomProfile = true
+		isCustomProfileEnabled = true
 		thisPlayerCountConfigs = customPlayerCountConfigs
-	else
-		thisPlayerCountConfigs = BattleGroundEnemies.db.profile[playerType].playerCountConfigs
-	end
+		-- add the 3 basic profiles, but disable them, also add the custome ones
 
-	local allConfigs = {}
-	local tables = {playerCountConfigs, customPlayerCountConfigs}
-	for i = 1, #tables do
-		local t = tables[i]
-		for j = 1, #t do
-			table.insert(allConfigs, t[j])
+		for i = 1, #customPlayerCountConfigs do
+			table.insert(allDbLocations, customPlayerCountConfigs[i])
+			table.insert(allPlayerCountConfigOptionsNames, CHANNEL_CATEGORY_CUSTOM.." ".. L[playerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(customPlayerCountConfigs[i], true))
 		end
-	end
-
-	local allPlayerCountConfigOptions = {}
-	for j = 1, #playerCountConfigs do
-		table.insert(allPlayerCountConfigOptions, L[playerType]..": ".. BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(playerCountConfigs[j]))
-	end
-	for k = 1, #customPlayerCountConfigs do
-		table.insert(allPlayerCountConfigOptions, CHANNEL_CATEGORY_CUSTOM.." ".. L[playerType]..": ".. BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(customPlayerCountConfigs[k]))
+	else
+		thisPlayerCountConfigs = playerCountConfigs
 	end
 
 
+	for i = 1, #allDbLocations do
+		local indexThisPlayerCountConfg
+		local isCustomProfile
+		local location = allDbLocations[i]
 
+		local currentProfileName = BattleGroundEnemies:GetPlayerCountConfigNameLocalized(location, isCustomProfile)
 
-	for i = 1, #thisPlayerCountConfigs do
-
-		local location = thisPlayerCountConfigs[i]
-
+		if i > numBasicProfile then
+			isCustomProfile = true
+			indexThisPlayerCountConfg = i - numBasicProfile
+		else
+			isCustomProfile = false
+			indexThisPlayerCountConfg = i
+		end
 		local allConfigsWithoutCurrent = {}
-		local allPlayerCountConfigOptionsWithoutCurrent = {}
-		for j = 1, #allConfigs do
-			if allConfigs[j] ~= location then
-				table.insert(allConfigsWithoutCurrent, location)
-				table.insert(allPlayerCountConfigOptionsWithoutCurrent, allPlayerCountConfigOptions[j])
+		local allPlayerCountConfigOptionsNamesWithoutCurrent = {}
+		for j = 1, #allDbLocations do
+			if allDbLocations[j] ~= location then
+				table.insert(allConfigsWithoutCurrent, allDbLocations[j])
+				table.insert(allPlayerCountConfigOptionsNamesWithoutCurrent, allPlayerCountConfigOptionsNames[j])
 			end
 		end
 
@@ -1154,11 +1168,13 @@ local function addEnemyAndAllySettings(self, mainFrame)
 		-- local playerCountConfigsWithoutCurrentConfig = table.remove(playerCountConfigsCopy, i)
 		-- print("i is ", i, #playerCountConfigsWithoutCurrentConfig)
 		-- print("bla", #playerCountConfigsCopy)
-		settings[BattleGroundEnemies[playerType]:GetPlayerCountConfigName(location)] = {
+		settings[BattleGroundEnemies:GetPlayerCountConfigName(location)] = {
 			type = "group",
-			name = BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location),
-			desc = BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location).."desc",
-			disabled = function() return not mainFrame.playerTypeConfig.Enabled end,
+			name = currentProfileName,
+			desc = currentProfileName.."desc",
+			disabled = function()
+				return not mainFrame.playerTypeConfig.Enabled or isCustomProfileEnabled and not isCustomProfile
+			end,
 			get =  function(option)
 				return Data.GetOption(location, option)
 			end,
@@ -1178,15 +1194,11 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					name = L.CopySettings,
 					get = function() return "" end,
 					set = function(option, value)
-						local minPlayers, maxPlayers = BattleGroundEnemies[playerType]:GetPlayerCountsFromConfig(location)
-						thisPlayerCountConfigs[i] = CopyTable(allConfigsWithoutCurrent[value])
-						thisPlayerCountConfigs[i].minPlayerCount = minPlayers
-						thisPlayerCountConfigs[i].maxPlayerCount = maxPlayers
-						BattleGroundEnemies:NotifyChange()
+						overWriteSettigsKeepPlayerCount(thisPlayerCountConfigs, indexThisPlayerCountConfg, allConfigsWithoutCurrent[value])
 					end,
-					values = allPlayerCountConfigOptionsWithoutCurrent,
+					values = allPlayerCountConfigOptionsNamesWithoutCurrent,
 					confirm = function()
-						return L.ConfirmProfileOverride:format(L[playerType]..": "..BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location), L[playerType]..": "..BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location))
+						return L.ConfirmProfileOverride:format(L[playerType]..": "..currentProfileName, L[playerType]..": "..currentProfileName)
 					end,
 					width = 1.5,
 					order = 3
@@ -1201,21 +1213,16 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						-- end,
 						-- values =   Data[playerType.."RangeToRange"],
 					set = function(option, value)
-						if isCustomProfile then
-							thisPlayerCountConfigs[i] = CopyTable(playerCountConfigDefaults[value])
-						else
-							thisPlayerCountConfigs[i] = CopyTable(playerCountConfigDefault)
-						end
-						BattleGroundEnemies:NotifyChange()
+						overWriteSettigsKeepPlayerCount(thisPlayerCountConfigs, indexThisPlayerCountConfg, isCustomProfileEnabled and playerCountConfigDefaults[value] or playerCountConfigDefault)
 					end,
 					values = function()
 						local t = {}
-						if isCustomProfile then
+						if isCustomProfileEnabled then
 							for j = 1, #playerCountConfigDefaults do
-								t[j] = L[playerType]..": ".. BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(playerCountConfigDefaults[j])
+								t[j] = L[playerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountConfigDefaults[j], true)
 							end
 						else
-							table.insert(t, L[playerType]..": ".. BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(playerCountConfigDefault))
+							table.insert(t, L[playerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountConfigDefault))
 						end
 						return t
 					end,
@@ -1273,22 +1280,22 @@ local function addEnemyAndAllySettings(self, mainFrame)
 								return "Are you sure you want to change this profile so its used for "..tempInputs.MinPlayerCount.." to "..tempInputs.MaxPlayerCount.."players for "..playerType.." ?"
 							end,
 							disabled = function ()
-								return not isValidPlayerCountRange(playerType, thisPlayerCountConfigs, tempInputs,  location)
+								return not isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs,  location)
 							end,
 							order = 3
 						},
 						DeletePlayerCountProfile = {
 							type = "execute",
 							name = DELETE,
-							desc = L.DeletePlayerCountProfile_Desc .. ": " ..L[playerType]..": "..BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location),
+							desc = L.DeletePlayerCountProfile_Desc .. ": " ..L[playerType]..": "..currentProfileName,
 							func = function()
-								table.remove(thisPlayerCountConfigs, i)
+								table.remove(thisPlayerCountConfigs, indexThisPlayerCountConfg)
 								BattleGroundEnemies:NotifyChange()
 							end,
 							confirm = function()
-								return L.ConfirmDeletePlayerCountProfile..": ".. L[playerType]..": "..BattleGroundEnemies[playerType]:GetPlayerCountConfigNameLocalized(location)
+								return L.ConfirmDeletePlayerCountProfile..": ".. L[playerType]..": "..currentProfileName
 							end,
-							hidden = not isCustomProfile,
+							hidden = not isCustomProfileEnabled,
 							width = "half",
 							order = 4
 						},
@@ -1296,14 +1303,14 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							type = "description",
 							fontSize = "large",
 							name = function ()
-								local isGood, errorMessage = isValidPlayerCountRange(playerType, thisPlayerCountConfigs, tempInputs, location)
+								local isGood, errorMessage = isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs, location)
 								if not isGood then
 									return ERRORS..": ".. errorMessage
 								end
 							end,
 							hidden = function ()
-								if not isCustomProfile then return true end
-								return isValidPlayerCountRange(playerType, thisPlayerCountConfigs, tempInputs, location)
+								if not isCustomProfileEnabled then return true end
+								return isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs, location)
 							end,
 							order = 5
 						}
@@ -1441,7 +1448,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				}
 			}
 		}
-		Mixin(settings[BattleGroundEnemies[playerType]:GetPlayerCountConfigName(location)].args.ButtonSettings.args, self:AddModulesSettings(location, playerCountConfigDefault, playerType, function(options) return options.attachSettingsToButton end))
+		Mixin(settings[BattleGroundEnemies:GetPlayerCountConfigName(location)].args.ButtonSettings.args, self:AddModulesSettings(location, playerCountConfigDefault, playerType, function(options) return options.attachSettingsToButton end))
 	end
 
 	local inputs = {
@@ -1453,8 +1460,8 @@ local function addEnemyAndAllySettings(self, mainFrame)
 		type = "group",
 		name = "+",
 		childGroups = "tab",
-		order = #playerCountConfigs + 2,
-		hidden = not isCustomProfile,
+		order = #allDbLocations + 2,
+		hidden = not isCustomProfileEnabled,
 		args = {
 			MinPlayerCount = {
 				type = "range",
@@ -1489,15 +1496,15 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				name = L.CopyFrom,
 				get = function() return "" end,
 				set = function(option, value)
-					table.insert(thisPlayerCountConfigs, CopyTable(allConfigs[value]))
+					table.insert(thisPlayerCountConfigs, CopyTable(allDbLocations[value]))
 					thisPlayerCountConfigs[#thisPlayerCountConfigs].minPlayerCount = inputs.MinPlayerCount
 					thisPlayerCountConfigs[#thisPlayerCountConfigs].maxPlayerCount = inputs.MaxPlayerCount
 					sortByMinPlayerCount(thisPlayerCountConfigs)
 					BattleGroundEnemies:NotifyChange()
 				end,
-				values = allPlayerCountConfigOptions,
+				values = allPlayerCountConfigOptionsNames,
 				disabled = function ()
-					return not isValidPlayerCountRange(playerType, thisPlayerCountConfigs, inputs)
+					return not isValidPlayerCountRange(thisPlayerCountConfigs, true, inputs)
 				end,
 				width = "double",
 				order = 3
@@ -1506,13 +1513,13 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				type = "description",
 				fontSize = "large",
 				name = function ()
-					local isGood, errorMessage = isValidPlayerCountRange(playerType, thisPlayerCountConfigs, inputs)
+					local isGood, errorMessage = isValidPlayerCountRange(thisPlayerCountConfigs, true, inputs)
 					if not isGood then
 						return ERRORS..": ".. errorMessage
 					end
 				end,
 				hidden = function ()
-					return isValidPlayerCountRange(playerType, thisPlayerCountConfigs, inputs)
+					return isValidPlayerCountRange(thisPlayerCountConfigs, true, inputs)
 				end,
 				order = 4,
 			},

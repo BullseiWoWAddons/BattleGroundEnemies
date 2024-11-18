@@ -396,25 +396,6 @@ local function CreateMainFrame(playerType)
 		self:CheckEnableState()
 	end
 
-	function mainframe:GetPlayerCountsFromConfig(playerCountConfig)
-		if type(playerCountConfig) ~= "table" then
-			error("playerCountConfig must be a table")
-		end
-		local minPlayers = playerCountConfig.minPlayerCount
-		local maxPlayers = playerCountConfig.maxPlayerCount
-		return minPlayers, maxPlayers
-	end
-
-	function mainframe:GetPlayerCountConfigNameLocalized(playerCountConfig)
-		local minPlayers, maxPlayers = self:GetPlayerCountsFromConfig(playerCountConfig)
-		return minPlayers.."–"..maxPlayers.. " ".. L.players
-	end
-
-	function mainframe:GetPlayerCountConfigName(playerCountConfig)
-		local minPlayers, maxPlayers = self:GetPlayerCountsFromConfig(playerCountConfig)
-		return minPlayers.."–"..maxPlayers.. " ".. "players"
-	end
-
 	function mainframe:SelectPlayerCountProfile(forceUpdate)
 		self.playerTypeConfig = BattleGroundEnemies.db.profile[self.PlayerType]
 		local maxNumPlayers = math_max(self.NumPlayers or 0)

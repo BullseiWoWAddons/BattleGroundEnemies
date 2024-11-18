@@ -461,7 +461,24 @@ local function UpdateFakeAuras(playerButton)
 	playerButton:UNIT_AURA()
 end
 
+function BattleGroundEnemies:GetPlayerCountsFromConfig(playerCountConfig)
+	if type(playerCountConfig) ~= "table" then
+		error("playerCountConfig must be a table")
+	end
+	local minPlayers = playerCountConfig.minPlayerCount
+	local maxPlayers = playerCountConfig.maxPlayerCount
+	return minPlayers, maxPlayers
+end
 
+function BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountConfig, isCustom)
+	local minPlayers, maxPlayers = self:GetPlayerCountsFromConfig(playerCountConfig)
+	return (isCustom and "*" or "") .. minPlayers.."–"..maxPlayers.. " ".. L.players
+end
+
+function BattleGroundEnemies:GetPlayerCountConfigName(playerCountConfig)
+	local minPlayers, maxPlayers = self:GetPlayerCountsFromConfig(playerCountConfig)
+	return minPlayers.."–"..maxPlayers.. " ".. "players"
+end
 
 -- returns true if <frame> or one of the frames that <frame> is dependent on is anchored to <otherFrame> and nil otherwise
 -- dont ancher to otherframe is
