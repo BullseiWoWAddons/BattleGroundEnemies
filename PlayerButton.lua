@@ -674,7 +674,7 @@ do
 			end
 		end
 		self:SetAlpha(1)
-		self:UpdateRange(not self.wasInRange)
+		self:UpdateRange(self.wasInRange, true)
 	end
 
 	function buttonFunctions:ArenaOpponentShown(unitID)
@@ -734,12 +734,12 @@ do
 		end
 	end
 
-	function buttonFunctions:UpdateRange(inRange)
+	function buttonFunctions:UpdateRange(inRange, forceUpdate)
 		--BattleGroundEnemies:Information("UpdateRange", inRange, self.PlayerName, self.config.RangeIndicator_Enabled, self.config.RangeIndicator_Alpha)
 
 		if not self.config.RangeIndicator_Enabled then return end
 
-		if inRange ~= self.wasInRange then
+		if forceUpdate or inRange ~= self.wasInRange then
 			local alpha = inRange and 1 or self.config.RangeIndicator_Alpha
 			if self.config.RangeIndicator_Everything then
 				self:SetAlpha(alpha)
