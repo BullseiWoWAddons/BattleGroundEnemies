@@ -1404,9 +1404,6 @@ function BattleGroundEnemies:ApplyAllSettings()
 	BattleGroundEnemies:ToggleRaidFrames()
 end
 
-BattleGroundEnemies.DebugText = BattleGroundEnemies.DebugText or ""
-
-
 local function stringifyMultitArgs(...)
 	local args = { ... }
 	local text = ""
