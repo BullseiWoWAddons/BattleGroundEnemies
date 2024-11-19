@@ -2121,7 +2121,7 @@ function BattleGroundEnemies:SetupOptions()
 					},
 					DebugToSV_ResetOnPlayerLogin = {
 						type = "toggle",
-						name = "Debug to Chat",
+						name = "Reset SV log on player login",
 						desc = L.ExportButton_Desc,
 						hidden = function ()
 							return not self.db.profile.DebugToSV
@@ -2136,7 +2136,7 @@ function BattleGroundEnemies:SetupOptions()
 					},
 					DebugToChat_AddTimestamp = {
 						type = "toggle",
-						name = "Debug to Chat",
+						name = "Add timestamp to chat",
 						desc = L.ExportButton_Desc,
 						hidden = function ()
 							return not self.db.profile.DebugToChat
