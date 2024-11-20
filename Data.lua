@@ -9,7 +9,7 @@ local DRList = LibStub("DRList-1.0")
 local table_insert = table.insert
 
 local GetClassInfo = GetClassInfo
-local GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
+local GetNumSpecializationsForClassID = C_SpecializationInfo and C_SpecializationInfo.GetNumSpecializationsForClassID or GetNumSpecializationsForClassID
 local GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
 local GetSpellInfo = GetSpellInfo
 local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellName
