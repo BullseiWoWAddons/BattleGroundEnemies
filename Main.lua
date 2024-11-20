@@ -47,7 +47,6 @@ local InCombatLockdown = InCombatLockdown
 local IsInBrawl = C_PvP.IsInBrawl
 local IsInInstance = IsInInstance
 local IsInRaid = IsInRaid
-local IsItemInRange = IsItemInRange
 local IsRatedBattleground = C_PvP.IsRatedBattleground
 local RequestBattlefieldScoreData = RequestBattlefieldScoreData
 local RequestCrowdControlSpell = C_PvP.RequestCrowdControlSpell
@@ -725,57 +724,137 @@ local function SetupTrinketAndRacialData()
 	end
 end
 
+local playerSpells
+local priorityAuras = {}
+local nonPriorityAuras = {}
 
 
-function BattleGroundEnemies.ToggleTestmodeOnUpdate()
-	local enabled = not FakePlayersOnUpdateFrame:IsShown()
-	FakePlayersOnUpdateFrame:SetShown(enabled)
-	if enabled then
-		BattleGroundEnemies:Information(L.FakeEventsEnabled)
-	else
-		BattleGroundEnemies:Information(L.FakeEventsDisabled)
+Data.FoundAuras = {
+	HELPFUL = {
+		foundPlayerAuras = {},
+		foundNonPlayerAuras = {},
+	},
+	HARMFUL = {
+		foundPlayerAuras = {},
+		foundNonPlayerAuras = {},
+		foundDRAuras = {}
+	}
+}
+
+function BattleGroundEnemies:SetupTestmode()
+	if not TestmodeRanOnce then
+		SetupTrinketAndRacialData()
+		TestmodeRanOnce = true
 	end
-end
 
-function BattleGroundEnemies.ToggleTestmode()
-	if BattleGroundEnemies.Testmode.Active then --disable testmode
-		BattleGroundEnemies:DisableTestMode()
-	else                                     --enable Testmode
-		BattleGroundEnemies:EnableTestMode()
+	wipe(self.Testmode.FakePlayerAuras)
+	wipe(self.Testmode.FakePlayerDRs)
+	wipe(self.Testmode.FakeRaidTargetIcons)
+
+	local mapIDs = {}
+	for mapID, data in pairs(Data.BattlegroundspezificBuffs) do
+		mapIDs[#mapIDs + 1] = mapID
 	end
-end
+	local mandomm = math_random(1, #mapIDs)
+	local randomMapID = mapIDs[mandomm]
 
-function BattleGroundEnemies.ToggleEditmode()
-	if BattleGroundEnemies.Editmode.Active then --disable testmode
-		BattleGroundEnemies:DisableEditmode()
-	else                                     --enable Testmode
-		BattleGroundEnemies:EnableEditmode()
+	self.states.battlegroundBuff = Data.BattlegroundspezificBuffs[randomMapID]
+
+	for i = 1, #auraFilters do
+		local filter = auraFilters[i]
+		priorityAuras[filter] = {}
+		nonPriorityAuras[filter] = {}
+
+		for spellID, spellData in pairs(Data.PriorityAuras[filter]) do
+			local spellExists = GetSpellName(spellID)
+			if spellExists then
+				if BattleGroundEnemies:GetSpellPriority(spellID) then
+					table.insert(priorityAuras[filter], spellID) 
+				else
+					table.insert(nonPriorityAuras[filter], spellID)
+				end
+			end
+		end
+
+
+		local auras = Data.FakeAuras[filter]
+		local foundA = Data.FoundAuras[filter]
+		if not playerSpells then
+			playerSpells = {}
+
+			if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then
+				local numSkillLines = C_SpellBook.GetNumSpellBookSkillLines()
+				for j = 1, numSkillLines do
+					if GetSpellTabInfo then
+						local name, texture, offset, numSpells = GetSpellTabInfo(j)
+						for k = 1, numSpells do
+							local id = k + offset
+							local spellName, _, spelliD = GetSpellBookItemName(id, 'spell')
+							if spelliD and IsSpellKnown(spelliD) then
+								playerSpells[spelliD] = true
+							end
+						end
+					elseif C_SpellBook and C_SpellBook.GetSpellBookSkillLineInfo then
+						local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(j)
+						local offset, numSlots = skillLineInfo.itemIndexOffset, skillLineInfo.numSpellBookItems
+						for k = offset + 1, offset + numSlots do
+							local name, subName = C_SpellBook.GetSpellBookItemName(k, Enum.SpellBookSpellBank.Player)
+							local spellID = select(2,C_SpellBook.GetSpellBookItemType(k, Enum.SpellBookSpellBank.Player))
+							if spellID and IsSpellKnown(spellID) then
+								playerSpells[spellID] = true
+							end
+						end
+					end
+				end
+			else
+				local numTabs = GetNumSpellTabs()
+				for j = 1, numTabs do
+					if GetSpellTabInfo then
+						local name, texture, offset, numSpells = GetSpellTabInfo(j)
+						for k = 1, numSpells do
+							local id = k + offset
+							local spellName, _, spelliD = GetSpellBookItemName(id, 'spell')
+							if spelliD and IsSpellKnown(spelliD) then
+								playerSpells[spelliD] = true
+							end
+						end
+					elseif C_SpellBook and C_SpellBook.GetSpellBookSkillLineInfo then
+						local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(j)
+						local offset, numSlots = skillLineInfo.itemIndexOffset, skillLineInfo.numSpellBookItems
+						for k = offset + 1, offset + numSlots do
+							local name, subName = C_SpellBook.GetSpellBookItemName(k, Enum.SpellBookSpellBank.Player)
+							local spellID = select(2,C_SpellBook.GetSpellBookItemType(k, Enum.SpellBookSpellBank.Player))
+							if spellID and IsSpellKnown(spellID) then
+								playerSpells[spellID] = true
+							end
+						end
+					end
+				end
+			end
+		end
+	
+
+		for spellId, auraDetails in pairs(auras) do
+
+			local spellExists = GetSpellName(spellId)
+
+			if spellExists and spellExists ~= "" then
+				if filter == "HARMFUL" and DRList:GetCategoryBySpellID(IsClassic and auraDetails.name or spellId) then
+					foundA.foundDRAuras[#foundA.foundDRAuras + 1] = auraDetails
+				elseif playerSpells[spellId] then
+					foundA.foundPlayerAuras[#foundA.foundPlayerAuras + 1] = auraDetails
+					-- this buff could be applied from the player
+				else
+					foundA.foundNonPlayerAuras[#foundA.foundNonPlayerAuras + 1] = auraDetails
+				end
+			end
+		end
 	end
-end
 
-function BattleGroundEnemies:EnableEditmode()
-	self.Editmode.Active = true
-	self:EnableTestMode()
-	BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
-	self:Information(L.EditmodeEnabled)
-	self:Information(L.EditModeIntroduction)
-end
 
-function BattleGroundEnemies:DisableEditmode()
-	self.Editmode.Active = false
-	self:DisableTestMode()
-	BattleGroundEnemies.EditMode.EditModeManager:CloseEditmode()
-	self:Information(L.EditmodeDisabled)
-end
+	self:CreateFakePlayers()
 
-function BattleGroundEnemies:DisableTestMode()
-	self.Testmode.Active = false
-	self.states.battlegroundBuff = false
-	FakePlayersOnUpdateFrame:Hide()
-	self.Allies:OnTestmodeDisabled()
-	self.Enemies:OnTestmodeDisabled()
-	self:Disable()
-	self:Information(L.TestmodeDisabled)
+	self:Enable()
 end
 
 do
@@ -843,96 +922,14 @@ do
 		end
 	end
 
-	Data.FoundAuras = {
-		HELPFUL = {
-			foundPlayerAuras = {},
-			foundNonPlayerAuras = {},
-		},
-		HARMFUL = {
-			foundPlayerAuras = {},
-			foundNonPlayerAuras = {},
-			foundDRAuras = {}
-		}
-	}
-
 	local TestmodeRanOnce = false
 	function BattleGroundEnemies:EnableTestMode()
 		if InCombatLockdown() then
 			return BattleGroundEnemies:Information(L.ErrorTestmodeInCombat)
 		end
 		self.Testmode.Active = true
-
-		if not TestmodeRanOnce then
-			SetupTrinketAndRacialData()
-			TestmodeRanOnce = true
-		end
-
-		wipe(self.Testmode.FakePlayerAuras)
-		wipe(self.Testmode.FakePlayerDRs)
-		wipe(self.Testmode.FakeRaidTargetIcons)
-
-		local mapIDs = {}
-		for mapID, data in pairs(Data.BattlegroundspezificBuffs) do
-			mapIDs[#mapIDs + 1] = mapID
-		end
-		local mandomm = math_random(1, #mapIDs)
-		local randomMapID = mapIDs[mandomm]
-
-		self.states.battlegroundBuff = Data.BattlegroundspezificBuffs[randomMapID]
-
-		for i = 1, #auraFilters do
-			local filter = auraFilters[i]
-
-			local auras = Data.FakeAuras[filter]
-			local foundA = Data.FoundAuras[filter]
-			local playerSpells = {}
-			local numTabs = GetNumSpellTabs()
-			for j = 1, numTabs do
-				if GetSpellTabInfo then
-					local name, texture, offset, numSpells = GetSpellTabInfo(j)
-					for k = 1, numSpells do
-						local id = k + offset
-						local spellName, _, spelliD = GetSpellBookItemName(id, 'spell')
-						if spelliD and IsSpellKnown(spelliD) then
-							playerSpells[spelliD] = true
-						end
-					end
-				elseif C_SpellBook and C_SpellBook.GetSpellBookSkillLineInfo then
-					local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(j)
-					local offset, numSlots = skillLineInfo.itemIndexOffset, skillLineInfo.numSpellBookItems
-					for k = offset + 1, offset + numSlots do
-						local name, subName = C_SpellBook.GetSpellBookItemName(k, Enum.SpellBookSpellBank.Player)
-						local spellID = select(2,C_SpellBook.GetSpellBookItemType(k, Enum.SpellBookSpellBank.Player))
-						if spellID and IsSpellKnown(spellID) then
-							playerSpells[spellID] = true
-						end
-					end
-
-				end
-
-			end
-
-			for spellId, auraDetails in pairs(auras) do
-
-				local spellExists = GetSpellName(spellId)
-
-				if spellExists and spellExists ~= "" then
-					if filter == "HARMFUL" and DRList:GetCategoryBySpellID(IsClassic and auraDetails.name or spellId) then
-						foundA.foundDRAuras[#foundA.foundDRAuras + 1] = auraDetails
-					elseif playerSpells[spellId] then
-						foundA.foundPlayerAuras[#foundA.foundPlayerAuras + 1] = auraDetails
-						-- this buff could be applied from the player
-					else
-						foundA.foundNonPlayerAuras[#foundA.foundNonPlayerAuras + 1] = auraDetails
-					end
-				end
-			end
-		end
-
-
-		self:CreateFakePlayers()
-
-		self:Enable()
+		self:SetupTestmode()
+		
 
 		FakePlayersOnUpdateFrame:Show()
 		self.Allies:OnTestmodeEnabled()
@@ -1018,6 +1015,74 @@ do
 	end
 	FakePlayersOnUpdateFrame:SetScript("OnUpdate", FakeOnUpdate)
 end
+
+function BattleGroundEnemies.ToggleTestmodeOnUpdate()
+	local enabled = not FakePlayersOnUpdateFrame:IsShown()
+	FakePlayersOnUpdateFrame:SetShown(enabled)
+	if enabled then
+		BattleGroundEnemies:Information(L.FakeEventsEnabled)
+	else
+		BattleGroundEnemies:Information(L.FakeEventsDisabled)
+	end
+end
+
+function BattleGroundEnemies.ToggleTestmode()
+	if BattleGroundEnemies.Testmode.Active then --disable testmode
+		BattleGroundEnemies:DisableTestMode()
+	else                                     --enable Testmode
+		BattleGroundEnemies:EnableTestMode()
+	end
+end
+
+function BattleGroundEnemies.ToggleEditmode()
+	if BattleGroundEnemies.Editmode.Active then --disable testmode
+		BattleGroundEnemies:DisableEditmode()
+	else                                     --enable Testmode
+		BattleGroundEnemies:EnableEditmode()
+	end
+end
+
+
+function BattleGroundEnemies:EnableEditmode()
+	if InCombatLockdown() then
+		return BattleGroundEnemies:Information(L.ErrorTestmodeInCombat)
+	end
+	self.Editmode.Active = true
+	self:SetupTestmode()
+	BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
+	self:Information(L.EditmodeEnabled)
+	self:Information(L.EditModeIntroduction)
+end
+
+function BattleGroundEnemies:DisableEditmode()
+	self.Editmode.Active = false
+	self.states.battlegroundBuff = false
+	self.states.battleGroundDebuffs = false
+	self:Disable()
+	BattleGroundEnemies.EditMode.EditModeManager:CloseEditmode()
+	self:Information(L.EditmodeDisabled)
+end
+
+function BattleGroundEnemies:DisableTestMode()
+	self.Testmode.Active = false
+	self.states.battlegroundBuff = false
+	self.states.battleGroundDebuffs = false
+	FakePlayersOnUpdateFrame:Hide()
+	self.Allies:OnTestmodeDisabled()
+	self.Enemies:OnTestmodeDisabled()
+	self:Disable()
+	self:Information(L.TestmodeDisabled)
+end
+
+function BattleGroundEnemies:DisableTestOrEditmode()
+	if self.Editmode.Active then
+		return self:DisableEditmode()
+	end
+	if self.Testmode.Active then
+		return self:DisableTestMode()
+	end
+end
+
 
 local RequestFrame = CreateFrame("Frame", nil, BattleGroundEnemies)
 RequestFrame:Hide()
@@ -1269,7 +1334,7 @@ function BattleGroundEnemies:Enable()
 	self.enabled = true
 
 	self:RegisterEvents()
-	if self.Testmode.Active then
+	if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
 		RequestFrame:Hide()
 		FakePlayersOnUpdateFrame:Show()
 	else
@@ -1467,6 +1532,11 @@ function BattleGroundEnemies:Debug(...)
 
 		table.insert(self.db.profile.log, {[getTimestamp()] = t })
 	end
+end
+
+function BattleGroundEnemies:EnableDebugging()
+	self.db.profile.Debug = true
+	self:NotifyChange()
 end
 
 local sentMessages = {}
@@ -2250,8 +2320,8 @@ BattleGroundEnemies.PARTY_LEADER_CHANGED = BattleGroundEnemies.GROUP_ROSTER_UPDA
 function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	BattleGroundEnemies:Debug("PLAYER_ENTERING_WORLD")
 	self:ResetCombatLogScanniningTables()
-	if self.Testmode.Active then --disable testmode
-		self:DisableTestMode()
+	if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then --disable testmode
+		self:DisableTestOrEditmode()
 	end
 
 	self.Enemies:RemoveAllPlayersFromAllSources()
