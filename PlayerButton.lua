@@ -320,14 +320,13 @@ do
 		end
 	end
 
-	function buttonFunctions:SetModulePositions()
-		self:SetConfigShortCuts()
+	function buttonFunctions:ApplyModuleSettings()
+		self:SetAllModuleConfigs()
 		if not self:GetRect() then return end --the position of the button is not set yet
 		local i = 1
 		repeat                          -- we basically run this roop to get out of the anchring hell (making sure all the frames that a module is depending on is set)
 			local allModulesSet = true
 			for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
-				self:SetModuleConfig(moduleName)
 				local moduleFrameOnButton = self[moduleName]
 
 				local config = moduleFrameOnButton.config
@@ -394,20 +393,43 @@ do
 					end
 				end
 			end
-
-			self.MyTarget:SetParent(self.healthBar)
-			self.MyTarget:SetPoint("TOPLEFT", self.healthBar, "TOPLEFT")
-			self.MyTarget:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT")
-			self.MyFocus:SetParent(self.healthBar)
-			self.MyFocus:SetPoint("TOPLEFT", self.healthBar, "TOPLEFT")
-			self.MyFocus:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT")
-
 			i = i + 1
 
 			if i > 10 then
-				self:Debug("something went wrong in SetModulePositions")
+				self:Debug("something went wrong in ApplyModuleSettings")
 			end
 		until allModulesSet or i > 10 --maxium of 10 tries
+
+		self.MyTarget:SetParent(self.healthBar)
+		self.MyTarget:SetPoint("TOPLEFT", self.healthBar, "TOPLEFT")
+		self.MyTarget:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT")
+		self.MyFocus:SetParent(self.healthBar)
+		self.MyFocus:SetPoint("TOPLEFT", self.healthBar, "TOPLEFT")
+		self.MyFocus:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT")
+
+		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
+			local moduleFrameOnButton = self[moduleName]
+
+			if moduleFrameOnButton.Enabled then
+				if moduleFrame.events then
+					for i = 1, #moduleFrame.events do
+						local event = moduleFrame.events[i]
+						self.ButtonEvents[event] = self.ButtonEvents[event] or {}
+
+						table_insert(self.ButtonEvents[event], moduleFrameOnButton)
+					end
+				end
+				moduleFrameOnButton.Enabled = true
+				moduleFrameOnButton:Show()
+				if moduleFrameOnButton.Enable then moduleFrameOnButton:Enable() end
+				if moduleFrameOnButton.ApplyAllSettings then moduleFrameOnButton:ApplyAllSettings() end
+			else
+				moduleFrameOnButton.Enabled = false
+				moduleFrameOnButton:Hide()
+				if moduleFrameOnButton.Disable then moduleFrameOnButton:Disable() end
+				if moduleFrameOnButton.Reset then moduleFrameOnButton:Reset() end
+			end
+		end
 	end
 
 	function buttonFunctions:SetConfigShortCuts()
@@ -460,32 +482,9 @@ do
 
 
 		wipe(self.ButtonEvents)
-		self:SetAllModuleConfigs()
-		self:SetModulePositions()
+		self:ApplyModuleSettings()
 
-		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
-			local moduleFrameOnButton = self[moduleName]
-
-			if moduleFrameOnButton.Enabled then
-				if moduleFrame.events then
-					for i = 1, #moduleFrame.events do
-						local event = moduleFrame.events[i]
-						self.ButtonEvents[event] = self.ButtonEvents[event] or {}
-
-						table_insert(self.ButtonEvents[event], moduleFrameOnButton)
-					end
-				end
-				moduleFrameOnButton.Enabled = true
-				moduleFrameOnButton:Show()
-				if moduleFrameOnButton.Enable then moduleFrameOnButton:Enable() end
-				if moduleFrameOnButton.ApplyAllSettings then moduleFrameOnButton:ApplyAllSettings() end
-			else
-				moduleFrameOnButton.Enabled = false
-				moduleFrameOnButton:Hide()
-				if moduleFrameOnButton.Disable then moduleFrameOnButton:Disable() end
-				if moduleFrameOnButton.Reset then moduleFrameOnButton:Reset() end
-			end
-		end
+	
 		self:SetBindings()
 	end
 

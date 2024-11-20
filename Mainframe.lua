@@ -198,7 +198,7 @@ local function CreateMainFrame(playerType)
 	function mainframe:AfterPlayerSourceUpdate()
 		local newPlayers = {} --contains combined data from PlayerSources
 		if self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies then
-			if BattleGroundEnemies.Testmode.Active then
+			if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
 				newPlayers = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.FakePlayers]
 			else
 				local scoreboardEnemies = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.Scoreboard]
@@ -259,7 +259,7 @@ local function CreateMainFrame(playerType)
 			local groupMembers = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.GroupMembers]
 			local numGroupMembers = #groupMembers
 			local addWholeGroup = false
-			if BattleGroundEnemies.Testmode.Active then
+			if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
 				if BattleGroundEnemies.db.profile.Testmode_UseTeammates then
 					addWholeGroup = true
 				else
@@ -335,7 +335,7 @@ local function CreateMainFrame(playerType)
 	function mainframe:Enable()
 		BattleGroundEnemies:Debug(self.PlayerType, "enabled")
 
-		if BattleGroundEnemies.Testmode.Active then
+		if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
 		else
 			if self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies then
 				BattleGroundEnemies:Debug("Registered enemie events")
@@ -763,9 +763,6 @@ local function CreateMainFrame(playerType)
 				playerButton:SetPoint(point, self, point, offsetX, offsetY)
 
 				playerButton:ApplyButtonSettings()
-
-				playerButton:SetModulePositions()
-
 
 				if row < rowsPerColumn then
 					row = row + 1
