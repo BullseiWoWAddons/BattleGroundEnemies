@@ -1,5 +1,5 @@
 ---
-name: Issue for Retail/Live
+name: report a bug
 about: Create a report to help improve the BattleGroundEnemies.
 title: ''
 labels: bug report
