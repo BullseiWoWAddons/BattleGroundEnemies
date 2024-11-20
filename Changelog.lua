@@ -6,6 +6,26 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.0.5.8",
+		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"resetting a custom player count profile to default will no longer overwrite the player count",
+				}
+			},
+			{
+				Header = "Changes",
+				Entries = {
+					"Increased respawm time in solo rated battlegrounds by 1 second to 16 seconds",
+					"Increased repawm time in solo rated battleground Deephaul Ravine to 26 seconds",
+					"When custom player count profiles are enabled, they will still be shown but be disabled, this is to avoid confusion since they still can be used to copy settings from"
+				}
+			}
+		}
+	},
+	{
 		Version = "11.0.5.7",
 		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
 		Sections = {
