@@ -930,8 +930,6 @@ do
 		self.Testmode.Active = true
 		self:SetupTestmode()
 		
-
-		FakePlayersOnUpdateFrame:Show()
 		self.Allies:OnTestmodeEnabled()
 		self.Enemies:OnTestmodeEnabled()
 		self:Information(L.TestmodeEnabled)
