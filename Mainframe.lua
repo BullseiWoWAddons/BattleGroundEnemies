@@ -40,6 +40,81 @@ local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 
+--[[  from wowpedia
+1	IconSmall RaidStar.png 		Yellow 4-point Star
+2	IconSmall RaidCircle.png 	Orange Circle
+3	IconSmall RaidDiamond.png 	Purple Diamond
+4	IconSmall RaidTriangle.png 	Green Triangle
+5	IconSmall RaidMoon.png 		White Crescent Moon
+6	IconSmall RaidSquare.png 	Blue Square
+7	IconSmall RaidCross.png 	Red "X" Cross
+8	IconSmall RaidSkull.png 	White Skull
+ ]]
+
+
+local testEvents = {
+	---@param mainFrame MainFrame
+	function(mainFrame, playerButton)
+		if playerButton.isDead then return end
+
+		-- hide old flag carrier
+		local oldFlagholder = mainFrame.Testmode.holdsFlag
+		if oldFlagholder then
+			oldFlagholder:DispatchEvent("ArenaOpponentHidden")
+		end
+
+		playerButton:ArenaOpponentShown()
+
+		mainFrame.Testmode.holdsFlag = playerButton
+		mainFrame.Testmode.hasFlag = true
+	end,
+	---@param mainFrame MainFrame
+	function(mainFrame, playerButton)
+		if playerButton.isDead then return end
+		BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, nil,
+			playerButton.PlayerDetails.PlayerName, nil, nil,
+			BattleGroundEnemies.Testmode.RandomRacials[math_random(1, #BattleGroundEnemies.Testmode.RandomRacials)])
+	end,
+	---@param mainFrame MainFrame
+	function(mainFrame, playerButton)
+		if playerButton.isDead then return end
+		BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, nil,
+			playerButton.PlayerDetails.PlayerName, nil, nil,
+			BattleGroundEnemies.Testmode.RandomTrinkets[math_random(1, #BattleGroundEnemies.Testmode.RandomTrinkets)])
+	end,
+	---@param mainFrame MainFrame
+	function (mainFrame, playerButton)
+		playerButton:UNIT_POWER_FREQUENT()
+		if playerButton.isDead then return end
+	end,
+	---@param mainFrame MainFrame
+	function (mainFrame, playerButton)
+		playerButton:UNIT_HEALTH()
+	end,
+	---@param mainFrame MainFrame
+	function(mainFrame, playerButton)
+		if playerButton.Target then
+			playerButton:IsNoLongerTarging(playerButton.Target)
+		end
+
+		local oppositeMainFrame = playerButton:GetOppositeMainFrame()
+		if oppositeMainFrame then --this really should never be nil
+			local randomPlayer = oppositeMainFrame:GetRandomPlayer()
+
+			if randomPlayer then
+				playerButton:IsNowTargeting(randomPlayer)
+			end
+		end
+	end,
+	---@param mainFrame MainFrame
+	function(mainFrame, playerButton)
+		playerButton:UpdateRaidTargetIcon(math_random(1, 8))
+	end,
+	function (mainFrame, playerButton)
+		playerButton:UpdateRange(not playerButton.wasInRange)
+	end
+}
+
 ---@class MainFrame : Button
 ---@field Players table<string, Button>
 ---@field CurrentPlayerOrder table<number, Button>
@@ -102,6 +177,10 @@ local function CreateMainFrame(playerType)
 	mainframe.PlayerSources = {}
 	mainframe.NumPlayers = 0
     mainframe.Counter = {}
+	mainframe.Testmode = {
+		holdsFlag = false,
+		hasFlag = false
+	}
 
     mainframe.Counter = {}
 
@@ -310,6 +389,43 @@ local function CreateMainFrame(playerType)
 		end
 		self:SetPlayerCount(#newPlayers)
 		self:CreateOrRemovePlayerButtons()
+	end
+
+	function mainframe:OnTestmodeTick()
+		for name, playerButton in pairs(self.Players) do
+			if playerButton.PlayerDetails.isFakePlayer then
+				local numEvents = #testEvents
+				local randomEvent = testEvents[math_random(1, numEvents)]
+				randomEvent(self, playerButton)
+				BattleGroundEnemies:UpdateFakeAurasTestmode(playerButton)
+				playerButton:UNIT_HEALTH()
+
+				playerButton:DispatchEvent("OnTestmodeTick")
+			end
+		end
+	end
+
+	function mainframe:OnEditmodeTick()
+		for name, playerButton in pairs(self.Players) do
+			if playerButton.PlayerDetails.isFakePlayer then
+				BattleGroundEnemies:UpdateDRsEditMode(playerButton)
+			end
+		end
+	end
+
+	function mainframe:OnEditmodeEnabled()
+		for name, playerButton in pairs(self.Players) do
+			if playerButton.PlayerDetails.isFakePlayer then
+				local numEvents = #testEvents
+				for i = 1, numEvents do
+					local event = testEvents[i]
+					event(self, playerButton)
+				end
+				playerButton:UNIT_HEALTH()
+				BattleGroundEnemies:UpdateFakeAurasEditmode(playerButton)
+				BattleGroundEnemies:UpdateDRsEditMode(playerButton)
+			end
+		end
 	end
 
 	function mainframe:OnTestmodeEnabled()
