@@ -222,10 +222,10 @@ local function CreateMainFrame(playerType)
 								--useful in solo shuffle in first round, then we can show a playername via data from scoreboard
 								local match = matchBattleFieldScoreToArenaEnemyPlayer(scoreboardEnemies, arenaEnemy)
 								if match then
-									BattleGroundEnemies:Debug("found a name match")
+									self:Debug("found a name match")
 									playerName = match.name
 								else
-									BattleGroundEnemies:Debug("didnt find a match", arenaEnemy.additionalData.PlayerArenaUnitID)
+									self:Debug("didnt find a match", arenaEnemy.additionalData.PlayerArenaUnitID)
 									-- use the unitID
 									playerName = arenaEnemy.additionalData.PlayerArenaUnitID
 								end
@@ -287,10 +287,10 @@ local function CreateMainFrame(playerType)
 					local specName = groupMember.specName
 					if not specName or specName == "" then
 						local name = groupMember.name
-						--BattleGroundEnemies:Debug("player", name, "doesnt have a spec from group member")
+						--self:Debug("player", name, "doesnt have a spec from group member")
 						local match = self:FindPlayerInSource(BattleGroundEnemies.consts.PlayerSources.Scoreboard, groupMember)
 						if match then
-							--BattleGroundEnemies:Debug("player", name, "we found a spec from the scoreboard")
+							--self:Debug("player", name, "we found a spec from the scoreboard")
 							groupMember.specName = match.talentSpec
 						end
 					end
@@ -337,12 +337,12 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:Enable()
-		BattleGroundEnemies:Debug(self.PlayerType, "enabled")
+		self:Debug("enabled")
 
 		if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
 		else
 			if self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies then
-				BattleGroundEnemies:Debug("Registered enemie events")
+				self:Debug("Registered enemy events")
 				self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 				self:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 				self:RegisterEvent("UNIT_NAME_UPDATE")
@@ -360,7 +360,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:Disable()
-		BattleGroundEnemies:Debug(self.PlayerType, "disabled")
+		self:Debug("disabled")
 		self:UnregisterAllEvents()
 		self:Hide()
 	end
@@ -398,7 +398,7 @@ local function CreateMainFrame(playerType)
 	function mainframe:SelectPlayerCountProfile(forceUpdate)
 		self.playerTypeConfig = BattleGroundEnemies.db.profile[self.PlayerType]
 		local maxNumPlayers = math_max(self.NumPlayers or 0)
-		BattleGroundEnemies:Debug("SelectPlayerCountProfile", maxNumPlayers)
+		self:Debug("SelectPlayerCountProfile", maxNumPlayers)
 		if not maxNumPlayers then return end
 		if maxNumPlayers == 0 then return self:NoActivePlayercountProfile() end
 
@@ -453,6 +453,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:CheckEnableState()
+		self:Debug("CheckEnableState")
 		if self.playerTypeConfig.Enabled and self.playerCountConfig and self.playerCountConfig.Enabled then
 			if BattleGroundEnemies.states.isInArena and not BattleGroundEnemies.db.profile.ShowBGEInArena then
 				return self:Disable()
@@ -467,7 +468,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:SetRealPlayerCount(realCount)
-		BattleGroundEnemies:Debug("SetRealPlayerCount", realCount)
+		self:Debug("SetRealPlayerCount", realCount)
 		local oldCount = self.RealPlayerCount
 		self.RealPlayerCount = realCount
 		if not oldCount or oldCount ~= realCount then
@@ -492,9 +493,9 @@ local function CreateMainFrame(playerType)
 
 
 		local isEnemy = self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies
-		BattleGroundEnemies:Debug("UpdatePlayerCount", self.PlayerType, maxNumPlayers, isEnemy)
+		self:Debug("UpdatePlayerCount", maxNumPlayers, isEnemy)
 
-		
+
 		BattleGroundEnemies:SetAllyFaction(BattleGroundEnemies.AllyFaction or (BattleGroundEnemies.UserFaction == "Horde" and 1 or 0))
 
 		if self.playerCountConfig and self.playerCountConfig.PlayerCount.Enabled then
@@ -562,8 +563,6 @@ local function CreateMainFrame(playerType)
 		playerButton.unit = nil
 
 		playerButton.PlayerDetails = playerDetails
-		-- BattleGroundEnemies:Debug("PlayerDetailsChanged")
-		playerButton:PlayerDetailsChanged()
 
 		self.Target = nil
 
@@ -595,7 +594,7 @@ local function CreateMainFrame(playerType)
 					if TimeSinceLastOnUpdate > UpdatePeroid then
 						if BattleGroundEnemies.states.userIsAlive then
 							if playerButton ~= BattleGroundEnemies.UserButton then
-								--BattleGroundEnemies:Debug(IsItemInRange(self.playerTypeConfig.RangeIndicator_Range, allyButton.unitID), self.playerTypeConfig.RangeIndicator_Range, allyButton.unitID)
+								--self:Debug(IsItemInRange(self.playerTypeConfig.RangeIndicator_Range, allyButton.unitID), self.playerTypeConfig.RangeIndicator_Range, allyButton.unitID)
 								playerButton:UpdateRangeViaLibRangeCheck(playerButton.unitID)
 							else
 								playerButton:UpdateRange(true)
@@ -676,7 +675,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:SetUpBindings()
-		--BattleGroundEnemies:Debug("SetUpBindings", self.PlayerType)
+		--self:Debug("SetUpBindings", self.PlayerType)
 		local maxPlayers = #self.CurrentPlayerOrder
 		self:SetAttribute("maxUnits", maxPlayers)
 		for j = 1, #self.CurrentPlayerOrder do
@@ -826,7 +825,7 @@ local function CreateMainFrame(playerType)
 			Mixin(playerDetails, additionalData)
 		end
 
-		-- BattleGroundEnemies:Debug("CreateOrUpdatePlayerDetails", name, race, classToken, specName, additionalData)
+		-- self:Debug("CreateOrUpdatePlayerDetails", name, race, classToken, specName, additionalData)
 		local playerButton = self.Players[name]
 		if playerButton then --already existing
 			local currentDetails = playerButton.PlayerDetails
@@ -835,7 +834,7 @@ local function CreateMainFrame(playerType)
 			for k, v in pairs(playerDetails) do
 				if v ~= currentDetails[k] then
 					detailsChanged = true
-					-- BattleGroundEnemies:Debug("k changed1", k)
+					-- self:Debug("k changed1", k)
 					break
 				end
 			end
@@ -844,7 +843,7 @@ local function CreateMainFrame(playerType)
 				for k, v in pairs(currentDetails) do
 					if v ~= playerDetails[k] then
 						detailsChanged = true
-						-- BattleGroundEnemies:Debug("k changed2", k)
+						-- self:Debug("k changed2", k)
 						break
 					end
 				end
@@ -957,16 +956,16 @@ local function CreateMainFrame(playerType)
 		end
 
 		function mainframe:SortPlayers(forceRepositioning)
-			--BattleGroundEnemies:Debug("SortPlayers", self.PlayerType)
+			--self:Debug("SortPlayers", self.PlayerType)
 			local newPlayerOrder = {}
 			for playerName, playerButton in pairs(self.Players) do
-				-- BattleGroundEnemies:Debug(playerName)
+				-- self:Debug(playerName)
 				table.insert(newPlayerOrder, playerButton)
 			end
 			--[[
-			BattleGroundEnemies:Debug("before sorting")
+			self:Debug("before sorting")
 			for i = 1, #newPlayerOrder do
-				BattleGroundEnemies:Debug(i, newPlayerOrder[i].PlayerDetails.PlayerName)
+				self:Debug(i, newPlayerOrder[i].PlayerDetails.PlayerName)
 			end
 
  ]]
@@ -981,10 +980,10 @@ local function CreateMainFrame(playerType)
 						end
 					end
 					if usePlayerSortingByArenaUnitID then
-						-- BattleGroundEnemies:Debug("usePlayerSortingByArenaUnitID", self.PlayerType)
+						-- self:Debug("usePlayerSortingByArenaUnitID", self.PlayerType)
 						table.sort(newPlayerOrder, PlayerSortingByArenaUnitID)
 					else
-						-- BattleGroundEnemies:Debug("dont usePlayerSortingByArenaUnitID", self.PlayerType)
+						-- self:Debug("dont usePlayerSortingByArenaUnitID", self.PlayerType)
 						table.sort(newPlayerOrder, PlayerSortingByRoleClassName)
 					end
 				else
@@ -1002,9 +1001,9 @@ local function CreateMainFrame(playerType)
 				end
 			end
 
-			--[[ 			BattleGroundEnemies:Debug("after sorting")
+			--[[ 			self:Debug("after sorting")
 			for i = 1, #newPlayerOrder do
-				BattleGroundEnemies:Debug(i, newPlayerOrder[i].PlayerDetails.PlayerName)
+				self:Debug(i, newPlayerOrder[i].PlayerDetails.PlayerName)
 			end ]]
 
 
@@ -1149,7 +1148,7 @@ function BattleGroundEnemies.Enemies:ChangeName(oldName, newName) --only used in
 
 	if playerButton then
 		playerButton.PlayerDetails.PlayerName = newName
-		BattleGroundEnemies:Debug("name changed", oldName, newName)
+		self:Debug("name changed", oldName, newName)
 		playerButton:PlayerDetailsChanged()
 
 		self.Players[newName] = playerButton
@@ -1158,7 +1157,7 @@ function BattleGroundEnemies.Enemies:ChangeName(oldName, newName) --only used in
 end
 
 function BattleGroundEnemies.Enemies:CreateArenaEnemies()
-	BattleGroundEnemies:Debug("CreateArenaEnemies")
+	self:Debug("CreateArenaEnemies")
 	if not BattleGroundEnemies.states.isInArena then return end
 
 	self:BeforePlayerSourceUpdate(BattleGroundEnemies.consts.PlayerSources.ArenaPlayers)
@@ -1176,8 +1175,8 @@ function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 		else
 			classToken = select(2, UnitClass(unitID))
 		end
-		BattleGroundEnemies:Debug("classToken", classToken)
-		BattleGroundEnemies:Debug("specName", specName)
+		self:Debug("classToken", classToken)
+		self:Debug("specName", specName)
 
 
 		if classToken then
@@ -1213,7 +1212,7 @@ end
 BattleGroundEnemies.Enemies.ARENA_PREP_OPPONENT_SPECIALIZATIONS = BattleGroundEnemies.Enemies.CreateArenaEnemies -- for Prepframe, not available in TBC
 
 function BattleGroundEnemies.Enemies:UNIT_NAME_UPDATE(unitID)
-	BattleGroundEnemies:Debug("UNIT_NAME_UPDATE", unitID)
+	self:Debug("UNIT_NAME_UPDATE", unitID)
 	BattleGroundEnemies:ThrottleUpdateArenaPlayers()
 end
 
