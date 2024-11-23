@@ -126,6 +126,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 
 
 	function frame:ApplyAllSettings()
+		if not self.config then return end
 		local conf = self.config
 		self.AuraText:ApplyFontStringSettings(conf.Text)
 		self.Cooldown:ApplyCooldownSettings(conf.Cooldown, true, {0, 0, 0, 0.75})

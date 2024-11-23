@@ -75,6 +75,7 @@ function covenant:AttachToPlayerButton(playerButton)
 	end
 
 	playerButton.Covenant.ApplyAllSettings = function(self)
+		if not self.config then return end
 		self:DisplayCovenant()
 	end
 

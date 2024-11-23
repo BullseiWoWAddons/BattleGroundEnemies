@@ -178,8 +178,8 @@ function trinket:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:ApplyAllSettings()
-
 		local moduleSettings = self.config
+		if not moduleSettings then return end
 		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, false, {0, 0, 0, 0.5})
 	end
 	playerButton.Trinket = frame

@@ -64,6 +64,7 @@ function raidTargetIcon:AttachToPlayerButton(playerButton)
 	end
 
 	function playerButton.RaidTargetIcon:ApplyAllSettings()
+		if not self.config then return end
 		self:UpdateRaidTargetIcon()
 	end
 	return playerButton.RaidTargetIcon

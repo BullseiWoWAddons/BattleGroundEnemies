@@ -158,6 +158,7 @@ function BattleGroundEnemies:NewContainer(playerButton, createChildF, setupChild
 	end
 
 	function f:ApplyAllSettings()
+		if not self.config then return end
 		self:Display()
 		for i = 1, #self.childFrames do
 			local childFrame = self.childFrames[i]

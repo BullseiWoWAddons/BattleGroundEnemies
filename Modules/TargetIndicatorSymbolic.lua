@@ -120,6 +120,7 @@ function symbolicTargetIndicator:AttachToPlayerButton(playerButton)
 
 
 	playerButton.TargetIndicatorSymbolic.ApplyAllSettings = function(self)
+		if not self.config then return end
 		for i = 1, #self.Symbols do
 			self:SetSizeAndPosition(i)
 		end

@@ -78,7 +78,7 @@ local SpecClassPriorityOne = BattleGroundEnemies:NewButtonModule({
 	generalDefaults = generalDefaults,
 	options = options,
 	generalOptions = generalOptions,
-	events = {"PlayerDetailsChanged", "ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
+	events = {"ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
 	enabledInThisExpansion = true
 })
 
@@ -98,7 +98,7 @@ local SpecClassPriorityTwo = BattleGroundEnemies:NewButtonModule({
 	generalDefaults = generalDefaults,
 	options = options,
 	generalOptions = generalOptions,
-	events = {"PlayerDetailsChanged", "ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
+	events = {"ShouldQueryAuras", "BeforeFullAuraUpdate", "NewAura", "AfterFullAuraUpdate", "GotInterrupted", "UnitDied"},
 	enabledInThisExpansion = true
 })
 
@@ -264,7 +264,21 @@ local function attachToPlayerButton(playerButton)
 		self:ResetPriorityData()
 	end
 
-	frame.PlayerDetailsChanged = function(self)
+    frame.CropImage = function(self)
+        local width = self:GetWidth()
+        local height = self:GetHeight()
+        if width and height and width > 0 and height > 0 then
+			if self.ShowsSpec then
+				BattleGroundEnemies.CropImage(self.SpecClassIcon, width, height)
+			end
+            BattleGroundEnemies.CropImage(self.PriorityIcon, width, height)
+        end
+    end
+
+	frame.ApplyAllSettings = function(self)
+		if not self.config then return end
+        local moduleSettings = self.config
+		self:Show()
 		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		self.ShowsSpec = false
@@ -289,23 +303,6 @@ local function attachToPlayerButton(playerButton)
 			end
         end
 		self:CropImage()
-	end
-
-    frame.CropImage = function(self)
-        local width = self:GetWidth()
-        local height = self:GetHeight()
-        if width and height and width > 0 and height > 0 then
-			if self.ShowsSpec then
-				BattleGroundEnemies.CropImage(self.SpecClassIcon, width, height)
-			end
-            BattleGroundEnemies.CropImage(self.PriorityIcon, width, height)
-        end
-    end
-
-	frame.ApplyAllSettings = function(self)
-        local moduleSettings = self.config
-		self:Show()
-		self:PlayerDetailsChanged()
 		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, true, {0, 0, 0, 0.5})
         if not moduleSettings.showHighestPriority then
             self:ResetPriorityData()

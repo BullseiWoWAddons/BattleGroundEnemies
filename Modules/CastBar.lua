@@ -104,6 +104,7 @@ function castBar:AttachToPlayerButton(playerButton)
 	end
 
 	playerButton.CastBar.ApplyAllSettings = function(self)
+		if not self.config then return end
 		self:CreateCastBar()
 		local unitID = playerButton:GetUnitID()
 		CastingBarFrame_SetUnit(self.CastBar, unitID)

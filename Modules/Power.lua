@@ -95,7 +95,7 @@ local power = BattleGroundEnemies:NewButtonModule({
 	generalDefaults = generalDefaults,
 	options = options,
 	generalOptions = generalOptions,
-	events = {"UnitIdUpdate", "UpdatePower", "PlayerDetailsChanged"},
+	events = {"UnitIdUpdate", "UpdatePower"},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
 })
@@ -134,39 +134,13 @@ function power:AttachToPlayerButton(playerButton)
 	function playerButton.Power:UnitIdUpdate(unitID)
 		if unitID then
 			local powerType, powerToken, altR, altG, altB = UnitPowerType(unitID)
-		
+
 			self:CheckForNewPowerColor(powerToken)
 			self:UpdatePower(unitID)
 		end
 	end
 
-	function playerButton.Power:PlayerDetailsChanged()
-		local playerDetails = playerButton.PlayerDetails
-		if not playerDetails then return end
-		if not playerDetails.PlayerClass then return end
-		if not playerDetails.PlayerRole then return end
 
-		if playerDetails.PlayerRole == "HEALER" or not self.config.OnlyShowForHealers then
-			self:SetHeight(self.config.Height or 0.01)
-		else
-			self:SetHeight(0.01)
-		end
-		
-		local powerToken
-		if playerDetails.PlayerClass then
-			local t = Data.Classes[playerDetails.PlayerClass]
-			if t then
-				if playerDetails.PlayerSpecName then
-					t = t[playerDetails.PlayerSpecName]
-				end
-			end
-			if t then powerToken = t.Ressource end
-		end
-		
-		self:CheckForNewPowerColor(powerToken)
-	end
-	
-	
 	function playerButton.Power:UpdatePower(unitID)
 		--self:Debug("UpdatePower", unitID, powerToken)
 		if unitID then
@@ -180,12 +154,35 @@ function power:AttachToPlayerButton(playerButton)
 
 
 	function playerButton.Power:ApplyAllSettings()
+		if not self.config then return end
 		-- power
 		self:SetHeight(self.config.Height or 0.01)
 
 		self:SetStatusBarTexture(LSM:Fetch("statusbar", self.config.Texture))--self.healthBar:SetStatusBarTexture(137012)
 		self.Background:SetVertexColor(unpack(self.config.Background))
-		self:PlayerDetailsChanged()
+		local playerDetails = playerButton.PlayerDetails
+		if not playerDetails then return end
+		if not playerDetails.PlayerClass then return end
+		if not playerDetails.PlayerRole then return end
+
+		if playerDetails.PlayerRole == "HEALER" or not self.config.OnlyShowForHealers then
+			self:SetHeight(self.config.Height or 0.01)
+		else
+			self:SetHeight(0.01)
+		end
+
+		local powerToken
+		if playerDetails.PlayerClass then
+			local t = Data.Classes[playerDetails.PlayerClass]
+			if t then
+				if playerDetails.PlayerSpecName then
+					t = t[playerDetails.PlayerSpecName]
+				end
+			end
+			if t then powerToken = t.Ressource end
+		end
+
+		self:CheckForNewPowerColor(powerToken)
 	end
 	return playerButton.Power
 end

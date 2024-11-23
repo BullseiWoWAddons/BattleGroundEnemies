@@ -249,6 +249,7 @@ function combatIndicator:AttachToPlayerButton(playerButton)
 
 
 	function playerButton.CombatIndicator:ApplyAllSettings()
+		if not self.config then return end
 		self:CallFuncOnAllIconFrames(function(iconFrame)
 			iconFrame.texture:SetTexture(self.config[iconFrame.type].Icon)
 		end)

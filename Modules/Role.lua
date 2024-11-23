@@ -39,7 +39,6 @@ local role = BattleGroundEnemies:NewButtonModule({
 	localizedModuleName = ROLE,
 	defaultSettings = defaultSettings,
 	options = nil,
-	events = {"PlayerDetailsChanged"},
 	enabledInThisExpansion = not not GetSpecializationRole,
 	attachSettingsToButton = true
 })
@@ -50,10 +49,7 @@ function role:AttachToPlayerButton(playerButton)
 	playerButton.Role.Icon:SetAllPoints()
 
 	playerButton.Role.ApplyAllSettings = function(self)
-		self:PlayerDetailsChanged()
-	end
-
-	playerButton.Role.PlayerDetailsChanged = function(self)
+		if not self.config then return end
 		local playerDetails = playerButton.PlayerDetails
 		if not playerDetails then return end
 		local specData = playerButton:GetSpecData()

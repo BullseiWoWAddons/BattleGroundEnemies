@@ -114,7 +114,7 @@ local healthBar = BattleGroundEnemies:NewButtonModule({
 	generalDefaults = generalDefaults,
 	options = options,
 	generalOptions = generalOptions,
-	events = {"UpdateHealth", "PlayerDetailsChanged"},
+	events = {"UpdateHealth"},
 	flags = {FixedPosition = true},
 	enabledInThisExpansion = true,
 	attachSettingsToButton = true
@@ -237,20 +237,8 @@ function healthBar:AttachToPlayerButton(playerButton)
 		end
 	end
 
-	function playerButton.healthBar:PlayerDetailsChanged()
-		local playerDetails = playerButton.PlayerDetails
-		if not playerDetails then return end
-		local color = playerDetails.PlayerClassColor
-		self:SetStatusBarColor(color.r,color.g,color.b)
-		self:SetMinMaxValues(0, 1)
-		self:SetValue(1)
-		self:UpdateHealthText(false, false)
-
-		playerButton.totalAbsorbOverlay:Hide()
-		playerButton.totalAbsorb:Hide()
-	end
-
 	function playerButton.healthBar:ApplyAllSettings()
+		if not self.config then return end
 		local config = self.config
 		self:SetStatusBarTexture(LSM:Fetch("statusbar", config.Texture))--self.healthBar:SetStatusBarTexture(137012)
 		self.Background:SetVertexColor(unpack(config.Background))
@@ -261,7 +249,16 @@ function healthBar:AttachToPlayerButton(playerButton)
 		end
 
 		self.HealthText:ApplyFontStringSettings(config.HealthText)
-		self:PlayerDetailsChanged()
+		local playerDetails = playerButton.PlayerDetails
+		if not playerDetails then return end
+		local color = playerDetails.PlayerClassColor
+		self:SetStatusBarColor(color.r,color.g,color.b)
+		self:SetMinMaxValues(0, 1)
+		self:SetValue(1)
+		self:UpdateHealthText(false, false)
+
+		playerButton.totalAbsorbOverlay:Hide()
+		playerButton.totalAbsorb:Hide()
 	end
 	return playerButton.healthBar
 end

@@ -115,6 +115,7 @@ function racial:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:ApplyAllSettings()
+		if not self.config then return end
 		local moduleSettings = self.config
 		self.Cooldown:ApplyCooldownSettings(moduleSettings.Cooldown, false, {0, 0, 0, 0.5})
 

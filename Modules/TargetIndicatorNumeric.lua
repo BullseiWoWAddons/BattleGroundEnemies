@@ -99,6 +99,7 @@ function targetIndicatorNumeric:AttachToPlayerButton(playerButton)
 	end
 
 	playerButton.TargetIndicatorNumeric.ApplyAllSettings = function(self)
+		if not self.config then return end
 		self:ApplyFontStringSettings(self.config.Text)
 		self:UpdateTargetIndicators()
 	end
