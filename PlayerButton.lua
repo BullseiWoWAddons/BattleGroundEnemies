@@ -226,7 +226,7 @@ do
 
 	function buttonFunctions:PlayerDetailsChanged()
 		self:SetBindings()
-		self:DispatchEvent("PlayerDetailsChanged")
+		self:CallExistingFuncOnAllEnabledButtonModuleFrames("ApplyAllSettings")
 	end
 
 	function buttonFunctions:UpdateRaidTargetIcon(forceIndex)
@@ -311,11 +311,35 @@ do
 		end
 	end
 
+	function buttonFunctions:CallExistingFuncOnAllEnabledButtonModuleFrames(funcName, ...)
+		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
+			local moduleFrameOnButton = self[moduleName]
+			if moduleFrameOnButton then
+				if moduleFrameOnButton.Enabled then
+					if type(moduleFrameOnButton[funcName]) == "function" then
+						moduleFrameOnButton[funcName](moduleFrameOnButton, ...)
+					end
+				end
+ 			end
+		end
+	end
+
 	function buttonFunctions:CallFuncOnAllButtonModuleFrames(func)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			local moduleFrameOnButton = self[moduleName]
 			if moduleFrameOnButton then
 				func(self, moduleFrameOnButton)
+ 			end
+		end
+	end
+
+	function buttonFunctions:CallFuncOnAllEnabledButtonModuleFrames(func)
+		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
+			local moduleFrameOnButton = self[moduleName]
+			if moduleFrameOnButton then
+				if moduleFrameOnButton.Enabled then
+					func(self, moduleFrameOnButton)
+				end
  			end
 		end
 	end
