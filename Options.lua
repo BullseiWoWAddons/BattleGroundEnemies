@@ -2109,15 +2109,16 @@ function BattleGroundEnemies:SetupOptions()
 				name = "Debug",
 				childGroups = "tab",
 				order = 8,
-				hidden = not self.db.profile.Debug,
 				args = {
+					Debug = {
+						type = "toggle",
+						name = "Enable Debug",
+						order = 1,
+					},
 					DebugToSV = {
 						type = "toggle",
-						name = "Debug to SV",                                                         -- DebugToSV = false,
-																										--DebugToChat = false,
-																									--	DebugToChat_AddTimestamp = false,
-
-						order = 1,
+						name = "Debug to Saved Variables",
+						order = 2,
 					},
 					DebugToSV_ResetOnPlayerLogin = {
 						type = "toggle",
@@ -2126,13 +2127,12 @@ function BattleGroundEnemies:SetupOptions()
 						hidden = function ()
 							return not self.db.profile.DebugToSV
 						end,
-						order = 2,
+						order =3,
 					},
 					DebugToChat = {
 						type = "toggle",
 						name = "Debug to Chat",
-	
-						order = 3,
+						order = 4,
 					},
 					DebugToChat_AddTimestamp = {
 						type = "toggle",
@@ -2141,23 +2141,26 @@ function BattleGroundEnemies:SetupOptions()
 						hidden = function ()
 							return not self.db.profile.DebugToChat
 						end,
-						order = 4,
+						order = 5,
 					},
-					ReseSVtLog = {
+					ResetSVLog = {
 						type = "execute",
 						name = "Reset Saved variables log",
 						desc = L.ImportButton_Desc,
 						func = function()
 							self.db.profile.log = {}
 						end,
-						order = 5,
+						order = 6,
 					},
-				
-					-- shareActiveProfile = {
-					-- 	type = "toggle",
-					-- 	name = L.EnableProfileSharing,
-					-- 	desc = L.EnableProfileSharing_Desc
-					-- }
+					ShowDebugChatFrame = {
+						type = "execute",
+						name = "Show debug chat frame",
+						desc = L.ImportButton_Desc,
+						func = function()
+							self.debugFrame:Show()
+						end,
+						order = 7,
+					},
 				}
 			}
 		}
