@@ -40,6 +40,7 @@ local GetSpecializationInfoByID = GetSpecializationInfoByID
 local GetSpellBookItemName = C_SpellBook and C_SpellBook.GetSpellBookItemName or GetSpellBookItemName
 local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellName
 local GetSpellTabInfo = GetSpellTabInfo
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 local C_SpellBook = C_SpellBook
 local GetTime = GetTime
 local GetUnitName = GetUnitName
