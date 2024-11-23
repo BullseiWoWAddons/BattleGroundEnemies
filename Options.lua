@@ -1563,13 +1563,7 @@ function BattleGroundEnemies:SetupOptions()
 						step = 1,
 						get = function() return self.Testmode.PlayerCountTestmode end,
 						set = function(option, value)
-							self.Testmode.PlayerCountTestmode = value
-							if self.Testmode.Active then
-								self:CreateFakePlayers()
-							end
-							if self.Editmode.Active then
-								BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
-							end
+							self:TestModePlayerCountChanged(value)
 						end,
 						order = 1
 					},
@@ -2157,6 +2151,7 @@ function BattleGroundEnemies:SetupOptions()
 						name = "Show debug chat frame",
 						desc = L.ImportButton_Desc,
 						func = function()
+							if not self.debugFrame then return end
 							self.debugFrame:Show()
 						end,
 						order = 7,
