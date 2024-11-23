@@ -688,46 +688,23 @@ function BattleGroundEnemies:ShowAuraTooltip(playerButton, displayedAura)
 	end
 end
 
-local randomTrinkets = {} -- key = number, value = spellId
-local randomRacials = {}  -- key = number, value = spellId
-local FakePlayersOnUpdateFrame = CreateFrame("frame")
-FakePlayersOnUpdateFrame:Hide()
+---@type FunctionContainer
+local FakePlayersUpdateTicker
 
-
-local function SetupTrinketAndRacialData()
-	do
-		local count = 1
-		for triggerSpellID, trinketData in pairs(Data.TrinketData) do
-			if type(triggerSpellID) == "string" then --support for classic, IsClassic
-				randomTrinkets[count] = triggerSpellID
-				count = count + 1
-			else
-				local spellExists = GetSpellName(triggerSpellID)
-
-				if spellExists and spellExists ~= "" then
-					randomTrinkets[count] = triggerSpellID
-					count = count + 1
-				end
-			end
-		end
-	end
-
-	do
-		local count = 1
-		for racialSpelliD, data in pairs(Data.RacialSpellIDtoCooldown) do
-			local spellExists = GetSpellName(racialSpelliD)
-
-			if spellExists and spellExists ~= "" then
-				randomRacials[count] = racialSpelliD
-				count = count + 1
-			end
-		end
+local function stopFakePlayersTicker()
+	if FakePlayersUpdateTicker then
+		FakePlayersUpdateTicker:Cancel()
+		FakePlayersUpdateTicker = nil
 	end
 end
 
-local playerSpells
-local priorityAuras = {}
-local nonPriorityAuras = {}
+local function createFakePlayersTicker(seconds, callback)
+	local ticker = C_Timer.NewTicker(seconds, callback)
+	stopFakePlayersTicker()
+	FakePlayersUpdateTicker = ticker
+	return ticker
+end
+
 
 
 Data.FoundAuras = {
@@ -922,105 +899,43 @@ do
 			end
 		end
 	end
+end
 
-	local TestmodeRanOnce = false
-	function BattleGroundEnemies:EnableTestMode()
-		if InCombatLockdown() then
-			return BattleGroundEnemies:Information(L.ErrorTestmodeInCombat)
-		end
-		self.Testmode.Active = true
-		self:SetupTestmode()
-		
-		self.Allies:OnTestmodeEnabled()
-		self.Enemies:OnTestmodeEnabled()
-		self:Information(L.TestmodeEnabled)
+local function fakePlayersTestmodeTicker()
+	for number, mainFrame in pairs({ BattleGroundEnemies.Allies, BattleGroundEnemies.Enemies }) do
+		mainFrame:OnTestmodeTick()
 	end
 end
 
+local function fakePlayersEditmodeTicker()
+	for number, mainFrame in pairs({ BattleGroundEnemies.Allies, BattleGroundEnemies.Enemies }) do
+		mainFrame:OnEditmodeTick()
+	end
+end
 
-do
-	local holdsflag
-	local TimeSinceLastOnUpdate = 0
-	local UpdatePeroid = 1                  --update every second
-
-	local function FakeOnUpdate(self, elapsed) --OnUpdate runs if the frame FakePlayersOnUpdateFrame is shown
-		TimeSinceLastOnUpdate = TimeSinceLastOnUpdate + elapsed
-		if TimeSinceLastOnUpdate > UpdatePeroid then
-			for number, mainFrame in pairs({ BattleGroundEnemies.Allies, BattleGroundEnemies.Enemies }) do
-				local hasFlag = false
-				for name, playerButton in pairs(mainFrame.Players) do
-					if playerButton.PlayerDetails.isFakePlayer then
-						local n = math_random(1, 10)
-						--self:Debug("number", number)
-
-						--self:Debug(playerButton.ObjectiveAndRespawn.Cooldown:GetCooldownDuration())
-
-						if not playerButton.isDead then
-							if n == 1 and not hasFlag then --this guy has a objective now
-								-- hide old flag carrier
-								local oldFlagholder = holdsflag
-								if oldFlagholder then
-									oldFlagholder:DispatchEvent("ArenaOpponentHidden")
-								end
-
-								playerButton:ArenaOpponentShown()
-
-								holdsflag = playerButton
-								hasFlag = true
-							elseif n == 2 and playerButton.Racial.Cooldown:GetCooldownDuration() == 0 then -- racial used
-								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, nil,
-									playerButton.PlayerDetails.PlayerName, nil, nil,
-									randomRacials[math_random(1, #randomRacials)])
-							elseif n == 3 and playerButton.Trinket.Cooldown:GetCooldownDuration() == 0 then -- trinket used
-								BattleGroundEnemies.CombatLogevents.SPELL_CAST_SUCCESS(BattleGroundEnemies, nil,
-									playerButton.PlayerDetails.PlayerName, nil, nil,
-									randomTrinkets[math_random(1, #randomTrinkets)])
-							elseif n == 4 then --power simulation
-								playerButton:UNIT_POWER_FREQUENT()
-							elseif n == 5 then
-								--let the player changed target or target someone if he didnt have a target before
-								if playerButton.Target then
-									playerButton:IsNoLongerTarging(playerButton.Target)
-								end
-
-								local oppositeMainFrame = playerButton:GetOppositeMainFrame()
-								if oppositeMainFrame then --this really should never be nil
-									local randomPlayer = oppositeMainFrame:GetRandomPlayer()
-
-									if randomPlayer then
-										playerButton:IsNowTargeting(randomPlayer)
-									end
-								end
-							elseif n == 6 then
-								UpdateFakeRaidTargetIcons(playerButton)
-							end
-
-
-
-							UpdateFakeAuras(playerButton)
-						end
-						playerButton:UNIT_HEALTH()
-
-						if n == 6 then --toggle range
-							playerButton:UpdateRange(not playerButton.wasInRange)
-						end
-						playerButton:DispatchEvent("OnTestmodeTick")
-					end
-				end
-			end
-
-			TimeSinceLastOnUpdate = 0
+local function setupFakePlayersEditmodeTicker()
+	local lowestDrResetTime
+	local drCatSpells = GetAllDrCategorySpells()
+	for categoryName, spellIDs in pairs(drCatSpells) do
+		local resetTime = DRList:GetResetTime(categoryName)
+		if not lowestDrResetTime or resetTime < lowestDrResetTime then
+			lowestDrResetTime = resetTime
 		end
 	end
-	FakePlayersOnUpdateFrame:SetScript("OnUpdate", FakeOnUpdate)
+	createFakePlayersTicker(lowestDrResetTime, fakePlayersEditmodeTicker)
+end
+
+local function setupFakePlayersTestmodeTicker()
+	createFakePlayersTicker(1, fakePlayersTestmodeTicker)
 end
 
 function BattleGroundEnemies.ToggleTestmodeOnUpdate()
-	local enabled = not FakePlayersOnUpdateFrame:IsShown()
-	FakePlayersOnUpdateFrame:SetShown(enabled)
+	local enabled = not FakePlayersUpdateTicker:IsCancelled()
 	if enabled then
+		setupFakePlayersTestmodeTicker()
 		BattleGroundEnemies:Information(L.FakeEventsEnabled)
 	else
+		stopFakePlayersTicker()
 		BattleGroundEnemies:Information(L.FakeEventsDisabled)
 	end
 end
@@ -1323,7 +1238,7 @@ function BattleGroundEnemies:Disable()
 	self:UnregisterEvents()
 	self:Hide()
 	RequestFrame:Hide()
-	FakePlayersOnUpdateFrame:Hide()
+	stopFakePlayersTicker()
 	self.Allies:Disable()
 	self.Enemies:Disable()
 end
@@ -1334,11 +1249,15 @@ function BattleGroundEnemies:Enable()
 
 	self:RegisterEvents()
 	if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
+		if BattleGroundEnemies.Testmode.Active then
+			setupFakePlayersTestmodeTicker()
+		else --editmode
+			setupFakePlayersEditmodeTicker()
+		end
 		RequestFrame:Hide()
-		FakePlayersOnUpdateFrame:Show()
 	else
 		RequestFrame:Show()
-		FakePlayersOnUpdateFrame:Hide()
+		stopFakePlayersTicker()
 	end
 	self:Show()
 	self.Allies:CheckEnableState()
