@@ -243,8 +243,12 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		self:Debug("ArenaOpponentShown")
 		if BattleGroundEnemies.states.battlegroundBuff then
 			self:Debug("has battlegroundBuff")
-			self.Icon:SetTexture(GetSpellTexture(BattleGroundEnemies.states.battlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]))
-			self:Show()
+			local spellId = BattleGroundEnemies.states.battlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]
+			if spellId then
+				self.Icon:SetTexture(GetSpellTexture(spellId))
+				self:Show()
+			end
+			
 		end
 
 		self:HideText()
