@@ -346,7 +346,6 @@ function dRTracking:AttachToPlayerButton(playerButton)
 
 		input.startTime = GetTime()
 		self:Display()
-	
 	end
 
 	playerButton.DRTracking = container
