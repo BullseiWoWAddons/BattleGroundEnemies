@@ -27,7 +27,7 @@ local math_random = math.random
 local table_insert = table.insert
 local table_remove = table.remove
 
-local HasSpeccs = not not GetSpecializationInfoByID
+local HasSpeccs = not not GetSpecialization
 
 --Libs
 local LibRaces = LibStub("LibRaces-1.0")
