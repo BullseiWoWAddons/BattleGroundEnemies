@@ -2109,53 +2109,63 @@ function BattleGroundEnemies:SetupOptions()
 						name = "Enable Debug",
 						order = 1,
 					},
-					DebugToSV = {
-						type = "toggle",
-						name = "Debug to Saved Variables",
+					SvDebugging = {
+						type = "group",
+						name = "Saved Variables",
 						order = 2,
+						inline = true,
+						args = {
+							DebugToSV = {
+								type = "toggle",
+								name = "Debug to Saved Variables",
+								order = 1,
+							},
+							DebugToSV_ResetOnPlayerLogin = {
+								type = "toggle",
+								name = "Reset SV log on player login",
+								desc = L.ExportButton_Desc,
+								order = 2,
+							},
+							ResetSVLog = {
+								type = "execute",
+								name = "Reset Saved variables log",
+								desc = L.ImportButton_Desc,
+								func = function()
+									self.db.profile.log = {}
+								end,
+								order = 3,
+							},
+						}
 					},
-					DebugToSV_ResetOnPlayerLogin = {
-						type = "toggle",
-						name = "Reset SV log on player login",
-						desc = L.ExportButton_Desc,
-						hidden = function ()
-							return not self.db.profile.DebugToSV
-						end,
-						order =3,
-					},
-					DebugToChat = {
-						type = "toggle",
-						name = "Debug to Chat",
-						order = 4,
-					},
-					DebugToChat_AddTimestamp = {
-						type = "toggle",
-						name = "Add timestamp to chat",
-						desc = L.ExportButton_Desc,
-						hidden = function ()
-							return not self.db.profile.DebugToChat
-						end,
-						order = 5,
-					},
-					ResetSVLog = {
-						type = "execute",
-						name = "Reset Saved variables log",
-						desc = L.ImportButton_Desc,
-						func = function()
-							self.db.profile.log = {}
-						end,
-						order = 6,
-					},
-					ShowDebugChatFrame = {
-						type = "execute",
-						name = "Show debug chat frame",
-						desc = L.ImportButton_Desc,
-						func = function()
-							if not self.debugFrame then return end
-							self.debugFrame:Show()
-						end,
-						order = 7,
-					},
+					ChatDebugging = {
+						type = "group",
+						name = "Chat",
+						inline = true,
+						order = 3,
+						args = {
+							DebugToChat_AddTimestamp = {
+								type = "toggle",
+								name = "Add timestamp to chat",
+								desc = L.ExportButton_Desc,
+								order = 1,
+							},
+							DebugToChat = {
+								type = "toggle",
+								name = "Debug to Chat",
+								order = 2,
+							},
+							ShowDebugChatFrame = {
+								type = "execute",
+								name = "Show debug chat frame",
+								desc = L.ImportButton_Desc,
+								func = function()
+									if not self.DebugFrame then self:GetDebugFrame() end
+									self.DebugFrame:Show()
+								end,
+								order = 3,
+							}
+						}
+					}
 				}
 			}
 		}
