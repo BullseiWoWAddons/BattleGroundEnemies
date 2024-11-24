@@ -126,7 +126,7 @@ do
 	end
 
 	function buttonFunctions:Debug(...)
-		return BattleGroundEnemies:Debug(self.PlayerName, ...)
+		return BattleGroundEnemies:Debug(self.PlayerDetails.PlayerName, ...)
 	end 
 
 	function buttonFunctions:OnDragStart()
