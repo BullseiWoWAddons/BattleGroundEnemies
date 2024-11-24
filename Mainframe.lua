@@ -285,43 +285,39 @@ local function CreateMainFrame(playerType)
 				local scoreboardEnemies = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.Scoreboard]
 				local numScoreboardEnemies = #scoreboardEnemies
 				local addScoreBoardPlayers = false
-			
-				
 				if BattleGroundEnemies.states.isInArena then
-					if numScoreboardEnemies > 0 then
-						addScoreBoardPlayers = true
-					else
-						self:Debug("AfterPlayerSourceUpdate", "inArena")
-						local arenaEnemies = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.ArenaPlayers]
-						local numArenaEnemies = #arenaEnemies
-						self:Debug("AfterPlayerSourceUpdate", numArenaEnemies)
-						if numArenaEnemies > 0 then
-							for i = 1, numArenaEnemies do
-								local playerName
-								local arenaEnemy = arenaEnemies[i]
-								if arenaEnemy.name then
-									playerName = arenaEnemy.name
-								else
-									--useful in solo shuffle in first round, then we can show a playername via data from scoreboard
-									local match = matchBattleFieldScoreToArenaEnemyPlayer(scoreboardEnemies, arenaEnemy)
-									if match then
-										self:Debug("found a name match")
-										playerName = match.name
-									else
-										self:Debug("didnt find a match", arenaEnemy.additionalData.PlayerArenaUnitID)
-										-- use the unitID
-										playerName = arenaEnemy.additionalData.PlayerArenaUnitID
-									end
-								end
-								local t = Mixin({}, arenaEnemy)
-								t.name = playerName
-								table.insert(newPlayers, t)
-							end
-						end
-					end
-					
+					self:Debug("AfterPlayerSourceUpdate", "inArena")
+					--use arenaPlayers is primary source to preserve same order arena1 to arena3, scoreboard doesn't offer this
+					local arenaEnemies = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.ArenaPlayers]
+					local numArenaEnemies = #arenaEnemies
+					self:Debug("AfterPlayerSourceUpdate", numArenaEnemies)
 
-			
+					if numArenaEnemies > 0 then
+						for i = 1, numArenaEnemies do
+							local playerName
+							local arenaEnemy = arenaEnemies[i]
+							if arenaEnemy.name then
+								playerName = arenaEnemy.name
+							else
+								--useful in solo shuffle in first round, then we can show a playername via data from scoreboard
+								local match = matchBattleFieldScoreToArenaEnemyPlayer(scoreboardEnemies, arenaEnemy)
+								if match then
+									self:Debug("found a name match")
+									playerName = match.name
+								else
+									self:Debug("didnt find a match", arenaEnemy.additionalData.PlayerArenaUnitID)
+									-- use the unitID
+									playerName = arenaEnemy.additionalData.PlayerArenaUnitID
+								end
+							end
+							local t = Mixin({}, arenaEnemy)
+							t.name = playerName
+							table.insert(newPlayers, t)
+						end
+					else
+						addScoreBoardPlayers = true
+						--maybe we got some in scoreboard
+					end
 				else --in BattleGround
 					if numScoreboardEnemies == 0 then
 						if BattleGroundEnemies.states.isRatedBG and IsRetail then
