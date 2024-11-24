@@ -15,7 +15,7 @@ local CTimerNewTicker = C_Timer.NewTicker
 local GetTime = GetTime
 local max = math.max
 
-local BGE_VERSION = "11.0.5.7"
+local BGE_VERSION = "11.0.5.8"
 local AddonPrefix = "BGE"
 local versionQueryString, versionResponseString = "Q^%s^%i", "V^%s^%i"
 local profileQueryString, profileResponseString = "PQ^%s", "PR^%s"
