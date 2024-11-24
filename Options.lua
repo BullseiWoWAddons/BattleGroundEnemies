@@ -1550,7 +1550,7 @@ function BattleGroundEnemies:SetupOptions()
 			TestmodeSettings = {
 				type = "group",
 				name = L.TestmodeSettings,
-				disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Testmode.Active) end,
+				disabled = function() return InCombatLockdown() end,
 				inline = true,
 				order = 1,
 				args = {
@@ -1571,7 +1571,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "execute",
 						name = L.Testmode_Toggle,
 						desc = L.Testmode_Toggle_Desc,
-						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Testmode.Active) or self.Editmode.Active end,
+						disabled = function() return InCombatLockdown() end,
 						func = self.ToggleTestmode,
 						order = 2
 					},
@@ -1579,7 +1579,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "execute",
 						name = L.Editmode_Toggle,
 						desc = L.Editmode_Toggle_Desc,
-						disabled = function() return InCombatLockdown() or (self:IsShown() and not self.Editmode.Active)end,
+						disabled = function() return InCombatLockdown() end,
 						func = self.ToggleEditmode,
 						order = 2
 					},
