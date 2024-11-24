@@ -731,19 +731,19 @@ function BattleGroundEnemies:ShowAuraTooltip(playerButton, displayedAura)
 end
 
 ---@type FunctionContainer
-local FakePlayersUpdateTicker
+BattleGroundEnemies.FakePlayersUpdateTicker = nil
 
 local function stopFakePlayersTicker()
-	if FakePlayersUpdateTicker then
-		FakePlayersUpdateTicker:Cancel()
-		FakePlayersUpdateTicker = nil
+	if BattleGroundEnemies.FakePlayersUpdateTicker then
+		BattleGroundEnemies.FakePlayersUpdateTicker:Cancel()
+		BattleGroundEnemies.FakePlayersUpdateTicker = nil
 	end
 end
 
 local function createFakePlayersTicker(seconds, callback)
-	local ticker = C_Timer.NewTicker(seconds, callback)
+	local ticker = CTimerNewTicker(seconds, callback)
 	stopFakePlayersTicker()
-	FakePlayersUpdateTicker = ticker
+	BattleGroundEnemies.FakePlayersUpdateTicker = ticker
 	return ticker
 end
 
@@ -994,7 +994,7 @@ local function setupFakePlayersTestmodeTicker()
 end
 
 function BattleGroundEnemies.ToggleTestmodeOnUpdate()
-	local enabled = not FakePlayersUpdateTicker:IsCancelled()
+	local enabled = not BattleGroundEnemies.FakePlayersUpdateTicker
 	if enabled then
 		setupFakePlayersTestmodeTicker()
 		BattleGroundEnemies:Information(L.FakeEventsEnabled)
@@ -1018,15 +1018,16 @@ end
 
 function BattleGroundEnemies:DisableTestMode()
 	self.Testmode.Active = false
-	self.states.battlegroundBuff = false
-	self.states.battleGroundDebuffs = false
+	self:Information(L.TestmodeDisabled)
 	self.Allies:OnTestmodeDisabled()
 	self.Enemies:OnTestmodeDisabled()
-	self:Disable()
-	self:Information(L.TestmodeDisabled)
+	self:PLAYER_ENTERING_WORLD()
 end
 
 function BattleGroundEnemies.ToggleTestmode()
+	if BattleGroundEnemies.Editmode.Active then
+		BattleGroundEnemies:DisableEditmode()
+	end
 	if BattleGroundEnemies.Testmode.Active then --disable testmode
 		BattleGroundEnemies:DisableTestMode()
 	else                                     --enable Testmode
@@ -1040,7 +1041,6 @@ function BattleGroundEnemies:EnableEditmode()
 	end
 	self.Editmode.Active = true
 	self:SetupTestmode()
-
 	self:OnEditmodeEnabled()
 
 	BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
@@ -1055,14 +1055,15 @@ end
 
 function BattleGroundEnemies:DisableEditmode()
 	self.Editmode.Active = false
-	self.states.battlegroundBuff = false
-	self.states.battleGroundDebuffs = false
-	self:Disable()
-	BattleGroundEnemies.EditMode.EditModeManager:CloseEditmode()
 	self:Information(L.EditmodeDisabled)
+	BattleGroundEnemies.EditMode.EditModeManager:CloseEditmode()
+	self:PLAYER_ENTERING_WORLD()
 end
 
 function BattleGroundEnemies.ToggleEditmode()
+	if BattleGroundEnemies.Testmode.Active then
+		BattleGroundEnemies:DisableTestMode()
+	end
 	if BattleGroundEnemies.Editmode.Active then --disable testmode
 		BattleGroundEnemies:DisableEditmode()
 	else                                     --enable Testmode
@@ -1333,10 +1334,10 @@ function BattleGroundEnemies:Enable()
 
 	self:RegisterEvents()
 	if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
-		if BattleGroundEnemies.Testmode.Active then
-			setupFakePlayersTestmodeTicker()
-		else --editmode
+		if self.Editmode.Active then
 			setupFakePlayersEditmodeTicker()
+		else
+			setupFakePlayersTestmodeTicker()
 		end
 		RequestFrame:Hide()
 	else
@@ -2028,7 +2029,7 @@ local function checkEffectiveEnableStateForArenaFrames()
 end
 
 function BattleGroundEnemies:ResetCombatLogScanniningTables()
-	self.SearchedGUIDs = self.SearchedGUIDs or {}
+	self.SearchedGUIDs = {}
 	self.PlayerGUIDs = {}
 end
 
@@ -2328,9 +2329,8 @@ BattleGroundEnemies.PARTY_LEADER_CHANGED = BattleGroundEnemies.GROUP_ROSTER_UPDA
 function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	BattleGroundEnemies:Debug("PLAYER_ENTERING_WORLD")
 	self:ResetCombatLogScanniningTables()
-	if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then --disable testmode
-		self:DisableTestOrEditmode()
-	end
+	self:DisableTestOrEditmode()
+	
 
 	self.Enemies:RemoveAllPlayersFromAllSources()
 	self.Allies:RemoveAllPlayersFromSource(self.consts.PlayerSources.Scoreboard)
