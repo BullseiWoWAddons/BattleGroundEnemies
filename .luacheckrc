@@ -130,6 +130,7 @@ globals = {
 	"C_PvP",
 	"C_RaidLocks",
 	"C_Scenario",
+	"C_SpecializationInfo",
 	"C_Spell",
 	"C_SpellBook",
 	"C_Texture",
