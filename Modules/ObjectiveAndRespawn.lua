@@ -144,7 +144,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 						if aura.points and type(aura.points) == "table" then
 							if aura.points[2] then
 								if not self.shownValue then
-									self:Debug("hier")
+									--self:Debug("hier")
 									--player just got the debuff
 									self.Icon:SetTexture(GetSpellTexture(aura.spellId))
 									self:Show()
@@ -187,7 +187,6 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 
 	function frame:BeforeFullAuraUpdate(filter)
-		self:Debug("BeforeFullAuraUpdate")
 		if filter == "HARMFUL" then
 			self.continue = true
 		end
@@ -199,14 +198,14 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		if filter ~= "HARMFUL" then return end
 		if not self.continue then return end
 
-		self:Debug("NewAura", 2)
+		--self:Debug("NewAura", 2)
 
 		if not BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then return end -- This player is not shown on arena enemy so we dont care
 		if BattleGroundEnemies.states.battleGroundDebuffs then self:SearchForDebuffs(aura) end
 	end
 
 	function frame:UnitRevived()
-		self:Debug("UnitRevived")
+		--self:Debug("UnitRevived")
 
 		--BattleGroundEnemies:Debug("UnitRevived")
 		if self.ActiveRespawnTimer then
