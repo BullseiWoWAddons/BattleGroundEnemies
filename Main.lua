@@ -1097,19 +1097,21 @@ end
 
 
 
-local function CreatedebugFrame()
-	local f = FCF_OpenTemporaryWindow("FILTERED")
-	f:SetMaxLines(2500)
-	FCF_UnDockFrame(f);
-	f:ClearAllPoints();
-	f:SetPoint("CENTER", "UIParent", "CENTER", 0, 0);
-	FCF_SetTabPosition(f, 0);
-	f:Show();
-	f.Tab = _G[f:GetName() .. "Tab"]
-	f.Tab.conversationIcon:Hide()
-	FCF_SetWindowName(f, "BGE_DebugFrame")
-
-	return f
+function BattleGroundEnemies:GetDebugFrame()
+	if not self.DebugFrame then
+		local f = FCF_OpenTemporaryWindow("FILTERED")
+		f:SetMaxLines(2500)
+		FCF_UnDockFrame(f);
+		f:ClearAllPoints();
+		f:SetPoint("CENTER", "UIParent", "CENTER", 0, 0);
+		FCF_SetTabPosition(f, 0);
+		f:Show();
+		f.Tab = _G[f:GetName() .. "Tab"]
+		f.Tab.conversationIcon:Hide()
+		FCF_SetWindowName(f, "BGE_DebugFrame")
+		self.DebugFrame = f
+	end
+	return self.DebugFrame
 end
 
 BattleGroundEnemies.ArenaIDToPlayerButton = {} --key = arenaID: arenaX, value = playerButton of that unitID
@@ -1507,6 +1509,7 @@ function BattleGroundEnemies:OnetimeDebug(...)
 	local message = table.concat({ ... }, ", ")
 	if sentDebugMessages[message] then return end
 	sentDebugMessages[message] = true
+	self:Debug(...)
 end
 
 function BattleGroundEnemies:Debug(...)
@@ -1517,8 +1520,8 @@ function BattleGroundEnemies:Debug(...)
 	self:OnetimeInformation("Debugging is enabled. Depending on the amount of messages or debug settings it can cause decrased performance. Please disable it after you are done debugging.")
 
 	if self.db.profile.DebugToChat then
-		if not self.debugFrame then
-			self.debugFrame = CreatedebugFrame()
+		if not self.DebugFrame then
+			self.DebugFrame = self:GetDebugFrame()
 		end
 
 		local text
@@ -1528,7 +1531,7 @@ function BattleGroundEnemies:Debug(...)
 			text = stringifyMultitArgs(...)
 		end
 
-		self.debugFrame:AddMessage(text)
+		self.DebugFrame:AddMessage(text)
 	end
 
 	if self.db.profile.DebugToSV then
