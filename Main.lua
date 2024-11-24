@@ -648,7 +648,7 @@ end
 
 BattleGroundEnemies:SetScript("OnEvent", function(self, event, ...)
 	--self.Counter[event] = (self.Counter[event] or 0) + 1
-	BattleGroundEnemies:Debug("BattleGroundEnemies OnEvent", event, ...)
+	--BattleGroundEnemies:Debug("BattleGroundEnemies OnEvent", event, ...)
 	self[event](self, ...)
 end)
 BattleGroundEnemies:Hide()
