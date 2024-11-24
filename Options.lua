@@ -2103,6 +2103,7 @@ function BattleGroundEnemies:SetupOptions()
 				name = "Debug",
 				childGroups = "tab",
 				order = 8,
+				hidden = not self.db.profile.Debug,
 				args = {
 					Debug = {
 						type = "toggle",
@@ -2123,13 +2124,11 @@ function BattleGroundEnemies:SetupOptions()
 							DebugToSV_ResetOnPlayerLogin = {
 								type = "toggle",
 								name = "Reset SV log on player login",
-								desc = L.ExportButton_Desc,
 								order = 2,
 							},
 							ResetSVLog = {
 								type = "execute",
 								name = "Reset Saved variables log",
-								desc = L.ImportButton_Desc,
 								func = function()
 									self.db.profile.log = {}
 								end,
@@ -2146,7 +2145,6 @@ function BattleGroundEnemies:SetupOptions()
 							DebugToChat_AddTimestamp = {
 								type = "toggle",
 								name = "Add timestamp to chat",
-								desc = L.ExportButton_Desc,
 								order = 1,
 							},
 							DebugToChat = {
@@ -2157,7 +2155,6 @@ function BattleGroundEnemies:SetupOptions()
 							ShowDebugChatFrame = {
 								type = "execute",
 								name = "Show debug chat frame",
-								desc = L.ImportButton_Desc,
 								func = function()
 									if not self.DebugFrame then self:GetDebugFrame() end
 									self.DebugFrame:Show()
