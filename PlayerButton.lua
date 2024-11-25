@@ -226,7 +226,7 @@ do
 
 	function buttonFunctions:PlayerDetailsChanged()
 		self:SetBindings()
-		self:CallExistingFuncOnAllEnabledButtonModuleFrames("ApplyAllSettings")
+		self:ApplyModuleSettings()
 	end
 
 	function buttonFunctions:UpdateRaidTargetIcon(forceIndex)
@@ -278,6 +278,8 @@ do
 	function buttonFunctions:SetModuleConfig(moduleName)
 		local moduleFrameOnButton = self[moduleName]
 		local moduleConfigOnButton = {}
+
+		if not self.playerCountConfig then return end
 
 		local playerSizeModuleConfig = self.playerCountConfig.ButtonModules[moduleName]
 
@@ -344,8 +346,7 @@ do
 		end
 	end
 
-	function buttonFunctions:ApplyModuleSettings()
-		self:SetAllModuleConfigs()
+	function buttonFunctions:SetModulePositions()
 		if not self:GetRect() then return end --the position of the button is not set yet
 		local i = 1
 		repeat                          -- we basically run this roop to get out of the anchring hell (making sure all the frames that a module is depending on is set)
@@ -423,14 +424,16 @@ do
 				self:Debug("something went wrong in ApplyModuleSettings")
 			end
 		until allModulesSet or i > 10 --maxium of 10 tries
-
 		self.MyTarget:SetParent(self.healthBar)
 		self.MyTarget:SetPoint("TOPLEFT", self.healthBar, "TOPLEFT")
 		self.MyTarget:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT")
 		self.MyFocus:SetParent(self.healthBar)
 		self.MyFocus:SetPoint("TOPLEFT", self.healthBar, "TOPLEFT")
 		self.MyFocus:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT")
+	end
 
+	function buttonFunctions:ApplyModuleSettings()
+		wipe(self.ButtonEvents)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			local moduleFrameOnButton = self[moduleName]
 
@@ -464,6 +467,7 @@ do
 		else
 			self.basePath = {}
 		end
+		self:SetAllModuleConfigs()
 	end
 
 	function buttonFunctions:GetOptionsPath()
@@ -504,11 +508,8 @@ do
 		self.MyFocus:SetBackdropColor(0, 0, 0, 0)
 		self.MyFocus:SetBackdropBorderColor(unpack(BattleGroundEnemies.db.profile.MyFocus_Color))
 
-
-		wipe(self.ButtonEvents)
+		self:SetModulePositions()
 		self:ApplyModuleSettings()
-
-	
 		self:SetBindings()
 	end
 
