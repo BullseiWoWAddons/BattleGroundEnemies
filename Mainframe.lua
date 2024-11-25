@@ -385,6 +385,7 @@ local function CreateMainFrame(playerType)
 			local classToken = newPlayer.classToken
 			local specName = newPlayer.specName
 			local additionalData = newPlayer.additionalData
+			self:Debug("AfterPlayer", name, raceName, classToken, specName, additionalData)
 			self:CreateOrUpdatePlayerDetails(name, raceName, classToken, specName, additionalData)
 		end
 		self:SetPlayerCount(#newPlayers)
@@ -679,6 +680,7 @@ local function CreateMainFrame(playerType)
 		playerButton.unit = nil
 
 		playerButton.PlayerDetails = playerDetails
+		playerButton:PlayerDetailsChanged()
 
 		self.Target = nil
 
