@@ -6,6 +6,20 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.0.5.9",
+		General = "This version fixes errors and bugs",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed bug leading to allies not being updated correctly after teammates changed, mostly noticable in solo shuffle.",
+					"Fixed error/bug when using test or editmode in arena.",
+					"Fixed respawn timer not resetting."
+				}
+			},
+		}
+	},
+	{
 		Version = "11.0.5.8",
 		General = "This version mostly is just a minor update after release of 11.0.5.1. Please read its changelog to know more about that major update.",
 		Sections = {
