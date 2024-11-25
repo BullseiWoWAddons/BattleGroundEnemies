@@ -1214,7 +1214,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	--local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe)
 
 
-	--@class PlayerButton
+	---@class PlayerButton: Button
 	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe, 'SecureUnitButtonTemplate')
 	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, "playerButton", L.Button, playerButton)
 	playerButton:RegisterForClicks('AnyUp')
