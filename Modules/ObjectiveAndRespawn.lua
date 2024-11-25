@@ -116,6 +116,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		self.Icon:SetTexture()
 		if self.AuraText:GetFont() then self:HideText() end
 		self.ActiveRespawnTimer = false
+		self.Cooldown:Clear() -- this doesn't seem to trigger OnCooldownDone for some reason, i am sure it used to in the past
 	end
 
 	function frame:HideText()
@@ -130,6 +131,9 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		local conf = self.config
 		self.AuraText:ApplyFontStringSettings(conf.Text)
 		self.Cooldown:ApplyCooldownSettings(conf.Cooldown, true, {0, 0, 0, 0.75})
+		if not playerButton.isDead then
+			self:UnitRevived()
+		end
 	end
 	function frame:SearchForDebuffs(aura)
 		self:Debug("SearchForDebuffs")
@@ -208,10 +212,8 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		--self:Debug("UnitRevived")
 
 		--BattleGroundEnemies:Debug("UnitRevived")
-		if self.ActiveRespawnTimer then
-			self.Cooldown:Clear() -- this doesn't seem to trigger OnCooldownDone for some reason, i am sure it used to in the past
-			frame:Reset()
-		end
+		
+		frame:Reset()
 	end
 
 	function frame:UnitDied()
