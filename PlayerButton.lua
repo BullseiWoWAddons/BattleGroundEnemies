@@ -252,10 +252,11 @@ do
 
 	function buttonFunctions:UpdateCrowdControl(unitID)
 		local spellId, itemID, startTime, duration
-		if IsClassic or IsTBCC or IsWrath then
-			spellId, itemID, startTime, duration = C_PvP.GetArenaCrowdControlInfo(unitID)
+		local one, two, three, four =  C_PvP.GetArenaCrowdControlInfo(unitID)
+		if four then
+			spellId, itemID, startTime, duration = one, two, three, four
 		else
-			spellId, startTime, duration = C_PvP.GetArenaCrowdControlInfo(unitID)
+			spellId, startTime, duration = one, two, three
 		end
 
 		if spellId then
