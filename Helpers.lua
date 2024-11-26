@@ -5,6 +5,12 @@ local Data = select(2, ...)
 
 Data.Helpers =  {}
 
+local tAppendAll = tAppendAll or function (table, addedArray)
+	for i, element in ipairs(addedArray) do
+		tinsert(table, element);
+	end
+end
+
 
 
 --[[
@@ -121,4 +127,13 @@ function Data.Helpers.getContainerAnchorPointForConfig(growRightwards, growDownw
     local point = pointY .. pointX
 
     return point, offsetDirectionX, offsetDirectionY
+end
+
+function Data.Helpers.JoinArrays(...)
+	local result = {};
+    for i = 1, select("#", ...) do
+		local array = select(i, ...);
+		tAppendAll(result, array);
+	end
+    return result
 end

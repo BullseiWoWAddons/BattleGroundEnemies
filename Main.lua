@@ -1154,11 +1154,16 @@ BattleGroundEnemies.WrathEvents = {
 
 
 function BattleGroundEnemies:RegisterEvents()
-	local allEvents = Mixin({}, self.GeneralEvents, self.ClassicEvents, self.WrathEvents, self.RetailEvents)
+	self:Debug("RegisterEvents")
+	
+	local allEvents = Data.Helpers.JoinArrays(self.GeneralEvents, self.ClassicEvents, self.WrathEvents, self.RetailEvents)
+	
+	DevTools_Dump(allEvents)
 	if C_EventUtils and C_EventUtils.IsEventValid then
 		for i = 1, #allEvents do
-			if C_EventUtils.IsEventValid(allEvents[i]) then
-				self:RegisterEvent(allEvents[i])
+			local event = allEvents[i]
+			if C_EventUtils.IsEventValid(event) then
+				self:RegisterEvent(event)
 			end
 		end
 	else
@@ -1184,7 +1189,7 @@ function BattleGroundEnemies:RegisterEvents()
 end
 
 function BattleGroundEnemies:UnregisterEvents()
-	local allEvents = Mixin({}, self.GeneralEvents, self.ClassicEvents, self.WrathEvents, self.RetailEvents)
+	local allEvents = Data.Helpers.JoinArrays(self.GeneralEvents, self.ClassicEvents, self.WrathEvents, self.RetailEvents)
 	for i = 1, #allEvents do
 		if self:IsEventRegistered(allEvents[i]) then
 			self:UnregisterEvent(allEvents[i])
