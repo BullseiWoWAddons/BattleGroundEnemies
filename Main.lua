@@ -48,7 +48,6 @@ local InCombatLockdown = InCombatLockdown
 local IsInBrawl = C_PvP.IsInBrawl
 local IsInInstance = IsInInstance
 local IsInRaid = IsInRaid
-local IsRatedBattleground = C_PvP.IsRatedBattleground
 local RequestBattlefieldScoreData = RequestBattlefieldScoreData
 local RequestCrowdControlSpell = C_PvP.RequestCrowdControlSpell
 local SetBattlefieldScoreFaction = SetBattlefieldScoreFaction
@@ -67,7 +66,6 @@ local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 
 local HasSpeccs = not not GetSpecialization  -- Mists of Pandaria
-local HasRBG = not not IsRatedBattleground
 
 local MaxLevel = GetMaxPlayerLevel()
 
@@ -2327,7 +2325,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	BattleGroundEnemies:Debug("PLAYER_ENTERING_WORLD")
 	self:ResetCombatLogScanniningTables()
 	self:DisableTestOrEditmode()
-	
+
 
 	self.Enemies:RemoveAllPlayersFromAllSources()
 	self.Allies:RemoveAllPlayersFromSource(self.consts.PlayerSources.Scoreboard)
@@ -2344,22 +2342,28 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 			BattleGroundEnemies.states.isInArena = true
 		else
 			BattleGroundEnemies.states.isInBattleground = true
-			if HasRBG then
-				C_Timer.After(5,
-					function()        --Delay this check, since its happening sometimes that this data is not ready yet
-						self.states.isRatedBG = IsRatedBattleground()
-						self.states.isSoloRBG = C_PvP and C_PvP.IsSoloRBG and C_PvP.IsSoloRBG()
 
-						self:UPDATE_BATTLEFIELD_SCORE() --trigger the function again because since 10.0.0 UPDATE_BATTLEFIELD_SCORE doesnt fire reguralry anymore and RequestBattlefieldScore doesnt trigger the event
-					end)
-			end
+			C_Timer.After(5,
+				function()        --Delay this check, since its happening sometimes that this data is not ready yet
+					if C_PvP then
+						self.states.isRatedBG = C_PvP.IsRatedBattleground()
+						self.states.isSoloRBG = C_PvP.IsSoloRBG()
+					else
+						self.states.isRatedBG = IsRatedBattleground()
+						self.states.isSoloRBG = false
+					end
+
+					self:UPDATE_BATTLEFIELD_SCORE() --trigger the function again because since 10.0.0 UPDATE_BATTLEFIELD_SCORE doesnt fire reguralry anymore and RequestBattlefieldScore doesnt trigger the event
+				end)
 		end
 
 		self:Enable()
 		self.states.userIsAlive = true
 	else
-		BattleGroundEnemies.states.isInArena = false
-		BattleGroundEnemies.states.isInBattleground = false
+		self.states.isInArena = false
+		self.states.isInBattleground = false
+		self.states.isSoloRBG = false
+		self.states.isRatedBG = false
 		self:Disable()
 	end
 
