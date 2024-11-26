@@ -6,15 +6,6 @@ local Data = select(2, ...)
 ---@class BattleGroundEnemies
 local BattleGroundEnemies = BattleGroundEnemies
 local L = Data.L
-
-
-local IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-local IsTBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-local IsWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
-
-local SetRaidTargetIconTexture = SetRaidTargetIconTexture
-
 local GetTexCoordsForRoleSmallCircle = GetTexCoordsForRoleSmallCircle or function(role)
 	if ( role == "TANK" ) then
 		return 0, 19/64, 22/64, 41/64;
@@ -253,7 +244,7 @@ do
 	function buttonFunctions:UpdateCrowdControl(unitID)
 		local spellId, itemID, startTime, duration
 		local one, two, three, four =  C_PvP.GetArenaCrowdControlInfo(unitID)
-		if four then
+		if four then --classsic uses four returns, extra item id
 			spellId, itemID, startTime, duration = one, two, three, four
 		else
 			spellId, startTime, duration = one, two, three
