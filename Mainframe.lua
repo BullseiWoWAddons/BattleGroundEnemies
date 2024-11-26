@@ -219,7 +219,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:AddPlayerToSource(source, playerT)
-		self:Debug("AddPlayerToSource", self.PlayerType, playerT)
+		self:Debug("AddPlayerToSource", source, playerT)
 		if playerT.name then
 			if playerT.name == "" then return end
 		else
