@@ -1156,43 +1156,40 @@ BattleGroundEnemies.WrathEvents = {
 
 
 function BattleGroundEnemies:RegisterEvents()
-	for i = 1, #self.GeneralEvents do
-		self:RegisterEvent(self.GeneralEvents[i])
-	end
-	if IsClassic then
-		for i = 1, #self.ClassicEvents do
-			self:RegisterEvent(self.ClassicEvents[i])
+	local allEvents = Mixin({}, self.GeneralEvents, self.ClassicEvents, self.WrathEvents, self.RetailEvents)
+	if C_EventUtils and C_EventUtils.IsEventValid then
+		for i = 1, #allEvents do
+			if C_EventUtils.IsEventValid(allEvents[i]) then
+				self:RegisterEvent(allEvents[i])
+			end
 		end
-	end
-	if IsWrath then
-		for i = 1, #self.WrathEvents do
-			self:RegisterEvent(self.WrathEvents[i])
+	else
+		for i = 1, #self.GeneralEvents do
+			self:RegisterEvent(self.GeneralEvents[i])
 		end
-	end
-	if IsRetail then
-		for i = 1, #self.RetailEvents do
-			self:RegisterEvent(self.RetailEvents[i])
+		if IsClassic then
+			for i = 1, #self.ClassicEvents do
+				self:RegisterEvent(self.ClassicEvents[i])
+			end
+		end
+		if IsWrath then
+			for i = 1, #self.WrathEvents do
+				self:RegisterEvent(self.WrathEvents[i])
+			end
+		end
+		if IsRetail then
+			for i = 1, #self.RetailEvents do
+				self:RegisterEvent(self.RetailEvents[i])
+			end
 		end
 	end
 end
 
 function BattleGroundEnemies:UnregisterEvents()
-	for i = 1, #self.GeneralEvents do
-		self:UnregisterEvent(self.GeneralEvents[i])
-	end
-	if IsClassic then
-		for i = 1, #self.ClassicEvents do
-			self:UnregisterEvent(self.ClassicEvents[i])
-		end
-	end
-	if IsWrath then
-		for i = 1, #self.WrathEvents do
-			self:UnregisterEvent(self.WrathEvents[i])
-		end
-	end
-	if IsRetail then
-		for i = 1, #self.RetailEvents do
-			self:UnregisterEvent(self.RetailEvents[i])
+	local allEvents = Mixin({}, self.GeneralEvents, self.ClassicEvents, self.WrathEvents, self.RetailEvents)
+	for i = 1, #allEvents do
+		if self:IsEventRegistered(allEvents[i]) then
+			self:UnregisterEvent(allEvents[i])
 		end
 	end
 end
