@@ -1154,11 +1154,7 @@ BattleGroundEnemies.WrathEvents = {
 
 
 function BattleGroundEnemies:RegisterEvents()
-	self:Debug("RegisterEvents")
-	
 	local allEvents = Data.Helpers.JoinArrays(self.GeneralEvents, self.ClassicEvents, self.WrathEvents, self.RetailEvents)
-	
-	DevTools_Dump(allEvents)
 	if C_EventUtils and C_EventUtils.IsEventValid then
 		for i = 1, #allEvents do
 			local event = allEvents[i]
