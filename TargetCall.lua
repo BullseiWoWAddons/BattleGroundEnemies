@@ -15,7 +15,7 @@ local L = Data.L
 -- BattleGroundEnemies.TargetCaller = {}
 
 -- -- Create the dropdown, and configure its appearance
--- BattleGroundEnemies.TargetCall = CreateFrame("FRAME", "TargetCallerSelection", UIParent, "UIDropDownMenuTemplate")
+-- BattleGroundEnemies.TargetCall = CreateFrame("Frame", "TargetCallerSelection", UIParent, "UIDropDownMenuTemplate")
 -- BattleGroundEnemies.TargetCall:SetPoint("CENTER", 0, 200)
 -- UIDropDownMenu_SetWidth(BattleGroundEnemies.TargetCall, 200)
 -- UIDropDownMenu_SetText(BattleGroundEnemies.TargetCall, "target caller: " .. (BattleGroundEnemies.TargetCaller.PlayerName and BattleGroundEnemies:GetColoredName(BattleGroundEnemies.TargetCaller) or ""))
