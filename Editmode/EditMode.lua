@@ -21,7 +21,7 @@ BattleGroundEnemies.EditMode.EditModeManager:OnLoad()
 
 
 function BattleGroundEnemies.EditMode.EditModeManager:AddFrame(frame, systemName, systemNameLocalized, playerButton)
-	frame.Selection = CreateFrame("frame", nil, frame, "NineSliceCodeTemplate")
+	frame.Selection = CreateFrame("Frame", nil, frame, "NineSliceCodeTemplate")
 	frame.Selection:SetAllPoints()
 	frame.Selection.highlightTextureKit = "editmode-actionbar-highlight"
 	frame.Selection.selectedTextureKit = "editmode-actionbar-selected"
