@@ -226,7 +226,7 @@ function BattleGroundEnemies:UpdatePlayerData(sender, prefix, version, profileSh
 			end
 		end
 		if profileSharingEnabled then
-			profileSharingEnabled = profileSharingEnabled == "1" and true or false
+			profileSharingEnabled = profileSharingEnabled == "1"
 			playerData[sender].profileSharingEnabled = profileSharingEnabled
 		end
 	end

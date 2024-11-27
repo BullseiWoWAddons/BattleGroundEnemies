@@ -1220,7 +1220,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	playerButton.ButtonEvents = playerButton.ButtonEvents or {}
 
 	playerButton.PlayerType = mainframe.PlayerType
-	playerButton.PlayerIsEnemy = playerButton.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies and true or false
+	playerButton.PlayerIsEnemy = playerButton.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies
 	playerButton.MainFrame = mainframe
 
 	playerButton:SetScript("OnSizeChanged", function(self, width, height)
