@@ -63,69 +63,124 @@ local function FakeUnitAura(playerButton, index, filter)
 	return aura
 end
 
-local enemyButtonFunctions = {}
-do
-	--Remove from OnUpdate
-	function enemyButtonFunctions:DeleteActiveUnitID() --Delete from OnUpdate
-		--BattleGroundEnemies:Debug("DeleteActiveUnitID")
-		self.unitID = false
-		self.TargetUnitID = false
-		self:UpdateRange(false)
-
-		if self.Target then
-			self:IsNoLongerTarging(self.Target)
-		end
-
-		self.UnitIDs.HasAllyUnitID = false
-		self:WipeAllAuras()
-		self:DispatchEvent("UnitIdUpdate")
-	end
-
-	function enemyButtonFunctions:UpdateEnemyUnitID(key, value)
-		if self.PlayerDetails.isFakePlayer then return end
-		local unitIDs = self.UnitIDs
-		if key then
-			unitIDs[key] = value
-		end
-
-		local unitID = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
-		if unitID then
-			unitIDs.HasAllyUnitID = false
-			self:UpdateUnitID(unitID, unitID .. "target")
-		elseif unitIDs.Ally then
-			unitIDs.HasAllyUnitID = true
-			local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitIDs.Ally)
-			if playerButton and playerButton == self then
-				self:UpdateUnitID(unitIDs.Ally, unitIDs.Ally .. "target")
-				unitIDs.HasAllyUnitID = true
-			end
-		else
-			self:DeleteActiveUnitID()
-		end
-	end
+---@param aura AuraData
+local function addPriority(aura)
+	aura.Priority = BattleGroundEnemies:GetSpellPriority(aura.spellId)
+	return aura
 end
 
+--packaged the aura into the new UnitAura packaged format (structure UnitAuraInfo)
+local function UnitAuraToUnitAuraInfo(filter, name, icon, count, debuffType, duration, expirationTime, unitCaster,
+	canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura,
+	castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
+	local aura
+	if type(name) == "table" then --seems already packaged
+		aura = name
+	else
+		local isDebuff = filter == "HARMFUL" or "HELPFUL"
+		--package that stuff up
+		aura = {
+			applications = count,
+			auraInstanceID = nil,
+			canApplyAura = canApplyAura,
+			charges = nil,
+			dispelName = debuffType,
+			duration = duration,
+			expirationTime = expirationTime,
+			icon = icon,
+			isBossAura = isBossAura,
+			isFromPlayerOrPlayerPet = castByPlayer,
+			isHarmful = isDebuff,
+			isHelpful = not isDebuff,
+			isNameplateOnly = nil,
+			isRaid = nil,
+			isStealable = canStealOrPurge,
+			maxCharges = nil,
+			name = name,
+			nameplateShowAll = nameplateShowAll,
+			nameplateShowPersonal = nameplateShowPersonal,
+			points = { value1, value2, value3, value4 }, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.
+			sourceUnit = unitCaster,
+			spellId = spellId,
+			timeMod = timeMod,
+		}
+	end
+	aura = addPriority(aura)
+	return aura
+end
 
-local buttonFunctions = {}
-do
-	function buttonFunctions:GetOppositeMainFrame()
-        if self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies then
-            return BattleGroundEnemies.Allies
-        else
-            return BattleGroundEnemies.Enemies
-        end
+---@class UnitIds
+---@field Arena UnitToken?
+---@field Nameplate UnitToken?
+---@field Target UnitToken?
+---@field Focus UnitToken?
+---@field Ally UnitToken?
+---@field HasAllyUnitID boolean
+---@field TargetedByEnemy table<PlayerButton, boolean>
+
+function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
+	--local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe)
+
+
+	---@class PlayerButton: Button
+	---@field PlayerType string
+	---@field PlayerIsEnemy boolean
+	---@field MainFrame MainFrame
+	---@field ButtonEvents table<string, table>
+	---@field PlayerDetails PlayerDetails
+	---@field unitID UnitToken?
+	---@field TargetUnitID UnitToken?
+	---@field UnitIDs UnitIds
+	---@field unit UnitToken?
+	---@field status number
+	---@field position number?
+	---@field Name MyFontString
+	---@field Role Role
+	---@field Trinket Trinket
+	---@field MyTarget BackdropTemplate
+	---@field MyFocus BackdropTemplate
+	---@field healthBar StatusBar
+	---@field Power StatusBar
+	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe, 'SecureUnitButtonTemplate')
+	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, "playerButton", L.Button, playerButton)
+	playerButton:RegisterForClicks('AnyUp')
+	playerButton:SetPropagateMouseMotion(true) --to send the mouse wheel event to the other frame behind it (the mainframe)
+	playerButton:Hide()
+	-- setmetatable(playerButton, self)
+	-- self.__index = self
+
+
+	playerButton.ButtonEvents = playerButton.ButtonEvents or {}
+
+	playerButton.PlayerType = mainframe.PlayerType
+	playerButton.PlayerIsEnemy = playerButton.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies
+	playerButton.MainFrame = mainframe
+
+	playerButton:SetScript("OnSizeChanged", function(self, width, height)
+		--self.DRContainer:SetWidthOfAuraFrames(height)
+		self:DispatchEvent("PlayerButtonSizeChanged", width, height)
+	end)
+
+
+	function playerButton:GetOppositeMainFrame()
+		if self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies then
+			return BattleGroundEnemies.Allies
+		else
+			return BattleGroundEnemies.Enemies
+		end
 	end
 
-	function buttonFunctions:Debug(...)
+	function playerButton:Debug(...)
 		return BattleGroundEnemies:Debug(self.PlayerDetails and self.PlayerDetails.PlayerName, ...)
-	end 
+	end
 
-	function buttonFunctions:OnDragStart()
+	function playerButton:OnDragStart()
 		return BattleGroundEnemies.db.profile.Locked or self:GetParent():StartMoving()
 	end
 
-	function buttonFunctions:OnDragStop()
+	function playerButton:OnDragStop()
 		local parent = self:GetParent()
+		if not parent then return end
 		parent:StopMovingOrSizing()
 		if not InCombatLockdown() then
 			local scale = self:GetEffectiveScale()
@@ -147,7 +202,7 @@ do
 		end
 	end
 
-	function buttonFunctions:UpdateAll(temporaryUnitID)
+	function playerButton:UpdateAll(temporaryUnitID)
 		local updateStuffWithEvents = false --only update health, power, etc for players that dont get events for that or that dont have a unitID assigned
 		local unitID
 		local updateAuras = false
@@ -204,7 +259,7 @@ do
 		self:UpdateTarget()
 	end
 
-	function buttonFunctions:GetSpecData()
+	function playerButton:GetSpecData()
 		if not self.PlayerDetails then return end
 		if self.PlayerDetails.PlayerClass and self.PlayerDetails.PlayerSpecName then
 			local t = Data.Classes[self.PlayerDetails.PlayerClass]
@@ -215,12 +270,12 @@ do
 		end
 	end
 
-	function buttonFunctions:PlayerDetailsChanged()
+	function playerButton:PlayerDetailsChanged()
 		self:SetBindings()
 		self:ApplyModuleSettings()
 	end
 
-	function buttonFunctions:UpdateRaidTargetIcon(forceIndex)
+	function playerButton:UpdateRaidTargetIcon(forceIndex)
 		local unit = self:GetUnitID()
 		local newIndex = forceIndex --used for testmode, otherwise it will just be nil and overwritten when one actually exists
 		if unit then
@@ -241,7 +296,7 @@ do
 		self:DispatchEvent("UpdateRaidTargetIcon", self.RaidTargetIconIndex)
 	end
 
-	function buttonFunctions:UpdateCrowdControl(unitID)
+	function playerButton:UpdateCrowdControl(unitID)
 		local spellId, itemID, startTime, duration
 		local one, two, three, four =  C_PvP.GetArenaCrowdControlInfo(unitID)
 		if four then --classsic uses four returns, extra item id
@@ -256,7 +311,7 @@ do
 		end
 	end
 
-	function buttonFunctions:UpdateUnitID(unitID, targetUnitID)
+	function playerButton:UpdateUnitID(unitID, targetUnitID)
 		if not UnitExists(unitID) then return end
 		self.unitID = unitID
 		self.TargetUnitID = targetUnitID
@@ -267,7 +322,7 @@ do
 		self:DispatchEvent("UnitIdUpdate", unitID)
 	end
 
-	function buttonFunctions:SetModuleConfig(moduleName)
+	function playerButton:SetModuleConfig(moduleName)
 		local moduleFrameOnButton = self[moduleName]
 		local moduleConfigOnButton = {}
 
@@ -288,24 +343,24 @@ do
 		moduleFrameOnButton.config = moduleConfigOnButton
 	end
 
-	function buttonFunctions:SetAllModuleConfigs()
+	function playerButton:SetAllModuleConfigs()
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			self:SetModuleConfig(moduleName)
 		end
 	end
 
-	function buttonFunctions:CallExistingFuncOnAllButtonModuleFrames(funcName, ...)
+	function playerButton:CallExistingFuncOnAllButtonModuleFrames(funcName, ...)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			local moduleFrameOnButton = self[moduleName]
 			if moduleFrameOnButton then
 				if moduleFrameOnButton and type(moduleFrameOnButton[funcName]) == "function" then
 					moduleFrameOnButton[funcName](moduleFrameOnButton, ...)
 				end
- 			end
+				end
 		end
 	end
 
-	function buttonFunctions:CallExistingFuncOnAllEnabledButtonModuleFrames(funcName, ...)
+	function playerButton:CallExistingFuncOnAllEnabledButtonModuleFrames(funcName, ...)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			local moduleFrameOnButton = self[moduleName]
 			if moduleFrameOnButton then
@@ -314,11 +369,11 @@ do
 						moduleFrameOnButton[funcName](moduleFrameOnButton, ...)
 					end
 				end
- 			end
+				end
 		end
 	end
 
-	function buttonFunctions:CallFuncOnAllButtonModuleFrames(func)
+	function playerButton:CallFuncOnAllButtonModuleFrames(func)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			local moduleFrameOnButton = self[moduleName]
 			if moduleFrameOnButton then
@@ -327,7 +382,7 @@ do
 		end
 	end
 
-	function buttonFunctions:CallFuncOnAllEnabledButtonModuleFrames(func)
+	function playerButton:CallFuncOnAllEnabledButtonModuleFrames(func)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			local moduleFrameOnButton = self[moduleName]
 			if moduleFrameOnButton then
@@ -338,7 +393,47 @@ do
 		end
 	end
 
-	function buttonFunctions:SetModulePositions()
+	function playerButton:DeleteActiveUnitID() --Delete from OnUpdate
+		if not self.PlayerIsEnemy then return end
+		--BattleGroundEnemies:Debug("DeleteActiveUnitID")
+		self.unitID = nil
+		self.TargetUnitID = nil
+		self:UpdateRange(false)
+
+		if self.Target then
+			self:IsNoLongerTarging(self.Target)
+		end
+
+		self.UnitIDs.HasAllyUnitID = false
+		self:WipeAllAuras()
+		self:DispatchEvent("UnitIdUpdate")
+	end
+
+	function playerButton:UpdateEnemyUnitID(key, value)
+		if not self.PlayerIsEnemy then return end
+		if self.PlayerDetails.isFakePlayer then return end
+		local unitIDs = self.UnitIDs
+		if key then
+			unitIDs[key] = value
+		end
+
+		local unitID = unitIDs.Arena or unitIDs.Nameplate or unitIDs.Target or unitIDs.Focus
+		if unitID then
+			unitIDs.HasAllyUnitID = false
+			self:UpdateUnitID(unitID, unitID .. "target")
+		elseif unitIDs.Ally then
+			unitIDs.HasAllyUnitID = true
+			local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitIDs.Ally)
+			if playerButton and playerButton == self then
+				self:UpdateUnitID(unitIDs.Ally, unitIDs.Ally .. "target")
+				unitIDs.HasAllyUnitID = true
+			end
+		else
+			self:DeleteActiveUnitID()
+		end
+	end
+
+	function playerButton:SetModulePositions()
 		if not self:GetRect() then return end --the position of the button is not set yet
 		local i = 1
 		repeat                          -- we basically run this roop to get out of the anchring hell (making sure all the frames that a module is depending on is set)
@@ -424,7 +519,7 @@ do
 		self.MyFocus:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT")
 	end
 
-	function buttonFunctions:ApplyModuleSettings()
+	function playerButton:ApplyModuleSettings()
 		wipe(self.ButtonEvents)
 		for moduleName, moduleFrame in pairs(BattleGroundEnemies.ButtonModules) do
 			local moduleFrameOnButton = self[moduleName]
@@ -451,7 +546,7 @@ do
 		end
 	end
 
-	function buttonFunctions:SetConfigShortCuts()
+	function playerButton:SetConfigShortCuts()
 		self.config = BattleGroundEnemies.db.profile[self.PlayerType]
 		self.playerCountConfig = BattleGroundEnemies[self.PlayerType].playerCountConfig
 		if self.playerCountConfig then
@@ -462,7 +557,7 @@ do
 		self:SetAllModuleConfigs()
 	end
 
-	function buttonFunctions:GetOptionsPath()
+	function playerButton:GetOptionsPath()
 		local t = CopyTable(self.basePath)
 		table.insert(t, "ButtonSettings")
 		return t
@@ -470,7 +565,7 @@ do
 
 
 
-	function buttonFunctions:ApplyButtonSettings()
+	function playerButton:ApplyButtonSettings()
 		self:SetConfigShortCuts()
 		local conf = self.playerCountConfig
 		if not conf then return end
@@ -512,7 +607,7 @@ do
 			[3] = "MiddleButton"
 		}
 
-		function buttonFunctions:SetBindings()
+		function playerButton:SetBindings()
 			self:Debug("SetBindings")
 			if not self.config then return end
 			local setupUsualAttributes = true
@@ -604,7 +699,7 @@ do
 		end
 	end
 
-	function buttonFunctions:PlayerIsDead()
+	function playerButton:PlayerIsDead()
 		if not self.isDead then
 			if self.PlayerDetails.isFakePlayer then
 				if BattleGroundEnemies.Testmode.FakePlayerAuras[self] then
@@ -621,7 +716,7 @@ do
 		end
 	end
 
-	function buttonFunctions:PlayerIsAlive()
+	function playerButton:PlayerIsAlive()
 		if self.isDead then
 			self:DispatchEvent("UnitRevived")
 			self.isDead = false
@@ -631,7 +726,7 @@ do
 	local maxHealths = {} --key = playerbutton, value = {}
 	local deadPlayers = {}
 
-	function buttonFunctions:FakeUnitHealth()
+	function playerButton:FakeUnitHealth()
 		local now = GetTime()
 		if deadPlayers[self] then
 			--this player is dead, check if we can revive him
@@ -652,7 +747,7 @@ do
 		end
 	end
 
-	function buttonFunctions:FakeUnitHealthMax()
+	function playerButton:FakeUnitHealthMax()
 		if not maxHealths[self] then
 			local myMaxHealth = UnitHealthMax("player")
 			local playerMaxHealthDifference = math_random(-15, 15) -- the player has the same health as me +/- 15%
@@ -662,7 +757,7 @@ do
 		return maxHealths[self]
 	end
 
-	function buttonFunctions:UpdateHealth(unitID, health, maxHealth)
+	function playerButton:UpdateHealth(unitID, health, maxHealth)
 		self:DispatchEvent("UpdateHealth", unitID, health, maxHealth)
 		if unitID and UnitIsDeadOrGhost(unitID) or health == 0 then
 			self:PlayerIsDead()
@@ -671,7 +766,7 @@ do
 		end
 	end
 
-	function buttonFunctions:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
+	function playerButton:UNIT_HEALTH(unitID) --gets health of nameplates, player, target, focus, raid1 to raid40, partymember
 		if not self.isShown then return end
 		local health
 		local maxHealth
@@ -686,7 +781,7 @@ do
 		self:UpdateHealth(unitID, health, maxHealth)
 	end
 
-	function buttonFunctions:ApplyRangeIndicatorSettings()
+	function playerButton:ApplyRangeIndicatorSettings()
 		--set everything to default
 		for frameName, enableRange in pairs(self.config.RangeIndicator_Frames) do
 			if self[frameName] then
@@ -700,19 +795,19 @@ do
 		self:UpdateRange(self.wasInRange, true)
 	end
 
-	function buttonFunctions:ArenaOpponentShown(unitID)
+	function playerButton:ArenaOpponentShown(unitID)
 		if unitID then
 			BattleGroundEnemies.ArenaIDToPlayerButton[unitID] = self
-			if self.PlayerIsEnemy then
-				self:UpdateEnemyUnitID("Arena", unitID)
-			end
+
+			self:UpdateEnemyUnitID("Arena", unitID)
+
 			RequestCrowdControlSpell(unitID)
 		end
 		self:DispatchEvent("ArenaOpponentShown")
 	end
 
 	-- Shows/Hides targeting indicators for a button
-	function buttonFunctions:UpdateTargetIndicators()
+	function playerButton:UpdateTargetIndicators()
 		self:DispatchEvent("UpdateTargetIndicators")
 		local isAlly = false
 		local isPlayer = false
@@ -757,7 +852,7 @@ do
 		end
 	end
 
-	function buttonFunctions:UpdateRange(inRange, forceUpdate)
+	function playerButton:UpdateRange(inRange, forceUpdate)
 		if not self.config then return end
 		--BattleGroundEnemies:Information("UpdateRange", inRange, self.PlayerName, self.config.RangeIndicator_Enabled, self.config.RangeIndicator_Alpha)
 
@@ -778,14 +873,14 @@ do
 		end
 	end
 
-	function buttonFunctions:UpdateRangeViaItem(unitID)
+	function playerButton:UpdateRangeViaItem(unitID)
 		--BattleGroundEnemies:Information("UpdateRange", inRange, self.PlayerName, self.config.RangeIndicator_Enabled, self.config.RangeIndicator_Alpha)
 
 		if not self.config.RangeIndicator_Enabled then return end
 		self:UpdateRange(IsItemInRange(self.config.RangeIndicator_Range, unitID))
 	end
 
-	function buttonFunctions:UpdateRangeViaLibRangeCheck(unitID)
+	function playerButton:UpdateRangeViaLibRangeCheck(unitID)
 		if not self.config.RangeIndicator_Enabled then return end
 		local checker, range = LRC[self.PlayerIsEnemy and "GetHarmMaxChecker"  or "GetFriendMaxChecker"](LRC, self.config.RangeIndicator_Range, true)
 		if not checker then return self:UpdateRange(true) end
@@ -794,17 +889,17 @@ do
 
 
 
-	function buttonFunctions:GetUnitID()
+	function playerButton:GetUnitID()
 		return self.unitID
 	end
 
-	function buttonFunctions:AuraRemoved(spellId, spellName)
+	function playerButton:AuraRemoved(spellId, spellName)
 		if not self.isShown then return end
 		self:DispatchEvent("AuraRemoved", spellId, spellName)
 		--BattleGroundEnemies:Debug(operation, spellId)
 	end
 
-	function buttonFunctions:ShouldSkipAuraUpdate(isFullUpdate, updatedAuraInfos, isRelevantFunc, unitID)
+	function playerButton:ShouldSkipAuraUpdate(isFullUpdate, updatedAuraInfos, isRelevantFunc, unitID)
 		if isFullUpdate then return false end
 		-- Early out if the update cannot affect the frame
 
@@ -823,7 +918,7 @@ do
 		return skipUpdate
 	end
 
-	function buttonFunctions:ShouldDisplayAura(unitID, filter, aura)
+	function playerButton:ShouldDisplayAura(unitID, filter, aura)
 		if self:DispatchUntilTrue("CareAboutThisAura", unitID, filter, aura) then return true end
 		return false --nobody cares about this aura
 	end
@@ -851,52 +946,11 @@ do
 
 	]]
 
-	local function addPriority(aura)
-		aura.Priority = BattleGroundEnemies:GetSpellPriority(aura.spellId)
-		return aura
-	end
 
-	--packaged the aura into the new UnitAura packaged format (structure UnitAuraInfo)
-	local function UnitAuraToUnitAuraInfo(filter, name, icon, count, debuffType, duration, expirationTime, unitCaster,
-										  canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossAura,
-										  castByPlayer, nameplateShowAll, timeMod, value1, value2, value3, value4)
-		local aura
-		if type(name) == "table" then --seems already packaged
-			aura = name
-		else
-			local isDebuff = filter == "HARMFUL" or "HELPFUL"
-			--package that stuff up
-			aura = {
-				applications = count,
-				auraInstanceID = nil,
-				canApplyAura = canApplyAura,
-				charges = nil,
-				dispelName = debuffType,
-				duration = duration,
-				expirationTime = expirationTime,
-				icon = icon,
-				isBossAura = isBossAura,
-				isFromPlayerOrPlayerPet = castByPlayer,
-				isHarmful = isDebuff,
-				isHelpful = not isDebuff,
-				isNameplateOnly = nil,
-				isRaid = nil,
-				isStealable = canStealOrPurge,
-				maxCharges = nil,
-				name = name,
-				nameplateShowAll = nameplateShowAll,
-				nameplateShowPersonal = nameplateShowPersonal,
-				points = { value1, value2, value3, value4 }, --	array	Variable returns - Some auras return additional values that typically correspond to something shown in the tooltip, such as the remaining strength of an absorption effect.
-				sourceUnit = unitCaster,
-				spellId = spellId,
-				timeMod = timeMod,
-			}
-		end
-		aura = addPriority(aura)
-		return aura
-	end
 
-	function buttonFunctions:WipeAllAuras()
+
+
+	function playerButton:WipeAllAuras()
 		self.Auras = self.Auras or {}
 		for i = 1, #auraFilters do
 			local filter = auraFilters[i]
@@ -905,7 +959,7 @@ do
 		self:SendAllAurasToModules()
 	end
 
-	function buttonFunctions:SendAllAurasToModules(unitID)
+	function playerButton:SendAllAurasToModules(unitID)
 		for i = 1, #auraFilters do
 			local filter = auraFilters[i]
 			self:DispatchEvent("BeforeFullAuraUpdate", filter)
@@ -919,7 +973,7 @@ do
 	---comment
 	---@param unitID UnitToken
 	---@param second UnitAuraUpdateInfo?
-	function buttonFunctions:UNIT_AURA(unitID, second)
+	function playerButton:UNIT_AURA(unitID, second)
 		if not self.isShown then return end
 		local now = GetTime()
 		if self.lastAuraUpdate and self.lastAuraUpdate == now then  --this event will fire for the same player multiple times if lets say he is shown on nameplate and on target frame
@@ -1086,30 +1140,30 @@ do
 		self.lastAuraUpdate = now
 	end
 
-	buttonFunctions.UNIT_HEALTH_FREQUENT = buttonFunctions.UNIT_HEALTH --TBC compability, IsTBCC
-	buttonFunctions.UNIT_MAXHEALTH = buttonFunctions.UNIT_HEALTH
-	buttonFunctions.UNIT_HEAL_PREDICTION = buttonFunctions.UNIT_HEALTH
-	buttonFunctions.UNIT_ABSORB_AMOUNT_CHANGED = buttonFunctions.UNIT_HEALTH
-	buttonFunctions.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = buttonFunctions.UNIT_HEALTH
+	playerButton.UNIT_HEALTH_FREQUENT = playerButton.UNIT_HEALTH --TBC compability, IsTBCC
+	playerButton.UNIT_MAXHEALTH = playerButton.UNIT_HEALTH
+	playerButton.UNIT_HEAL_PREDICTION = playerButton.UNIT_HEALTH
+	playerButton.UNIT_ABSORB_AMOUNT_CHANGED = playerButton.UNIT_HEALTH
+	playerButton.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = playerButton.UNIT_HEALTH
 
 
-	function buttonFunctions:UNIT_POWER_FREQUENT(unitID, powerToken) --gets power of nameplates, player, target, focus, raid1 to raid40, partymember
+	function playerButton:UNIT_POWER_FREQUENT(unitID, powerToken) --gets power of nameplates, player, target, focus, raid1 to raid40, partymember
 		if not self.isShown then return end
 		self:DispatchEvent("UpdatePower", unitID, powerToken)
 	end
 
 	-- returns true if the other button is a enemy from the point of view of the button. True if button is ally and other button is enemy, and vice versa
-	function buttonFunctions:IsEnemyToMe(playerButton)
+	function playerButton:IsEnemyToMe(playerButton)
 		return self.PlayerIsEnemy ~= playerButton.PlayerIsEnemy
 	end
 
-	function buttonFunctions:UpdateTargetedByEnemy(playerButton, targeted)
+	function playerButton:UpdateTargetedByEnemy(playerButton, targeted)
 		local unitIDs = self.UnitIDs
 		unitIDs.TargetedByEnemy[playerButton] = targeted
 		self:UpdateTargetIndicators()
 
 		if self.PlayerIsEnemy then
-			local allyUnitID = false
+			local allyUnitID
 
 			for allyBtn in pairs(unitIDs.TargetedByEnemy) do
 				if allyBtn ~= BattleGroundEnemies.UserButton then
@@ -1121,7 +1175,7 @@ do
 		end
 	end
 
-	function buttonFunctions:IsNowTargeting(playerButton)
+	function playerButton:IsNowTargeting(playerButton)
 		--BattleGroundEnemies:Debug("IsNowTargeting", self.PlayerName, self.unitID, playerButton.PlayerName)
 		self.Target = playerButton
 
@@ -1130,7 +1184,7 @@ do
 		playerButton:UpdateTargetedByEnemy(self, true)
 	end
 
-	function buttonFunctions:IsNoLongerTarging(playerButton)
+	function playerButton:IsNoLongerTarging(playerButton)
 		--BattleGroundEnemies:Debug("IsNoLongerTarging", self.PlayerName, self.unitID, playerButton.PlayerName)
 		self.Target = nil
 
@@ -1139,7 +1193,7 @@ do
 		playerButton:UpdateTargetedByEnemy(self, nil)
 	end
 
-	function buttonFunctions:UpdateTarget()
+	function playerButton:UpdateTarget()
 		--BattleGroundEnemies:Debug("UpdateTarget", self.PlayerName, self.unitID)
 
 		local oldTargetPlayerButton = self.Target
@@ -1165,7 +1219,7 @@ do
 		end
 	end
 
-	function buttonFunctions:DispatchEvent(event, ...)
+	function playerButton:DispatchEvent(event, ...)
 		if not self.ButtonEvents then return end
 
 		local moduleFrames = self.ButtonEvents[event]
@@ -1183,7 +1237,7 @@ do
 	end
 
 	-- used for the AuraInfo (third return of UNIT_AURA) of UNIT_AURA, we dispatch until one of the consumers (modules) returns true, then we proceed with aura scanning
-	function buttonFunctions:DispatchUntilTrue(event, ...)
+	function playerButton:DispatchUntilTrue(event, ...)
 		local moduleFrames = self.ButtonEvents[event]
 		if not moduleFrames then return end
 
@@ -1198,41 +1252,10 @@ do
 		end
 	end
 
-	function buttonFunctions:GetAnchor(relativeFrame)
+	function playerButton:GetAnchor(relativeFrame)
 		return relativeFrame == "Button" and self or self[relativeFrame]
 	end
-end
 
-function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
-	--local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe)
-
-
-	---@class PlayerButton: Button
-	local playerButton = CreateFrame('Button', "BattleGroundEnemies" .. mainframe.PlayerType .. "frame" ..num, mainframe, 'SecureUnitButtonTemplate')
-	BattleGroundEnemies.EditMode.EditModeManager:AddFrame(playerButton, "playerButton", L.Button, playerButton)
-	playerButton:RegisterForClicks('AnyUp')
-	playerButton:SetPropagateMouseMotion(true) --to send the mouse wheel event to the other frame behind it (the mainframe)
-	playerButton:Hide()
-	-- setmetatable(playerButton, self)
-	-- self.__index = self
-
-
-	playerButton.ButtonEvents = playerButton.ButtonEvents or {}
-
-	playerButton.PlayerType = mainframe.PlayerType
-	playerButton.PlayerIsEnemy = playerButton.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies
-	playerButton.MainFrame = mainframe
-
-	playerButton:SetScript("OnSizeChanged", function(self, width, height)
-		--self.DRContainer:SetWidthOfAuraFrames(height)
-		self:DispatchEvent("PlayerButtonSizeChanged", width, height)
-	end)
-
-	Mixin(playerButton, buttonFunctions)
-
-	if playerButton.PlayerIsEnemy then
-		Mixin(playerButton, enemyButtonFunctions)
-	end
 
 	playerButton.Counter = {}
 	playerButton:SetScript("OnEvent", function(self, event, ...)

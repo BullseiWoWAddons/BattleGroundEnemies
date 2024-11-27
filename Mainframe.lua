@@ -667,16 +667,14 @@ local function CreateMainFrame(playerType)
 			if playerButton.UnitIDs then
 				wipe(playerButton.UnitIDs.TargetedByEnemy)
 				playerButton:UpdateTargetIndicators()
-				if playerButton.PlayerIsEnemy then
-					playerButton:DeleteActiveUnitID()
-				end
+				playerButton:DeleteActiveUnitID()
 			end
 		else --no recycleable buttons remaining => create a new one
 			self.buttonCounter = (self.buttonCounter or 0) + 1
 			playerButton = BattleGroundEnemies:CreatePlayerButton(self, self.buttonCounter)
 		end
 
-		playerButton.UnitIDs = { TargetedByEnemy = {} }
+		playerButton.UnitIDs = { TargetedByEnemy = {}, HasAllyUnitID = false}
 		playerButton.unitID = nil
 		playerButton.unit = nil
 
@@ -867,7 +865,7 @@ local function CreateMainFrame(playerType)
 		for i = 1, playerCount do
 			local playerButton = orderedPlayers[i]
 			if playerButton then --should never be nil
-				playerButton.Position = i
+				playerButton.position = i
 				if column > 1 then
 					offsetX = (column - 1) * (barWidth + horizontalSpacing) * offsetDirectionX
 				else
@@ -973,7 +971,7 @@ local function CreateMainFrame(playerType)
 				playerButton:PlayerDetailsChanged()
 			end
 
-			playerButton.Status = 1 --1 means found, already existing
+			playerButton.status = 1 --1 means found, already existing
 			playerDetails = playerButton.PlayerDetails
 		else
 			table.insert(self.NewPlayersDetails, playerDetails)
@@ -984,14 +982,14 @@ local function CreateMainFrame(playerType)
 		local inCombat = InCombatLockdown()
 		local existingPlayersCount = 0
 		for playerName, playerButton in pairs(self.Players) do
-			if playerButton.Status == 2 then --no longer existing
+			if playerButton.status == 2 then --no longer existing
 				if inCombat then
 					return BattleGroundEnemies:QueueForUpdateAfterCombat(self, "AfterPlayerSourceUpdate")
 				else
 					self:RemovePlayer(playerButton)
 				end
 			else -- == 1 -- set to 2 for the next comparison
-				playerButton.Status = 2
+				playerButton.status = 2
 				existingPlayersCount = existingPlayersCount + 1
 			end
 		end
@@ -1002,7 +1000,7 @@ local function CreateMainFrame(playerType)
 				return BattleGroundEnemies:QueueForUpdateAfterCombat(self, "AfterPlayerSourceUpdate")
 			else
 				local playerButton = self:SetupButtonForNewPlayer(playerDetails)
-				playerButton.Status = 2
+				playerButton.status = 2
 			end
 		end
 		self:SortPlayers(false)

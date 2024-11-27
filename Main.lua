@@ -1567,9 +1567,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			self.ArenaIDToPlayerButton[unitID] = nil
 			playerButton.ObjectiveAndRespawn:Reset()
 
-			if playerButton.PlayerIsEnemy then -- then this button is an enemy button
-				playerButton:UpdateEnemyUnitID("Arena", false)
-			end
+			playerButton:UpdateEnemyUnitID("Arena", false)
 			playerButton:DispatchEvent("ArenaOpponentHidden")
 		end
 	end
@@ -1790,9 +1788,9 @@ end
 function BattleGroundEnemies:HandleTargetChanged(newTarget)
 	BattleGroundEnemies:Debug("playerButton target", GetUnitName("target", true))
 	if BattleGroundEnemies.currentTarget then
-		if BattleGroundEnemies.currentTarget.PlayerIsEnemy then
-			BattleGroundEnemies.currentTarget:UpdateEnemyUnitID("Target", false)
-		end
+		
+		BattleGroundEnemies.currentTarget:UpdateEnemyUnitID("Target", false)
+		
 		if self.UserButton then
 			self.UserButton:IsNoLongerTarging(BattleGroundEnemies.currentTarget)
 		end
@@ -1801,9 +1799,9 @@ function BattleGroundEnemies:HandleTargetChanged(newTarget)
 
 	if newTarget then --i target an existing player
 		if self.UserButton then
-			if newTarget.PlayerIsEnemy then
-				newTarget:UpdateEnemyUnitID("Target", "target")
-			end
+			
+			newTarget:UpdateEnemyUnitID("Target", "target")
+			
 			self.UserButton:IsNowTargeting(newTarget)
 		end
 		newTarget.MyTarget:Show()
@@ -1826,15 +1824,15 @@ function BattleGroundEnemies:HandleFocusChanged(newFocus)
 
 	--BattleGroundEnemies:Debug("playerButton focus", playerButton, GetUnitName("focus", true))
 	if BattleGroundEnemies.currentFocus then
-		if BattleGroundEnemies.currentFocus.PlayerIsEnemy then
-			BattleGroundEnemies.currentFocus:UpdateEnemyUnitID("Focus", false)
-		end
+		
+		BattleGroundEnemies.currentFocus:UpdateEnemyUnitID("Focus", false)
+		
 		BattleGroundEnemies.currentFocus.MyFocus:Hide()
 	end
 	if newFocus then
-		if newFocus.PlayerIsEnemy then
-			newFocus:UpdateEnemyUnitID("Focus", "focus")
-		end
+		
+		newFocus:UpdateEnemyUnitID("Focus", "focus")
+		
 		newFocus.MyFocus:Show()
 		BattleGroundEnemies.currentFocus = newFocus
 	else
