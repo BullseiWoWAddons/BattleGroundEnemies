@@ -325,6 +325,7 @@ Data.defaultSettings = {
 	profile = {
 		Locked = false,
 		Debug = false,
+		DebugBlizzEvents = false,
 		DebugToSV = false,
 		DebugToSV_ResetOnPlayerLogin = true,
 		DebugToChat = false,

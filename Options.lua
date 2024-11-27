@@ -2107,10 +2107,15 @@ function BattleGroundEnemies:SetupOptions()
 						name = "Enable Debug",
 						order = 1,
 					},
+					DebugBlizzEvents = {
+						type = "toggle",
+						name = "Debug Blizz Events",
+						order = 2,
+					},
 					SvDebugging = {
 						type = "group",
 						name = "Saved Variables",
-						order = 2,
+						order = 4,
 						inline = true,
 						args = {
 							DebugToSV = {
@@ -2137,7 +2142,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "group",
 						name = "Chat",
 						inline = true,
-						order = 3,
+						order = 5,
 						args = {
 							DebugToChat_AddTimestamp = {
 								type = "toggle",

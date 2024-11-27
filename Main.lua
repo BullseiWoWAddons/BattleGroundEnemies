@@ -619,14 +619,6 @@ function BattleGroundEnemies:NewButtonModule(moduleSetupTable)
 		copyModuleDefaultsIntoDefaults(Data.defaultSettings.profile, moduleName, moduleSetupTable.generalDefaults)
 	end
 
-
-
-	--not used
-	-- moduleFrame:SetScript("OnEvent", function(self, event, ...)
-	-- 	BattleGroundEnemies:Debug("BattleGroundEnemies module event", moduleName, event, ...)
-	-- 	self[event](self, ...)
-	-- end)
-
 	self.ButtonModules[moduleName] = moduleFrame
 	return moduleFrame
 end
@@ -646,7 +638,9 @@ end
 
 BattleGroundEnemies:SetScript("OnEvent", function(self, event, ...)
 	--self.Counter[event] = (self.Counter[event] or 0) + 1
-	--BattleGroundEnemies:Debug("BattleGroundEnemies OnEvent", event, ...)
+	if self.db and self.db.profile and self.db.profile.DebugBlizzEvents then
+		self:Debug("BattleGroundEnemies OnEvent", event, ...)
+	end
 	self[event](self, ...)
 end)
 BattleGroundEnemies:Hide()

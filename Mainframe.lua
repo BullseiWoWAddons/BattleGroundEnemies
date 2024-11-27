@@ -186,8 +186,9 @@ local function CreateMainFrame(playerType)
 
     mainframe:Hide()
     mainframe:SetScript("OnEvent", function(self, event, ...)
-        --self.Counter[event] = (self.Counter[event] or 0) + 1
-        --self:Debug("Enemies OnEvent", event, ...)
+		if self.db and self.db.profile and self.db.profile.DebugBlizzEvents then
+			self:Debug("OnEvent", event, ...)
+		end
         self[event](self, ...)
     end)
 

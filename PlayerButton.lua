@@ -117,7 +117,7 @@ do
 	end
 
 	function buttonFunctions:Debug(...)
-		return BattleGroundEnemies:Debug(self.PlayerDetails.PlayerName, ...)
+		return BattleGroundEnemies:Debug(self.PlayerDetails and self.PlayerDetails.PlayerName, ...)
 	end 
 
 	function buttonFunctions:OnDragStart()
@@ -1237,7 +1237,9 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	playerButton.Counter = {}
 	playerButton:SetScript("OnEvent", function(self, event, ...)
 		--self.Counter[event] = (self.Counter[event] or 0) + 1
-
+		if self.db and self.db.profile and self.db.profile.DebugBlizzEvents then
+			self:Debug("OnEvent", event, ...)
+		end
 		self[event](self, ...)
 	end)
 	playerButton:SetScript("OnShow", function()
