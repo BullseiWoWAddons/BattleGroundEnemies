@@ -159,7 +159,7 @@ BattleGroundEnemies.states = {
 	WOW_PROJECT_ID = WOW_PROJECT_ID,
 	isInArena = false,
 	isInBattleground = false,
-	userIsAlive = false,
+	userIsAlive = not UnitIsDeadOrGhost("player"),
 	currentMapID = false,
 	isRatedBG = false,
 	isSoloRBG = false,
@@ -1123,8 +1123,6 @@ BattleGroundEnemies.GeneralEvents = {
 	"ARENA_COOLDOWNS_UPDATE",        --fires when a arenaX enemy used a trinket or racial to break cc, C_PvP.GetArenaCrowdControlInfo(unitID) shoudl be called afterwards to get used CCs
 	"RAID_TARGET_UPDATE",
 	"UNIT_TARGET",
-	"PLAYER_ALIVE",
-	"PLAYER_UNGHOST",
 	"UNIT_AURA",
 	"UNIT_HEALTH",
 	"UNIT_MAXHEALTH",
@@ -1363,7 +1361,6 @@ do
 			GUID = UnitGUID("player")
 		}
 
-
 		self.db = LibStub("AceDB-3.0"):New("BattleGroundEnemiesDB", Data.defaultSettings, true)
 
 		self.db.RegisterCallback(self, "OnProfileChanged", "ProfileChanged")
@@ -1396,9 +1393,14 @@ do
 
 
 
-		self:RegisterEvent("GROUP_ROSTER_UPDATE")
+		self:RegisterEvent("GROUP_ROSTER_UPDATE") --Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
 		self:RegisterEvent("PLAYER_ENTERING_WORLD") -- fired on reload UI and on every loading screen (for switching zones, intances etc)
-		self:RegisterEvent("PARTY_LEADER_CHANGED")
+		self:RegisterEvent("PARTY_LEADER_CHANGED") --Fired when the player's leadership changed.
+		self:RegisterEvent("PLAYER_ALIVE") --Fired when the player releases from death to a graveyard; or accepts a resurrect before releasing their spirit. Does not fire when the player is alive after being a ghost. PLAYER_UNGHOST is triggered in that case.
+		self:RegisterEvent("PLAYER_UNGHOST") --Fired when the player is alive after being a ghost.
+		self:RegisterEvent("PLAYER_DEAD") --Fired when the player has died.
+
+
 
 		self:SetupOptions()
 
@@ -1554,7 +1556,6 @@ end
 
 --fires when a arena enemy appears and a frame is ready to be shown
 function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
-	BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 	--unitEvent can be: "seen", "unseen", "destroyed", "cleared"
 	self:Debug("ARENA_OPPONENT_UPDATE", unitID, unitEvent, UnitName(unitID))
 
@@ -1956,6 +1957,10 @@ function BattleGroundEnemies:PLAYER_REGEN_ENABLED()
 	wipe(self.PendingUpdates)
 end
 
+function BattleGroundEnemies:PlayerDead()
+	self.states.userIsAlive = false
+end
+
 function BattleGroundEnemies:PlayerAlive()
 	--recheck the targets of groupmembers
 	for allyName, allyButton in pairs(self.Allies.Players) do
@@ -1966,10 +1971,14 @@ end
 
 function BattleGroundEnemies:PLAYER_ALIVE()
 	if UnitIsGhost("player") then --Releases his ghost to a graveyard.
-		self.states.userIsAlive = false
+		self:PlayerDead()
 	else                       --alive (revived while not being a ghost)
 		self:PlayerAlive()
 	end
+end
+
+function BattleGroundEnemies:PLAYER_DEAD()
+	self:PlayerDead()
 end
 
 function BattleGroundEnemies:UNIT_TARGET(unitID)
@@ -2358,7 +2367,6 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 		end
 
 		self:Enable()
-		self.states.userIsAlive = true
 	else
 		self.states.isInArena = false
 		self.states.isInBattleground = false
