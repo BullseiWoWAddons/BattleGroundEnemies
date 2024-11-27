@@ -470,9 +470,9 @@ local function CreateMainFrame(playerType)
 			end
 
 
-			if BattleGroundEnemies.states.isInArena or BattleGroundEnemies.states.isInBattleground then
-				BattleGroundEnemies:CheckForArenaEnemies()
-			end
+
+			BattleGroundEnemies:CheckForArenaEnemies()
+
 		end
 		self:Show()
 	end
@@ -1345,7 +1345,7 @@ BattleGroundEnemies.Enemies.ARENA_PREP_OPPONENT_SPECIALIZATIONS = BattleGroundEn
 
 function BattleGroundEnemies.Enemies:UNIT_NAME_UPDATE(unitID)
 	self:Debug("UNIT_NAME_UPDATE", unitID)
-	BattleGroundEnemies:ThrottleUpdateArenaPlayers()
+	BattleGroundEnemies:CheckForArenaEnemies()
 end
 
 function BattleGroundEnemies.Enemies:NAME_PLATE_UNIT_ADDED(unitID)

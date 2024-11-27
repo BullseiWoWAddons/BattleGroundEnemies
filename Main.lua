@@ -1572,7 +1572,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			playerButton:DispatchEvent("ArenaOpponentHidden")
 		end
 	end
-	self:ThrottleUpdateArenaPlayers()
+	self:CheckForArenaEnemies()
 end
 
 function BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
@@ -2048,18 +2048,7 @@ function BattleGroundEnemies:ToggleRaidFrames()
 	restoreShowRaidFrameCVar()
 end
 
-local UpdateArenaPlayersTicker
 
-
---too avoid calling UpdateArenaPlayers too many times within a second
-function BattleGroundEnemies:ThrottleUpdateArenaPlayers()
-	if UpdateArenaPlayersTicker then UpdateArenaPlayersTicker:Cancel() end -- use a timer to apply changes after 1 second, this prevents from too many updates after each player is found
-
-	UpdateArenaPlayersTicker = CTimerNewTicker(0.5, function()
-		BattleGroundEnemies:UpdateArenaPlayers()
-		UpdateArenaPlayersTicker = nil
-	end, 1)
-end
 
 function BattleGroundEnemies:UpdateArenaPlayers()
 	BattleGroundEnemies:Debug("UpdateArenaPlayers")
@@ -2079,6 +2068,22 @@ function BattleGroundEnemies:UpdateArenaPlayers()
 		C_Timer.After(2, function() self:UpdateArenaPlayers() end)
 	end
 end
+
+
+local UpdateArenaPlayersTicker
+
+--too avoid calling UpdateArenaPlayers too many times within a second
+function BattleGroundEnemies:ThrottleUpdateArenaPlayers()
+	if UpdateArenaPlayersTicker then UpdateArenaPlayersTicker:Cancel() end -- use a timer to apply changes after half second, this prevents from too many updates after each player is found
+
+	if not self.states.isInArena and not self.states.isInBattleground then return end
+	UpdateArenaPlayersTicker = CTimerNewTicker(0.5, function()
+		BattleGroundEnemies:UpdateArenaPlayers()
+		UpdateArenaPlayersTicker = nil
+	end, 1)
+end
+
+
 
 function BattleGroundEnemies:CheckForArenaEnemies()
 	BattleGroundEnemies:Debug("CheckForArenaEnemies")
