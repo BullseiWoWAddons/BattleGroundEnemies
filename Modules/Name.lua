@@ -108,13 +108,10 @@ function name:AttachToPlayerButton(playerButton)
 			end
 			--self.DisplayedName = self.DisplayedName:gsub("-.",string.upper) --uppercase the realm name
 			name = playerName
-			if realm then
-				playerName = playerName.."-"..realm
-			end
 		end
 
-		if self.config.ShowRealmnames then
-			name = playerName
+		if realm and self.config.ShowRealmnames then
+			name = name.."-"..realm
 		end
 
 		self:SetText(name)
