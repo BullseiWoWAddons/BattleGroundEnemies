@@ -172,15 +172,15 @@ function power:AttachToPlayerButton(playerButton)
 		end
 
 		local powerToken
-		if playerDetails.PlayerClass then
-			local t = Data.Classes[playerDetails.PlayerClass]
-			if t then
-				if playerDetails.PlayerSpecName then
-					t = t[playerDetails.PlayerSpecName]
-				end
+
+		local t = Data.Classes[playerDetails.PlayerClass]
+		if t then
+			if playerDetails.PlayerSpecName then
+				t = t[playerDetails.PlayerSpecName]
 			end
-			if t then powerToken = t.Ressource end
 		end
+		if t then powerToken = t.Ressource end
+
 
 		self:CheckForNewPowerColor(powerToken)
 	end
