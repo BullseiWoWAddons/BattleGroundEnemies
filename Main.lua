@@ -926,7 +926,7 @@ function BattleGroundEnemies:SetupTestmode()
 
 
 	self:CreateFakePlayers()
-	self:Enable()
+	self:CheckEnableState()
 end
 
 do
@@ -1051,7 +1051,7 @@ function BattleGroundEnemies:DisableTestMode()
 	self:Information(L.TestmodeDisabled)
 	self.Allies:OnTestmodeDisabled()
 	self.Enemies:OnTestmodeDisabled()
-	self:PLAYER_ENTERING_WORLD()
+	self:CheckEnableState()
 end
 
 function BattleGroundEnemies.ToggleTestmode()
@@ -1086,8 +1086,10 @@ end
 function BattleGroundEnemies:DisableEditmode()
 	self.states.editmodeActive = false
 	self:Information(L.EditmodeDisabled)
+	self.Allies:OnEditmodeDisabled()
+	self.Enemies:OnEditmodeDisabled()
 	BattleGroundEnemies.EditMode.EditModeManager:CloseEditmode()
-	self:PLAYER_ENTERING_WORLD()
+	self:CheckEnableState()
 end
 
 function BattleGroundEnemies.ToggleEditmode()
@@ -1151,7 +1153,8 @@ BattleGroundEnemies.ArenaIDToPlayerButton = {} --key = arenaID: arenaX, value = 
 BattleGroundEnemies:RegisterEvent("PLAYER_LOGIN") --Fired on reload UI and on initial loading screen
 
 BattleGroundEnemies.GeneralEvents = {
-	"UPDATE_BATTLEFIELD_SCORE", --stopping the onupdate script should do it but other addons make "UPDATE_BATTLEFIELD_SCORE" trigger aswell
+	"LOSS_OF_CONTROL_ADDED",
+	"LOSS_OF_CONTROL_UPDATE",
 	"COMBAT_LOG_EVENT_UNFILTERED",
 	"UPDATE_MOUSEOVER_UNIT",
 	"PLAYER_TARGET_CHANGED",
@@ -1375,6 +1378,17 @@ function BattleGroundEnemies:Enable()
 	self.Enemies:CheckEnableState()
 end
 
+function BattleGroundEnemies:CheckEnableState()
+	self:Debug("CheckEnableState")
+	local states = BattleGroundEnemies:GetActiveStates()
+	if states.isInArena and BattleGroundEnemies.db.profile.ShowBGEInArena then
+		return self:Enable()
+	end
+	if states.isInBattleground and BattleGroundEnemies.db.profile.ShowBGEInBattleground then
+		return self:Enable()
+	end
+	self:Disable()
+end
 
 
 do
@@ -1437,6 +1451,7 @@ do
 		self:RegisterEvent("PLAYER_ALIVE") --Fired when the player releases from death to a graveyard; or accepts a resurrect before releasing their spirit. Does not fire when the player is alive after being a ghost. PLAYER_UNGHOST is triggered in that case.
 		self:RegisterEvent("PLAYER_UNGHOST") --Fired when the player is alive after being a ghost.
 		self:RegisterEvent("PLAYER_DEAD") --Fired when the player has died.
+		self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
 
 
 
@@ -1502,7 +1517,7 @@ function BattleGroundEnemies:TestModePlayerCountChanged(value)
 		if self:IsTestmodeOrEditmodeActive() then
 			self:CreateFakePlayers()
 		end
-		if self.Editmode.Active then
+		if self.states.editmodeActive then
 			self:OnEditmodeEnabled()
 			BattleGroundEnemies.EditMode.EditModeManager:OpenEditmode()
 		end
@@ -1513,6 +1528,7 @@ end
 
 
 function BattleGroundEnemies:ApplyAllSettings()
+	BattleGroundEnemies:CheckEnableState()
 	BattleGroundEnemies.Allies:SelectPlayerCountProfile(true)
 	BattleGroundEnemies.Enemies:SelectPlayerCountProfile(true)
 	BattleGroundEnemies:ToggleArenaFrames()
@@ -2122,7 +2138,7 @@ function BattleGroundEnemies:DebounceUpdateArenaPlayers()
 	self:Debug("DebounceUpdateArenaPlayers")
 	if UpdateArenaPlayersTicker then UpdateArenaPlayersTicker:Cancel() end -- use a timer to apply changes after half second, this prevents from too many updates after each player is found
 
-	if not self.states.isInArena and not self.states.isInBattleground then return end
+	if not self.states.real.isInArena and not self.states.real.isInBattleground then return end
 	UpdateArenaPlayersTicker = CTimerNewTicker(0.5, function()
 		BattleGroundEnemies:UpdateArenaPlayers()
 		UpdateArenaPlayersTicker = nil
