@@ -1355,7 +1355,7 @@ function BattleGroundEnemies:Disable()
 end
 
 function BattleGroundEnemies:Enable()
-	BattleGroundEnemies:Debug("BattleGroundEnemies enabled")
+	self:Debug("BattleGroundEnemies enabled")
 	self.enabled = true
 
 	self:RegisterEvents()
@@ -1600,7 +1600,7 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 	if unitEvent == "cleared" then --"unseen", "cleared" or "destroyed"
 		local playerButton = self.ArenaIDToPlayerButton[unitID]
 		if playerButton then
-			--BattleGroundEnemies:Debug("ARENA_OPPONENT_UPDATE", playerButton.DisplayedName, "ObjectiveLost")
+			self:Debug("ARENA_OPPONENT_UPDATE cleared", playerButton.DisplayedName)
 
 			self.ArenaIDToPlayerButton[unitID] = nil
 			playerButton.ObjectiveAndRespawn:Reset()
@@ -2096,16 +2096,16 @@ end
 
 
 function BattleGroundEnemies:UpdateArenaPlayers()
-	BattleGroundEnemies:Debug("UpdateArenaPlayers")
+	self:Debug("UpdateArenaPlayers")
 	self.Enemies:CreateArenaEnemies()
 
 	if #BattleGroundEnemies.Enemies.CurrentPlayerOrder > 1 or #BattleGroundEnemies.Allies.CurrentPlayerOrder > 1 then --this ensures that we checked for enemies and the flag carrier will be shown (if its an enemy)
 		for i = 1, GetNumArenaOpponents() do
 			local unitID = "arena" .. i
-			BattleGroundEnemies:Debug(unitID, UnitName(unitID))
+			self:Debug(unitID, UnitName(unitID))
 			local playerButton = BattleGroundEnemies:GetPlayerbuttonByUnitID(unitID)
 			if playerButton then
-				BattleGroundEnemies:Debug("Button exists for", unitID)
+				self:Debug("Button exists for", unitID)
 				playerButton:ArenaOpponentShown(unitID)
 			end
 		end
@@ -2118,7 +2118,8 @@ end
 local UpdateArenaPlayersTicker
 
 --too avoid calling UpdateArenaPlayers too many times within a second
-function BattleGroundEnemies:ThrottleUpdateArenaPlayers()
+function BattleGroundEnemies:DebounceUpdateArenaPlayers()
+	self:Debug("DebounceUpdateArenaPlayers")
 	if UpdateArenaPlayersTicker then UpdateArenaPlayersTicker:Cancel() end -- use a timer to apply changes after half second, this prevents from too many updates after each player is found
 
 	if not self.states.isInArena and not self.states.isInBattleground then return end
@@ -2131,7 +2132,7 @@ end
 
 
 function BattleGroundEnemies:CheckForArenaEnemies()
-	BattleGroundEnemies:Debug("CheckForArenaEnemies")
+	self:Debug("CheckForArenaEnemies")
 
 	-- returns valid data on PLAYER_ENTERING_WORLD
 	self:Debug(GetNumArenaOpponents())
@@ -2234,7 +2235,7 @@ local function parseBattlefieldScore(index)
 end
 
 function BattleGroundEnemies:SetAllyFaction(allyFaction)
-	BattleGroundEnemies:Debug("SetAllyFaction", allyFaction)
+	self:Debug("SetAllyFaction", allyFaction)
 	self.EnemyFaction = allyFaction == 0 and 1 or 0
 	self.AllyFaction = allyFaction
 end
@@ -2242,7 +2243,7 @@ end
 
 
 function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
-	BattleGroundEnemies:Debug("UPDATE_BATTLEFIELD_SCORE")
+	self:Debug("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug(GetCurrentMapAreaID())
 	-- self:Debug("UPDATE_BATTLEFIELD_SCORE")
 	-- self:Debug("GetBattlefieldArenaFaction", GetBattlefieldArenaFaction())
@@ -2271,7 +2272,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 
 	local battlefieldScores = {}
 	local numScores = GetNumBattlefieldScores()
-	BattleGroundEnemies:Debug("numScores", numScores)
+	self:Debug("numScores", numScores)
 	for i = 1, numScores do
 		local score = parseBattlefieldScore(i)
 		if score then
@@ -2279,7 +2280,7 @@ function BattleGroundEnemies:UPDATE_BATTLEFIELD_SCORE()
 		end
 	end
 
-	BattleGroundEnemies:Debug("battlefieldScores", battlefieldScores)
+	self:Debug("battlefieldScores", battlefieldScores)
 
 	--see if our faciton in BG changed
 	for i = 1, #battlefieldScores do
@@ -2371,7 +2372,7 @@ BattleGroundEnemies.PARTY_LEADER_CHANGED = BattleGroundEnemies.GROUP_ROSTER_UPDA
 
 --Fires when the player logs in, /reloads the UI or zones between map instances. Basically whenever the loading screen appears.
 function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
-	BattleGroundEnemies:Debug("PLAYER_ENTERING_WORLD")
+	self:Debug("PLAYER_ENTERING_WORLD")
 	self:ResetCombatLogScanniningTables()
 	self:DisableTestOrEditmode()
 
