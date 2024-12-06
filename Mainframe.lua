@@ -183,8 +183,8 @@ local function CreateMainFrame(playerType)
 
     mainframe.Counter = {}
 
-
-    mainframe:Hide()
+	mainframe.enabled = true
+	mainframe:Disable()
     mainframe:SetScript("OnEvent", function(self, event, ...)
 		if self.db and self.db.profile and self.db.profile.DebugBlizzEvents then
 			self:Debug("OnEvent", event, ...)
@@ -393,6 +393,15 @@ local function CreateMainFrame(playerType)
 		self:CreateOrRemovePlayerButtons()
 	end
 
+	function mainframe:OnTestOrEditmodeEnabled()
+		self.ActiveProfile:Show()
+	end
+
+	function mainframe:OnTestOrEditmodeDisabled()
+		self:RemoveAllPlayersFromSource(BattleGroundEnemies.consts.PlayerSources.FakePlayers)
+		self.ActiveProfile:Hide()
+	end
+
 	function mainframe:OnTestmodeTick()
 		for name, playerButton in pairs(self.Players) do
 			if playerButton.PlayerDetails.isFakePlayer then
@@ -428,6 +437,11 @@ local function CreateMainFrame(playerType)
 				BattleGroundEnemies:UpdateDRsEditMode(playerButton)
 			end
 		end
+		self:OnTestOrEditmodeEnabled()
+	end
+
+	function mainframe:OnEditmodeDisabled()
+		self:OnTestOrEditmodeDisabled()
 	end
 
 	function mainframe:OnTestmodeEnabled()
@@ -442,20 +456,20 @@ local function CreateMainFrame(playerType)
 		if self.CurrentPlayerOrder[2] then
 			BattleGroundEnemies:HandleFocusChanged(self.CurrentPlayerOrder[2])
 		end
+		self:OnTestOrEditmodeEnabled()
 	end
 
 	function mainframe:OnTestmodeDisabled()
 		for playerName, playerButton in pairs(self.Players) do
 			playerButton:DispatchEvent("OnTestmodeDisabled")
 		end
-		self:RemoveAllPlayersFromSource(BattleGroundEnemies.consts.PlayerSources.FakePlayers)
-
-
-		self.ActiveProfile:Hide()
+		self:OnTestOrEditmodeDisabled()
 	end
 
 	function mainframe:Enable()
 		self:Debug("enabled")
+		if self.enabled then return end
+		if InCombatLockdown() then return BattleGroundEnemies:QueueForUpdateAfterCombat(mainframe, "CheckEnableState") end
 
 		if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
 		else
@@ -469,17 +483,19 @@ local function CreateMainFrame(playerType)
 				end
 			end
 
-
-
 			BattleGroundEnemies:CheckForArenaEnemies()
-
 		end
+		self.enabled = true
 		self:Show()
 	end
 
 	function mainframe:Disable()
 		self:Debug("disabled")
+		if not self.enabled then return end
+		if InCombatLockdown() then return BattleGroundEnemies:QueueForUpdateAfterCombat(mainframe, "CheckEnableState") end
+
 		self:UnregisterAllEvents()
+		self.enabled = false
 		self:Hide()
 	end
 
@@ -520,10 +536,7 @@ local function CreateMainFrame(playerType)
 		if not maxNumPlayers then return end
 		if maxNumPlayers == 0 then return self:NoActivePlayercountProfile() end
 
-		if maxNumPlayers > 40 then
-			self:Disable()
-			return
-		end
+		if maxNumPlayers > 40 then return self:NoActivePlayercountProfile() end
 
 		local playerCountConfigs
 		if self.playerTypeConfig.CustomPlayerCountConfigsEnabled then
@@ -572,6 +585,7 @@ local function CreateMainFrame(playerType)
 
 	function mainframe:CheckEnableState()
 		self:Debug("CheckEnableState")
+		if not BattleGroundEnemies.enabled then return self:Disable() end
 		if self.playerTypeConfig.Enabled and self.playerCountConfig and self.playerCountConfig.Enabled then
 			self:Enable()
 		else
