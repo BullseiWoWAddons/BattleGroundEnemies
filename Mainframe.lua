@@ -516,8 +516,6 @@ local function CreateMainFrame(playerType)
 
 		self:SetPlayerCountJustifyV(conf.BarVerticalGrowdirection)
 
-		self.PlayerCount:ApplyFontStringSettings(BattleGroundEnemies.db.profile.PlayerCount.Text)
-
 		self.ActiveProfile:ApplyFontStringSettings(BattleGroundEnemies.db.profile.PlayerCount.Text)
 
 		self.ActiveProfile:SetText(L[self.PlayerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(self.playerCountConfig, self.playerTypeConfig.CustomPlayerCountConfigsEnabled))
@@ -525,7 +523,7 @@ local function CreateMainFrame(playerType)
 
 		self:SortPlayers(true) --force repositioning
 
-		self:UpdatePlayerCount()
+		self:UpdatePlayerCountText()
 		self:CheckEnableState()
 	end
 
@@ -595,12 +593,8 @@ local function CreateMainFrame(playerType)
 
 	function mainframe:SetRealPlayerCount(realCount)
 		self:Debug("SetRealPlayerCount", realCount)
-		local oldCount = self.RealPlayerCount
 		self.RealPlayerCount = realCount
-		if not oldCount or oldCount ~= realCount then
-			self:SelectPlayerCountProfile()
-		end
-		self:UpdatePlayerCount()
+		self:UpdatePlayerCountText()
 	end
 
 	function mainframe:SetPlayerCount(count)
@@ -609,17 +603,16 @@ local function CreateMainFrame(playerType)
 		if not oldCount or oldCount ~= count then
 			self:SelectPlayerCountProfile()
 		end
-		self:UpdatePlayerCount()
+		self:UpdatePlayerCountText()
 	end
 
-	function mainframe:UpdatePlayerCount()
-
-
+	function mainframe:UpdatePlayerCountText()
+		self.PlayerCount:ApplyFontStringSettings(BattleGroundEnemies.db.profile.PlayerCount.Text)
 		local maxNumPlayers = math_max(self.RealPlayerCount or 0, self.NumPlayers or 0)
 
 
 		local isEnemy = self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies
-		self:Debug("UpdatePlayerCount", maxNumPlayers, isEnemy)
+		self:Debug("UpdatePlayerCountText", maxNumPlayers, isEnemy)
 
 
 		BattleGroundEnemies:SetAllyFaction(BattleGroundEnemies.AllyFaction or (BattleGroundEnemies.UserFaction == "Horde" and 1 or 0))
