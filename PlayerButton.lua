@@ -282,7 +282,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 			newIndex = GetRaidTargetIndex(unit)
 			if newIndex then
 				if newIndex == 8 and (not self.RaidTargetIconIndex or self.RaidTargetIconIndex ~= 8) then
-					if BattleGroundEnemies.states.isRatedBG and BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationEnable then
+					if BattleGroundEnemies:GetActiveStates().isRatedBG and BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationEnable then
 						local path = LSM:Fetch("sound",
 							BattleGroundEnemies.db.profile.RBG.TargetCalling_NotificationSound, true)
 						if path then
@@ -827,7 +827,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 
 		local enemyTargets = i
 
-		if BattleGroundEnemies.states.isRatedBG then
+		if BattleGroundEnemies:GetActiveStates().isRatedBG then
 			if isAlly then
 				if BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Enabled then
 					if enemyTargets >= (BattleGroundEnemies.db.profile.RBG.EnemiesTargetingAllies_Amount or 1) then

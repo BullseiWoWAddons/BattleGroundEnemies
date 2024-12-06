@@ -137,46 +137,46 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 	end
 	function frame:SearchForDebuffs(aura)
 		self:Debug("SearchForDebuffs")
-		local battleGroundDebuffs = BattleGroundEnemies.states.battleGroundDebuffs
+		local states = BattleGroundEnemies:GetActiveStates()
+		local battleGroundBuffs, battleGroundDebuffs = BattleGroundEnemies:GetBattlegroundAuras()
+		if not battleGroundDebuffs then return end
 		local value
-		if battleGroundDebuffs then
-			for i = 1, #battleGroundDebuffs do
-				if aura.spellId == battleGroundDebuffs[i] then
-					self:Debug("found debuff", aura.spellId)
-					if BattleGroundEnemies.states.currentMapID == 417 then -- 417 is Kotmogu, we scan for orb debuffs
-	
-						if aura.points and type(aura.points) == "table" then
-							if aura.points[2] then
-								if not self.shownValue then
-									--self:Debug("hier")
-									--player just got the debuff
-									self.Icon:SetTexture(GetSpellTexture(aura.spellId))
-									self:Show()
-									--self:Debug("Texture set")
-								end
-								value = aura.points[2]
-									--values for orb debuff:
-									--frame:Debug(value1, value2, value3, value4)
-									-- value1 = Reduces healing received by value1
-									-- value2 = Increases damage taken by value2
-									-- value3 = Increases damage done by value3
+		for i = 1, #battleGroundDebuffs do
+			if aura.spellId == battleGroundDebuffs[i] then
+				self:Debug("found debuff", aura.spellId)
+				if states.currentMapId == 417 then -- 417 is Kotmogu, we scan for orb debuffs
+
+					if aura.points and type(aura.points) == "table" then
+						if aura.points[2] then
+							if not self.shownValue then
+								--self:Debug("hier")
+								--player just got the debuff
+								self.Icon:SetTexture(GetSpellTexture(aura.spellId))
+								self:Show()
+								--self:Debug("Texture set")
 							end
+							value = aura.points[2]
+								--values for orb debuff:
+								--frame:Debug(value1, value2, value3, value4)
+								-- value1 = Reduces healing received by value1
+								-- value2 = Increases damage taken by value2
+								-- value3 = Increases damage done by value3
 						end
-						--kotmogu
-						
-						--end of kotmogu
-	
-					else
-						-- not kotmogu
-						value = aura.applications
 					end
-					if value ~= self.shownValue then
-						self.AuraText:SetText(value)
-						self.shownValue = value
-					end
-					self.continue = false
-					return
+					--kotmogu
+					
+					--end of kotmogu
+
+				else
+					-- not kotmogu
+					value = aura.applications
 				end
+				if value ~= self.shownValue then
+					self.AuraText:SetText(value)
+					self.shownValue = value
+				end
+				self.continue = false
+				return
 			end
 		end
 	end
@@ -205,7 +205,7 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 		--self:Debug("NewAura", 2)
 
 		if not BattleGroundEnemies.ArenaIDToPlayerButton[unitID] then return end -- This player is not shown on arena enemy so we dont care
-		if BattleGroundEnemies.states.battleGroundDebuffs then self:SearchForDebuffs(aura) end
+		self:SearchForDebuffs(aura)
 	end
 
 	function frame:UnitRevived()
@@ -218,8 +218,9 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 
 	function frame:UnitDied()
 		self:Debug("UnitDied")
+		local states = BattleGroundEnemies:GetActiveStates()
 
-		if (BattleGroundEnemies.states.isRatedBG or BattleGroundEnemies.states.isSoloRBG or BattleGroundEnemies:IsTestmodeOrEditmodeActive()) then
+		if states.isRatedBG or states.isSoloRBG then
 			self:Debug("UnitIsDead SetCooldown")
 			if not self.ActiveRespawnTimer then
 				self:Show()
@@ -231,8 +232,8 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 			if IsCataClassic then
 				respawmTime = 45
 			else
-				if BattleGroundEnemies.states.isSoloRBG then
-					if BattleGroundEnemies.states.currentMapID ~= 2345 then
+				if states.isSoloRBG then
+					if states.currentMapId ~= 2345 then
 						respawmTime = 16
 					end
 				end
@@ -243,14 +244,14 @@ function objectiveAndRespawn:AttachToPlayerButton(playerButton)
 
 	function frame:ArenaOpponentShown()
 		self:Debug("ArenaOpponentShown")
-		if BattleGroundEnemies.states.battlegroundBuff then
+		local battlegroundBuffs = BattleGroundEnemies:GetBattlegroundAuras()
+		if battlegroundBuffs then
 			self:Debug("has battlegroundBuff")
-			local spellId = BattleGroundEnemies.states.battlegroundBuff[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]
+			local spellId = battlegroundBuffs[playerButton.PlayerIsEnemy and BattleGroundEnemies.EnemyFaction or BattleGroundEnemies.AllyFaction]
 			if spellId then
 				self.Icon:SetTexture(GetSpellTexture(spellId))
 				self:Show()
 			end
-			
 		end
 
 		self:HideText()

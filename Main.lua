@@ -213,7 +213,7 @@ end
 
 
 function BattleGroundEnemies:IsTestmodeOrEditmodeActive()
-	return self.Testmode.Active or self.Editmode.Active
+	return self.states.testmodeActive or self.states.editmodeActive
 end
 
 local auraFilters = { "HELPFUL", "HARMFUL" }
@@ -828,7 +828,9 @@ function BattleGroundEnemies:SetupTestmode()
 	local mandomm = math_random(1, #mapIDs)
 	local randomMapID = mapIDs[mandomm]
 
-	BattleGroundEnemies:UpdateMapID(randomMapID)
+	BattleGroundEnemies.states.test.currentMapId = randomMapID
+	BattleGroundEnemies.states.test.isInBattleground = true
+	BattleGroundEnemies.states.test.isRatedBG = true
 
 	for i = 1, #auraFilters do
 		local filter = auraFilters[i]
@@ -2143,7 +2145,14 @@ end
 BattleGroundEnemies.PLAYER_UNGHOST = BattleGroundEnemies.PlayerAlive --player is alive again
 
 
-function BattleGroundEnemies:UpdateMapID(forceMapId)
+function BattleGroundEnemies:GetBuffsAndDebuffsForMap(mapId)
+	if not mapId then return end
+	return Data.BattlegroundspezificBuffs[mapId], Data.BattlegroundspezificDebuffs[mapId]
+end
+
+
+function BattleGroundEnemies:UpdateMapID(retries)
+	retries = retries or 0
 	--	SetMapToCurrentZone() apparently removed in 8.0
 	local mapId = GetBestMapForUnit('player')
 	self:Debug("UpdateMapID")
