@@ -285,7 +285,7 @@ local function CreateMainFrame(playerType)
 				local scoreboardEnemies = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.Scoreboard]
 				local numScoreboardEnemies = #scoreboardEnemies
 				local addScoreBoardPlayers = false
-				if BattleGroundEnemies.states.isInArena then
+				if BattleGroundEnemies:GetActiveStates().isInArena then
 					self:Debug("AfterPlayerSourceUpdate", "inArena")
 					--use arenaPlayers is primary source to preserve same order arena1 to arena3, scoreboard doesn't offer this
 					local arenaEnemies = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.ArenaPlayers]
@@ -320,7 +320,7 @@ local function CreateMainFrame(playerType)
 					end
 				else --in BattleGround
 					if numScoreboardEnemies == 0 then
-						if BattleGroundEnemies.states.isRatedBG and IsRetail then
+						if BattleGroundEnemies.states.real.isRatedBG and IsRetail then
 							newPlayers = self.PlayerSources[BattleGroundEnemies.consts.PlayerSources.CombatLog]
 						end
 					else
@@ -573,12 +573,6 @@ local function CreateMainFrame(playerType)
 	function mainframe:CheckEnableState()
 		self:Debug("CheckEnableState")
 		if self.playerTypeConfig.Enabled and self.playerCountConfig and self.playerCountConfig.Enabled then
-			if BattleGroundEnemies.states.isInArena and not BattleGroundEnemies.db.profile.ShowBGEInArena then
-				return self:Disable()
-			end
-			if BattleGroundEnemies.states.isInBattleground and not BattleGroundEnemies.db.profile.ShowBGEInBattleground then
-				return self:Disable()
-			end
 			self:Enable()
 		else
 			self:Disable()
@@ -1089,7 +1083,7 @@ local function CreateMainFrame(playerType)
 
  ]]
 
-			if BattleGroundEnemies.states.isInArena then
+			if BattleGroundEnemies.states.real.isInArena then
 				if (self.PlayerType == BattleGroundEnemies.consts.PlayerTypes.Enemies) then
 					local usePlayerSortingByArenaUnitID = true
 					for i = 1, #newPlayerOrder do
@@ -1288,7 +1282,7 @@ end
 
 function BattleGroundEnemies.Enemies:CreateArenaEnemies()
 	self:Debug("CreateArenaEnemies")
-	if not BattleGroundEnemies.states.isInArena then return end
+	if not BattleGroundEnemies.states.real.isInArena then return end
 
 	self:BeforePlayerSourceUpdate(BattleGroundEnemies.consts.PlayerSources.ArenaPlayers)
 	for i = 1, 15 do --we can have 15 enemies in the Arena Brawl Packed House

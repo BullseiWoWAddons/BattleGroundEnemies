@@ -144,37 +144,73 @@ BattleGroundEnemies.currentFocus = false
 
 BattleGroundEnemies.Testmode = {
 	PlayerCountTestmode = 5,
-	Active = false,
 	FakePlayerAuras = {}, --key = playerbutton, value = {}
 	FakePlayerDRs = {},   --key = playerButtonTable, value = {categoryname = {state = 0, expirationTime}
 	RandomRacials = false, -- key = number, value = spellId-- key = number, value = spellId
 	RandomTrinkets = false, -- key = number, value = spellId-- key = number, value = spellId
 }
-BattleGroundEnemies.Editmode = {
-	Active = false
-}
 
 BattleGroundEnemies.ButtonModules = {}   --contains moduleFrames, key is the module name
-BattleGroundEnemies.states = {
-	WOW_PROJECT_ID = WOW_PROJECT_ID,
-	isInArena = false,
-	isInBattleground = false,
-	userIsAlive = not UnitIsDeadOrGhost("player"),
-	currentMapID = false,
-	isRatedBG = false,
-	isSoloRBG = false,
-	battlegroundBuff = false, --contains the battleground specific enemy buff to watchout for of the current active battlefield
-	battleGroundDebuffs = {}--contains battleground specific debbuffs to watchout for of the current active battlefield
-}
-
 BattleGroundEnemies.UserFaction = UnitFactionGroup("player")
 BattleGroundEnemies.UserButton = false   --the button of the Player himself
 BattleGroundEnemies.specCache = {} -- key = GUID, value = specName (localized)
 
-
 local playerSpells
 local priorityAuras = {}
 local nonPriorityAuras = {}
+local auraFilters = { "HELPFUL", "HARMFUL" }
+
+---@class bgeState
+---@field WOW_PROJECT_ID number
+---@field isInArena boolean
+---@field isInBattleground boolean
+---@field currentMapId number|boolean
+---@field isRatedBG boolean
+---@field isSoloRBG boolean
+
+BattleGroundEnemies.states = {
+	editmodeActive = false,
+	testmodeActive = false,
+	userIsAlive = not UnitIsDeadOrGhost("player"),
+	---@type bgeState
+	real = {
+		WOW_PROJECT_ID = WOW_PROJECT_ID,
+		isInArena = false,
+		isInBattleground = false,
+		currentMapId = false,
+		isRatedBG = false,
+		isSoloRBG = false,
+	},
+	---@type bgeState
+	test = {
+		WOW_PROJECT_ID = WOW_PROJECT_ID,
+		isInArena = false,
+		isInBattleground = false,
+		currentMapId = false,
+		isRatedBG = false,
+		isSoloRBG = false,
+	}
+}
+
+---@return bgeState
+function BattleGroundEnemies:GetActiveStates()
+	if self:IsTestmodeOrEditmodeActive() then
+		return self.states.test
+	else
+		return self.states.real
+	end
+end
+
+function BattleGroundEnemies:GetBattlegroundAuras()
+	local states = self:GetActiveStates()
+	if not states then return end
+	return Data.BattlegroundspezificBuffs[states.currentMapId], Data.BattlegroundspezificDebuffs[states.currentMapId]
+end
+
+
+
+
+
 
 function BattleGroundEnemies:IsTestmodeOrEditmodeActive()
 	return self.Testmode.Active or self.Editmode.Active
@@ -379,7 +415,7 @@ function BattleGroundEnemies:UpdateFakeAurasEditmode(playerButton)
 		local createNewAura = not playerButton.isDead
 		if createNewAura then
 			for j = 1, (4 ) do
-				local newFakeAura1, newFakeAura2 = CreateFakeAura(filter, BattleGroundEnemies.Editmode.Active)
+				local newFakeAura1, newFakeAura2 = CreateFakeAura(filter, BattleGroundEnemies.states.editmodeActive)
 				if newFakeAura1 then
 					table_insert(fakePlayerAuras[playerButton][filter], newFakeAura1)
 				end
@@ -1000,7 +1036,7 @@ function BattleGroundEnemies:EnableTestMode()
 	if InCombatLockdown() then
 		return BattleGroundEnemies:Information(L.ErrorTestmodeInCombat)
 	end
-	self.Testmode.Active = true
+	self.states.testmodeActive = true
 	self:SetupTestmode()
 
 	self.Allies:OnTestmodeEnabled()
@@ -1009,7 +1045,7 @@ function BattleGroundEnemies:EnableTestMode()
 end
 
 function BattleGroundEnemies:DisableTestMode()
-	self.Testmode.Active = false
+	self.states.testmodeActive = false
 	self:Information(L.TestmodeDisabled)
 	self.Allies:OnTestmodeDisabled()
 	self.Enemies:OnTestmodeDisabled()
@@ -1017,10 +1053,10 @@ function BattleGroundEnemies:DisableTestMode()
 end
 
 function BattleGroundEnemies.ToggleTestmode()
-	if BattleGroundEnemies.Editmode.Active then
+	if BattleGroundEnemies.states.editmodeActive then
 		BattleGroundEnemies:DisableEditmode()
 	end
-	if BattleGroundEnemies.Testmode.Active then --disable testmode
+	if BattleGroundEnemies.states.testmodeActive then --disable testmode
 		BattleGroundEnemies:DisableTestMode()
 	else                                     --enable Testmode
 		BattleGroundEnemies:EnableTestMode()
@@ -1031,7 +1067,7 @@ function BattleGroundEnemies:EnableEditmode()
 	if InCombatLockdown() then
 		return BattleGroundEnemies:Information(L.ErrorTestmodeInCombat)
 	end
-	self.Editmode.Active = true
+	self.states.editmodeActive = true
 	self:SetupTestmode()
 	self:OnEditmodeEnabled()
 
@@ -1046,17 +1082,17 @@ function BattleGroundEnemies:OnEditmodeEnabled()
 end
 
 function BattleGroundEnemies:DisableEditmode()
-	self.Editmode.Active = false
+	self.states.editmodeActive = false
 	self:Information(L.EditmodeDisabled)
 	BattleGroundEnemies.EditMode.EditModeManager:CloseEditmode()
 	self:PLAYER_ENTERING_WORLD()
 end
 
 function BattleGroundEnemies.ToggleEditmode()
-	if BattleGroundEnemies.Testmode.Active then
+	if BattleGroundEnemies.states.testmodeActive then
 		BattleGroundEnemies:DisableTestMode()
 	end
-	if BattleGroundEnemies.Editmode.Active then --disable testmode
+	if BattleGroundEnemies.states.editmodeActive then --disable testmode
 		BattleGroundEnemies:DisableEditmode()
 	else                                     --enable Testmode
 		BattleGroundEnemies:EnableEditmode()
@@ -1064,10 +1100,10 @@ function BattleGroundEnemies.ToggleEditmode()
 end
 
 function BattleGroundEnemies:DisableTestOrEditmode()
-	if self.Editmode.Active then
+	if self.states.editmodeActive then
 		return self:DisableEditmode()
 	end
-	if self.Testmode.Active then
+	if self.states.testmodeActive then
 		return self:DisableTestMode()
 	end
 end
@@ -1322,7 +1358,7 @@ function BattleGroundEnemies:Enable()
 
 	self:RegisterEvents()
 	if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
-		if self.Editmode.Active then
+		if self.states.editmodeActive then
 			setupFakePlayersEditmodeTicker()
 		else
 			setupFakePlayersTestmodeTicker()
@@ -2032,7 +2068,7 @@ end
 
 function BattleGroundEnemies:ToggleArenaFrames()
 	if InCombatLockdown() then return self:QueueForUpdateAfterCombat(self, "ToggleArenaFrames") end
-	if (BattleGroundEnemies.states.isInArena and self.db.profile.DisableArenaFramesInArena) or (BattleGroundEnemies.states.isInBattleground and self.db.profile.DisableArenaFramesInBattleground) then return disableArenaFrames() end
+	if (BattleGroundEnemies.states.real.isInArena and self.db.profile.DisableArenaFramesInArena) or (BattleGroundEnemies.states.real.isInBattleground and self.db.profile.DisableArenaFramesInBattleground) then return disableArenaFrames() end
 
 	checkEffectiveEnableStateForArenaFrames()
 end
@@ -2050,7 +2086,7 @@ local function disableRaidFrames()
 end
 
 function BattleGroundEnemies:ToggleRaidFrames()
-	if (BattleGroundEnemies.states.isInArena and self.db.profile.DisableRaidFramesInArena) or (BattleGroundEnemies.states.isInBattleground and self.db.profile.DisableRaidFramesInBattleground) then return disableRaidFrames() end
+	if (BattleGroundEnemies.states.real.isInArena and self.db.profile.DisableRaidFramesInArena) or (BattleGroundEnemies.states.real.isInBattleground and self.db.profile.DisableRaidFramesInBattleground) then return disableRaidFrames() end
 
 	restoreShowRaidFrameCVar()
 end
@@ -2109,19 +2145,16 @@ BattleGroundEnemies.PLAYER_UNGHOST = BattleGroundEnemies.PlayerAlive --player is
 
 function BattleGroundEnemies:UpdateMapID(forceMapId)
 	--	SetMapToCurrentZone() apparently removed in 8.0
-	local mapID = forceMapId or GetBestMapForUnit('player')
-	BattleGroundEnemies:Debug("UpdateMapID", mapID)
+	local mapId = GetBestMapForUnit('player')
+	self:Debug("UpdateMapID")
 
-	if mapID and mapID ~= -1 and mapID ~= 0 then -- when this values occur the map ID is not real
-		self.states.battlegroundBuff = Data.BattlegroundspezificBuffs[mapID]
-		self.states.battleGroundDebuffs = Data.BattlegroundspezificDebuffs[mapID]
-		self.states.currentMapID = mapID
+	if mapId and mapId ~= -1 and mapId ~= 0 then -- when this values occur the map ID is not real
+		self.states.real.currentMapId = mapId
 	else
-		self.states.battleGroundDebuffs = false
-		self.states.battlegroundBuff = false
-		self.states.currentMapID = false
+		self.states.real.currentMapId = false
+		if retries > 5 then return end
 		C_Timer.After(2, function() --Delay this check, since its happening sometimes that this data is not ready yet
-			self:UpdateMapID()
+			self:UpdateMapID(retries + 1)
 		end)
 	end
 end
@@ -2337,7 +2370,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 	self.Enemies:RemoveAllPlayersFromAllSources()
 	self.Allies:RemoveAllPlayersFromSource(self.consts.PlayerSources.Scoreboard)
 	local _, zone = IsInInstance()
-	BattleGroundEnemies:Debug("zone", zone)
+	self:Debug("zone", zone)
 	if zone == "pvp" or zone == "arena" then
 		if GetBattlefieldArenaFaction then
 			self:SetAllyFaction(GetBattlefieldArenaFaction()) -- returns the playered faction 0 for horde, 1 for alliance, doesnt exist in TBC)
@@ -2346,33 +2379,31 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 		end
 
 		if zone == "arena" then
-			BattleGroundEnemies.states.isInArena = true
+			BattleGroundEnemies.states.real.isInArena = true
 		else
-			BattleGroundEnemies.states.isInBattleground = true
+			BattleGroundEnemies.states.real.isInBattleground = true
 
 			C_Timer.After(5,
 				function()        --Delay this check, since its happening sometimes that this data is not ready yet
 					if C_PvP then
-						self.states.isRatedBG = C_PvP.IsRatedBattleground()
-						self.states.isSoloRBG = C_PvP.IsSoloRBG()
+						self.states.real.isRatedBG = C_PvP.IsRatedBattleground()
+						self.states.real.isSoloRBG = C_PvP.IsSoloRBG()
 					else
-						self.states.isRatedBG = IsRatedBattleground()
-						self.states.isSoloRBG = false
+						self.states.real.isRatedBG = IsRatedBattleground()
+						self.states.real.isSoloRBG = false
 					end
 
 					self:UPDATE_BATTLEFIELD_SCORE() --trigger the function again because since 10.0.0 UPDATE_BATTLEFIELD_SCORE doesnt fire reguralry anymore and RequestBattlefieldScore doesnt trigger the event
 				end)
 		end
-
-		self:Enable()
 	else
-		self.states.isInArena = false
-		self.states.isInBattleground = false
-		self.states.isSoloRBG = false
-		self.states.isRatedBG = false
-		self:Disable()
+		self.states.real.isInArena = false
+		self.states.real.isInBattleground = false
+		self.states.real.isSoloRBG = false
+		self.states.real.isRatedBG = false
 	end
 
+	self:CheckEnableState()
 	self:UpdateMapID()
 	self:ToggleArenaFrames()
 	self:ToggleRaidFrames()
