@@ -216,7 +216,7 @@ function BattleGroundEnemies:IsTestmodeOrEditmodeActive()
 	return self.states.testmodeActive or self.states.editmodeActive
 end
 
-local auraFilters = { "HELPFUL", "HARMFUL" }
+
 
 function BattleGroundEnemies:FlipButtonModuleSettingsHorizontally(moduleName, dbLocation)
 	local newSettings = {}
