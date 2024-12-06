@@ -1347,7 +1347,7 @@ function BattleGroundEnemies.MyCreateCooldown(parent)
 end
 
 function BattleGroundEnemies:Disable()
-	BattleGroundEnemies:Debug("BattleGroundEnemies disabled")
+	self:Debug("BattleGroundEnemies disabled")
 	self.enabled = false
 	self:UnregisterEvents()
 	self:Hide()
