@@ -273,16 +273,16 @@ end
 ---@return table
 function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 	local numPoints = location.ActivePoints
+	local allModuleAnchors = GetAllModuleAnchors(moduleName)
 	local temp = {}
 	temp.Parent = {
 		type = "select",
 		name = "Parent",
-		values = GetAllModuleAnchors(moduleName),
+		values = allModuleAnchors,
 		order = 2
 	}
 	temp.Fake1 = Data.AddVerticalSpacing(3)
 	if location.Points and numPoints then
-
 		for i = 1, numPoints do
 			temp["Point"..i] = {
 				type = "group",
@@ -309,7 +309,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 					RelativeFrame = {
 						type = "select",
 						name = "RelativeFrame",
-						values = GetAllModuleAnchors(moduleName),
+						values = allModuleAnchors,
 						validate = function(option, value)
 
 							if validateAnchor(playerType, moduleName, value) then
@@ -391,10 +391,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		name = L.Width,
 		order = numPoints + 5,
 		hidden = function()
-			local widthNeeded = BattleGroundEnemies:ModuleFrameNeedsWidth(moduleFrame, location)
-			if not widthNeeded then
-				return true
-			end
+			return not BattleGroundEnemies:ModuleFrameNeedsWidth(moduleFrame, location)
 		end,
 		inline = true,
 		args = {
@@ -425,10 +422,7 @@ function Data.AddPositionSetting(location, moduleName, moduleFrame, playerType)
 		name = L.Height,
 		order = numPoints + 6,
 		hidden = function()
-			local heightNeeded = BattleGroundEnemies:ModuleFrameNeedsHeight(moduleFrame, location)
-			if not heightNeeded then
-				return true
-			end
+			return not BattleGroundEnemies:ModuleFrameNeedsHeight(moduleFrame, location)
 		end,
 		inline = true,
 		args = {
@@ -1139,7 +1133,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 		local isCustomProfile
 		local location = allDbLocations[i]
 
-		
+
 
 		if i > numBasicProfile then
 			isCustomProfile = true
@@ -1558,8 +1552,14 @@ function BattleGroundEnemies:SetupOptions()
 						min = 1,
 						max = 40,
 						step = 1,
-						get = function() return self.Testmode.PlayerCountTestmode end,
+						get = function()
+							print("get", self.Testmode.PlayerCountTestmode)
+							return 6
+							--return  self.Testmode.PlayerCountTestmode
+						end,
 						set = function(option, value)
+							print("set value", value)
+							print("set", self.Testmode.PlayerCountTestmode)
 							self:TestModePlayerCountChanged(value)
 						end,
 						order = 1
@@ -1568,7 +1568,8 @@ function BattleGroundEnemies:SetupOptions()
 						type = "execute",
 						name = L.Testmode_Toggle,
 						desc = L.Testmode_Toggle_Desc,
-						disabled = function() return InCombatLockdown() end,
+						disabled = function()
+							return InCombatLockdown() end,
 						func = self.ToggleTestmode,
 						order = 2
 					},
@@ -1584,7 +1585,7 @@ function BattleGroundEnemies:SetupOptions()
 						type = "execute",
 						name = L.Testmode_ToggleAnimation,
 						desc = L.Testmode_ToggleAnimation_Desc,
-						disabled = function() return InCombatLockdown() or not self.Testmode.Active end,
+						disabled = function() return InCombatLockdown() or not self.states.testmodeActive end,
 						func = self.ToggleTestmodeOnUpdate,
 						order = 3
 					},
@@ -1592,9 +1593,42 @@ function BattleGroundEnemies:SetupOptions()
 						type = "toggle",
 						name = L.Testmode_UseTeammates,
 						desc = L.Testmode_UseTeammates_Desc,
-						disabled = function() return self.Testmode.Active end,
+						disabled = function() return self.states.testmodeActive end,
 						width = "full",
 						order = 4
+					},
+					Testmode_MapId = {
+						type = "select",
+						name = "select testmode map",
+						width = "full",
+						get = function() return self.states.test.currentMapId end,
+						set = function(option, value)
+							--value is the mapId
+							self.states.test.currentMapId = value
+
+						end,
+						order = 5,
+						values = function()
+							local buffs = Data.BattlegroundspezificBuffs
+							local debuffs = Data.BattlegroundspezificDebuffs
+							local commonMapIds = {}
+							for mapId in pairs(buffs) do
+								if debuffs[mapId] then
+									table.insert(commonMapIds, mapId)
+								end
+							end
+							local allCommonWithData = {}
+							for i, mapId in pairs(commonMapIds) do
+								local data = C_Map.GetMapInfo(mapId)
+								if data then table.insert(allCommonWithData, {mapId = mapId, data = data}) end
+							end
+							local allMapNames = {}
+							for _, mapData in pairs(allCommonWithData) do
+								allMapNames[mapData.mapId] = mapData.data.name
+							end
+
+							return allMapNames
+						end
 					},
 				}
 			},

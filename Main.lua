@@ -861,7 +861,7 @@ function BattleGroundEnemies:SetupTestmode()
 						local name, texture, offset, numSpells = GetSpellTabInfo(j)
 						for k = 1, numSpells do
 							local id = k + offset
-							local spellName, _, spelliD = GetSpellBookItemName(id, 'spell')
+							local spellName, _, spelliD = GetSpellBookItemName(id, Enum.SpellBookSpellBank.Player)
 							if spelliD and IsSpellKnown(spelliD) then
 								playerSpells[spelliD] = true
 							end
@@ -885,7 +885,7 @@ function BattleGroundEnemies:SetupTestmode()
 						local name, texture, offset, numSpells = GetSpellTabInfo(j)
 						for k = 1, numSpells do
 							local id = k + offset
-							local spellName, _, spelliD = GetSpellBookItemName(id, 'spell')
+							local spellName, _, spelliD = GetSpellBookItemName(id, Enum.SpellBookSpellBank.Player)
 							if spelliD and IsSpellKnown(spelliD) then
 								playerSpells[spelliD] = true
 							end
@@ -1147,6 +1147,7 @@ function BattleGroundEnemies:GetDebugFrame()
 	return self.DebugFrame
 end
 
+---@type PlayerButton[]
 BattleGroundEnemies.ArenaIDToPlayerButton = {} --key = arenaID: arenaX, value = playerButton of that unitID
 
 
@@ -1303,9 +1304,9 @@ end
 
 ---comment
 ---@param parent Frame
----@return unknown
 function BattleGroundEnemies.MyCreateFontString(parent)
 	---@class MyFontString: fontstring
+	---@field DisplayedName string
 	local fontString = parent:CreateFontString(nil, "OVERLAY")
 	fontString.ApplyFontStringSettings = ApplyFontStringSettings
 	fontString.EnableShadowColor = EnableShadowColor
@@ -1619,8 +1620,6 @@ function BattleGroundEnemies:ARENA_OPPONENT_UPDATE(unitID, unitEvent)
 			self:Debug("ARENA_OPPONENT_UPDATE cleared", playerButton.DisplayedName)
 
 			self.ArenaIDToPlayerButton[unitID] = nil
-			playerButton.ObjectiveAndRespawn:Reset()
-
 			playerButton:UpdateEnemyUnitID("Arena", false)
 			playerButton:DispatchEvent("ArenaOpponentHidden")
 		end
@@ -1840,11 +1839,11 @@ local function IamTargetcaller()
 end
 
 function BattleGroundEnemies:HandleTargetChanged(newTarget)
-	BattleGroundEnemies:Debug("playerButton target", GetUnitName("target", true))
+	self:Debug("playerButton target", GetUnitName("target", true))
 	if BattleGroundEnemies.currentTarget then
-		
+
 		BattleGroundEnemies.currentTarget:UpdateEnemyUnitID("Target", false)
-		
+
 		if self.UserButton then
 			self.UserButton:IsNoLongerTarging(BattleGroundEnemies.currentTarget)
 		end
@@ -1853,16 +1852,16 @@ function BattleGroundEnemies:HandleTargetChanged(newTarget)
 
 	if newTarget then --i target an existing player
 		if self.UserButton then
-			
+
 			newTarget:UpdateEnemyUnitID("Target", "target")
-			
+
 			self.UserButton:IsNowTargeting(newTarget)
 		end
 		newTarget.MyTarget:Show()
 		BattleGroundEnemies.currentTarget = newTarget
 
 
-		if BattleGroundEnemies.states.isRatedBG and self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then -- i am the target caller
+		if BattleGroundEnemies.states.real.isRatedBG and self.db.profile.RBG.TargetCalling_SetMark and IamTargetcaller() then -- i am the target caller
 			SetRaidTarget("target", 8)
 		end
 	else
@@ -1876,17 +1875,17 @@ end
 
 function BattleGroundEnemies:HandleFocusChanged(newFocus)
 
-	--BattleGroundEnemies:Debug("playerButton focus", playerButton, GetUnitName("focus", true))
+	--self:Debug("playerButton focus", playerButton, GetUnitName("focus", true))
 	if BattleGroundEnemies.currentFocus then
-		
+
 		BattleGroundEnemies.currentFocus:UpdateEnemyUnitID("Focus", false)
-		
+
 		BattleGroundEnemies.currentFocus.MyFocus:Hide()
 	end
 	if newFocus then
-		
+
 		newFocus:UpdateEnemyUnitID("Focus", "focus")
-		
+
 		newFocus.MyFocus:Show()
 		BattleGroundEnemies.currentFocus = newFocus
 	else
@@ -1907,15 +1906,22 @@ function BattleGroundEnemies:UPDATE_MOUSEOVER_UNIT()
 	end
 end
 
--- function BattleGroundEnemies:LOSS_OF_CONTROL_ADDED()
--- local numEvents = C_LossOfControl.GetNumEvents()
--- for i = 1, numEvents do
--- local locType, spellId, text, iconTexture, startTime, timeRemaining, duration, lockoutSchool, priority, displayType = C_LossOfControl.GetEventInfo(i)
--- --self:Debug(C_LossOfControl.GetEventInfo(i))
--- if not self.LOSS_OF_CONTROL then self.LOSS_OF_CONTROL = {} end
--- self.LOSS_OF_CONTROL[spellId] = locType
--- end
--- end
+function BattleGroundEnemies:LOSS_OF_CONTROL_ADDED(unitTarget, effectIndex)
+	self:Debug("LOSS_OF_CONTROL_ADDED", unitTarget, effectIndex)
+	local numLossOfControlEffects = C_LossOfControl.GetActiveLossOfControlDataCountByUnit(unitTarget) or 0;
+	for i = 1, numLossOfControlEffects do
+		local data = C_LossOfControl.GetActiveLossOfControlDataByUnit(unitTarget, i);
+		if data then
+			if not self.db.profile.Debug then return end
+			self.db.profile.LossOfControlData = self.db.profile.LossOfControlData or {}
+			if not self.db.profile.LossOfControlData[data.spellID] then
+				self.db.profile.LossOfControlData[data.spellID] = CopyTable(data)
+			end
+		end
+	end
+end
+
+BattleGroundEnemies.LOSS_OF_CONTROL_UPDATE = BattleGroundEnemies.LOSS_OF_CONTROL_ADDED
 
 
 --fires when data requested by C_PvP.RequestCrowdControlSpell(unitID) is available
@@ -1925,6 +1931,7 @@ function BattleGroundEnemies:ARENA_CROWD_CONTROL_SPELL_UPDATE(unitID, ...)
 	if playerButton then
 		local spellId, itemID = ...                                             --itemID only exists in classic, tbc, wrath isClassic, isTBCC, IsWrath
 		playerButton.Trinket:DisplayTrinket(spellId, itemID)
+		playerButton:UpdateCrowdControlCooldown(unitID)
 	end
 
 	--if spellId ~= 72757 then --cogwheel (30 sec cooldown trigger by racial)
@@ -1937,14 +1944,14 @@ function BattleGroundEnemies:ARENA_COOLDOWNS_UPDATE(unitID)
 	if unitID then
 		local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 		if playerButton then
-			playerButton:UpdateCrowdControl(unitID)
+			playerButton:UpdateCrowdControlCooldown(unitID)
 		end
 	else --for backwards compability, i am not sure if unitID was always given by ARENA_COOLDOWNS_UPDATE
 		for i = 1, 5 do
 			unitID = "arena" .. i
 			local playerButton = self:GetPlayerbuttonByUnitID(unitID)
 			if playerButton then
-				playerButton:UpdateCrowdControl(unitID)
+				playerButton:UpdateCrowdControlCooldown(unitID)
 			end
 		end
 	end
@@ -2115,7 +2122,7 @@ function BattleGroundEnemies:UpdateArenaPlayers()
 	self:Debug("UpdateArenaPlayers")
 	self.Enemies:CreateArenaEnemies()
 
-	if #BattleGroundEnemies.Enemies.CurrentPlayerOrder > 1 or #BattleGroundEnemies.Allies.CurrentPlayerOrder > 1 then --this ensures that we checked for enemies and the flag carrier will be shown (if its an enemy)
+	if #BattleGroundEnemies.Enemies.CurrentPlayerOrder > 0 or #BattleGroundEnemies.Allies.CurrentPlayerOrder > 0 then --this ensures that we checked for enemies and the flag carrier will be shown (if its an enemy)
 		for i = 1, GetNumArenaOpponents() do
 			local unitID = "arena" .. i
 			self:Debug(unitID, UnitName(unitID))
@@ -2153,9 +2160,9 @@ function BattleGroundEnemies:CheckForArenaEnemies()
 	-- returns valid data on PLAYER_ENTERING_WORLD
 	self:Debug(GetNumArenaOpponents())
 	if GetNumArenaOpponents() == 0 then
-		C_Timer.After(2, function() self:ThrottleUpdateArenaPlayers() end)
+		C_Timer.After(2, function() self:DebounceUpdateArenaPlayers() end)
 	else
-		self:ThrottleUpdateArenaPlayers()
+		self:DebounceUpdateArenaPlayers()
 	end
 end
 

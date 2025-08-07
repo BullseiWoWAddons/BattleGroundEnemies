@@ -1,3 +1,6 @@
+---@class Data
+---@class BattleGroundEnemies
+
 ---@type string
 local AddonName = ...
 ---@class Data
@@ -124,8 +127,8 @@ local testEvents = {
 ---@field PlayerSources table<string, table>
 ---@field NumPlayers number
 ---@field Counter table<string, number>
----@field PlayerCount FontString
----@field ActiveProfile FontString
+---@field PlayerCount MyFontString
+---@field ActiveProfile MyFontString
 ---@return MainFrame
 local function CreateMainFrame(playerType)
 
@@ -135,7 +138,7 @@ local function CreateMainFrame(playerType)
     -- the handler then sets the wheeldown and wheelup binding to execute a button click using the global button names
     -- when mouswheel is scrolled up or down it triggers a button click and runs the onclick kook from SecureHandlerWrapScript gets execute, which then sets the macrotext
 
-    ---@class MainFrame :Button
+    ---@class MainFrame
 	local mainframe = CreateFrame("Button","BGE"..playerType,BattleGroundEnemies,"SecureActionButtonTemplate, SecureHandlerEnterLeaveTemplate")
 
 	mainframe:SetAttribute("type4", "macro")
@@ -1176,12 +1179,12 @@ local function CreateMainFrame(playerType)
     return mainframe
 end
 
---@class BattleGroundEnemies.Allies: AllyFrame
+---@class BattleGroundEnemies.Allies: MainFrame
 BattleGroundEnemies.Allies = CreateMainFrame(BattleGroundEnemies.consts.PlayerTypes.Allies)
 BattleGroundEnemies.Allies.GUIDToAllyname = {}
 
 
-
+---@class BattleGroundEnemies.Enemies: MainFrame
 BattleGroundEnemies.Enemies = CreateMainFrame(BattleGroundEnemies.consts.PlayerTypes.Enemies)
 BattleGroundEnemies.Enemies.Counter = {}
 

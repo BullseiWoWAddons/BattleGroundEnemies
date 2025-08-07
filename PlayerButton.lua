@@ -18,6 +18,16 @@ local GetTexCoordsForRoleSmallCircle = GetTexCoordsForRoleSmallCircle or functio
 	end
 end
 
+---@class PlayerDetails: table
+---@field PlayerName string
+---@field PlayerClass string
+---@field PlayerSpecName string
+---@field PlayerSpecID number
+---@field PlayerRole string
+---@field PlayerRoleID number
+---@field PlayerArenaUnitID string
+---@field isFakePlayer boolean
+---@field unitID UnitToken?
 
 
 --WoW API
@@ -44,7 +54,6 @@ local time = time
 local type = type
 local unpack = unpack
 
-
 --Libs
 local LSM = LibStub("LibSharedMedia-3.0")
 local LRC = LibStub("LibRangeCheck-3.0")
@@ -52,9 +61,9 @@ local LRC = LibStub("LibRangeCheck-3.0")
 
 
 local auraFilters = { "HELPFUL", "HARMFUL" }
----comment
----@param playerButton any
----@param index number
+---FakeUnitAura returns a fake aura for test mode
+---@param playerButton PlayerButton
+---@param index integer
 ---@param filter string
 ---@return AuraData
 local function FakeUnitAura(playerButton, index, filter)
@@ -63,7 +72,9 @@ local function FakeUnitAura(playerButton, index, filter)
 	return aura
 end
 
+---Add priority to an aura
 ---@param aura AuraData
+---@return AuraData
 local function addPriority(aura)
 	aura.Priority = BattleGroundEnemies:GetSpellPriority(aura.spellId)
 	return aura
@@ -296,18 +307,20 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 		self:DispatchEvent("UpdateRaidTargetIcon", self.RaidTargetIconIndex)
 	end
 
-	function playerButton:UpdateCrowdControl(unitID)
-		local spellId, itemID, startTime, duration
+	function playerButton:UpdateCrowdControlCooldown(unitID)
+		local spellId, itemID, startTimeMs, durationMs
 		local one, two, three, four =  C_PvP.GetArenaCrowdControlInfo(unitID)
 		if four then --classsic uses four returns, extra item id
-			spellId, itemID, startTime, duration = one, two, three, four
+			spellId, itemID, startTimeMs, durationMs = one, two, three, four
 		else
-			spellId, startTime, duration = one, two, three
+			spellId, startTimeMs, durationMs = one, two, three
 		end
 
 		if spellId then
-			self.Trinket:DisplayTrinket(spellId, itemID)
-			self.Trinket:SetTrinketCooldown(startTime / 1000.0, duration / 1000.0)
+			--self.Trinket:DisplayTrinket(spellId, itemID)
+			self.Trinket:SetTrinketCooldown(startTimeMs / 1000.0, durationMs / 1000.0)
+		else
+			self.Trinket:SetTrinketCooldown(0, 0)
 		end
 	end
 
@@ -395,7 +408,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 
 	function playerButton:DeleteActiveUnitID() --Delete from OnUpdate
 		if not self.PlayerIsEnemy then return end
-		--BattleGroundEnemies:Debug("DeleteActiveUnitID")
+		self:Debug("DeleteActiveUnitID")
 		self.unitID = nil
 		self.TargetUnitID = nil
 		self:UpdateRange(false)
