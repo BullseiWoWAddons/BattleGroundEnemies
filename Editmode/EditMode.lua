@@ -32,6 +32,12 @@ function BattleGroundEnemies.EditMode.EditModeManager:AddFrame(frame, systemName
 	frame.Selection:SetIgnoreParentAlpha(true)
 	frame.Selection:SetFrameStrata("MEDIUM")
 	frame.Selection:SetFrameLevel(1000)
+	
+	-- Initialize NineSlice layout properly
+	if frame.Selection.NineSlice then
+		frame.Selection.NineSlice:SetShown(true)
+	end
+	
 	frame.Selection.Label = frame.Selection:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
 	frame.Selection.Label:SetAllPoints()
 	frame.Selection.Label:SetIgnoreParentScale(true)
@@ -41,7 +47,12 @@ function BattleGroundEnemies.EditMode.EditModeManager:AddFrame(frame, systemName
 	frame.Selection:SetScript("OnMouseDown", frame.Selection.OnMouseDown)
 	frame.Selection:SetScript("OnDragStart", frame.Selection.OnDragStart)
 	frame.Selection:SetScript("OnDragStop", frame.Selection.OnDragStop)
-	frame.Selection:OnLoad()
+	
+	-- Initialize the frame after setting up all properties
+	if frame.Selection.OnLoad then
+		pcall(frame.Selection.OnLoad, frame.Selection)
+	end
+	
 	frame.Selection:Hide()
 	frame.system = systemName
 	frame.systemLocalized = systemNameLocalized
