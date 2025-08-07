@@ -35,6 +35,7 @@ function BattleGroundEnemies.EditMode.EditModeManager:AddFrame(frame, systemName
 	frame.Selection.Label = frame.Selection:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
 	frame.Selection.Label:SetAllPoints()
 	frame.Selection.Label:SetIgnoreParentScale(true)
+	frame.Selection.MouseOverHighlight = CreateFrame("frame", nil, frame.Selection, "NineSliceCodeTemplate")
 	Mixin(frame.Selection.Label, ShrinkUntilTruncateFontStringMixin)
 	Mixin(frame.Selection, BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin, BattleGroundEnemies.Mixins.EditModeSystemSelectionMixin)
 	Mixin(frame, BattleGroundEnemies.Mixins.CustomEditModeSystemMixin)

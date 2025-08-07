@@ -168,22 +168,18 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnMou
 	BattleGroundEnemies.EditMode.EditModeManager:SelectSystem(self.parent);
 end
 
-local EditModeSystemSelectionMixin = EditModeSystemSelectionMixin
+local EditModeSystemSelectionMixin = EditModeSystemSelectionMixin or {}
 
-if not EditModeSystemSelectionMixin then
-    EditModeSystemSelectionMixin = {};
+function EditModeSystemSelectionMixin:SetGetLabelTextFunction(getLabelText)
+    self.getLabelText = getLabelText;
+end
 
-    function EditModeSystemSelectionMixin:SetGetLabelTextFunction(getLabelText)
-        self.getLabelText = getLabelText;
+function EditModeSystemSelectionMixin:UpdateLabelVisibility()
+    if self.getLabelText then
+        self.Label:SetText(self.getLabelText());
     end
 
-    function EditModeSystemSelectionMixin:UpdateLabelVisibility()
-        if self.getLabelText then
-            self.Label:SetText(self.getLabelText());
-        end
-
-        self.Label:SetShown(self.isSelected);
-    end
+    self.Label:SetShown(self.isSelected);
 end
 
 BattleGroundEnemies.Mixins.EditModeSystemSelectionMixin = EditModeSystemSelectionMixin
