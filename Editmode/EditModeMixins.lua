@@ -209,7 +209,9 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemLoad()
 
 
 
-	self.Selection:SetGetLabelTextFunction(function() return self:GetLocalizedSystemName(); end);
+	if self.Selection and self.Selection.SetGetLabelTextFunction then
+		self.Selection:SetGetLabelTextFunction(function() return self:GetLocalizedSystemName(); end);
+	end
 	--self:SetupSettingsDialogAnchor();
 	self.snappedFrames = {};
 	self.downKeys = {};
