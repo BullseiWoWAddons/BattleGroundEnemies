@@ -1553,13 +1553,13 @@ function BattleGroundEnemies:SetupOptions()
 						max = 40,
 						step = 1,
 						get = function()
-							print("get", self.Testmode.PlayerCountTestmode)
-							return 6
-							--return  self.Testmode.PlayerCountTestmode
+							--print("get", self.Testmode.PlayerCountTestmode)
+							--return 6
+							return  self.Testmode.PlayerCountTestmode
 						end,
 						set = function(option, value)
-							print("set value", value)
-							print("set", self.Testmode.PlayerCountTestmode)
+							--print("set value", value)
+							--print("set", self.Testmode.PlayerCountTestmode)
 							self:TestModePlayerCountChanged(value)
 						end,
 						order = 1
@@ -1597,39 +1597,39 @@ function BattleGroundEnemies:SetupOptions()
 						width = "full",
 						order = 4
 					},
-					Testmode_MapId = {
-						type = "select",
-						name = "select testmode map",
-						width = "full",
-						get = function() return self.states.test.currentMapId end,
-						set = function(option, value)
-							--value is the mapId
-							self.states.test.currentMapId = value
+					-- Testmode_MapId = {
+					-- 	type = "select",
+					-- 	name = "select testmode map",
+					-- 	width = "full",
+					-- 	get = function() return self.states.test.currentMapId end,
+					-- 	set = function(option, value)
+					-- 		--value is the mapId
+					-- 		self.states.test.currentMapId = value
 
-						end,
-						order = 5,
-						values = function()
-							local buffs = Data.BattlegroundspezificBuffs
-							local debuffs = Data.BattlegroundspezificDebuffs
-							local commonMapIds = {}
-							for mapId in pairs(buffs) do
-								if debuffs[mapId] then
-									table.insert(commonMapIds, mapId)
-								end
-							end
-							local allCommonWithData = {}
-							for i, mapId in pairs(commonMapIds) do
-								local data = C_Map.GetMapInfo(mapId)
-								if data then table.insert(allCommonWithData, {mapId = mapId, data = data}) end
-							end
-							local allMapNames = {}
-							for _, mapData in pairs(allCommonWithData) do
-								allMapNames[mapData.mapId] = mapData.data.name
-							end
+					-- 	end,
+					-- 	order = 5,
+					-- 	values = function()
+					-- 		local buffs = Data.BattlegroundspezificBuffs
+					-- 		local debuffs = Data.BattlegroundspezificDebuffs
+					-- 		local commonMapIds = {}
+					-- 		for mapId in pairs(buffs) do
+					-- 			if debuffs[mapId] then
+					-- 				table.insert(commonMapIds, mapId)
+					-- 			end
+					-- 		end
+					-- 		local allCommonWithData = {}
+					-- 		for i, mapId in pairs(commonMapIds) do
+					-- 			local data = C_Map.GetMapInfo(mapId)
+					-- 			if data then table.insert(allCommonWithData, {mapId = mapId, data = data}) end
+					-- 		end
+					-- 		local allMapNames = {}
+					-- 		for _, mapData in pairs(allCommonWithData) do
+					-- 			allMapNames[mapData.mapId] = mapData.data.name
+					-- 		end
 
-							return allMapNames
-						end
-					},
+					-- 		return allMapNames
+					-- 	end
+					-- },
 				}
 			},
 			GeneralSettings = {
