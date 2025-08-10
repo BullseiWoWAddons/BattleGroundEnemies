@@ -125,7 +125,6 @@ local EditModeSystemSelectionLayout = EditModeSystemSelectionLayout or
 BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin = {};
 
 function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnLoad()
-	print("OnLoad", "seEditModeSystemSelectionBaseMixin")
 	self.parent = self:GetParent();
 	if self.Label then
 		self.Label:SetFontObjectsToTry("GameFontHighlightLarge", "GameFontHighlightMedium", "GameFontHighlightSmall");
@@ -143,7 +142,6 @@ function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:SetSystem(s
 end
 
 function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:ShowHighlighted()
-	print("ShowHighlighted", self.system)
 	if self.textureShown ~= "highlight" then
 		NineSliceUtil.ApplyLayout(self, EditModeSystemSelectionLayout, self.highlightTextureKit);
 		self.textureShown = "highlight";
@@ -154,7 +152,6 @@ function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:ShowHighlig
 end
 
 function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:ShowSelected()
-	print("ShowSelected", self.system)
 	if self.textureShown ~= "selected" then
 		NineSliceUtil.ApplyLayout(self, EditModeSystemSelectionLayout, self.selectedTextureKit);
 		self.textureShown = "selected";
@@ -181,12 +178,10 @@ function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnDragStop(
 end
 
 function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnMouseDown()
-	print("OnMouseDown", self.system)
 	BattleGroundEnemies.EditMode.EditModeManager:SelectSystem(self.parent);
 end
 
 function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnEnter()
-	print("onEnter", self.system)
 	self:ShowEditInstructions(true);
 	self:CheckShowInstructionalTooltip();
 end
@@ -239,7 +234,6 @@ end
 BattleGroundEnemies.Mixins.CustomEditModeSystemMixin = {}
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemLoad()
-	print("OnSystemLoad", self.system);
 	if not self.system then
 		-- All systems must have self.system set on them
 		return;
@@ -910,18 +904,13 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:ClearHighlight()
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:HighlightSystem()
-	print("HighlightSystem", self.system, self.playerButton.PlayerDetails.PlayerName)
 	if self.isDragging then
 		self:OnDragStop();
 	end
 
-	print("HighlightSystem", 2)
-
 	self:SetMovable(false);
 	self:AnchorSelectionFrame();
-	print("HighlightSystem", 3)
 	self.Selection:ShowHighlighted();
-	print("HighlightSystem",4)
 	self.isHighlighted = true;
 	self.isSelected = false;
 	self:UpdateMagnetismRegistration();
