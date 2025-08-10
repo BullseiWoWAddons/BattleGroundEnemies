@@ -122,9 +122,10 @@ local EditModeSystemSelectionLayout = EditModeSystemSelectionLayout or
 	end
 };
 
-BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin = {};
+BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin = {};
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnLoad()
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnLoad()
+	print("OnLoad", "seEditModeSystemSelectionBaseMixin")
 	self.parent = self:GetParent();
 	if self.Label then
 		self.Label:SetFontObjectsToTry("GameFontHighlightLarge", "GameFontHighlightMedium", "GameFontHighlightSmall");
@@ -132,64 +133,113 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnLoa
 	if self.HorizontalLabel then
 		self.HorizontalLabel:SetFontObjectsToTry("GameFontHighlightLarge", "GameFontHighlightMedium", "GameFontHighlightSmall");
 	end
+
+	NineSliceUtil.ApplyLayout(self.MouseOverHighlight, EditModeSystemSelectionLayout, self.highlightTextureKit);
+	self.MouseOverHighlight:SetBlendMode("ADD");
 end
 
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:SetSystem(system)
+	self.system = system;
+end
 
-
-
-
-
-function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:ShowHighlighted()
-	NineSliceUtil.ApplyLayout(self, EditModeSystemSelectionLayout, self.highlightTextureKit);
-
-
-
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:ShowHighlighted()
+	print("ShowHighlighted", self.system)
+	if self.textureShown ~= "highlight" then
+		NineSliceUtil.ApplyLayout(self, EditModeSystemSelectionLayout, self.highlightTextureKit);
+		self.textureShown = "highlight";
+	end
 	self.isSelected = false;
 	self:UpdateLabelVisibility();
 	self:Show();
 end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:ShowSelected()
-	NineSliceUtil.ApplyLayout(self, EditModeSystemSelectionLayout, self.selectedTextureKit);
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:ShowSelected()
+	print("ShowSelected", self.system)
+	if self.textureShown ~= "selected" then
+		NineSliceUtil.ApplyLayout(self, EditModeSystemSelectionLayout, self.selectedTextureKit);
+		self.textureShown = "selected";
+	end
 	self.isSelected = true;
 	self:UpdateLabelVisibility();
 	self:Show();
 end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnDragStart()
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:IsSelected()
+	return self.isSelected;
+end
+
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:ShouldShowLabelText()
+	return self:IsSelected() or self:IsShowingEditInstructions();
+end
+
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnDragStart()
 	self.parent:OnDragStart();
 end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnDragStop()
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnDragStop()
 	self.parent:OnDragStop();
 end
 
-function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionBaseMixin:OnMouseDown()
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnMouseDown()
+	print("OnMouseDown", self.system)
 	BattleGroundEnemies.EditMode.EditModeManager:SelectSystem(self.parent);
 end
 
-local EditModeSystemSelectionMixin = EditModeSystemSelectionMixin
-
-if not EditModeSystemSelectionMixin then
-    EditModeSystemSelectionMixin = {};
-
-    function EditModeSystemSelectionMixin:SetGetLabelTextFunction(getLabelText)
-        self.getLabelText = getLabelText;
-    end
-
-    function EditModeSystemSelectionMixin:UpdateLabelVisibility()
-        if self.getLabelText then
-            self.Label:SetText(self.getLabelText());
-        end
-
-        self.Label:SetShown(self.isSelected);
-    end
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnEnter()
+	print("onEnter", self.system)
+	self:ShowEditInstructions(true);
+	self:CheckShowInstructionalTooltip();
 end
 
-BattleGroundEnemies.Mixins.EditModeSystemSelectionMixin = EditModeSystemSelectionMixin
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnLeave()
+	self:ShowEditInstructions(false);
+	self:HideInstructionalTooltip();
+end
+
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:ShowEditInstructions(shown)
+	self.instructionsShown = shown;
+
+	self.MouseOverHighlight:SetShown(shown);
+	self:UpdateLabelVisibility();
+end
+
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:IsShowingEditInstructions()
+	return self.instructionsShown;
+end
+
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:CheckShowInstructionalTooltip()
+	if not self:IsSelected() then
+		local tooltip = GetAppropriateTooltip();
+		tooltip:SetOwner(self, "ANCHOR_CURSOR");
+		tooltip:SetText(self.system);
+		tooltip:Show();
+	else
+		self:HideInstructionalTooltip();
+	end
+end
+
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:HideInstructionalTooltip()
+	local tooltip = GetAppropriateTooltip();
+	tooltip:Hide();
+end
+
+
+BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionMixin = {};
+function BattleGroundEnemies.Mixins.CustomEditModeSystemSelectionMixin:GetLabelText()
+	--custom
+	return self.system:GetLocalizedSystemName();
+end
+
+
+BattleGroundEnemies.Mixins.EditModeSystemSelectionMixin = {}
+function BattleGroundEnemies.Mixins.EditModeSystemSelectionMixin:UpdateLabelVisibility()
+	self.Label:SetText(self:GetLabelText());
+	self.Label:SetShown(self.isSelected);
+end
 BattleGroundEnemies.Mixins.CustomEditModeSystemMixin = {}
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemLoad()
+	print("OnSystemLoad", self.system);
 	if not self.system then
 		-- All systems must have self.system set on them
 		return;
@@ -208,13 +258,12 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnSystemLoad()
 	BattleGroundEnemies.EditMode.EditModeManager:RegisterSystemFrame(self);
 
 
-
-	self.Selection:SetGetLabelTextFunction(function() return self:GetLocalizedSystemName(); end);
 	--self:SetupSettingsDialogAnchor();
 	self.snappedFrames = {};
 	self.downKeys = {};
 
 	--self.settingDisplayInfoMap = EditModeSettingDisplayInfoManager:GetSystemSettingDisplayInfoMap(self.system);
+	self.Selection:SetSystem(self);
 end
 
 
@@ -640,39 +689,39 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetScaledSelection
 	return left * scale, (left + width) * scale, bottom * scale, (bottom + height) * scale;
 end
 
-local SELECTION_PADDING = 0; --custom, is 2 uually
+local SELECTION_PADDING = 0; --custom, is 2 set in EditModeSystemTemplates.lua
+
+function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetLeftOffset()
+	return select(4, self.Selection:GetPoint(1)) - SELECTION_PADDING;
+end
+function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetRightOffset()
+	return select(4, self.Selection:GetPoint(2)) + SELECTION_PADDING;
+end
+function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetTopOffset()
+	return select(5, self.Selection:GetPoint(1)) + SELECTION_PADDING;
+end
+function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetBottomOffset()
+	return select(5, self.Selection:GetPoint(2)) - SELECTION_PADDING;
+end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:GetSelectionOffset(point, forYOffset)
-	local function GetLeftOffset()
-		return select(4, self.Selection:GetPoint(1)) - SELECTION_PADDING;
-	end
-	local function GetRightOffset()
-		return select(4, self.Selection:GetPoint(2)) + SELECTION_PADDING;
-	end
-	local function GetTopOffset()
-		return select(5, self.Selection:GetPoint(1)) + SELECTION_PADDING;
-	end
-	local function GetBottomOffset()
-		return select(5, self.Selection:GetPoint(2)) - SELECTION_PADDING;
-	end
-
 	local offset;
 	if point == "LEFT" then
-		offset = GetLeftOffset();
+		offset = self:GetLeftOffset();
 	elseif point == "RIGHT" then
-		offset = GetRightOffset();
+		offset = self:GetRightOffset();
 	elseif point == "TOP" then
-		offset = GetTopOffset();
+		offset = self:GetTopOffset();
 	elseif point == "BOTTOM" then
-		offset = GetBottomOffset();
+		offset = self:GetBottomOffset();
 	elseif point == "TOPLEFT" then
-		offset = forYOffset and GetTopOffset() or GetLeftOffset();
+		offset = forYOffset and self:GetTopOffset() or self:GetLeftOffset();
 	elseif point == "TOPRIGHT" then
-		offset = forYOffset and GetTopOffset() or GetRightOffset();
+		offset = forYOffset and self:GetTopOffset() or self:GetRightOffset();
 	elseif point == "BOTTOMLEFT" then
-		offset = forYOffset and GetBottomOffset() or GetLeftOffset();
+		offset = forYOffset and self:GetBottomOffset() or self:GetLeftOffset();
 	elseif point == "BOTTOMRIGHT" then
-		offset = forYOffset and GetBottomOffset() or GetRightOffset();
+		offset = forYOffset and self:GetBottomOffset() or self:GetRightOffset();
 	else
 		-- Center
 		local selectionCenterX, selectionCenterY = self.Selection:GetCenter();
@@ -793,6 +842,8 @@ end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SnapToFrame(frameInfo)
 	local offsetX, offsetY = self:GetSnapOffsets(frameInfo);
+	-- ClearAllPoints after GetSnapOffsets since it uses the existing rect to calculate the offset
+	self:ClearAllPoints();
 	self:SetPoint(frameInfo.point, frameInfo.frame, frameInfo.relativePoint, offsetX, offsetY);
 end
 
@@ -859,13 +910,18 @@ function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:ClearHighlight()
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:HighlightSystem()
+	print("HighlightSystem", self.system, self.playerButton.PlayerDetails.PlayerName)
 	if self.isDragging then
 		self:OnDragStop();
 	end
 
+	print("HighlightSystem", 2)
+
 	self:SetMovable(false);
 	self:AnchorSelectionFrame();
+	print("HighlightSystem", 3)
 	self.Selection:ShowHighlighted();
+	print("HighlightSystem",4)
 	self.isHighlighted = true;
 	self.isSelected = false;
 	self:UpdateMagnetismRegistration();
@@ -883,6 +939,10 @@ end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:SetSelectionShown(shown)
 	self.Selection:SetShown(shown);
+end
+
+function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:ShowEditInstructions(shown)
+	self.Selection:ShowEditInstructions(shown);
 end
 
 function BattleGroundEnemies.Mixins.CustomEditModeSystemMixin:OnEditModeEnter()
