@@ -5,6 +5,19 @@ local Data = select(2, ...)
 
 
 Data.changelog = {
+		{
+		Version = "11.2.0.0",
+		General = "This version fixes errors and bugs.",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed an error message regarding the Hiding of the frame in combat.",
+					"Fixed an error that was caused by Editmode changes in 11.2.0."
+				}
+			},
+		}
+	},
 	{
 		Version = "11.0.5.9",
 		General = "This version fixes errors and bugs",
