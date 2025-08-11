@@ -5,7 +5,19 @@ local Data = select(2, ...)
 
 
 Data.changelog = {
-		{
+	{
+		Version = "11.2.0.1",
+		General = "This version fixes error message on Mists of Pandaria.",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed an error message in Mists of Pandaria. Thanks to shalmirane@curseforge for pointing this out."
+				}
+			},
+		}
+	},
+	{
 		Version = "11.2.0.0",
 		General = "This version fixes errors and bugs.",
 		Sections = {
