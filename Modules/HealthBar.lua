@@ -232,6 +232,7 @@ function healthBar:AttachToPlayerButton(playerButton)
 		if unitID and CompactUnitFrame_UpdateHealPrediction then
 			local config = self.config
 			playerButton.displayedUnit = unitID
+			playerButton.unit = unitID --set it for cata -- see CompactUnitFrame_UpdateHealPrediction in Wrath/CompactUnitFrame.lua
 			playerButton.optionTable = {displayHealPrediction = config.HealthPrediction_Enabled}
 			CompactUnitFrame_UpdateHealPrediction(playerButton)
 		end
