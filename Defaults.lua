@@ -390,7 +390,9 @@ Data.defaultSettings = {
 			CustomPlayerCountConfigsEnabled = false,
 
 			RangeIndicator_Enabled = true,
-			RangeIndicator_Range = 40,
+			RangeIndicator_Range = 40, --not used anymore, but kept for compatibility
+			RangeIndicator_Range_InCombat = 40,
+			RangeIndicator_Range_OutOfCombat = 40,
 			RangeIndicator_Alpha = 0.55,
 			RangeIndicator_Everything = true,
 			RangeIndicator_Frames = {},
@@ -753,7 +755,9 @@ Data.defaultSettings = {
 			CustomPlayerCountConfigsEnabled = false,
 
 			RangeIndicator_Enabled = true,
-			RangeIndicator_Range = 40,
+			RangeIndicator_Range = 40, --not used anymore, but kept for compatibility
+			RangeIndicator_Range_InCombat = 40,
+			RangeIndicator_Range_OutOfCombat = 40,
 			RangeIndicator_Alpha = 0.55,
 			RangeIndicator_Everything = true,
 			RangeIndicator_Frames = {},

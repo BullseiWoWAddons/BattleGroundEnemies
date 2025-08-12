@@ -894,8 +894,10 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	end
 
 	function playerButton:UpdateRangeViaLibRangeCheck(unitID)
+		if not unitID then return end
 		if not self.config.RangeIndicator_Enabled then return end
-		local checker, range = LRC[self.PlayerIsEnemy and "GetHarmMaxChecker"  or "GetFriendMaxChecker"](LRC, self.config.RangeIndicator_Range, InCombatLockdown())
+		local inCombatLockdown = InCombatLockdown()
+		local checker, range = LRC[self.PlayerIsEnemy and "GetHarmMaxChecker"  or "GetFriendMaxChecker"](LRC, inCombatLockdown and self.config.RangeIndicator_Range_InCombat or self.config.RangeIndicator_Range_OutOfCombat, inCombatLockdown)
 		if not checker then return self:UpdateRange(true) end
 		self:UpdateRange(checker(unitID))
 	end

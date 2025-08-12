@@ -934,11 +934,22 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						type = "toggle",
 						name = L.RangeIndicator_Enabled,
 						desc = L.RangeIndicator_Enabled_Desc,
+						width = 1.2,
 						order = 2
 					},
-					RangeIndicator_Range = {
+					RangeIndicator_Alpha = {
+						type = "range",
+						name = L.RangeIndicator_Alpha,
+						desc = L.RangeIndicator_Alpha_Desc,
+						disabled = function() return not location.RangeIndicator_Enabled end,
+						min = 0,
+						max = 1,
+						step = 0.05,
+						order = 3
+					},
+					RangeIndicator_Range_InCombat = {
 						type = "select",
-						name = L.RangeIndicator_Range,
+						name = L.RangeIndicator_Range_InCombat,
 						desc = L.RangeIndicator_Range_Desc,
 						disabled = function() return not location.RangeIndicator_Enabled end,
 						-- get = function() return Data[playerType.."ItemIDToRange"][location.RangeIndicator_Range] end,
@@ -960,25 +971,42 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							end
 							return ranges
 						end,
-						width = "half",
-						order = 3
-					},
-					RangeIndicator_Alpha = {
-						type = "range",
-						name = L.RangeIndicator_Alpha,
-						desc = L.RangeIndicator_Alpha_Desc,
-						disabled = function() return not location.RangeIndicator_Enabled end,
-						min = 0,
-						max = 1,
-						step = 0.05,
+						width = 1.2,
 						order = 4
 					},
-					Fake = Data.AddVerticalSpacing(5),
+					RangeIndicator_Range_OutOfCombat = {
+						type = "select",
+						name = L.RangeIndicator_Range_OutOfCombat,
+						desc = L.RangeIndicator_Range_Desc,
+						disabled = function() return not location.RangeIndicator_Enabled end,
+						-- get = function() return Data[playerType.."ItemIDToRange"][location.RangeIndicator_Range] end,
+						-- set = function(option, value)
+						-- 	value = Data[playerType.."RangeToItemID"][value]
+						-- 	return Data.SetOption(location, option, value)
+						-- end,
+						-- values =   Data[playerType.."RangeToRange"],
+						values = function()
+							local checkers
+							if playerType == "Enemies" then
+								checkers = LRC:GetHarmCheckers(false)
+							else
+								checkers = LRC:GetFriendCheckers(false)
+							end
+							local ranges = {}
+							for range, checker in checkers do
+								ranges[range] = range
+							end
+							return ranges
+						end,
+						width = 1.2,
+						order = 5
+					},
 					RangeIndicator_Everything = {
 						type = "toggle",
 						name = L.RangeIndicator_Everything,
 						disabled = function() return not location.RangeIndicator_Enabled end,
-						order = 6
+						order = 6,
+						width = "double",
 					},
 					RangeIndicator_Frames = {
 						type = "multiselect",
@@ -1016,14 +1044,16 @@ local function addEnemyAndAllySettings(self, mainFrame)
 						type = "toggle",
 						name = ACTION_BUTTON_USE_KEY_DOWN,
 						desc = OPTION_TOOLTIP_ACTION_BUTTON_USE_KEY_DOWN,
+						width = "full",
 						order = 2,
 					},
 					UseClique = {
 						type = "toggle",
 						name = L.EnableClique,
 						desc = L.EnableClique_Desc,
+						hidden = playerType == "Enemies",
+						width = "full",
 						order = 3,
-						hidden = playerType == "Enemies"
 					},
 					LeftButton = {
 						type = "group",

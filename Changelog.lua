@@ -6,6 +6,25 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.2.0.2",
+		General = "This release changes settings for the range indicator and fixes error message.",
+		Sections = {
+			{
+				Header = "Changes",
+				Entries = {
+					"You can now specify different range values for in-combat and out-of-combat situations.",
+					"Adjusted text length of some options to avoid text overflow in the options panel.",
+				}
+			},
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed an error message that happened when toggling testmode while in a battleground."
+				}
+			},
+		}
+	},
+	{
 		Version = "11.2.0.1",
 		General = "This version fixes error message on Mists of Pandaria.",
 		Sections = {
