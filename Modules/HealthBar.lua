@@ -79,7 +79,7 @@ local options = function(location)
 		HealthTextEnabled = {
 			type = "toggle",
 			name = L.HealthTextEnabled,
-			width = "normal",
+			width = 1.2,
 			order = 6,
 		},
 		HealthTextType = {
