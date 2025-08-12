@@ -305,7 +305,7 @@ local function addGeneralPriorityAuraSettings(location, filter)
 			type = "toggle",
 			name = L.HideHighestPriority,
 			desc = L.HideHighestPriority_Desc,
-			width = 'normal',
+			width = 'full',
 			order = 1
 		}
 	}

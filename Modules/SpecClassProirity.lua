@@ -39,14 +39,14 @@ local generalOptions = function (location)
 			type = "toggle",
 			name = L.ShowSpecIfExists,
 			desc = L.ShowSpecIfExists_Desc,
-			width = "normal",
+			width = "full",
 			order = 1
 		},
 		showHighestPriority = {
 			type = "toggle",
 			name = L.ShowHighestPriority,
 			desc = L.ShowHighestPriority_Desc,
-			width = "normal",
+			width = "full",
 			order = 2
 		},
 	}

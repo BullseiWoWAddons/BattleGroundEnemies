@@ -37,7 +37,8 @@ local generalOptions = function (location)
 		OnlyShowIfNotMaxLevel = {
 			type = "toggle",
 			name = L.LevelText_OnlyShowIfNotMaxLevel,
-			order = 2
+			order = 2,
+			width = "full",
 		}
 	}
 end

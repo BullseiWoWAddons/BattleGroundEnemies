@@ -122,6 +122,7 @@ local generalOptions = function(location)
 					type = "toggle",
 					name = L.EnableCustomDRCategoryIcons,
 					desc = L.EnableCustomDRCategoryIcons_Desc,
+					width = "full",
 					order = 1
 				},
 				CustomCategoryIcons = {
