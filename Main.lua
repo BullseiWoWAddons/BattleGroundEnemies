@@ -853,6 +853,7 @@ function BattleGroundEnemies:SetupTestmode()
 		local foundA = Data.FoundAuras[filter]
 		if not playerSpells then
 			playerSpells = {}
+			local playerSpellbook = Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player or 0
 
 			if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then
 				local numSkillLines = C_SpellBook.GetNumSpellBookSkillLines()
@@ -861,7 +862,7 @@ function BattleGroundEnemies:SetupTestmode()
 						local name, texture, offset, numSpells = GetSpellTabInfo(j)
 						for k = 1, numSpells do
 							local id = k + offset
-							local spellName, _, spelliD = GetSpellBookItemName(id, Enum.SpellBookSpellBank.Player)
+							local spellName, _, spelliD = GetSpellBookItemName(id, playerSpellbook)
 							if spelliD and IsSpellKnown(spelliD) then
 								playerSpells[spelliD] = true
 							end
@@ -870,8 +871,8 @@ function BattleGroundEnemies:SetupTestmode()
 						local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(j)
 						local offset, numSlots = skillLineInfo.itemIndexOffset, skillLineInfo.numSpellBookItems
 						for k = offset + 1, offset + numSlots do
-							local name, subName = C_SpellBook.GetSpellBookItemName(k, Enum.SpellBookSpellBank.Player)
-							local spellID = select(2,C_SpellBook.GetSpellBookItemType(k, Enum.SpellBookSpellBank.Player))
+							local name, subName = C_SpellBook.GetSpellBookItemName(k, playerSpellbook)
+							local spellID = select(2,C_SpellBook.GetSpellBookItemType(k, playerSpellbook))
 							if spellID and IsSpellKnown(spellID) then
 								playerSpells[spellID] = true
 							end
@@ -885,7 +886,7 @@ function BattleGroundEnemies:SetupTestmode()
 						local name, texture, offset, numSpells = GetSpellTabInfo(j)
 						for k = 1, numSpells do
 							local id = k + offset
-							local spellName, _, spelliD = GetSpellBookItemName(id, Enum.SpellBookSpellBank.Player)
+							local spellName, _, spelliD = GetSpellBookItemName(id, playerSpellbook)
 							if spelliD and IsSpellKnown(spelliD) then
 								playerSpells[spelliD] = true
 							end
@@ -894,8 +895,8 @@ function BattleGroundEnemies:SetupTestmode()
 						local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(j)
 						local offset, numSlots = skillLineInfo.itemIndexOffset, skillLineInfo.numSpellBookItems
 						for k = offset + 1, offset + numSlots do
-							local name, subName = C_SpellBook.GetSpellBookItemName(k, Enum.SpellBookSpellBank.Player)
-							local spellID = select(2,C_SpellBook.GetSpellBookItemType(k, Enum.SpellBookSpellBank.Player))
+							local name, subName = C_SpellBook.GetSpellBookItemName(k, playerSpellbook)
+							local spellID = select(2,C_SpellBook.GetSpellBookItemType(k, playerSpellbook))
 							if spellID and IsSpellKnown(spellID) then
 								playerSpells[spellID] = true
 							end
