@@ -134,7 +134,9 @@ function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:OnLoad()
 	end
 
 	NineSliceUtil.ApplyLayout(self.MouseOverHighlight, EditModeSystemSelectionLayout, self.highlightTextureKit);
-	self.MouseOverHighlight:SetBlendMode("ADD");
+	if self.MouseOverHighlight.SetBlendMode then
+		self.MouseOverHighlight:SetBlendMode("ADD");
+	end
 end
 
 function BattleGroundEnemies.Mixins.EditModeSystemSelectionBaseMixin:SetSystem(system)
