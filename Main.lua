@@ -2423,7 +2423,7 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 						self.states.real.isRatedBG = C_PvP.IsRatedBattleground()
 						self.states.real.isSoloRBG = C_PvP.IsSoloRBG()
 					else
-						self.states.real.isRatedBG = IsRatedBattleground and IsRatedBattleground()
+						self.states.real.isRatedBG = not not (IsRatedBattleground and IsRatedBattleground())
 						self.states.real.isSoloRBG = false
 					end
 
