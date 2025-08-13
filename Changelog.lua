@@ -6,6 +6,18 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.2.0.3",
+		General = "Fix Errors on Mists of Pandaria",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed two error messages that happened on Mists of Pandaria"
+				}
+			},
+		}
+	},
+	{
 		Version = "11.2.0.2",
 		General = "This release changes settings for the range indicator and fixes error message.",
 		Sections = {
