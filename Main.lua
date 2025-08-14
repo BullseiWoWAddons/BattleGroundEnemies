@@ -2420,10 +2420,10 @@ function BattleGroundEnemies:PLAYER_ENTERING_WORLD()
 			C_Timer.After(5,
 				function()        --Delay this check, since its happening sometimes that this data is not ready yet
 					if C_PvP then
-						self.states.real.isRatedBG = C_PvP.IsRatedBattleground()
-						self.states.real.isSoloRBG = C_PvP.IsSoloRBG()
+						self.states.real.isRatedBG = not not C_PvP.IsRatedBattleground and C_PvP.IsRatedBattleground()
+						self.states.real.isSoloRBG = not not C_PvP.IsSoloRBG and C_PvP.IsSoloRBG()
 					else
-						self.states.real.isRatedBG = not not (IsRatedBattleground and IsRatedBattleground())
+						self.states.real.isRatedBG = not not IsRatedBattleground and IsRatedBattleground()
 						self.states.real.isSoloRBG = false
 					end
 

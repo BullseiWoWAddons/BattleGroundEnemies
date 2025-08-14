@@ -6,6 +6,10 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.2.0.5",
+		General = "Fixed IsRatedBattleGround error for real this time",
+	},
+	{
 		Version = "11.2.0.4",
 		General = "Fix one more error on Mists of Pandaria",
 		Sections = {
