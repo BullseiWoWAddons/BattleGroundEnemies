@@ -1170,7 +1170,8 @@ BattleGroundEnemies.GeneralEvents = {
 	"UNIT_HEALTH",
 	"UNIT_MAXHEALTH",
 	"UNIT_POWER_FREQUENT",
-	"PLAYER_REGEN_ENABLED"
+	"PLAYER_REGEN_ENABLED",
+	"PLAYER_REGEN_DISABLED"
 }
 
 BattleGroundEnemies.RetailEvents = {
@@ -2015,6 +2016,10 @@ function BattleGroundEnemies:PLAYER_REGEN_ENABLED()
 		tbl[funcName](tbl)
 	end
 	wipe(self.PendingUpdates)
+end
+
+function BattleGroundEnemies:PLAYER_REGEN_DISABLED()
+	self:DisableTestOrEditmode()
 end
 
 function BattleGroundEnemies:PlayerDead()
