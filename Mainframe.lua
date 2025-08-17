@@ -139,7 +139,7 @@ local function CreateMainFrame(playerType)
     -- when mouswheel is scrolled up or down it triggers a button click and runs the onclick kook from SecureHandlerWrapScript gets execute, which then sets the macrotext
 
     ---@class MainFrame
-	local mainframe = CreateFrame("Button","BGE"..playerType,BattleGroundEnemies,"SecureActionButtonTemplate, SecureHandlerEnterLeaveTemplate")
+	local mainframe = CreateFrame("Button", "BGE"..playerType, UIParent, "SecureActionButtonTemplate, SecureHandlerEnterLeaveTemplate")
 
 	mainframe:SetAttribute("type4", "macro")
 	mainframe:SetAttribute("type5", "macro")
@@ -186,8 +186,7 @@ local function CreateMainFrame(playerType)
 
     mainframe.Counter = {}
 
-	mainframe.enabled = true
-	mainframe:Disable()
+	
     mainframe:SetScript("OnEvent", function(self, event, ...)
 		if self.db and self.db.profile and self.db.profile.DebugBlizzEvents then
 			self:Debug("OnEvent", event, ...)
@@ -1174,6 +1173,9 @@ local function CreateMainFrame(playerType)
 	mainframe.ActiveProfile:SetJustifyH("LEFT")
 	mainframe.ActiveProfile:SetJustifyV("MIDDLE")
 	mainframe.ActiveProfile:Hide()
+
+	mainframe.enabled = true
+	mainframe:Disable()
 
 
     return mainframe
