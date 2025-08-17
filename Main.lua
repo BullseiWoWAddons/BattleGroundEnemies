@@ -679,7 +679,6 @@ BattleGroundEnemies:SetScript("OnEvent", function(self, event, ...)
 	end
 	self[event](self, ...)
 end)
-BattleGroundEnemies:Hide()
 
 function BattleGroundEnemies:ShowTooltip(owner, func)
 	if self.db.profile.ShowTooltips then
@@ -1353,7 +1352,6 @@ function BattleGroundEnemies:Disable()
 	self:Debug("BattleGroundEnemies disabled")
 	self.enabled = false
 	self:UnregisterEvents()
-	self:Hide()
 	RequestFrame:Hide()
 	stopFakePlayersTicker()
 	self.Allies:Disable()
@@ -1376,7 +1374,6 @@ function BattleGroundEnemies:Enable()
 		RequestFrame:Show()
 		stopFakePlayersTicker()
 	end
-	self:Show()
 	self.Allies:CheckEnableState()
 	self.Enemies:CheckEnableState()
 end
