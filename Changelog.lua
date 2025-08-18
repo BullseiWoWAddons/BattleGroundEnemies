@@ -6,6 +6,21 @@ local Data = select(2, ...)
 
 Data.changelog = {
 	{
+		Version = "11.2.0.6",
+		General = "Fixed issues and errors.",
+		Sections = {
+			{
+				Header = "Bugfix",
+				Entries = {
+					"Fixed one error message that happened on the options panel when custom player count profiles are enabled.",
+					"Fixed error message reported by snakefizz@Curseforge.",
+					"Fixed error when trying to move the frames in combat.",
+					"Fixed mouse wheel targeting not working. Thanks to Pride_rag@curseforge for the report."
+				}
+			},
+		}
+	},
+	{
 		Version = "11.2.0.5",
 		General = "Fixed IsRatedBattleGround error for real this time",
 	},
