@@ -184,8 +184,6 @@ local function CreateMainFrame(playerType)
 		hasFlag = false
 	}
 
-    mainframe.Counter = {}
-
 	
     mainframe:SetScript("OnEvent", function(self, event, ...)
 		if self.db and self.db.profile and self.db.profile.DebugBlizzEvents then
@@ -469,8 +467,7 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:Enable()
-		self:Debug("enabled")
-		if self.enabled then return end
+		self:Debug("Enable called")
 		if InCombatLockdown() then return BattleGroundEnemies:QueueForUpdateAfterCombat(mainframe, "CheckEnableState") end
 
 		if BattleGroundEnemies:IsTestmodeOrEditmodeActive() then
@@ -492,11 +489,11 @@ local function CreateMainFrame(playerType)
 	end
 
 	function mainframe:Disable()
-		self:Debug("disabled")
-		if not self.enabled then return end
-		if InCombatLockdown() then return BattleGroundEnemies:QueueForUpdateAfterCombat(mainframe, "CheckEnableState") end
+		self:Debug("Disable called")
 
 		self:UnregisterAllEvents()
+		if InCombatLockdown() then return BattleGroundEnemies:QueueForUpdateAfterCombat(mainframe, "CheckEnableState") end
+
 		self.enabled = false
 		self:Hide()
 	end
