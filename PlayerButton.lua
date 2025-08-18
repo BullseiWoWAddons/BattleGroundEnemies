@@ -175,31 +175,37 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 	end
 
 	function playerButton:OnDragStart()
+		if InCombatLockdown() then
+			return BattleGroundEnemies:Debug("OnDragStart called in combat, ignoring")
+		end
 		return BattleGroundEnemies.db.profile.Locked or self:GetParent():StartMoving()
 	end
 
 	function playerButton:OnDragStop()
 		local parent = self:GetParent()
 		if not parent then return end
-		parent:StopMovingOrSizing()
-		if not InCombatLockdown() then
-			local scale = self:GetEffectiveScale()
-
-			local growDownwards = (self.playerCountConfig.BarVerticalGrowdirection == "downwards")
-			local growRightwards = (self.playerCountConfig.BarHorizontalGrowdirection == "rightwards")
-
-			if growDownwards then
-				self.playerCountConfig.Position_Y = parent:GetTop() * scale
-			else
-				self.playerCountConfig.Position_Y = parent:GetBottom() * scale
-			end
-
-			if growRightwards then
-				self.playerCountConfig.Position_X = parent:GetLeft() * scale
-			else
-				self.playerCountConfig.Position_X = parent:GetRight() * scale
-			end
+		if InCombatLockdown() then
+			return BattleGroundEnemies:Debug("OnDragStop called in combat, ignoring")
 		end
+		parent:StopMovingOrSizing()
+
+		local scale = self:GetEffectiveScale()
+
+		local growDownwards = (self.playerCountConfig.BarVerticalGrowdirection == "downwards")
+		local growRightwards = (self.playerCountConfig.BarHorizontalGrowdirection == "rightwards")
+
+		if growDownwards then
+			self.playerCountConfig.Position_Y = parent:GetTop() * scale
+		else
+			self.playerCountConfig.Position_Y = parent:GetBottom() * scale
+		end
+
+		if growRightwards then
+			self.playerCountConfig.Position_X = parent:GetLeft() * scale
+		else
+			self.playerCountConfig.Position_X = parent:GetRight() * scale
+		end
+	
 	end
 
 	function playerButton:UpdateAll(temporaryUnitID)
