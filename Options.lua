@@ -1141,7 +1141,6 @@ local function addEnemyAndAllySettings(self, mainFrame)
 	for i = 1, #playerCountConfigs do
 		table.insert(allDbLocations, playerCountConfigs[i])
 		table.insert(allPlayerCountConfigOptionsNames, L[playerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountConfigs[i], false))
-
 	end
 
 	if BattleGroundEnemies.db.profile[playerType].CustomPlayerCountConfigsEnabled then
@@ -1244,7 +1243,9 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					end,
 					values = function()
 						local t = {}
-						table.insert(t, L[playerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountConfigDefault))
+						for k = 1, #playerCountConfigDefaults do
+							table.insert(t, L[playerType]..": ".. BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountConfigDefaults[k], false))
+						end
 						return t
 					end,
 					confirm = function ()
