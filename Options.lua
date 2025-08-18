@@ -1161,7 +1161,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 	for i = 1, #allDbLocations do
 		local indexThisPlayerCountConfg
 		local isCustomProfile
-		local location = allDbLocations[i]
+		local playerCountLocation = allDbLocations[i]
 
 
 
@@ -1173,12 +1173,12 @@ local function addEnemyAndAllySettings(self, mainFrame)
 			indexThisPlayerCountConfg = i
 		end
 
-		local currentProfileName = BattleGroundEnemies:GetPlayerCountConfigNameLocalized(location, isCustomProfile)
+		local currentProfileName = BattleGroundEnemies:GetPlayerCountConfigNameLocalized(playerCountLocation, isCustomProfile)
 
 		local allConfigsWithoutCurrent = {}
 		local allPlayerCountConfigOptionsNamesWithoutCurrent = {}
 		for j = 1, #allDbLocations do
-			if allDbLocations[j] ~= location then
+			if allDbLocations[j] ~= playerCountLocation then
 				table.insert(allConfigsWithoutCurrent, allDbLocations[j])
 				table.insert(allPlayerCountConfigOptionsNamesWithoutCurrent, allPlayerCountConfigOptionsNames[j])
 			end
@@ -1188,14 +1188,14 @@ local function addEnemyAndAllySettings(self, mainFrame)
 		local playerCountConfigDefault = playerCountConfigDefaults[i]
 
 		local tempInputs = {
-			MinPlayerCount = location.minPlayerCount,
-			MaxPlayerCount = location.maxPlayerCount
+			MinPlayerCount = playerCountLocation.minPlayerCount,
+			MaxPlayerCount = playerCountLocation.maxPlayerCount
 		}
 		-- local playerCountConfigsCopy = CopyTable(playerCountConfigs)
 		-- local playerCountConfigsWithoutCurrentConfig = table.remove(playerCountConfigsCopy, i)
 		-- print("i is ", i, #playerCountConfigsWithoutCurrentConfig)
 		-- print("bla", #playerCountConfigsCopy)
-		settings[BattleGroundEnemies:GetPlayerCountConfigName(location)] = {
+		settings[BattleGroundEnemies:GetPlayerCountConfigName(playerCountLocation)] = {
 			type = "group",
 			name = currentProfileName,
 			desc = currentProfileName.."desc",
@@ -1203,10 +1203,10 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				return not mainFrame.playerTypeConfig.Enabled or isCustomProfileEnabled and not isCustomProfile
 			end,
 			get =  function(option)
-				return Data.GetOption(location, option)
+				return Data.GetOption(playerCountLocation, option)
 			end,
 			set = function(option, ...)
-				return Data.SetOption(location, option, ...)
+				return Data.SetOption(playerCountLocation, option, ...)
 			end,
 			order = i + 1,
 			args = {
@@ -1233,10 +1233,10 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				LoadFromDefaultPlayerCountProfile = {
 					type = "select",
 					name = SETTINGS_DEFAULTS,
-				 	get = function() return "" end,
+					get = function() return "" end,
 						-- set = function(option, value)
 						-- 	value = Data[playerType.."RangeToItemID"][value]
-						-- 	return Data.SetOption(location, option, value)
+						-- 	return Data.SetOption(playerCountLocation, option, value)
 						-- end,
 						-- values =   Data[playerType.."RangeToRange"],
 					set = function(option, value)
@@ -1292,8 +1292,8 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							type = "execute",
 							name = L.Change,
 							func = function(option, value)
-								location.minPlayerCount = tempInputs.MinPlayerCount
-								location.maxPlayerCount = tempInputs.MaxPlayerCount
+								playerCountLocation.minPlayerCount = tempInputs.MinPlayerCount
+								playerCountLocation.maxPlayerCount = tempInputs.MaxPlayerCount
 								sortByMinPlayerCount(thisPlayerCountConfigs)
 								BattleGroundEnemies:NotifyChange()
 							end,
@@ -1301,7 +1301,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 								return "Are you sure you want to change this profile so its used for "..tempInputs.MinPlayerCount.." to "..tempInputs.MaxPlayerCount.."players for "..playerType.." ?"
 							end,
 							disabled = function ()
-								return not isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs,  location)
+								return not isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs,  playerCountLocation)
 							end,
 							order = 3
 						},
@@ -1324,14 +1324,14 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							type = "description",
 							fontSize = "large",
 							name = function ()
-								local isGood, errorMessage = isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs, location)
+								local isGood, errorMessage = isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs, playerCountLocation)
 								if not isGood then
 									return ERRORS..": ".. errorMessage
 								end
 							end,
 							hidden = function ()
 								if not isCustomProfileEnabled then return true end
-								return isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs, location)
+								return isValidPlayerCountRange(thisPlayerCountConfigs, true, tempInputs, playerCountLocation)
 							end,
 							order = 5
 						}
@@ -1341,7 +1341,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					type = "group",
 					name = L.MainFrameSettings,
 					desc = L.MainFrameSettings_Desc:format(L[playerType == "Enemies" and "enemies" or "allies"]),
-					disabled = function() return not location.Enabled end,
+					disabled = function() return not playerCountLocation.Enabled end,
 					--childGroups = "tab",
 					order = 6,
 					args = {
@@ -1359,10 +1359,10 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							type = "group",
 							name = "",
 							get = function(option)
-								return Data.GetOption(location.PlayerCount, option)
+								return Data.GetOption(playerCountLocation.PlayerCount, option)
 							end,
 							set = function(option, ...)
-								return Data.SetOption(location.PlayerCount, option, ...)
+								return Data.SetOption(playerCountLocation.PlayerCount, option, ...)
 							end,
 							order = 2,
 							inline = true,
@@ -1380,14 +1380,14 @@ local function addEnemyAndAllySettings(self, mainFrame)
 				ButtonSettings = {
 					type = "group",
 					name = L.Button,
-					disabled = function() return not location.Enabled end,
+					disabled = function() return not playerCountLocation.Enabled end,
 					--childGroups = "tab",
 					order = 7,
 					args = {
 						Reset = {
 							type = "execute",
 							name = SETTINGS_DEFAULTS,
-							func = addResetFunctionForgroup(location, playerCountConfigDefault, true),
+							func = addResetFunctionForgroup(playerCountLocation, playerCountConfigDefault, true),
 							width = "full",
 							order = 1,
 						},
@@ -1443,7 +1443,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							type = "select",
 							name = L.HorizontalGrowdirection,
 							desc = L.HorizontalGrowdirection_Desc.." "..L.NotAvailableInCombat,
-							hidden = function() return location.BarColumns < 2 end,
+							hidden = function() return playerCountLocation.BarColumns < 2 end,
 							disabled = InCombatLockdown,
 							values = Data.HorizontalDirections,
 							order = 7
@@ -1452,7 +1452,7 @@ local function addEnemyAndAllySettings(self, mainFrame)
 							type = "range",
 							name = L.HorizontalSpacing,
 							desc = L.HorizontalSpacing.." "..L.NotAvailableInCombat,
-							hidden = function() return location.BarColumns < 2 end,
+							hidden = function() return playerCountLocation.BarColumns < 2 end,
 							disabled = InCombatLockdown,
 							min = 0,
 							max = 400,
@@ -1465,11 +1465,11 @@ local function addEnemyAndAllySettings(self, mainFrame)
 					type = "group",
 					name = L.Modules,
 					order = 8,
-					args = self:AddModulesSettings(location, playerCountConfigDefault, playerType, function(options) return not options.attachSettingsToButton end)
+					args = self:AddModulesSettings(playerCountLocation, playerCountConfigDefault, playerType, function(options) return not options.attachSettingsToButton end)
 				}
 			}
 		}
-		Mixin(settings[BattleGroundEnemies:GetPlayerCountConfigName(location)].args.ButtonSettings.args, self:AddModulesSettings(location, playerCountConfigDefault, playerType, function(options) return options.attachSettingsToButton end))
+		Mixin(settings[BattleGroundEnemies:GetPlayerCountConfigName(playerCountLocation)].args.ButtonSettings.args, self:AddModulesSettings(playerCountLocation, playerCountConfigDefault, playerType, function(options) return options.attachSettingsToButton end))
 	end
 
 	local inputs = {
