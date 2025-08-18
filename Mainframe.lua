@@ -491,8 +491,8 @@ local function CreateMainFrame(playerType)
 	function mainframe:Disable()
 		self:Debug("Disable called")
 
-		self:UnregisterAllEvents()
 		if InCombatLockdown() then return BattleGroundEnemies:QueueForUpdateAfterCombat(mainframe, "CheckEnableState") end
+		self:UnregisterAllEvents()
 
 		self.enabled = false
 		self:Hide()
@@ -1170,10 +1170,6 @@ local function CreateMainFrame(playerType)
 	mainframe.ActiveProfile:SetJustifyH("LEFT")
 	mainframe.ActiveProfile:SetJustifyV("MIDDLE")
 	mainframe.ActiveProfile:Hide()
-
-	mainframe.enabled = true
-	mainframe:Disable()
-
 
     return mainframe
 end
