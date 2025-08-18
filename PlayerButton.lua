@@ -371,7 +371,7 @@ function BattleGroundEnemies:CreatePlayerButton(mainframe, num)
 						moduleFrameOnButton[funcName](moduleFrameOnButton, ...)
 					end
 				end
-				end
+			end
 		end
 	end
 
