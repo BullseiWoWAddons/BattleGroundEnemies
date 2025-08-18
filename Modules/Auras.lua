@@ -670,6 +670,7 @@ local function AttachToPlayerButton(playerButton, filterr, isPriorityContainer)
 
 	function auraContainer:AfterFullAuraUpdate(filter)
 		if not (filter == self.filter) then return end
+		if not self.config then return end
 		if self.config.HideHighestPriority then
 			-- remove it from inputs
 
